@@ -1,4 +1,4 @@
-This reporsitory is currently not Maintained due to personal time restrictions
+This reporsitory is currently not maintained due to personal time restrictions
 ========================
 
 
