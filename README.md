@@ -1,7 +1,3 @@
-This reporsitory is currently not maintained due to personal time restrictions
-========================
-
-
 XCP-ng Center
 =============
 
