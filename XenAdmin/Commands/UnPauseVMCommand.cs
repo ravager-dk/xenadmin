@@ -70,12 +70,12 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecute(VM vm)
+        protected override bool CanRun(VM vm)
         {
             return vm != null && vm.allowed_operations != null && vm.allowed_operations.Contains(vm_operations.unpause);
         }
 
-        protected override void Execute(List<VM> vms)
+        protected override void Run(List<VM> vms)
         {
             //fixme: add new message to Messages
             //RunAction(vms, Messages.ACTION_VM_UNPAUSING, Messages.ACTION_VM_UNPAUSING, Messages.ACTION_VM_UNPAUSED, null);
@@ -92,7 +92,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override string EnabledToolTipText
+        public override string EnabledToolTipText
         {
             get
             {
@@ -182,11 +182,11 @@ namespace XenAdmin.Commands
             get { return "WarningVmLifeCyclePause"; }
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             VM vm = item as VM;
             if (vm == null)
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
 
             switch (vm.power_state)
             {
@@ -197,17 +197,17 @@ namespace XenAdmin.Commands
                 case vm_power_state.Suspended:
                     return Messages.VM_SUSPENDED;
                 case vm_power_state.unknown:
-                    return base.GetCantExecuteReasonCore(item);
+                    return base.GetCantRunReasonCore(item);
             }
 
-            return GetCantExecuteNoToolsOrDriversReasonCore(item) ?? base.GetCantExecuteReasonCore(item);
+            return GetCantRunNoToolsOrDriversReasonCore(item) ?? base.GetCantRunReasonCore(item);
         }
 
         protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
         {
             foreach (VM vm in GetSelection().AsXenObjects<VM>())
             {
-                if (!CanExecute(vm) && vm.power_state != vm_power_state.Paused)
+                if (!CanRun(vm) && vm.power_state != vm_power_state.Paused)
                 {
                     return new CommandErrorDialog(Messages.ERROR_DIALOG_SHUTDOWN_VM_TITLE, Messages.ERROR_DIALOG_SHUTDOWN_VMS_TITLE, cantExecuteReasons);
                 }

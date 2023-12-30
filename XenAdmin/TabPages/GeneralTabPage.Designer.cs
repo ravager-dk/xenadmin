@@ -150,7 +150,6 @@ namespace XenAdmin.TabPages
             this.panel2.Controls.Add(this.panelCPU);
             this.panel2.Controls.Add(this.panelMemory);
             this.panel2.Controls.Add(this.panelManagementInterfaces);
-            this.panel2.Controls.Add(this.panelBios);
             this.panel2.Controls.Add(this.panelUpdates);
             this.panel2.Controls.Add(this.panelVersion);
             this.panel2.Controls.Add(this.panelLicense);
@@ -471,13 +470,11 @@ namespace XenAdmin.TabPages
             this.panelCustomFields.ResumeLayout(false);
             this.panelCertificate.ResumeLayout(false);
             this.panelGeneral.ResumeLayout(false);
-            this.panelBios.ResumeLayout(false);
             this.tableLayoutPanelButtons.ResumeLayout(false);
             this.tableLayoutPanelButtons.PerformLayout();
             this.panel1DeviceSecurity.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

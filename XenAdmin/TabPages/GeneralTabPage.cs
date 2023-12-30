@@ -1183,15 +1183,15 @@ namespace XenAdmin.TabPages
 
             if (host.software_version.ContainsKey("product_version"))
             {
-                var hotfixEligibilityString = AdditionalVersionString(host);
+                //var hotfixEligibilityString = AdditionalVersionString(host);
                 var versionString = $"{host.ProductBrand()} {host.ProductVersionText()}";
                 
-                if (string.IsNullOrEmpty(hotfixEligibilityString))
+                //if (string.IsNullOrEmpty(hotfixEligibilityString))
                     pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
-                else
-                    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
-                        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
-                        Color.Red);
+                //else
+                //    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
+                //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
+                //        Color.Red);
             }
 
             if (host.software_version.ContainsKey("dbv"))
@@ -1541,14 +1541,14 @@ namespace XenAdmin.TabPages
 
                     if (p.IsPoolFullyUpgraded())
                     {
-                        var hotfixEligibilityString = AdditionalVersionString(coordinator);
+                        //var hotfixEligibilityString = AdditionalVersionString(coordinator);
 
-                        if (string.IsNullOrEmpty(hotfixEligibilityString))
+                        //if (string.IsNullOrEmpty(hotfixEligibilityString))
                             s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
-                        else
-                            s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
-                                string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
-                                Color.Red);
+                        //else
+                        //    s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
+                        //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
+                        //        Color.Red);
                     }
                     else
                     {
@@ -1622,21 +1622,21 @@ namespace XenAdmin.TabPages
         //        case hotfix_eligibility.cu:
         //            return Messages.HOTFIX_ELIGIBILITY_WARNING_CU_NO_DATE;
 
-                // none
-                case hotfix_eligibility.none when unlicensed && xenServerVersion.EolDate != DateTime.MinValue:
-                    return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-                case hotfix_eligibility.none when xenServerVersion.EolDate != DateTime.MinValue:
-                    return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-                case hotfix_eligibility.none when unlicensed:
-                    return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE_NO_DATE;
-                case hotfix_eligibility.none:
-                    return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_NO_DATE;
+        //        // none
+        //        case hotfix_eligibility.none when unlicensed && xenServerVersion.EolDate != DateTime.MinValue:
+        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
+        //        case hotfix_eligibility.none when xenServerVersion.EolDate != DateTime.MinValue:
+        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
+        //        case hotfix_eligibility.none when unlicensed:
+        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE_NO_DATE;
+        //        case hotfix_eligibility.none:
+        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_NO_DATE;
 
-                // default
-                default:
-                    return string.Empty;
-            }
-        }
+        //        // default
+        //        default:
+        //            return string.Empty;
+        //    }
+        //}
 
         private static void GenerateVirtualisationStatusForGeneralBox(PDSection s, VM vm)
         {

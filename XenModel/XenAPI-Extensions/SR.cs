@@ -50,7 +50,7 @@ namespace XenAPI
         {
             local, file, ext, ext4, lvmoiscsi, iso, nfs, lvm, udev, lvmofc,
             lvmohba, egenera, egeneracd, dummy, unknown, shm,
-            iscsi,
+            iscsi, tmpfs, xfs,
             ebs, rawhba,
             smb, lvmofcoe, gfs2,
             nutanix, nutanixiso, 

@@ -19,7 +19,7 @@ namespace XenAdmin {
     // -Klasse über ein Tool wie ResGen oder Visual Studio automatisch generiert.
     // Um einen Member hinzuzufügen oder zu entfernen, bearbeiten Sie die .ResX-Datei und führen dann ResGen
     // mit der /str-Option erneut aus, oder Sie erstellen Ihr VS-Projekt neu.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Messages {
@@ -61,6 +61,51 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking for the presence of an EUA ähnelt.
+        /// </summary>
+        public static string ACCEPT_EUA_CHECK_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("ACCEPT_EUA_CHECK_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Looking for an EUA to be accepted ähnelt.
+        /// </summary>
+        public static string ACCEPT_EUA_CHECK_GROUP_NAME {
+            get {
+                return ResourceManager.GetString("ACCEPT_EUA_CHECK_GROUP_NAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die More than one EUA was fetched. Please ensure you have read all of them before accepting. ähnelt.
+        /// </summary>
+        public static string ACCEPT_EUA_MORE_THAN_ONE_FOUND {
+            get {
+                return ResourceManager.GetString("ACCEPT_EUA_MORE_THAN_ONE_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You must accept the End User Agreement (EUA) ähnelt.
+        /// </summary>
+        public static string ACCEPT_EUA_PROBLEM_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("ACCEPT_EUA_PROBLEM_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die See EUA... ähnelt.
+        /// </summary>
+        public static string ACCEPT_EUA_PROBLEM_HELP_MESSAGE {
+            get {
+                return ResourceManager.GetString("ACCEPT_EUA_PROBLEM_HELP_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Activating virtual disks... ähnelt.
         /// </summary>
         public static string ACTION_ACTIVATING_MULTIPLE_VDIS_STATUS {
@@ -75,6 +120,15 @@ namespace XenAdmin {
         public static string ACTION_ACTIVATING_MULTIPLE_VDIS_TITLE {
             get {
                 return ResourceManager.GetString("ACTION_ACTIVATING_MULTIPLE_VDIS_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing updates on {0}... ähnelt.
+        /// </summary>
+        public static string ACTION_APPLY_CDN_UPDATES_TITLE {
+            get {
+                return ResourceManager.GetString("ACTION_APPLY_CDN_UPDATES_TITLE", resourceCulture);
             }
         }
         
@@ -106,7 +160,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Change email options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Change email notifications ähnelt.
         /// </summary>
         public static string ACTION_CHANGE_EMAIL_OPTIONS {
             get {
@@ -313,7 +367,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Changing email options for &apos;{0}&apos;... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Changing email notifications for &apos;{0}&apos;... ähnelt.
         /// </summary>
         public static string ACTION_CHANGING_EMAIL_OPTIONS_FOR {
             get {
@@ -601,6 +655,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disabling Health Check for &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string ACTION_DISABLE_HEALTH_CHECK_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("ACTION_DISABLE_HEALTH_CHECK_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disable Health Check ähnelt.
+        /// </summary>
+        public static string ACTION_DISABLE_HEALTH_CHECK_TITLE {
+            get {
+                return ResourceManager.GetString("ACTION_DISABLE_HEALTH_CHECK_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Disable IGMP snooping ähnelt.
         /// </summary>
         public static string ACTION_DISABLE_IGMP_SNOOPING {
@@ -732,33 +804,6 @@ namespace XenAdmin {
         public static string ACTION_DISK_ACTIVATING_TITLE {
             get {
                 return ResourceManager.GetString("ACTION_DISK_ACTIVATING_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Added disk ähnelt.
-        /// </summary>
-        public static string ACTION_DISK_ADDED {
-            get {
-                return ResourceManager.GetString("ACTION_DISK_ADDED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Adding disk ähnelt.
-        /// </summary>
-        public static string ACTION_DISK_ADDING {
-            get {
-                return ResourceManager.GetString("ACTION_DISK_ADDING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Creating disk &apos;{0}&apos; on SR &apos;{1}&apos; ähnelt.
-        /// </summary>
-        public static string ACTION_DISK_ADDING_TITLE {
-            get {
-                return ResourceManager.GetString("ACTION_DISK_ADDING_TITLE", resourceCulture);
             }
         }
         
@@ -1024,6 +1069,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabling VM memory and vGPU data compression during VM live migration on &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string ACTION_ENABLE_MIGRATION_COMPRESSION {
+            get {
+                return ResourceManager.GetString("ACTION_ENABLE_MIGRATION_COMPRESSION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Enable PVS-Accelerator ähnelt.
         /// </summary>
         public static string ACTION_ENABLE_PVS_READ_CACHING {
@@ -1078,6 +1132,26 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabling metric &quot;{0}&quot;... ähnelt.
+        /// </summary>
+        public static string ACTION_ENABLING_DATASOURCE {
+            get {
+                return ResourceManager.GetString("ACTION_ENABLING_DATASOURCE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not enable metric &quot;{0}&quot;.
+        ///
+        ///This could be because the data source is not generating any data. Ensure the prerequisites for collecting this metric are met before attempting to enable it. ähnelt.
+        /// </summary>
+        public static string ACTION_ENABLING_DATASOURCE_ERROR {
+            get {
+                return ResourceManager.GetString("ACTION_ENABLING_DATASOURCE_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Enabling live patching for &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string ACTION_ENABLING_LIVE_PATCHING {
@@ -1092,6 +1166,24 @@ namespace XenAdmin {
         public static string ACTION_ENABLING_PVS_READ_CACHING {
             get {
                 return ResourceManager.GetString("ACTION_ENABLING_PVS_READ_CACHING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabling certificate verification... ähnelt.
+        /// </summary>
+        public static string ACTION_ENABLING_TLS_VERIFICATION {
+            get {
+                return ResourceManager.GetString("ACTION_ENABLING_TLS_VERIFICATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabling certificate verification on {0}... ähnelt.
+        /// </summary>
+        public static string ACTION_ENABLING_TLS_VERIFICATION_ON {
+            get {
+                return ResourceManager.GetString("ACTION_ENABLING_TLS_VERIFICATION_ON", resourceCulture);
             }
         }
         
@@ -1204,15 +1296,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Exporting {0} to backup file ähnelt.
-        /// </summary>
-        public static string ACTION_EXPORT_TASK_DESCRIPTION {
-            get {
-                return ResourceManager.GetString("ACTION_EXPORT_TASK_DESCRIPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Exporting {0} ähnelt.
         /// </summary>
         public static string ACTION_EXPORT_TASK_NAME {
@@ -1254,33 +1337,6 @@ namespace XenAdmin {
         public static string ACTION_GET_DISK_SPACE_REQUIREMENTS_TITLE {
             get {
                 return ResourceManager.GetString("ACTION_GET_DISK_SPACE_REQUIREMENTS_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Get Health Check analysis result from [Citrix] Insight Services ähnelt.
-        /// </summary>
-        public static string ACTION_GET_HEALTH_CHECK_RESULT {
-            get {
-                return ResourceManager.GetString("ACTION_GET_HEALTH_CHECK_RESULT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Failed to get the analysis result ähnelt.
-        /// </summary>
-        public static string ACTION_GET_HEALTH_CHECK_RESULT_FAILED {
-            get {
-                return ResourceManager.GetString("ACTION_GET_HEALTH_CHECK_RESULT_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Getting the analysis result ähnelt.
-        /// </summary>
-        public static string ACTION_GET_HEALTH_CHECK_RESULT_PROGRESS {
-            get {
-                return ResourceManager.GetString("ACTION_GET_HEALTH_CHECK_RESULT_PROGRESS", resourceCulture);
             }
         }
         
@@ -1362,24 +1418,6 @@ namespace XenAdmin {
         public static string ACTION_HA_UNPROTECT_VM_TITLE {
             get {
                 return ResourceManager.GetString("ACTION_HA_UNPROTECT_VM_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Authentication with [Citrix] Insight Services ähnelt.
-        /// </summary>
-        public static string ACTION_HEALTHCHECK_AUTHENTICATION {
-            get {
-                return ResourceManager.GetString("ACTION_HEALTHCHECK_AUTHENTICATION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Authenticating with [Citrix] Insight Services ähnelt.
-        /// </summary>
-        public static string ACTION_HEALTHCHECK_AUTHENTICATION_PROGRESS {
-            get {
-                return ResourceManager.GetString("ACTION_HEALTHCHECK_AUTHENTICATION_PROGRESS", resourceCulture);
             }
         }
         
@@ -1519,6 +1557,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Thinly provisioned (GFS2) SRs with CHAP authentication are not supported. ähnelt.
+        /// </summary>
+        public static string ACTION_ISCSI_IQN_SCANNING_GFS2 {
+            get {
+                return ResourceManager.GetString("ACTION_ISCSI_IQN_SCANNING_GFS2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Scanning for LUNs on iSCSI filer {0} ähnelt.
         /// </summary>
         public static string ACTION_ISCSI_LUN_SCANNING {
@@ -1555,20 +1602,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Moving virtual disk &apos;{0}&apos;... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Moving Virtual Disk &apos;{0}&apos; from SR &apos;{1}&apos; to SR &apos;{2}&apos; ähnelt.
         /// </summary>
-        public static string ACTION_MOVING_VDI_STATUS {
+        public static string ACTION_MOVING_VDI_TO_SR {
             get {
-                return ResourceManager.GetString("ACTION_MOVING_VDI_STATUS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Moving Virtual Disk &apos;{0}&apos; to SR &apos;{1}&apos; ähnelt.
-        /// </summary>
-        public static string ACTION_MOVING_VDI_TITLE {
-            get {
-                return ResourceManager.GetString("ACTION_MOVING_VDI_TITLE", resourceCulture);
+                return ResourceManager.GetString("ACTION_MOVING_VDI_TO_SR", resourceCulture);
             }
         }
         
@@ -1951,20 +1989,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Save Health Check settings ähnelt.
-        /// </summary>
-        public static string ACTION_SAVE_HEALTHCHECK_SETTINGS {
-            get {
-                return ResourceManager.GetString("ACTION_SAVE_HEALTHCHECK_SETTINGS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Save settings for &apos;{0}&apos;... ähnelt.
         /// </summary>
         public static string ACTION_SAVE_SETTINGS {
             get {
                 return ResourceManager.GetString("ACTION_SAVE_SETTINGS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Saving system status canceled ähnelt.
+        /// </summary>
+        public static string ACTION_SAVE_STATUS_REPORT_CANCELLED {
+            get {
+                return ResourceManager.GetString("ACTION_SAVE_STATUS_REPORT_CANCELLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Saving system status failed ähnelt.
+        /// </summary>
+        public static string ACTION_SAVE_STATUS_REPORT_FAILED {
+            get {
+                return ResourceManager.GetString("ACTION_SAVE_STATUS_REPORT_FAILED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die There was an error while saving the server status report. Only a partial report may be available ähnelt.
+        /// </summary>
+        public static string ACTION_SAVE_STATUS_REPORT_FAILED_PARTIAL {
+            get {
+                return ResourceManager.GetString("ACTION_SAVE_STATUS_REPORT_FAILED_PARTIAL", resourceCulture);
             }
         }
         
@@ -2001,15 +2057,6 @@ namespace XenAdmin {
         public static string ACTION_SAVING_FOLDER_TAGS_FOR {
             get {
                 return ResourceManager.GetString("ACTION_SAVING_FOLDER_TAGS_FOR", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Saving Health Check settings for &apos;{0}&apos;... ähnelt.
-        /// </summary>
-        public static string ACTION_SAVING_HEALTHCHECK_SETTINGS {
-            get {
-                return ResourceManager.GetString("ACTION_SAVING_HEALTHCHECK_SETTINGS", resourceCulture);
             }
         }
         
@@ -2064,15 +2111,6 @@ namespace XenAdmin {
         public static string ACTION_SET_SECONDARY_MANAGEMENT_PURPOSE_TITLE {
             get {
                 return ResourceManager.GetString("ACTION_SET_SECONDARY_MANAGEMENT_PURPOSE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Saving VM Configuration ähnelt.
-        /// </summary>
-        public static string ACTION_SET_VM_OTHER_CONFIG_TITLE {
-            get {
-                return ResourceManager.GetString("ACTION_SET_VM_OTHER_CONFIG_TITLE", resourceCulture);
             }
         }
         
@@ -2545,11 +2583,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Getting system status canceled ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Canceled ähnelt.
         /// </summary>
         public static string ACTION_SYSTEM_STATUS_CANCELLED {
             get {
                 return ResourceManager.GetString("ACTION_SYSTEM_STATUS_CANCELLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die No data was compiled. Press previous to select new items or servers and try again. ähnelt.
+        /// </summary>
+        public static string ACTION_SYSTEM_STATUS_COMPILE_FAILED {
+            get {
+                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_COMPILE_FAILED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Finished compiling status report (with errors). A partial status report was saved. ähnelt.
+        /// </summary>
+        public static string ACTION_SYSTEM_STATUS_COMPILE_PARTIAL {
+            get {
+                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_COMPILE_PARTIAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Status report was compiled and saved successfully. ähnelt.
+        /// </summary>
+        public static string ACTION_SYSTEM_STATUS_COMPILE_SUCCESSFUL {
+            get {
+                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_COMPILE_SUCCESSFUL", resourceCulture);
             }
         }
         
@@ -2581,29 +2646,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die No data was compiled. Press previous to select new items or servers and try again. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Failed to save the status report to specified location. Please try again. ähnelt.
         /// </summary>
-        public static string ACTION_SYSTEM_STATUS_FAILED {
+        public static string ACTION_SYSTEM_STATUS_SAVE_FAILED {
             get {
-                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Finished compiling status report ähnelt.
-        /// </summary>
-        public static string ACTION_SYSTEM_STATUS_SUCCESSFUL {
-            get {
-                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_SUCCESSFUL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Finished compiling status report (with errors). A partial status report was compiled. ähnelt.
-        /// </summary>
-        public static string ACTION_SYSTEM_STATUS_SUCCESSFUL_PARTIAL {
-            get {
-                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_SUCCESSFUL_PARTIAL", resourceCulture);
+                return ResourceManager.GetString("ACTION_SYSTEM_STATUS_SAVE_FAILED", resourceCulture);
             }
         }
         
@@ -2631,15 +2678,6 @@ namespace XenAdmin {
         public static string ACTION_TEMPLATE_CLONED {
             get {
                 return ResourceManager.GetString("ACTION_TEMPLATE_CLONED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Duplicating ähnelt.
-        /// </summary>
-        public static string ACTION_TEMPLATE_CLONING {
-            get {
-                return ResourceManager.GetString("ACTION_TEMPLATE_CLONING", resourceCulture);
             }
         }
         
@@ -2689,15 +2727,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Transfer Health Check settings ähnelt.
-        /// </summary>
-        public static string ACTION_TRANSFER_HEALTHCHECK_SETTINGS {
-            get {
-                return ResourceManager.GetString("ACTION_TRANSFER_HEALTHCHECK_SETTINGS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Updating integrated GPU pass-through on &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string ACTION_UPDATE_INTEGRATED_GPU_PASSTHROUGH_TITLE {
@@ -2707,47 +2736,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upload server status report to [Citrix] Insight Services ähnelt.
-        /// </summary>
-        public static string ACTION_UPLOAD_SERVER_STATUS_REPORT {
-            get {
-                return ResourceManager.GetString("ACTION_UPLOAD_SERVER_STATUS_REPORT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Failed to upload the status report. ähnelt.
-        /// </summary>
-        public static string ACTION_UPLOAD_SERVER_STATUS_REPORT_FAILED {
-            get {
-                return ResourceManager.GetString("ACTION_UPLOAD_SERVER_STATUS_REPORT_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Uploading report to [Citrix] Insight Services ({0} of {1}) ähnelt.
-        /// </summary>
-        public static string ACTION_UPLOAD_SERVER_STATUS_REPORT_PERCENTAGE {
-            get {
-                return ResourceManager.GetString("ACTION_UPLOAD_SERVER_STATUS_REPORT_PERCENTAGE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Uploading report to [Citrix] Insight Services ähnelt.
-        /// </summary>
-        public static string ACTION_UPLOAD_SERVER_STATUS_REPORT_PROGRESS {
-            get {
-                return ResourceManager.GetString("ACTION_UPLOAD_SERVER_STATUS_REPORT_PROGRESS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Upload error. The patch was uploaded, but it cannot be found on the host. ähnelt.
         /// </summary>
-        public static string ACTION_UPLOADPATCHTOMASTERPLANACTION_FAILED {
+        public static string ACTION_UPLOADPATCHTOCOORDINATORPLANACTION_FAILED {
             get {
-                return ResourceManager.GetString("ACTION_UPLOADPATCHTOMASTERPLANACTION_FAILED", resourceCulture);
+                return ResourceManager.GetString("ACTION_UPLOADPATCHTOCOORDINATORPLANACTION_FAILED", resourceCulture);
             }
         }
         
@@ -3085,7 +3078,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Copying VM &apos;{0}&apos; to &apos;{1}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Copying VM &apos;{0}&apos; from &apos;{1}&apos; to &apos;{2}&apos; ähnelt.
         /// </summary>
         public static string ACTION_VM_CROSS_POOL_COPY_TITLE {
             get {
@@ -3193,7 +3186,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Moving VM to new storage... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Moving VM &apos;{0}&apos; to new storage ähnelt.
         /// </summary>
         public static string ACTION_VM_MOVING {
             get {
@@ -3202,11 +3195,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Moving VM &apos;{0}&apos; to &apos;{1}&apos; on SR &apos;{2}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Moving VM &apos;{0}&apos; from server &apos;{1}&apos; to server &apos;{2}&apos; ähnelt.
         /// </summary>
-        public static string ACTION_VM_MOVING_TITLE {
+        public static string ACTION_VM_MOVING_HOST {
             get {
-                return ResourceManager.GetString("ACTION_VM_MOVING_TITLE", resourceCulture);
+                return ResourceManager.GetString("ACTION_VM_MOVING_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Moving VM &apos;{0}&apos; to SR &apos;{1}&apos; ähnelt.
+        /// </summary>
+        public static string ACTION_VM_MOVING_SR {
+            get {
+                return ResourceManager.GetString("ACTION_VM_MOVING_SR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Failed to finalize moving VM &apos;{0}&apos; to new storage. Please see logs for details. ähnelt.
+        /// </summary>
+        public static string ACTION_VM_MOVING_VDI_DESTROY_FAILURE {
+            get {
+                return ResourceManager.GetString("ACTION_VM_MOVING_VDI_DESTROY_FAILURE", resourceCulture);
             }
         }
         
@@ -3616,11 +3627,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Waiting for slaves to recover... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Waiting for other pool members to recover... ähnelt.
         /// </summary>
-        public static string ACTION_WAIT_FOR_SLAVES_TO_RECOVER {
+        public static string ACTION_WAIT_FOR_POOL_MEMBERS_TO_RECOVER {
             get {
-                return ResourceManager.GetString("ACTION_WAIT_FOR_SLAVES_TO_RECOVER", resourceCulture);
+                return ResourceManager.GetString("ACTION_WAIT_FOR_POOL_MEMBERS_TO_RECOVER", resourceCulture);
             }
         }
         
@@ -3688,43 +3699,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading WLB report {0} ähnelt.
-        /// </summary>
-        public static string ACTION_WLB_REPORT_TASK_DESCRIPTION {
-            get {
-                return ResourceManager.GetString("ACTION_WLB_REPORT_TASK_DESCRIPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading WLB report {0} ähnelt.
-        /// </summary>
-        public static string ACTION_WLB_REPORT_TASK_NAME {
-            get {
-                return ResourceManager.GetString("ACTION_WLB_REPORT_TASK_NAME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die A&amp;ctivate ähnelt.
         /// </summary>
         public static string ACTIVATE {
             get {
                 return ResourceManager.GetString("ACTIVATE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] is unable to contact the activation server.
-        ///
-        ///If you are not currently connected to the internet, we can save
-        ///the activation request to a file, for you to upload at a later date.
-        ///
-        ///To use this file, visit https://{0}. ähnelt.
-        /// </summary>
-        public static string ACTIVATION_FAILED_MESSAGE {
-            get {
-                return ResourceManager.GetString("ACTIVATION_FAILED_MESSAGE", resourceCulture);
             }
         }
         
@@ -3783,7 +3762,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Adding/removing roles from subject ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Assigning new roles to subject ähnelt.
         /// </summary>
         public static string AD_ADDING_REMOVING_ROLES {
             get {
@@ -3792,11 +3771,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Adding/removing roles from subject &apos;{0}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Assigning new roles to subject &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string AD_ADDING_REMOVING_ROLES_ON {
             get {
                 return ResourceManager.GetString("AD_ADDING_REMOVING_ROLES_ON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Assigning new roles to subjects &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string AD_ADDING_REMOVING_ROLES_ON_MULTIPLE {
+            get {
+                return ResourceManager.GetString("AD_ADDING_REMOVING_ROLES_ON_MULTIPLE", resourceCulture);
             }
         }
         
@@ -3876,6 +3864,32 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to revoke the permissions for user &apos;{0}&apos;.
+        ///
+        ///You are currently logged in as &apos;{0}&apos; on &apos;{1}&apos;, and doing this will disconnect you from &apos;{1}&apos;. To reconnect, you will need to supply the local root account credentials, or the credentials for another authorized AD user.
+        ///
+        ///Do you want to continue? ähnelt.
+        /// </summary>
+        public static string AD_CONFIRM_LOGOUT_CURRENT_USER {
+            get {
+                return ResourceManager.GetString("AD_CONFIRM_LOGOUT_CURRENT_USER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to revoke the permissions for group &apos;{0}&apos;.
+        ///
+        ///The user you are currently logged into &apos;{1}&apos; with is a member of &apos;{0}&apos;. Proceeding will disconnect you and any other members of this group from &apos;{1}&apos;. To reconnect, you will need to supply the local root account credentials, or the credentials for another authorized AD user.
+        ///
+        ///Do you want to continue? ähnelt.
+        /// </summary>
+        public static string AD_CONFIRM_LOGOUT_CURRENT_USER_GROUP {
+            get {
+                return ResourceManager.GetString("AD_CONFIRM_LOGOUT_CURRENT_USER_GROUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to terminate this user session?
         ///
         ///This will disconnect you from &apos;{0}&apos;. ähnelt.
@@ -3896,28 +3910,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to revoke the permissions for user &apos;{0}&apos;.
-        ///
-        ///You are currently logged in as &apos;{0}&apos; on &apos;{1}&apos;, and doing this will disconnect you from &apos;{1}&apos;. To reconnect, you will need to supply the local root account credentials, or the credentials for another authorized AD user.
-        ///
-        ///Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Please wait while {0} establishes your current external authentication configuration. ähnelt.
         /// </summary>
-        public static string AD_CONFIRM_SUICIDE {
+        public static string AD_COORDINATOR_UNAVAILABLE_BLURB {
             get {
-                return ResourceManager.GetString("AD_CONFIRM_SUICIDE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to revoke the permissions for group &apos;{0}&apos;.
-        ///
-        ///The user you are currently logged into &apos;{1}&apos; with is a member of &apos;{0}&apos;. Proceeding will disconnect you and any other members of this group from &apos;{1}&apos;. To reconnect, you will need to supply the local root account credentials, or the credentials for another authorized AD user.
-        ///
-        ///Do you want to continue? ähnelt.
-        /// </summary>
-        public static string AD_CONFIRM_SUICIDE_GROUP {
-            get {
-                return ResourceManager.GetString("AD_CONFIRM_SUICIDE_GROUP", resourceCulture);
+                return ResourceManager.GetString("AD_COORDINATOR_UNAVAILABLE_BLURB", resourceCulture);
             }
         }
         
@@ -4063,33 +4060,86 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are currently logged in as one of the selected users. If you continue you will be logged out of &apos;{0}&apos;.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are currently logged in as one of the selected users. If you continue, you will be logged out of &apos;{0}&apos;. All other selected users will also be logged out.
         ///
-        ///Do you want to continue? ähnelt.
+        ///Are you sure you want to continue? ähnelt.
         /// </summary>
-        public static string AD_LOGOUT_SUICIDE_MANY {
+        public static string AD_LOGOUT_CURRENT_USER_MANY {
             get {
-                return ResourceManager.GetString("AD_LOGOUT_SUICIDE_MANY", resourceCulture);
+                return ResourceManager.GetString("AD_LOGOUT_CURRENT_USER_MANY", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are currently logged in as the selected user. If you continue you will be logged out of &apos;{0}&apos;.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are currently logged in as one of the selected users. If you assign a new role, you will be logged out of &apos;{0}&apos;. All other selected users that are logged in will also be logged out.
         ///
-        ///Do you want to continue? ähnelt.
+        ///Are you sure you want to continue? ähnelt.
         /// </summary>
-        public static string AD_LOGOUT_SUICIDE_ONE {
+        public static string AD_LOGOUT_CURRENT_USER_MANY_ROLE_CHANGE {
             get {
-                return ResourceManager.GetString("AD_LOGOUT_SUICIDE_ONE", resourceCulture);
+                return ResourceManager.GetString("AD_LOGOUT_CURRENT_USER_MANY_ROLE_CHANGE", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Please wait while [XenCenter] establishes your current external authentication configuration. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are currently logged in as the selected user. If you continue, you will be logged out of &apos;{0}&apos;.
+        ///
+        ///Are you sure you want to continue? ähnelt.
         /// </summary>
-        public static string AD_MASTER_UNAVAILABLE_BLURB {
+        public static string AD_LOGOUT_CURRENT_USER_ONE {
             get {
-                return ResourceManager.GetString("AD_MASTER_UNAVAILABLE_BLURB", resourceCulture);
+                return ResourceManager.GetString("AD_LOGOUT_CURRENT_USER_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are currently logged in as the selected user. If you assign a new role, you will be logged out of &apos;{0}&apos;.
+        ///
+        ///Are you sure you want to continue? ähnelt.
+        /// </summary>
+        public static string AD_LOGOUT_CURRENT_USER_ONE_ROLE_CHANGE {
+            get {
+                return ResourceManager.GetString("AD_LOGOUT_CURRENT_USER_ONE_ROLE_CHANGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to log out these {0} users? ähnelt.
+        /// </summary>
+        public static string AD_LOGOUT_USER_MANY {
+            get {
+                return ResourceManager.GetString("AD_LOGOUT_USER_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you assign a new role to logged in users, they will be logged out.
+        ///
+        ///Are you sure you want to continue? ähnelt.
+        /// </summary>
+        public static string AD_LOGOUT_USER_MANY_ROLE_CHANGE {
+            get {
+                return ResourceManager.GetString("AD_LOGOUT_USER_MANY_ROLE_CHANGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to log out the user &apos;{0}&apos;? ähnelt.
+        /// </summary>
+        public static string AD_LOGOUT_USER_ONE {
+            get {
+                return ResourceManager.GetString("AD_LOGOUT_USER_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you assign a new role to user &apos;{0}&apos;, the user will be logged out.
+        ///
+        ///Are you sure you want to continue? ähnelt.
+        /// </summary>
+        public static string AD_LOGOUT_USER_ONE_ROLE_CHANGE {
+            get {
+                return ResourceManager.GetString("AD_LOGOUT_USER_ONE_ROLE_CHANGE", resourceCulture);
             }
         }
         
@@ -4108,6 +4158,24 @@ namespace XenAdmin {
         public static string AD_NOT_CONFIGURED_BLURB_HOST {
             get {
                 return ResourceManager.GetString("AD_NOT_CONFIGURED_BLURB_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to remove these {0} users? ähnelt.
+        /// </summary>
+        public static string AD_REMOVE_USER_MANY {
+            get {
+                return ResourceManager.GetString("AD_REMOVE_USER_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to remove the user &apos;{0}&apos;? ähnelt.
+        /// </summary>
+        public static string AD_REMOVE_USER_ONE {
+            get {
+                return ResourceManager.GetString("AD_REMOVE_USER_ONE", resourceCulture);
             }
         }
         
@@ -4384,7 +4452,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the server &apos;{0}&apos; to a pool that is using older CPUs.
         ///
-        ///[XenServer] can continue by rebooting the server and reducing its CPU to the level of the existing servers in the pool. This will shut down any VMs running on the server. This feature is supported for CPU combinations listed in the [XenServer] Hardware Compatibility List.
+        ///{1} can continue by rebooting the server and reducing its CPU to the level of the existing servers in the pool. This will shut down any VMs running on the server. This feature is supported for CPU combinations listed in the {1} Hardware Compatibility List.
         ///
         ///Do you want to do this? ähnelt.
         /// </summary>
@@ -4399,7 +4467,7 @@ namespace XenAdmin {
         ///
         ///{0}
         ///
-        ///[XenServer] can continue by rebooting the servers and reducing their CPUs to the level of the existing servers in the pool. This will shut down any VMs running on the servers. This feature is supported for CPU combinations listed in the [XenServer] Hardware Compatibility List.
+        ///{1} can continue by rebooting the servers and reducing their CPUs to the level of the existing servers in the pool. This will shut down any VMs running on the servers. This feature is supported for CPU combinations listed in the {1} Hardware Compatibility List.
         ///
         ///Do you want to do this? ähnelt.
         /// </summary>
@@ -4676,7 +4744,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] can no longer authenticate with the existing credentials for this server. Enter new credentials to proceed. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} can no longer authenticate with the existing credentials for this server. Enter new credentials to proceed. ähnelt.
         /// </summary>
         public static string ADDSERVER_PASS_NEW {
             get {
@@ -4685,7 +4753,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Advanced Options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Advanced ähnelt.
         /// </summary>
         public static string ADVANCED_OPTIONS {
             get {
@@ -4832,7 +4900,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disk usage for the Control Domain on {0} has reached {1}. [XenServer]&apos;s performance will be critically affected if this disk becomes full. Log files or other non-essential (user created) files should be removed. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disk usage for the Control Domain on {0} has reached {1}. {2}&apos;s performance will be critically affected if this disk becomes full. Log files or other non-essential (user created) files should be removed. ähnelt.
         /// </summary>
         public static string ALERT_ALARM_FILESYSTEM_DESCRIPTION {
             get {
@@ -4944,11 +5012,128 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have never synchronized with the update channel. ähnelt.
+        /// </summary>
+        public static string ALERT_CDN_NEVER_SYNC_TITLE {
+            get {
+                return ResourceManager.GetString("ALERT_CDN_NEVER_SYNC_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The last synchronization with the update channel took place on {0}. ähnelt.
+        /// </summary>
+        public static string ALERT_CDN_OUT_OF_SYNC_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("ALERT_CDN_OUT_OF_SYNC_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have not synchronized with the update channel in {0} days. ähnelt.
+        /// </summary>
+        public static string ALERT_CDN_OUT_OF_SYNC_TITLE {
+            get {
+                return ResourceManager.GetString("ALERT_CDN_OUT_OF_SYNC_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configure Updates ähnelt.
+        /// </summary>
+        public static string ALERT_CDN_REPO_NOT_CONFIGURED_ACTION_LINK {
+            get {
+                return ResourceManager.GetString("ALERT_CDN_REPO_NOT_CONFIGURED_ACTION_LINK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuring an update channel will allow your system to synchronize and retrieve available updates. ähnelt.
+        /// </summary>
+        public static string ALERT_CDN_REPO_NOT_CONFIGURED_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("ALERT_CDN_REPO_NOT_CONFIGURED_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have not configured an update channel on &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string ALERT_CDN_REPO_NOT_CONFIGURED_TITLE {
+            get {
+                return ResourceManager.GetString("ALERT_CDN_REPO_NOT_CONFIGURED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die When CPU usage exceeds {0}% for {1} min(s) ähnelt.
         /// </summary>
         public static string ALERT_CPUS_SUB_TEXT {
             get {
                 return ResourceManager.GetString("ALERT_CPUS_SUB_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your Customer Success Services (CSS) agreement expired on {0}. ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRED_DESCIRPTION {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRED_DESCIRPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Renew CSS Agreement ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRED_LINK_TEXT {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRED_LINK_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your CSS agreement has expired ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRED_TITLE {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your Customer Success Services (CSS) agreement will expire on {0}. ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRING_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRING_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your CSS agreement is expiring in {0} day(s) ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRING_TITLE_DAYS {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRING_TITLE_DAYS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your CSS agreement is expiring in {0} hour(s) ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRING_TITLE_HOURS {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRING_TITLE_HOURS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your CSS agreement is expiring in {0} minute(s) ähnelt.
+        /// </summary>
+        public static string ALERT_CSS_EXPIRING_TITLE_MINUTES {
+            get {
+                return ResourceManager.GetString("ALERT_CSS_EXPIRING_TITLE_MINUTES", resourceCulture);
             }
         }
         
@@ -5031,6 +5216,105 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die All {0} attempts originated from unknown sources. ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_ALL_UNKNOWN {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_ALL_UNKNOWN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The most common attempts originated from the following sources: ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_COMMON {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_COMMON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die There has been a total of {0} failed login attempts. ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_TOTAL {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_TOTAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} attempts originated from unknown sources. ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_UNKNOWN {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_DESCRIPTION_UNKNOWN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Last attempt on: {0} ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_DATE {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_DATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die IP address: {0} ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_IP {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_IP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Number of attempts: {0} ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_NUMBER {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_NUMBER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Originator: {0} ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_ORIGINATOR {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_ORIGINATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die User agent: {0} ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_USERAGENT {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_USERAGENT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Username: {0} ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_USERNAME {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_OFFENDER_USERNAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die There has been a number of failed attempts to login to &apos;{0}&apos; within the past hour. ähnelt.
+        /// </summary>
+        public static string ALERT_FAILED_LOGIN_ATTEMPT_TITLE {
+            get {
+                return ResourceManager.GetString("ALERT_FAILED_LOGIN_ATTEMPT_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Help ähnelt.
         /// </summary>
         public static string ALERT_GENERIC_HELP {
@@ -5085,11 +5369,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now available. Click Download and Install to proceed with the update. ähnelt.
+        /// </summary>
+        public static string ALERT_NEW_VERSION_DETAILS_CLIENT {
+            get {
+                return ResourceManager.GetString("ALERT_NEW_VERSION_DETAILS_CLIENT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Go to Web Page ähnelt.
         /// </summary>
         public static string ALERT_NEW_VERSION_DOWNLOAD {
             get {
                 return ResourceManager.GetString("ALERT_NEW_VERSION_DOWNLOAD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die v{0} Release Notes ähnelt.
+        /// </summary>
+        public static string ALERT_NEW_VERSION_DOWNLOAD_CLIENT {
+            get {
+                return ResourceManager.GetString("ALERT_NEW_VERSION_DOWNLOAD_CLIENT", resourceCulture);
             }
         }
         
@@ -5229,9 +5531,36 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Show internet proxy settings ähnelt.
+        /// </summary>
+        public static string ALLOWED_UPDATES_DIALOG_CHECKBOX {
+            get {
+                return ResourceManager.GetString("ALLOWED_UPDATES_DIALOG_CHECKBOX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Would you like {0} to periodically check the internet for new versions of the application? ähnelt.
+        /// </summary>
+        public static string ALLOWED_UPDATES_DIALOG_MESSAGE {
+            get {
+                return ResourceManager.GetString("ALLOWED_UPDATES_DIALOG_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You can configure {0} to periodically check the internet for updates and new versions for servers running {1} or earlier. Would you like to do so? ähnelt.
+        /// </summary>
+        public static string ALLOWED_UPDATES_DIALOG_MESSAGE_CFU {
+            get {
+                return ResourceManager.GetString("ALLOWED_UPDATES_DIALOG_MESSAGE_CFU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The SR &apos;{0}&apos; is currently attached elsewhere. Do you want to attach it to &apos;{1}&apos;? 
         ///
-        ///Warning: you must ensure that the SR is not in use by any server not connected to [XenCenter]. Failure to do so may result in data loss. ähnelt.
+        ///Warning: you must ensure that the SR is not in use by any server not connected to {2}. Failure to do so may result in data loss. ähnelt.
         /// </summary>
         public static string ALREADY_ATTACHED_ELSEWHERE {
             get {
@@ -5624,7 +5953,7 @@ namespace XenAdmin {
         ///
         ///- Ensure automated updates are not restricted on any hosts in the pool.
         ///
-        ///- Deselect the updates application checkbox on the previous page. [XenCenter] will upgrade the selected servers to the new version without applying any updates. ähnelt.
+        ///- Deselect the updates application checkbox on the previous page. {0} will upgrade the selected servers to the new version without applying any updates. ähnelt.
         /// </summary>
         public static string AUTOMATED_UPDATES_UNLICENSED_WARNING_MORE_INFO {
             get {
@@ -5660,11 +5989,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Download ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking for {0} updates ähnelt.
         /// </summary>
-        public static string AVAILABLE_UPDATES_DOWNLOAD_TEXT {
+        public static string AVAILABLE_UPDATES_CHECKING {
             get {
-                return ResourceManager.GetString("AVAILABLE_UPDATES_DOWNLOAD_TEXT", resourceCulture);
+                return ResourceManager.GetString("AVAILABLE_UPDATES_CHECKING", resourceCulture);
             }
         }
         
@@ -5674,15 +6003,6 @@ namespace XenAdmin {
         public static string AVAILABLE_UPDATES_ERROR {
             get {
                 return ResourceManager.GetString("AVAILABLE_UPDATES_ERROR", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The following software updates for your system are available online. ähnelt.
-        /// </summary>
-        public static string AVAILABLE_UPDATES_FOUND {
-            get {
-                return ResourceManager.GetString("AVAILABLE_UPDATES_FOUND", resourceCulture);
             }
         }
         
@@ -5705,7 +6025,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die No updates found. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die No updates found ähnelt.
         /// </summary>
         public static string AVAILABLE_UPDATES_NOT_FOUND {
             get {
@@ -5732,7 +6052,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Backing up server &apos;{0}&apos;, {1} received...  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Backing up server &apos;{0}&apos; ({1} received)...  ähnelt.
         /// </summary>
         public static string BACKINGUP_HOST_WITH_DATA {
             get {
@@ -5923,15 +6243,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The BIOS boot mode is not supported with the selected template. ähnelt.
-        /// </summary>
-        public static string BIOS_BOOT_MODE_UNSUPPORTED_WARNING {
-            get {
-                return ResourceManager.GetString("BIOS_BOOT_MODE_UNSUPPORTED_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die BIOS strings copied ähnelt.
         /// </summary>
         public static string BIOS_STRINGS_COPIED {
@@ -6005,9 +6316,9 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Creating this bond will automatically move the management interface on one of your selected bond members to the bond itself:
         ///
-        ///- [XenCenter] connections to the pool will temporarily be disturbed
+        ///- {0} connections to the pool will temporarily be disturbed
         ///
-        ///- If your network configuration is incorrect then [XenCenter] may permanently lose the connection to the pool, or pool members may be unable to contact each other. ähnelt.
+        ///- If your network configuration is incorrect then {0} may permanently lose the connection to the pool, or pool members may be unable to contact each other. ähnelt.
         /// </summary>
         public static string BOND_CREATE_WILL_DISTURB_PRIMARY {
             get {
@@ -6049,13 +6360,13 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0}
         ///
-        ///Deleting this bond will automatically transfer the management and secondary interfaces on the bond to the first slave member of the bond: 
+        ///Deleting this bond will automatically transfer the management and secondary interfaces on the bond to the first other member of the bond: 
         ///
-        ///- [XenCenter] connections to the pool will temporarily be disturbed
+        ///- {1} connections to the pool will temporarily be disturbed
         ///
         ///- Traffic through the secondary interface will be disrupted
         ///
-        ///- If your network configuration is incorrect then [XenCenter] may permanently lose the connection to the pool, or pool members may be unable to contact each other. ähnelt.
+        ///- If your network configuration is incorrect then {1} may permanently lose the connection to the pool, or pool members may be unable to contact each other. ähnelt.
         /// </summary>
         public static string BOND_DELETE_WILL_DISTURB_BOTH {
             get {
@@ -6066,11 +6377,11 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0}
         ///
-        ///Deleting this bond will automatically transfer the management interface on the bond to the first slave member of the bond: 
+        ///Deleting this bond will automatically transfer the management interface on the bond to the first of the bonded members: 
         ///
-        ///- [XenCenter] connections to the pool will temporarily be disturbed
+        ///- {1} connections to the pool will temporarily be disturbed
         ///
-        ///- If your network configuration is incorrect then [XenCenter] may permanently lose the connection to the pool, or pool members may be unable to contact each other. ähnelt.
+        ///- If your network configuration is incorrect then {1} may permanently lose the connection to the pool, or pool members may be unable to contact each other. ähnelt.
         /// </summary>
         public static string BOND_DELETE_WILL_DISTURB_PRIMARY {
             get {
@@ -6081,7 +6392,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0}
         ///
-        ///Deleting this bond will disrupt traffic through the secondary interface on the bond while the interface is moved to the first slave of the bond. ähnelt.
+        ///Deleting this bond will disrupt traffic through the secondary interface on the bond while the interface is moved to the first of the bonded members. ähnelt.
         /// </summary>
         public static string BOND_DELETE_WILL_DISTURB_SECONDARY {
             get {
@@ -6090,7 +6401,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the bond in [XenCenter]&apos;s cache. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the bond in {0}&apos;s cache. ähnelt.
         /// </summary>
         public static string BOND_GONE {
             get {
@@ -6099,11 +6410,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the bond master in [XenCenter]&apos;s cache. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the bond interface in {0}&apos;s cache. ähnelt.
         /// </summary>
-        public static string BOND_MASTER_GONE {
+        public static string BOND_INTERFACE_GONE {
             get {
-                return ResourceManager.GetString("BOND_MASTER_GONE", resourceCulture);
+                return ResourceManager.GetString("BOND_INTERFACE_GONE", resourceCulture);
             }
         }
         
@@ -6144,6 +6455,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Not supported with the selected template ähnelt.
+        /// </summary>
+        public static string BOOT_MODE_UNSUPPORTED_WARNING {
+            get {
+                return ResourceManager.GetString("BOOT_MODE_UNSUPPORTED_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Boot order: {0} ähnelt.
         /// </summary>
         public static string BOOTORDER {
@@ -6171,7 +6491,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Your Tools ISO is on a broken SR, [XenCenter] will attempt to fix it before proceeding. Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your Tools ISO is on a broken SR, {0} will attempt to fix it before proceeding. Do you want to continue? ähnelt.
         /// </summary>
         public static string BROKEN_TOOLS_PROMPT {
             get {
@@ -6180,7 +6500,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Compiling [XenCenter] logs and metadata ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Compiling {0} logs and metadata ähnelt.
         /// </summary>
         public static string BUGTOOL_CLIENT_ACTION_LOGS_META {
             get {
@@ -6189,7 +6509,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Compiling [XenCenter] metadata ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Compiling {0} metadata ähnelt.
         /// </summary>
         public static string BUGTOOL_CLIENT_ACTION_META {
             get {
@@ -6198,7 +6518,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] logs and metadata ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} logs and metadata ähnelt.
         /// </summary>
         public static string BUGTOOL_CLIENT_LOGS_META {
             get {
@@ -6207,7 +6527,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] metadata ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} metadata ähnelt.
         /// </summary>
         public static string BUGTOOL_CLIENT_META {
             get {
@@ -6371,6 +6691,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading ähnelt.
+        /// </summary>
+        public static string BUGTOOL_REPORTSTATUS_DOWNLOADING_NO_DATA {
+            get {
+                return ResourceManager.GetString("BUGTOOL_REPORTSTATUS_DOWNLOADING_NO_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Failed - Please see logs for details ähnelt.
         /// </summary>
         public static string BUGTOOL_REPORTSTATUS_FAILED {
@@ -6385,6 +6714,24 @@ namespace XenAdmin {
         public static string BUGTOOL_REPORTSTATUS_QUEUED {
             get {
                 return ResourceManager.GetString("BUGTOOL_REPORTSTATUS_QUEUED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Saving - {0}% ähnelt.
+        /// </summary>
+        public static string BUGTOOL_REPORTSTATUS_SAVING {
+            get {
+                return ResourceManager.GetString("BUGTOOL_REPORTSTATUS_SAVING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Saving report to selected destination ähnelt.
+        /// </summary>
+        public static string BUGTOOL_SAVE_STATUS_REPORT {
+            get {
+                return ResourceManager.GetString("BUGTOOL_SAVE_STATUS_REPORT", resourceCulture);
             }
         }
         
@@ -6506,6 +6853,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disks belonging to templates cannot be activated or deactivated. ähnelt.
+        /// </summary>
+        public static string CANNOT_ACTIVATE_TEMPLATE_DISK {
+            get {
+                return ResourceManager.GetString("CANNOT_ACTIVATE_TEMPLATE_DISK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die This virtual disk is already activated on VM &apos;{0}&apos;. ähnelt.
         /// </summary>
         public static string CANNOT_ACTIVATE_VD_ALREADY_ACTIVE {
@@ -6542,7 +6898,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You must install [Citrix VM Tools] on VM &apos;{0}&apos; before you can activate this virtual disk for the VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You must install {0} on VM &apos;{1}&apos; before you can activate this virtual disk for the VM. ähnelt.
         /// </summary>
         public static string CANNOT_ACTIVATE_VD_VM_NEEDS_TOOLS {
             get {
@@ -6650,7 +7006,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You must install [Citrix VM Tools] on VM &apos;{0}&apos; before you can deactivate this virtual disk for the VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You must install {0} on VM &apos;{1}&apos; before you can deactivate this virtual disk for the VM. ähnelt.
         /// </summary>
         public static string CANNOT_DEACTIVATE_VDI_NEEDS_TOOLS {
             get {
@@ -6686,8 +7042,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die It is not possible to deactivate and delete this virtual disk on the VM &apos;{0}&apos;: 
-        ///
+        ///   Sucht eine lokalisierte Zeichenfolge, die It is not possible to deactivate and delete this virtual disk on the VM &apos;{0}&apos;:
         ///{1} ähnelt.
         /// </summary>
         public static string CANNOT_DELETE_CANNOT_DEACTIVATE_REASON {
@@ -6697,7 +7052,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] templates cannot be deleted. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} templates cannot be deleted. ähnelt.
         /// </summary>
         public static string CANNOT_DELETE_DEFAULT_TEMPLATE {
             get {
@@ -6769,7 +7124,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Deleting the [Citrix VM Tools] ISO storage is not supported. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Deleting the {0} ISO storage is not supported. ähnelt.
         /// </summary>
         public static string CANNOT_DELETE_TOOLS_SR {
             get {
@@ -6841,20 +7196,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot configure an SR of type &apos;{0}&apos; using [XenCenter]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot configure an SR of type &apos;{0}&apos; using {1}. ähnelt.
         /// </summary>
         public static string CANNOT_FIND_SR_WIZARD_TYPE {
             get {
                 return ResourceManager.GetString("CANNOT_FIND_SR_WIZARD_TYPE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot move this virtual disk because it is attached to a VM that is not running. ähnelt.
-        /// </summary>
-        public static string CANNOT_MIGRATE_VDI_NON_RUNNING_VM {
-            get {
-                return ResourceManager.GetString("CANNOT_MIGRATE_VDI_NON_RUNNING_VM", resourceCulture);
             }
         }
         
@@ -6962,11 +7308,479 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Attached CD/DVD Drive. ähnelt.
+        /// </summary>
+        public static string CD_DVD_DEVICE_ATTACHED {
+            get {
+                return ResourceManager.GetString("CD_DVD_DEVICE_ATTACHED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The DVD drive cannot be created, because you have reached the maximum number of virtual disks allowed for this virtual machine. ähnelt.
         /// </summary>
         public static string CDDRIVE_MAX_ALLOWED_VBDS {
             get {
                 return ResourceManager.GetString("CDDRIVE_MAX_ALLOWED_VBDS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Migrate VMs off this server ähnelt.
+        /// </summary>
+        public static string CDN_GUIDANCE_EVACUATE_HOST {
+            get {
+                return ResourceManager.GetString("CDN_GUIDANCE_EVACUATE_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Reboot this server ähnelt.
+        /// </summary>
+        public static string CDN_GUIDANCE_REBOOT_HOST {
+            get {
+                return ResourceManager.GetString("CDN_GUIDANCE_REBOOT_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Live patch failed. Reboot this server ähnelt.
+        /// </summary>
+        public static string CDN_GUIDANCE_REBOOT_HOST_LIVEPATCH_FAILURE {
+            get {
+                return ResourceManager.GetString("CDN_GUIDANCE_REBOOT_HOST_LIVEPATCH_FAILURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Reboot VMs running on this server ähnelt.
+        /// </summary>
+        public static string CDN_GUIDANCE_RESTART_DEVICE_MODEL {
+            get {
+                return ResourceManager.GetString("CDN_GUIDANCE_RESTART_DEVICE_MODEL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Restart Toolstack ähnelt.
+        /// </summary>
+        public static string CDN_GUIDANCE_RESTART_TOOLSTACK {
+            get {
+                return ResourceManager.GetString("CDN_GUIDANCE_RESTART_TOOLSTACK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die This update live patches the following components: {0} ähnelt.
+        /// </summary>
+        public static string CDN_LIVEPATCHES_IN_UPDATE {
+            get {
+                return ResourceManager.GetString("CDN_LIVEPATCHES_IN_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The following tasks will need to be performed manually for the installed updates to take effect:
+        ///{0} ähnelt.
+        /// </summary>
+        public static string CDN_PENDING_GUIDANCES_FAILURE {
+            get {
+                return ResourceManager.GetString("CDN_PENDING_GUIDANCES_FAILURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pending tasks on {0} ähnelt.
+        /// </summary>
+        public static string CDN_PENDING_GUIDANCES_KEY {
+            get {
+                return ResourceManager.GetString("CDN_PENDING_GUIDANCES_KEY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The following tasks need to be performed for the latest installed updates to take effect:
+        ///{0} ähnelt.
+        /// </summary>
+        public static string CDN_PENDING_GUIDANCES_VALUE {
+            get {
+                return ResourceManager.GetString("CDN_PENDING_GUIDANCES_VALUE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The trusted CA certificate &apos;{0}&apos; of &apos;{1}&apos; expired on {2}. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_CA_ALERT_EXPIRED_DESCIRPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_CA_ALERT_EXPIRED_DESCIRPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trusted CA certificate &apos;{0}&apos; on {1} expired ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_CA_ALERT_EXPIRED_TITLE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_CA_ALERT_EXPIRED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The trusted CA certificate &apos;{0}&apos; of &apos;{1}&apos; will expire on {2}. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_CA_ALERT_EXPIRING_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_CA_ALERT_EXPIRING_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trusted CA certificate &apos;{0}&apos; on {1} expiring in {2} day(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_CA_ALERT_EXPIRING_TITLE_DAYS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_CA_ALERT_EXPIRING_TITLE_DAYS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trusted CA certificate &apos;{0}&apos; on {1} expiring in {2} hour(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_CA_ALERT_EXPIRING_TITLE_HOURS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_CA_ALERT_EXPIRING_TITLE_HOURS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trusted CA certificate &apos;{0}&apos; on {1} expiring in {2} minute(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_CA_ALERT_EXPIRING_TITLE_MINUTES {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_CA_ALERT_EXPIRING_TITLE_MINUTES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die TLS certificate files (*.pem;*.crt;*.cer)|*.pem;*.crt;*.cer ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_FILETYPES {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_FILETYPES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The identity certificate of server &apos;{0}&apos; expired on {1}. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_ALERT_EXPIRED_DESCIRPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_ALERT_EXPIRED_DESCIRPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server identity certificate on {0} expired ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_ALERT_EXPIRED_TITLE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_ALERT_EXPIRED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The identity certificate of server &apos;{0}&apos; will expire on {1}. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_ALERT_EXPIRING_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_ALERT_EXPIRING_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server identity certificate on {0} expiring in {1} day(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_ALERT_EXPIRING_TITLE_DAYS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_ALERT_EXPIRING_TITLE_DAYS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server identity certificate on {0} expiring in {1} hour(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_ALERT_EXPIRING_TITLE_HOURS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_ALERT_EXPIRING_TITLE_HOURS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server identity certificate on {0} expiring in {1} minute(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_ALERT_EXPIRING_TITLE_MINUTES {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_ALERT_EXPIRING_TITLE_MINUTES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The internal identity certificate of server &apos;{0}&apos; expired on {1}. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRED_DESCIRPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRED_DESCIRPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server internal identity certificate on {0} expired ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRED_TITLE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The internal identity certificate of server &apos;{0}&apos; will expire on {1}. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server internal identity certificate on {0} expiring in {1} day(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_TITLE_DAYS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_TITLE_DAYS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server internal identity certificate on {0} expiring in {1} hour(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_TITLE_HOURS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_TITLE_HOURS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server internal identity certificate on {0} expiring in {1} minute(s) ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_TITLE_MINUTES {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_HOST_INTERNAL_ALERT_EXPIRING_TITLE_MINUTES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The certificate installation failed. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_INSTALLATION_FAILURE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_INSTALLATION_FAILURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The certificate installation failed.
+        ///{0} ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_INSTALLATION_FAILURE_GENERIC {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_INSTALLATION_FAILURE_GENERIC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The certificate installation was completed successfully. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_INSTALLATION_SUCCESS {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_INSTALLATION_SUCCESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid TLS certificate file {0} ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_INVALID {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_INVALID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die TLS key files (*.pem;*.key)|*.pem;*.key ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_FILETYPES {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_FILETYPES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The selected TLS key file is invalid. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_INVALID {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_INVALID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server certificate compatibility check ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_LENGTH_CHECK_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_LENGTH_CHECK_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking compatibility of server identity certificate ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_LENGTH_CHECK_GROUP {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_LENGTH_CHECK_GROUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The key size of the server&apos;s identity certificate is too small. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_LENGTH_PROBLEM_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_LENGTH_PROBLEM_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The key size of the server&apos;s identity certificate is smaller than 2048 bytes.
+        ///
+        ///It is recommended that you first install a new certificate with a key size of at least 2048 bytes, otherwise you will not be able to connect to the server after the upgrade. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_LENGTH_PROBLEM_MORE_INFO {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_LENGTH_PROBLEM_MORE_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The key size of the server&apos;s identity certificate is smaller than 2048 bytes.
+        ///
+        ///If you are upgrading to {0} {1} and above, it is recommended that you first install a new certificate with a key size of at least 2048 bytes, otherwise you will not be able to connect to the server after the upgrade. ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_KEY_LENGTH_WARNING_MORE_INFO {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_KEY_LENGTH_WARNING_MORE_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user does not have sufficient permissions to install certificates on the server. Please login using an account with one of the following roles:
+        ///
+        ///{1} ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_RBAC_RESTRICTION {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_RBAC_RESTRICTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select TLS Certificate File ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_SELECT_CERTIFICATE_TITLE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_SELECT_CERTIFICATE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select TLS Key File ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_SELECT_KEY_TITLE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_SELECT_KEY_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Thumbprint: {0} ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_THUMBPRINT_VALUE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_THUMBPRINT_VALUE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trusted CA certificate ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_TYPE_CA {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_TYPE_CA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server identity certificate ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_TYPE_HOST {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_TYPE_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server internal identity certificate ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_TYPE_HOST_INTERNAL {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_TYPE_HOST_INTERNAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Valid from {0} to {1} ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_VALIDITY_PERIOD_VALUE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_VALIDITY_PERIOD_VALUE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabled on the pool, but disabled on: ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_VERIFICATION_HOST_DISABLED_IN_POOL {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_VERIFICATION_HOST_DISABLED_IN_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disabled, but enabled on the pool ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_VERIFICATION_HOST_DISABLED_STANDALONE {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_VERIFICATION_HOST_DISABLED_STANDALONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificate Verification ähnelt.
+        /// </summary>
+        public static string CERTIFICATE_VERIFICATION_KEY {
+            get {
+                return ResourceManager.GetString("CERTIFICATE_VERIFICATION_KEY", resourceCulture);
             }
         }
         
@@ -6994,15 +7808,6 @@ namespace XenAdmin {
         public static string CHANGE_POLICY_STATUS {
             get {
                 return ResourceManager.GetString("CHANGE_POLICY_STATUS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Insert [XenServer] CD ähnelt.
-        /// </summary>
-        public static string CHANGE_SERVER_CD {
-            get {
-                return ResourceManager.GetString("CHANGE_SERVER_CD", resourceCulture);
             }
         }
         
@@ -7078,24 +7883,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Changed [XenCenter] master password ähnelt.
-        /// </summary>
-        public static string CHANGED_MASTER_PASSWORD {
-            get {
-                return ResourceManager.GetString("CHANGED_MASTER_PASSWORD", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Changed [XenCenter] master password for session restore ähnelt.
-        /// </summary>
-        public static string CHANGED_MASTER_PASSWORD_LONG {
-            get {
-                return ResourceManager.GetString("CHANGED_MASTER_PASSWORD_LONG", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Server CD changed ähnelt.
         /// </summary>
         public static string CHANGED_SERVER_CD {
@@ -7110,15 +7897,6 @@ namespace XenAdmin {
         public static string CHANGEPASS_DIALOG_TITLE {
             get {
                 return ResourceManager.GetString("CHANGEPASS_DIALOG_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Please type the root password for &apos;{0}&apos;: ähnelt.
-        /// </summary>
-        public static string CHANGEPASS_ROOT_PASS {
-            get {
-                return ResourceManager.GetString("CHANGEPASS_ROOT_PASS", resourceCulture);
             }
         }
         
@@ -7159,6 +7937,33 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Docker container management check ähnelt.
+        /// </summary>
+        public static string CHECKING_CONTAINER_MANAGEMENT {
+            get {
+                return ResourceManager.GetString("CHECKING_CONTAINER_MANAGEMENT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking for legacy Container Management supplemental pack ähnelt.
+        /// </summary>
+        public static string CHECKING_CONTAINER_MANAGEMENT_GROUP {
+            get {
+                return ResourceManager.GetString("CHECKING_CONTAINER_MANAGEMENT_GROUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking for deprecated storage repositories ähnelt.
+        /// </summary>
+        public static string CHECKING_DEPRECATED_SRS {
+            get {
+                return ResourceManager.GetString("CHECKING_DEPRECATED_SRS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Checking for pending restart ähnelt.
         /// </summary>
         public static string CHECKING_FOR_PENDING_RESTART {
@@ -7170,9 +7975,18 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Checking HA and WLB status ähnelt.
         /// </summary>
-        public static string CHECKING_HA_STATUS {
+        public static string CHECKING_HA_AND_WLB_STATUS {
             get {
-                return ResourceManager.GetString("CHECKING_HA_STATUS", resourceCulture);
+                return ResourceManager.GetString("CHECKING_HA_AND_WLB_STATUS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking pool enrollment to Health Check ähnelt.
+        /// </summary>
+        public static string CHECKING_HEALTH_CHECK_SERVICE {
+            get {
+                return ResourceManager.GetString("CHECKING_HEALTH_CHECK_SERVICE", resourceCulture);
             }
         }
         
@@ -7200,6 +8014,42 @@ namespace XenAdmin {
         public static string CHECKING_HOST_MEMORY_POST_UPGRADE_DESCRIPTION {
             get {
                 return ResourceManager.GetString("CHECKING_HOST_MEMORY_POST_UPGRADE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Has synchronized within the past week ähnelt.
+        /// </summary>
+        public static string CHECKING_LAST_CDN_SYNC_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("CHECKING_LAST_CDN_SYNC_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking date of last synchronization with update channel ähnelt.
+        /// </summary>
+        public static string CHECKING_LAST_CDN_SYNC_TILE {
+            get {
+                return ResourceManager.GetString("CHECKING_LAST_CDN_SYNC_TILE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Power On mode check ähnelt.
+        /// </summary>
+        public static string CHECKING_POWER_ON_MODE {
+            get {
+                return ResourceManager.GetString("CHECKING_POWER_ON_MODE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking Power On mode ähnelt.
+        /// </summary>
+        public static string CHECKING_POWER_ON_MODE_GROUP {
+            get {
+                return ResourceManager.GetString("CHECKING_POWER_ON_MODE_GROUP", resourceCulture);
             }
         }
         
@@ -7254,6 +8104,24 @@ namespace XenAdmin {
         public static string CHECKING_SAFE_TO_UPGRADE_DESCRIPTION {
             get {
                 return ResourceManager.GetString("CHECKING_SAFE_TO_UPGRADE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Security protocol check ähnelt.
+        /// </summary>
+        public static string CHECKING_SECURITY_PROTOCOL {
+            get {
+                return ResourceManager.GetString("CHECKING_SECURITY_PROTOCOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking security protocol ähnelt.
+        /// </summary>
+        public static string CHECKING_SECURITY_PROTOCOL_GROUP {
+            get {
+                return ResourceManager.GetString("CHECKING_SECURITY_PROTOCOL_GROUP", resourceCulture);
             }
         }
         
@@ -7321,7 +8189,25 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Checking [XenCenter] version ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die vSwitch Controller check ähnelt.
+        /// </summary>
+        public static string CHECKING_VSWITCH_CONTROLLER {
+            get {
+                return ResourceManager.GetString("CHECKING_VSWITCH_CONTROLLER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking vSwitch Controller configuration ähnelt.
+        /// </summary>
+        public static string CHECKING_VSWITCH_CONTROLLER_GROUP {
+            get {
+                return ResourceManager.GetString("CHECKING_VSWITCH_CONTROLLER_GROUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Checking {0} version ähnelt.
         /// </summary>
         public static string CHECKING_XENCENTER_VERSION {
             get {
@@ -7483,7 +8369,36 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die for use with Common Criteria versions of [XenServer] only ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Resetting the vTPM that is attached to a VM to its original state may result in the deactivation of some security features on the VM. Do you want to continue? ähnelt.
+        /// </summary>
+        public static string COMMAND_RESET_VTPM_WARNING {
+            get {
+                return ResourceManager.GetString("COMMAND_RESET_VTPM_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die TPM is supported only for VMs using the UEFI or UEFI secure boot modes. ähnelt.
+        /// </summary>
+        public static string COMMAND_VTPM_DISABLED_NON_UEFI {
+            get {
+                return ResourceManager.GetString("COMMAND_VTPM_DISABLED_NON_UEFI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Mana&amp;ge vTPMs... ähnelt.
+        /// </summary>
+        public static string COMMAND_VTPM_MENU {
+            get {
+                return ResourceManager.GetString("COMMAND_VTPM_MENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 
+        ///(For use with Common Criteria versions of {0} only).
+        /// ähnelt.
         /// </summary>
         public static string COMMON_CRITERIA_TEXT {
             get {
@@ -7519,6 +8434,33 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} {1} ähnelt.
+        /// </summary>
+        public static string CONFIG_CDN_UPDATES_TAB_TITLE {
+            get {
+                return ResourceManager.GetString("CONFIG_CDN_UPDATES_TAB_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} or earlier ähnelt.
+        /// </summary>
+        public static string CONFIG_LCM_UPDATES_TAB_TITLE {
+            get {
+                return ResourceManager.GetString("CONFIG_LCM_UPDATES_TAB_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Configure Updates... ähnelt.
+        /// </summary>
+        public static string CONFIG_UPDATES_MENU_ITEM {
+            get {
+                return ResourceManager.GetString("CONFIG_UPDATES_MENU_ITEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Configure HA ähnelt.
         /// </summary>
         public static string CONFIGURE_HA {
@@ -7533,6 +8475,42 @@ namespace XenAdmin {
         public static string CONFIGURE_HA_ELLIPSIS {
             get {
                 return ResourceManager.GetString("CONFIGURE_HA_ELLIPSIS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your external SSH console could not be launched. Please check that you have selected a valid file. ähnelt.
+        /// </summary>
+        public static string CONFIGURE_SSH_CONSOLE_ERROR {
+            get {
+                return ResourceManager.GetString("CONFIGURE_SSH_CONSOLE_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die An external SSH console has not been configured. ähnelt.
+        /// </summary>
+        public static string CONFIGURE_SSH_CONSOLE_FILE_NOT_CONFIGURED {
+            get {
+                return ResourceManager.GetString("CONFIGURE_SSH_CONSOLE_FILE_NOT_CONFIGURED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The file associated with your external SSH console doesn&apos;t exist. Please check that you have selected a valid file. ähnelt.
+        /// </summary>
+        public static string CONFIGURE_SSH_CONSOLE_FILE_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("CONFIGURE_SSH_CONSOLE_FILE_NOT_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configure &amp;SSH Console ähnelt.
+        /// </summary>
+        public static string CONFIGURE_SSH_CONSOLE_TITLE {
+            get {
+                return ResourceManager.GetString("CONFIGURE_SSH_CONSOLE_TITLE", resourceCulture);
             }
         }
         
@@ -7628,6 +8606,15 @@ namespace XenAdmin {
         public static string CONFIRM_CHANGE_STATIC_MAX_SINGULAR {
             get {
                 return ResourceManager.GetString("CONFIRM_CHANGE_STATIC_MAX_SINGULAR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Do you want to continue? ähnelt.
+        /// </summary>
+        public static string CONFIRM_CONTINUE {
+            get {
+                return ResourceManager.GetString("CONFIRM_CONTINUE", resourceCulture);
             }
         }
         
@@ -7858,13 +8845,27 @@ namespace XenAdmin {
         ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to destroy &apos;{0}&apos;?
         ///
         ///You should only need to destroy a server if it has physically failed.
-        ///Destroying this server will permanently remove it from the pool along with its local SRs, DVD drives and removable storage. The server will need to be reinstalled before it can be used again.
+        ///Destroying a server will permanently remove it from the pool along with its local SRs, DVD drives and removable storage. The server will need to be reinstalled before it can be used again.
         ///
         ///This action is final and unrecoverable. ähnelt.
         /// </summary>
         public static string CONFIRM_DESTROY_HOST {
             get {
                 return ResourceManager.GetString("CONFIRM_DESTROY_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to destroy the selected servers?
+        ///
+        ///You should only need to destroy servers if they have physically failed.
+        ///Destroying servers will permanently remove them from the pool along with their local SRs, DVD drives and removable storage. The servers will need to be reinstalled before they can be used again.
+        ///
+        ///This action is final and unrecoverable. ähnelt.
+        /// </summary>
+        public static string CONFIRM_DESTROY_HOST_MANY {
+            get {
+                return ResourceManager.GetString("CONFIRM_DESTROY_HOST_MANY", resourceCulture);
             }
         }
         
@@ -7878,6 +8879,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Destroy Multiple Servers ähnelt.
+        /// </summary>
+        public static string CONFIRM_DESTROY_HOST_TITLE_MANY {
+            get {
+                return ResourceManager.GetString("CONFIRM_DESTROY_HOST_TITLE_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Yes, Destroy ähnelt.
         /// </summary>
         public static string CONFIRM_DESTROY_HOST_YES_BUTTON_LABEL {
@@ -7887,7 +8897,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This will disable Changed Block Tracking on the disks of the selected VM. If you are using any third-party solutions to back up the VM, they might be affected. Note that Changed Block Tracking cannot be enabled again from [XenCenter]. Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This will disable Changed Block Tracking on the disks of the selected VM. If you are using any third-party solutions to back up the VM, they might be affected. Note that Changed Block Tracking cannot be enabled again from {0}. Do you want to continue? ähnelt.
         /// </summary>
         public static string CONFIRM_DISABLE_CBT_VM {
             get {
@@ -7905,7 +8915,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This will disable Changed Block Tracking on the disks of the selected VMs. If you are using any third-party solutions to back up the VMs, they might be affected. Note that Changed Block Tracking cannot be enabled again from [XenCenter]. Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This will disable Changed Block Tracking on the disks of the selected VMs. If you are using any third-party solutions to back up the VMs, they might be affected. Note that Changed Block Tracking cannot be enabled again from {0}. Do you want to continue? ähnelt.
         /// </summary>
         public static string CONFIRM_DISABLE_CBT_VMS {
             get {
@@ -7919,24 +8929,6 @@ namespace XenAdmin {
         public static string CONFIRM_DISABLE_CBT_VMS_TITLE {
             get {
                 return ResourceManager.GetString("CONFIRM_DISABLE_CBT_VMS_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to disable Health Check on the selected pool? ähnelt.
-        /// </summary>
-        public static string CONFIRM_DISABLE_HEALTH_CHECK_POOL {
-            get {
-                return ResourceManager.GetString("CONFIRM_DISABLE_HEALTH_CHECK_POOL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to disable Health Check on the selected server? ähnelt.
-        /// </summary>
-        public static string CONFIRM_DISABLE_HEALTH_CHECK_SERVER {
-            get {
-                return ResourceManager.GetString("CONFIRM_DISABLE_HEALTH_CHECK_SERVER", resourceCulture);
             }
         }
         
@@ -8238,7 +9230,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to restart the toolstack on the selected servers? Note that [XenCenter] will temporarily lose connection to them. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to restart the toolstack on the selected servers? Note that {0} will temporarily lose connection to them. ähnelt.
         /// </summary>
         public static string CONFIRM_RESTART_TOOLSTACK_MANY_SERVERS {
             get {
@@ -8247,7 +9239,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to restart the toolstack on &apos;{0}&apos;? Note that [XenCenter] will temporarily lose connection to the server. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to restart the toolstack on &apos;{0}&apos;? Note that {1} will temporarily lose connection to the server. ähnelt.
         /// </summary>
         public static string CONFIRM_RESTART_TOOLSTACK_ONE_SERVER {
             get {
@@ -8600,7 +9592,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Proxy and timeout options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Proxy and timeout ähnelt.
         /// </summary>
         public static string CONNECTION_DESC {
             get {
@@ -8636,20 +9628,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Looking for master for {0} on {1}... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Looking for coordinator for {0} on {1}... ähnelt.
         /// </summary>
-        public static string CONNECTION_FINDING_MASTER_DESCRIPTION {
+        public static string CONNECTION_FINDING_COORDINATOR_DESCRIPTION {
             get {
-                return ResourceManager.GetString("CONNECTION_FINDING_MASTER_DESCRIPTION", resourceCulture);
+                return ResourceManager.GetString("CONNECTION_FINDING_COORDINATOR_DESCRIPTION", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Looking for master for {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Looking for coordinator for {0} ähnelt.
         /// </summary>
-        public static string CONNECTION_FINDING_MASTER_TITLE {
+        public static string CONNECTION_FINDING_COORDINATOR_TITLE {
             get {
-                return ResourceManager.GetString("CONNECTION_FINDING_MASTER_TITLE", resourceCulture);
+                return ResourceManager.GetString("CONNECTION_FINDING_COORDINATOR_TITLE", resourceCulture);
             }
         }
         
@@ -8672,11 +9664,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Lost connection to {0}. Will search for a new pool master in {1} seconds. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Lost connection to {0}. Will search for a new pool coordinator in {1} seconds. ähnelt.
         /// </summary>
-        public static string CONNECTION_LOST_NOTICE_MASTER_IN_X_SECONDS {
+        public static string CONNECTION_LOST_NOTICE_COORDINATOR_IN_X_SECONDS {
             get {
-                return ResourceManager.GetString("CONNECTION_LOST_NOTICE_MASTER_IN_X_SECONDS", resourceCulture);
+                return ResourceManager.GetString("CONNECTION_LOST_NOTICE_COORDINATOR_IN_X_SECONDS", resourceCulture);
             }
         }
         
@@ -8717,7 +9709,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Connection to {0}: redirecting to the pool master at {1} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Connection to {0}: redirecting to the pool coordinator at {1} ähnelt.
         /// </summary>
         public static string CONNECTION_REDIRECTING {
             get {
@@ -8744,40 +9736,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Connection to Server {0} restricted because a connection already exists to another XE Express Server ({1}) ähnelt.
-        /// </summary>
-        public static string CONNECTION_RESTRICTED_MESSAGE {
-            get {
-                return ResourceManager.GetString("CONNECTION_RESTRICTED_MESSAGE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Connection to server {0} restricted - a connection to a [Citrix XenServer] Express Edition server ({1}) already exists.
-        ///
-        ///You can only connect to a single [Citrix XenServer] Express Edition server at a time. To find out how to upgrade your license, follow the link below. ähnelt.
-        /// </summary>
-        public static string CONNECTION_RESTRICTED_MESSAGE_LONG {
-            get {
-                return ResourceManager.GetString("CONNECTION_RESTRICTED_MESSAGE_LONG", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot connect to {0} due to license restrictions on the server ähnelt.
-        /// </summary>
-        public static string CONNECTION_RESTRICTED_NOTICE_TITLE {
-            get {
-                return ResourceManager.GetString("CONNECTION_RESTRICTED_NOTICE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Connection to {0}: trying to find pool at {1} ähnelt.
         /// </summary>
-        public static string CONNECTION_RETRYING_SLAVE {
+        public static string CONNECTION_RETRYING_SUPPORTER {
             get {
-                return ResourceManager.GetString("CONNECTION_RETRYING_SLAVE", resourceCulture);
+                return ResourceManager.GetString("CONNECTION_RETRYING_SUPPORTER", resourceCulture);
             }
         }
         
@@ -8793,9 +9756,9 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Connection to {0}: will try to connect to another pool member in {1} seconds ähnelt.
         /// </summary>
-        public static string CONNECTION_WILL_RETRY_SLAVE {
+        public static string CONNECTION_WILL_RETRY_SUPPORTER {
             get {
-                return ResourceManager.GetString("CONNECTION_WILL_RETRY_SLAVE", resourceCulture);
+                return ResourceManager.GetString("CONNECTION_WILL_RETRY_SUPPORTER", resourceCulture);
             }
         }
         
@@ -8809,7 +9772,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Keyboard shortcuts and scaling options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Keyboard shortcuts and scaling ähnelt.
         /// </summary>
         public static string CONSOLE_DESC {
             get {
@@ -8832,15 +9795,6 @@ namespace XenAdmin {
         public static string CONSOLE_HOST_DEAD {
             get {
                 return ResourceManager.GetString("CONSOLE_HOST_DEAD", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Nutanix CVM console ähnelt.
-        /// </summary>
-        public static string CONSOLE_HOST_NUTANIX {
-            get {
-                return ResourceManager.GetString("CONSOLE_HOST_NUTANIX", resourceCulture);
             }
         }
         
@@ -8899,6 +9853,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die SR &apos;{0}&apos; Driver Domain Console ähnelt.
+        /// </summary>
+        public static string CONSOLE_SR_DRIVER_DOMAIN {
+            get {
+                return ResourceManager.GetString("CONSOLE_SR_DRIVER_DOMAIN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die contained in ähnelt.
         /// </summary>
         public static string CONTAINED_IN {
@@ -8949,6 +9912,15 @@ namespace XenAdmin {
         public static string CONTAINER_IMAGE {
             get {
                 return ResourceManager.GetString("CONTAINER_IMAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Support for container management has been removed as of {0}. You will no longer be able to use the Container Management supplemental pack for managing Docker containers. ähnelt.
+        /// </summary>
+        public static string CONTAINER_MANAGEMENT_REMOVAL_WARNING {
+            get {
+                return ResourceManager.GetString("CONTAINER_MANAGEMENT_REMOVAL_WARNING", resourceCulture);
             }
         }
         
@@ -9360,7 +10332,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Manage Conversions - {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Conversion Manager - {0} ähnelt.
         /// </summary>
         public static string CONVERSION_MANAGER_TITLE {
             get {
@@ -9414,7 +10386,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Optionally, select [XenServer] networks to connect the VMs ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Optionally, select {0} networks to connect the VMs ähnelt.
         /// </summary>
         public static string CONVERSION_NETWORK_PAGE_TITLE {
             get {
@@ -9704,7 +10676,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] is incompatible with this version of the Conversion Manager virtual appliance. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is incompatible with this version of the Conversion Manager virtual appliance. ähnelt.
         /// </summary>
         public static string CONVERSION_VERSION_INCOMPATIBILITY {
             get {
@@ -9713,7 +10685,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The version of the Conversion Manager virtual appliance you are using is earlier than {0}. You can use the legacy Conversion Manager console to set up and control conversions. However, it is strongly recommended that you import and configure the Conversion Manager virtual appliance matching your [XenServer] version. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The version of the Conversion Manager virtual appliance you are using is earlier than {0}. You can use the legacy Conversion Manager console to set up and control conversions. However, it is strongly recommended that you import and configure the Conversion Manager virtual appliance matching your {1} version. ähnelt.
         /// </summary>
         public static string CONVERSION_VERSION_INCOMPATIBILITY_INFO {
             get {
@@ -9817,6 +10789,15 @@ namespace XenAdmin {
         public static string CONVERT_TO_TEMPLATE {
             get {
                 return ResourceManager.GetString("CONVERT_TO_TEMPLATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Coordinator ähnelt.
+        /// </summary>
+        public static string COORDINATOR {
+            get {
+                return ResourceManager.GetString("COORDINATOR", resourceCulture);
             }
         }
         
@@ -10010,11 +10991,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Copyright © {0} All rights reserved. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Copying template &apos;{0}&apos; to SR &apos;{1}&apos; ähnelt.
         /// </summary>
-        public static string COPYRIGHT {
+        public static string COPYING_TEMPLATE {
             get {
-                return ResourceManager.GetString("COPYRIGHT", resourceCulture);
+                return ResourceManager.GetString("COPYING_TEMPLATE", resourceCulture);
             }
         }
         
@@ -10129,15 +11110,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Target Server: ähnelt.
-        /// </summary>
-        public static string CPM_SUMMARY_KEY_TARGET_SERVER {
-            get {
-                return ResourceManager.GetString("CPM_SUMMARY_KEY_TARGET_SERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Migration Network: ähnelt.
         /// </summary>
         public static string CPM_SUMMARY_KEY_TRANSFER_NETWORK {
@@ -10152,15 +11124,6 @@ namespace XenAdmin {
         public static string CPM_SUMMARY_NETWORK_NOT_FOUND {
             get {
                 return ResourceManager.GetString("CPM_SUMMARY_NETWORK_NOT_FOUND", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Unset ähnelt.
-        /// </summary>
-        public static string CPM_SUMMARY_UNSET {
-            get {
-                return ResourceManager.GetString("CPM_SUMMARY_UNSET", resourceCulture);
             }
         }
         
@@ -10201,7 +11164,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to copy the selected VMs to. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to copy the selected VM(s) to. ähnelt.
         /// </summary>
         public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_COPY {
             get {
@@ -10210,16 +11173,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to copy the selected VM to. ähnelt.
-        /// </summary>
-        public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_COPY_SINGLE {
-            get {
-                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_INSTRUCTIONS_COPY_SINGLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to copy the selected templates to. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to copy the selected template(s) to. ähnelt.
         /// </summary>
         public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_COPY_TEMPLATE {
             get {
@@ -10228,16 +11182,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to copy the selected template to. ähnelt.
-        /// </summary>
-        public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_COPY_TEMPLATE_SINGLE {
-            get {
-                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_INSTRUCTIONS_COPY_TEMPLATE_SINGLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to migrate the selected VMs to. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to migrate the selected VM(s) to. ähnelt.
         /// </summary>
         public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_MIGRATE {
             get {
@@ -10246,29 +11191,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to migrate the selected VM to. ähnelt.
-        /// </summary>
-        public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_MIGRATE_SINGLE {
-            get {
-                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_INSTRUCTIONS_MIGRATE_SINGLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to move the selected VMs to. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to move the selected VM(s) to. ähnelt.
         /// </summary>
         public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_MOVE {
             get {
                 return ResourceManager.GetString("CPM_WIZARD_DESTINATION_INSTRUCTIONS_MOVE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the pool or standalone server where you want to move the selected VM to. ähnelt.
-        /// </summary>
-        public static string CPM_WIZARD_DESTINATION_INSTRUCTIONS_MOVE_SINGLE {
-            get {
-                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_INSTRUCTIONS_MOVE_SINGLE", resourceCulture);
             }
         }
         
@@ -10282,11 +11209,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Specify a &amp;target server in the destination pool (optional): ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you want to copy the disks of a VM to local storage, specify the server below. ähnelt.
         /// </summary>
-        public static string CPM_WIZARD_DESTINATION_TABLE_INTRO {
+        public static string CPM_WIZARD_DESTINATION_TABLE_INTRO_COPY {
             get {
-                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_TABLE_INTRO", resourceCulture);
+                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_TABLE_INTRO_COPY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you want to migrate the disks of a VM to local storage, specify the server below. ähnelt.
+        /// </summary>
+        public static string CPM_WIZARD_DESTINATION_TABLE_INTRO_MIGRATE {
+            get {
+                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_TABLE_INTRO_MIGRATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you want to move the disks of a VM to local storage, specify the server below. ähnelt.
+        /// </summary>
+        public static string CPM_WIZARD_DESTINATION_TABLE_INTRO_MOVE {
+            get {
+                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_TABLE_INTRO_MOVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you want to place the disks of a template on local storage, specify the server below. ähnelt.
+        /// </summary>
+        public static string CPM_WIZARD_DESTINATION_TABLE_INTRO_TEMPLATES {
+            get {
+                return ResourceManager.GetString("CPM_WIZARD_DESTINATION_TABLE_INTRO_TEMPLATES", resourceCulture);
             }
         }
         
@@ -10518,7 +11472,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The selected VMs are no longer available in [XenCenter]&apos;s cache. Please verify your selection is valid and relaunch the wizard. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The selected VMs are no longer available in {0}&apos;s cache. Please verify your selection is valid and relaunch the wizard. ähnelt.
         /// </summary>
         public static string CPM_WIZARD_VM_MISSING_ERROR {
             get {
@@ -10532,24 +11486,6 @@ namespace XenAdmin {
         public static string CPM_WIZARD_VM_SELECTION_INTRODUCTION {
             get {
                 return ResourceManager.GetString("CPM_WIZARD_VM_SELECTION_INTRODUCTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die WLB is enabled on the host ähnelt.
-        /// </summary>
-        public static string CPM_WLB_ENABLED_ON_HOST_FAILURE_REASON {
-            get {
-                return ResourceManager.GetString("CPM_WLB_ENABLED_ON_HOST_FAILURE_REASON", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die WLB is enabled on the source ähnelt.
-        /// </summary>
-        public static string CPM_WLB_ENABLED_ON_VM_FAILURE_REASON {
-            get {
-                return ResourceManager.GetString("CPM_WLB_ENABLED_ON_VM_FAILURE_REASON", resourceCulture);
             }
         }
         
@@ -10617,24 +11553,6 @@ namespace XenAdmin {
         public static string CPU {
             get {
                 return ResourceManager.GetString("CPU", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die CPU and Memory ähnelt.
-        /// </summary>
-        public static string CPU_AND_MEMORY {
-            get {
-                return ResourceManager.GetString("CPU_AND_MEMORY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} vCPU(s) &amp; {1} MB RAM ähnelt.
-        /// </summary>
-        public static string CPU_AND_MEMORY_SUB {
-            get {
-                return ResourceManager.GetString("CPU_AND_MEMORY_SUB", resourceCulture);
             }
         }
         
@@ -10936,15 +11854,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Archiving appliance files into single package file {0}... ähnelt.
-        /// </summary>
-        public static string CREATING_FILE {
-            get {
-                return ResourceManager.GetString("CREATING_FILE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Creating manifest file... ähnelt.
         /// </summary>
         public static string CREATING_MANIFEST {
@@ -10954,11 +11863,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Creating new pool &apos;{0}&apos; with master &apos;{1}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Calculating checksum for file &apos;{0}&apos;... ähnelt.
         /// </summary>
-        public static string CREATING_NAMED_POOL_WITH_MASTER {
+        public static string CREATING_MANIFEST_CHECKSUM {
             get {
-                return ResourceManager.GetString("CREATING_NAMED_POOL_WITH_MASTER", resourceCulture);
+                return ResourceManager.GetString("CREATING_MANIFEST_CHECKSUM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Creating new pool &apos;{0}&apos; with coordinator &apos;{1}&apos; ähnelt.
+        /// </summary>
+        public static string CREATING_NAMED_POOL_WITH_COORDINATOR {
+            get {
+                return ResourceManager.GetString("CREATING_NAMED_POOL_WITH_COORDINATOR", resourceCulture);
             }
         }
         
@@ -10977,6 +11895,15 @@ namespace XenAdmin {
         public static string CREATING_NEW_FOLDERS {
             get {
                 return ResourceManager.GetString("CREATING_NEW_FOLDERS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Archiving appliance files into single package file &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string CREATING_OVA_FILE {
+            get {
+                return ResourceManager.GetString("CREATING_OVA_FILE", resourceCulture);
             }
         }
         
@@ -11022,60 +11949,6 @@ namespace XenAdmin {
         public static string CREDENTIALS_CHECKING {
             get {
                 return ResourceManager.GetString("CREDENTIALS_CHECKING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Dell EqualLogic ähnelt.
-        /// </summary>
-        public static string CSLG_DELL_DIRECT {
-            get {
-                return ResourceManager.GetString("CSLG_DELL_DIRECT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Direct Connection ähnelt.
-        /// </summary>
-        public static string CSLG_DIRECT_CONNECTION {
-            get {
-                return ResourceManager.GetString("CSLG_DIRECT_CONNECTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die NetApp ähnelt.
-        /// </summary>
-        public static string CSLG_NETAPP_DIRECT {
-            get {
-                return ResourceManager.GetString("CSLG_NETAPP_DIRECT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Storage adapter: ähnelt.
-        /// </summary>
-        public static string CSLG_STORAGEADAPTER {
-            get {
-                return ResourceManager.GetString("CSLG_STORAGEADAPTER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die StorageLink adapters ähnelt.
-        /// </summary>
-        public static string CSLG_STORAGELINK_ADAPTERS {
-            get {
-                return ResourceManager.GetString("CSLG_STORAGELINK_ADAPTERS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die StorageLink Server ({0}) ähnelt.
-        /// </summary>
-        public static string CSLG_STORAGELINK_SERVER {
-            get {
-                return ResourceManager.GetString("CSLG_STORAGELINK_SERVER", resourceCulture);
             }
         }
         
@@ -11368,6 +12241,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die MMM d, hh:mm:ss ähnelt.
+        /// </summary>
+        public static string DATEFORMAT_DM_HMS {
+            get {
+                return ResourceManager.GetString("DATEFORMAT_DM_HMS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die MMM d, yyyy ähnelt.
         /// </summary>
         public static string DATEFORMAT_DMY {
@@ -11494,6 +12376,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Imported from an OVF/OVA package. ähnelt.
+        /// </summary>
+        public static string DEFAULT_IMPORT_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("DEFAULT_IMPORT_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Default install of {0} ähnelt.
         /// </summary>
         public static string DEFAULT_INSTALL_OF_XENSERVER {
@@ -11566,7 +12457,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die VMs without [Citrix VM Tools] ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die VMs without {0} ähnelt.
         /// </summary>
         public static string DEFAULT_SEARCH_VMS_WO_XS_TOOLS {
             get {
@@ -11789,7 +12680,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die There are no alerts remaining which you have permission to dismiss. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have no permission to dismiss the selected alerts. ähnelt.
         /// </summary>
         public static string DELETE_MESSAGE_RBAC_BLOCKED {
             get {
@@ -12086,6 +12977,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die SR deprecation check ähnelt.
+        /// </summary>
+        public static string DEPRECATED_SRS_CHECK {
+            get {
+                return ResourceManager.GetString("DEPRECATED_SRS_CHECK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Description ähnelt.
         /// </summary>
         public static string DESCRIPTION {
@@ -12230,15 +13130,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] has detected that an SR already exists on this LUN. This SR is not currently in use by &apos;{0}&apos;,  would you like to attach it? ähnelt.
-        /// </summary>
-        public static string DETACHED_ISCI_DETECTED {
-            get {
-                return ResourceManager.GetString("DETACHED_ISCI_DETECTED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Details ähnelt.
         /// </summary>
         public static string DETAILS {
@@ -12271,6 +13162,24 @@ namespace XenAdmin {
         public static string DEVICE_POSITION_CONFLICT {
             get {
                 return ResourceManager.GetString("DEVICE_POSITION_CONFLICT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Configure just this disk anyway ähnelt.
+        /// </summary>
+        public static string DEVICE_POSITION_CONFLICT_CONFIGURE {
+            get {
+                return ResourceManager.GetString("DEVICE_POSITION_CONFLICT_CONFIGURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Swap these disks ähnelt.
+        /// </summary>
+        public static string DEVICE_POSITION_CONFLICT_SWAP {
+            get {
+                return ResourceManager.GetString("DEVICE_POSITION_CONFLICT_SWAP", resourceCulture);
             }
         }
         
@@ -12311,7 +13220,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disable pass-through ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure that you want to disable pass-through on this device? This device will no longer be allowed to be passed through to virtual machines. ähnelt.
         /// </summary>
         public static string DIALOG_USB_USAGE_DISABLE_PASSTHROUGH {
             get {
@@ -12320,29 +13229,13 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Enable pass-through ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure that you want to enable pass-through on this device? This will allow this device to be passed through to virtual machines.
+        ///
+        ///Plugging in untrustworthy USB devices to your computer may put your computer at risk. USB devices with modifiable behaviour should only be assigned to trustworthy guest VMs. ähnelt.
         /// </summary>
         public static string DIALOG_USB_USAGE_ENABLE_PASSTHROUGH {
             get {
                 return ResourceManager.GetString("DIALOG_USB_USAGE_ENABLE_PASSTHROUGH", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure that you want to enable pass-through on this device? This will allow this device to be passed through to virtual machines. ähnelt.
-        /// </summary>
-        public static string DIALOG_USB_USAGE_NOTE_ALLOW {
-            get {
-                return ResourceManager.GetString("DIALOG_USB_USAGE_NOTE_ALLOW", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure that you want to disable pass-through on this device? This device will no longer be allowed to be passed through to virtual machines. ähnelt.
-        /// </summary>
-        public static string DIALOG_USB_USAGE_NOTE_DENY {
-            get {
-                return ResourceManager.GetString("DIALOG_USB_USAGE_NOTE_DENY", resourceCulture);
             }
         }
         
@@ -12392,11 +13285,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disable HA if you want to configure the management interfaces ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disable HA if you want to configure IP addresses. ähnelt.
         /// </summary>
-        public static string DISABLE_HA_CONFIGURE_MANAGEMENT_INTERFACES {
+        public static string DISABLE_HA_CONFIGURE_IP_ADDRESSES {
             get {
-                return ResourceManager.GetString("DISABLE_HA_CONFIGURE_MANAGEMENT_INTERFACES", resourceCulture);
+                return ResourceManager.GetString("DISABLE_HA_CONFIGURE_IP_ADDRESSES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Disable HA ähnelt.
+        /// </summary>
+        public static string DISABLE_HA_HOTKEY {
+            get {
+                return ResourceManager.GetString("DISABLE_HA_HOTKEY", resourceCulture);
             }
         }
         
@@ -12460,6 +13362,15 @@ namespace XenAdmin {
         public static string DISABLED_CLUSTERING_ON_POOL {
             get {
                 return ResourceManager.GetString("DISABLED_CLUSTERING_ON_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Don&apos;t compress VMs during migration ähnelt.
+        /// </summary>
+        public static string DISABLED_MIGRATION_COMPRESSION {
+            get {
+                return ResourceManager.GetString("DISABLED_MIGRATION_COMPRESSION", resourceCulture);
             }
         }
         
@@ -12770,15 +13681,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Dynamic Memory Control ähnelt.
-        /// </summary>
-        public static string DMC {
-            get {
-                return ResourceManager.GetString("DMC", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The Dynamic Memory Control (DMC) is not available due to license restrictions on the server. ähnelt.
         /// </summary>
         public static string DMC_UNAVAILABLE_LICENSE_RESTRICTION {
@@ -12806,7 +13708,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because [Citrix VM Tools] are not installed on this VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because {0} are not installed on this VM. ähnelt.
         /// </summary>
         public static string DMC_UNAVAILABLE_NOTOOLS {
             get {
@@ -12815,7 +13717,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because [Citrix VM Tools] are not installed on these VMs. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because {0} are not installed on these VMs. ähnelt.
         /// </summary>
         public static string DMC_UNAVAILABLE_NOTOOLS_PLURAL {
             get {
@@ -12842,7 +13744,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because [Citrix VM Tools] are out of date on this VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because {0} are out of date on this VM. ähnelt.
         /// </summary>
         public static string DMC_UNAVAILABLE_OLDTOOLS {
             get {
@@ -12851,7 +13753,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because [Citrix VM Tools] are out of date on these VMs. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A memory range cannot be set because {0} are out of date on these VMs. ähnelt.
         /// </summary>
         public static string DMC_UNAVAILABLE_OLDTOOLS_PLURAL {
             get {
@@ -13121,7 +14023,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Don&apos;t select a target server ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die None selected ähnelt.
         /// </summary>
         public static string DONT_SELECT_TARGET_SERVER {
             get {
@@ -13135,6 +14037,15 @@ namespace XenAdmin {
         public static string DOWLOAD_LATEST_XS_TITLE {
             get {
                 return ResourceManager.GetString("DOWLOAD_LATEST_XS_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Authenticating your {0} account... ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_AND_EXTRACT_ACTION_AUTHENTICATING_DESC {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_AND_EXTRACT_ACTION_AUTHENTICATING_DESC", resourceCulture);
             }
         }
         
@@ -13202,6 +14113,51 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading {0} installer ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_CLIENT_INSTALLER_ACTION_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_CLIENT_INSTALLER_ACTION_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Download {0} installer ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_CLIENT_INSTALLER_ACTION_TITLE {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_CLIENT_INSTALLER_ACTION_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The downloaded installer can no longer be found. ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_CLIENT_INSTALLER_MSI_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_CLIENT_INSTALLER_MSI_NOT_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading {0} source code ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_CLIENT_SOURCE_ACTION_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_CLIENT_SOURCE_ACTION_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Download {0} source code ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_CLIENT_SOURCE_ACTION_TITLE {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_CLIENT_SOURCE_ACTION_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Download... ähnelt.
         /// </summary>
         public static string DOWNLOAD_ELLIPSES {
@@ -13211,7 +14167,34 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now available. Download the latest at the [Citrix] website. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The downloaded file can no longer be found. ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_FILE_ACTION_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_FILE_ACTION_NOT_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading {0} ({1} of {2})... ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_FILE_ACTION_PROGRESS_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_FILE_ACTION_PROGRESS_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Download latest {0} source code ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_LATEST_SOURCE {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_LATEST_SOURCE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now available. Download the latest at the {1} downloads website. ähnelt.
         /// </summary>
         public static string DOWNLOAD_LATEST_XS_BODY {
             get {
@@ -13220,7 +14203,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading update from &apos;{0}&apos;... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Download {0} v{1} source code ähnelt.
+        /// </summary>
+        public static string DOWNLOAD_SOURCE {
+            get {
+                return ResourceManager.GetString("DOWNLOAD_SOURCE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Downloading update from &apos;{0}&apos; ({1} of {2})... ähnelt.
         /// </summary>
         public static string DOWNLOADING_PATCH_FROM {
             get {
@@ -13688,7 +14680,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Click Fail Over to begin the test recovery of the selected vApps and VMs. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Once done, click Fail Over to begin the test recovery of the selected vApps and VMs. ähnelt.
         /// </summary>
         public static string DR_WIZARD_PRECHECKPAGE_CONTINUE_DRYRUN {
             get {
@@ -13697,7 +14689,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Click Fail Back to begin recovery of the selected vApps and VMs to your primary data site. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Once done, click Fail Back to begin recovery of the selected vApps and VMs to your primary data site. ähnelt.
         /// </summary>
         public static string DR_WIZARD_PRECHECKPAGE_CONTINUE_FAILBACK {
             get {
@@ -13706,7 +14698,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Click Fail Over to begin recovery of the selected vApps and VMs. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Once done, click Fail Over to begin recovery of the selected vApps and VMs. ähnelt.
         /// </summary>
         public static string DR_WIZARD_PRECHECKPAGE_CONTINUE_FAILOVER {
             get {
@@ -13787,47 +14779,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: {1} ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_PRECHECKPAGE_PROBLEM {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_PRECHECKPAGE_PROBLEM", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Resolve ähnelt.
         /// </summary>
         public static string DR_WIZARD_PRECHECKPAGE_RESOLVE {
             get {
                 return ResourceManager.GetString("DR_WIZARD_PRECHECKPAGE_RESOLVE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Failover pre-checks completed: {0} issues found ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_PRECHECKPAGE_STATUS_FAILURE {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_PRECHECKPAGE_STATUS_FAILURE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Running failover pre-checks: ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_PRECHECKPAGE_STATUS_RUNNING {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_PRECHECKPAGE_STATUS_RUNNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Failover pre-checks completed: No issues found ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_PRECHECKPAGE_STATUS_SUCCESS {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_PRECHECKPAGE_STATUS_SUCCESS", resourceCulture);
             }
         }
         
@@ -13967,6 +14923,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Missing SR information not found ähnelt.
+        /// </summary>
+        public static string DR_WIZARD_PROBLEM_MISSING_SR_NO_INFO {
+            get {
+                return ResourceManager.GetString("DR_WIZARD_PROBLEM_MISSING_SR_NO_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Is running on pool &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string DR_WIZARD_PROBLEM_RUNNING_APPLIANCE {
@@ -14003,6 +14968,39 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Test failover is in progress. This may take some time.
+        ///
+        ///Once done, click Next to remove the vApps and VMs that were failed over and to see the summary report. ähnelt.
+        /// </summary>
+        public static string DR_WIZARD_RECOVERPAGE_BLURB_DRYRUN {
+            get {
+                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_BLURB_DRYRUN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Failback is in progress. This may take some time.
+        ///
+        ///Once done,  click Next to see the summary report. ähnelt.
+        /// </summary>
+        public static string DR_WIZARD_RECOVERPAGE_BLURB_FAILBACK {
+            get {
+                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_BLURB_FAILBACK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Disaster Recovery is in progress. This may take some time.
+        ///
+        ///Once done, click Next to see the summary report. ähnelt.
+        /// </summary>
+        public static string DR_WIZARD_RECOVERPAGE_BLURB_FAILOVER {
+            get {
+                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_BLURB_FAILOVER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Test failover to pool &apos;{0}&apos; is complete. ähnelt.
         /// </summary>
         public static string DR_WIZARD_RECOVERPAGE_COMPLETE_DRYRUN {
@@ -14021,65 +15019,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Disaster Recovery is complete. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Disaster Recovery is complete. ähnelt.
         /// </summary>
         public static string DR_WIZARD_RECOVERPAGE_COMPLETE_FAILOVER {
             get {
                 return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_COMPLETE_FAILOVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Click Next to remove the vApps and VMs that were failed over and to see the summary report. ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_RECOVERPAGE_CONTINUE_DRYRUN {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_CONTINUE_DRYRUN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Click Next to see the summary report. ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_RECOVERPAGE_CONTINUE_FAILBACK {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_CONTINUE_FAILBACK", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Click Next to see the summary report. ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_RECOVERPAGE_CONTINUE_FAILOVER {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_CONTINUE_FAILOVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Test failover is in progress. This may take some time. ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_RECOVERPAGE_IN_PROGRESS_DRYRUN {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_IN_PROGRESS_DRYRUN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Failback is in progress. This may take some time. ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_RECOVERPAGE_IN_PROGRESS_FAILBACK {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_IN_PROGRESS_FAILBACK", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Disaster Recovery is in progress. This may take some time. ähnelt.
-        /// </summary>
-        public static string DR_WIZARD_RECOVERPAGE_IN_PROGRESS_FAILOVER {
-            get {
-                return ResourceManager.GetString("DR_WIZARD_RECOVERPAGE_IN_PROGRESS_FAILOVER", resourceCulture);
             }
         }
         
@@ -14174,7 +15118,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Disaster Recovery progress ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Disaster Recovery progress ähnelt.
         /// </summary>
         public static string DR_WIZARD_RECOVERPAGE_TITLE_FAILOVER {
             get {
@@ -14655,7 +15599,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Email Options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Email Notifications ähnelt.
         /// </summary>
         public static string EMAIL_OPTIONS {
             get {
@@ -14669,6 +15613,15 @@ namespace XenAdmin {
         public static string EMPTY {
             get {
                 return ResourceManager.GetString("EMPTY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Empty key ähnelt.
+        /// </summary>
+        public static string EMPTY_KEY {
+            get {
+                return ResourceManager.GetString("EMPTY_KEY", resourceCulture);
             }
         }
         
@@ -14745,6 +15698,80 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable certificate verification while the pool is in the process of creating a cluster. ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_CLUSTERING {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_CLUSTERING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable certificate verification while HA is being disabled on the pool. ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_HA_DISABLING {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_HA_DISABLING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable certificate verification when HA is on. ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_HA_ENABLED {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_HA_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable certificate verification while HA is being enabled on the pool. ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_HA_ENABLING {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_HA_ENABLING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enable Certificate Veri&amp;fication ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_MENU {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_MENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable certificate verification while a new coordinator is being nominated in the pool. ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_NEW_COORDINATOR {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_NEW_COORDINATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user does not have sufficient permissions to enable certificate verification. Please login using an account with one of the following roles:
+        ///
+        ///{1} ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_RBAC_RESTRICTION {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_RBAC_RESTRICTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable certificate verification while a rolling pool upgrade is in progress. ähnelt.
+        /// </summary>
+        public static string ENABLE_TLS_VERIFICATION_RPU {
+            get {
+                return ResourceManager.GetString("ENABLE_TLS_VERIFICATION_RPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Res&amp;ume ähnelt.
         /// </summary>
         public static string ENABLE_WLB_ELLIPSIS {
@@ -14768,6 +15795,15 @@ namespace XenAdmin {
         public static string ENABLED_CLUSTERING_ON_POOL {
             get {
                 return ResourceManager.GetString("ENABLED_CLUSTERING_ON_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Compress VMs during migration ähnelt.
+        /// </summary>
+        public static string ENABLED_MIGRATION_COMPRESSION {
+            get {
+                return ResourceManager.GetString("ENABLED_MIGRATION_COMPRESSION", resourceCulture);
             }
         }
         
@@ -14898,15 +15934,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die To access your saved session it is required that you enter the master password when starting [XenCenter] ähnelt.
-        /// </summary>
-        public static string ENTER_MASTER_PASSWORD_TO_ACCESS_SETTINGS_TT {
-            get {
-                return ResourceManager.GetString("ENTER_MASTER_PASSWORD_TO_ACCESS_SETTINGS_TT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The QoS limit value should be an integer greater than zero ähnelt.
         /// </summary>
         public static string ENTER_VALID_QOS {
@@ -14921,15 +15948,6 @@ namespace XenAdmin {
         public static string EQUALLOGICS_MEMBERS {
             get {
                 return ResourceManager.GetString("EQUALLOGICS_MEMBERS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Error importing server list. Check that the xml format in the file is correct. ähnelt.
-        /// </summary>
-        public static string ERRO_IMPORTING_SERVER_LIST {
-            get {
-                return ResourceManager.GetString("ERRO_IMPORTING_SERVER_LIST", resourceCulture);
             }
         }
         
@@ -14970,11 +15988,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] has encountered a problem connecting to this server. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} has encountered a problem connecting to this server. ähnelt.
         /// </summary>
         public static string ERROR_CONNECTING_BLURB {
             get {
                 return ResourceManager.GetString("ERROR_CONNECTING_BLURB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The storage repository was not found and a default was not assigned. ähnelt.
+        /// </summary>
+        public static string ERROR_COULD_NOT_FIND_SR {
+            get {
+                return ResourceManager.GetString("ERROR_COULD_NOT_FIND_SR", resourceCulture);
             }
         }
         
@@ -15402,6 +16429,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The file to import was not provided. ähnelt.
+        /// </summary>
+        public static string ERROR_FILE_NAME_NULL {
+            get {
+                return ResourceManager.GetString("ERROR_FILE_NAME_NULL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die File {0} not found ähnelt.
         /// </summary>
         public static string ERROR_FILE_NOT_FOUND {
@@ -15416,6 +16452,15 @@ namespace XenAdmin {
         public static string ERROR_HOST_STILL_BOOTING {
             get {
                 return ResourceManager.GetString("ERROR_HOST_STILL_BOOTING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Error importing server list. Check that the xml format in the file is correct. ähnelt.
+        /// </summary>
+        public static string ERROR_IMPORTING_SERVER_LIST {
+            get {
+                return ResourceManager.GetString("ERROR_IMPORTING_SERVER_LIST", resourceCulture);
             }
         }
         
@@ -15456,6 +16501,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A password was not provided to decrypt the OVF package. ähnelt.
+        /// </summary>
+        public static string ERROR_NO_PASSWORD {
+            get {
+                return ResourceManager.GetString("ERROR_NO_PASSWORD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You are not authorized to access this server. ähnelt.
         /// </summary>
         public static string ERROR_NO_PERMISSION {
@@ -15492,7 +16546,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] has encountered a problem launching PuTTY. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A problem was encountered while launching PuTTY. ähnelt.
         /// </summary>
         public static string ERROR_PUTTY_LAUNCHING {
             get {
@@ -15528,6 +16582,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Please shut down or suspend VM &apos;{0}&apos; before exporting. ähnelt.
+        /// </summary>
+        public static string ERROR_VM_NOT_HALTED {
+            get {
+                return ResourceManager.GetString("ERROR_VM_NOT_HALTED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} encountered an issue while trying to fetch the EUA. ähnelt.
+        /// </summary>
+        public static string EUA_NOT_FOUND_PROBLEM_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("EUA_NOT_FOUND_PROBLEM_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die EULA ähnelt.
         /// </summary>
         public static string EULA {
@@ -15542,6 +16614,15 @@ namespace XenAdmin {
         public static string EULAS {
             get {
                 return ResourceManager.GetString("EULAS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot nominate a new coordinator while the pool is in the process of creating a cluster. ähnelt.
+        /// </summary>
+        public static string EVACUATE_HOST_CLUSER_CREATING {
+            get {
+                return ResourceManager.GetString("EVACUATE_HOST_CLUSER_CREATING", resourceCulture);
             }
         }
         
@@ -15564,6 +16645,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot nominate a new coordinator while HA is being disabled on the pool. ähnelt.
+        /// </summary>
+        public static string EVACUATE_HOST_HA_DISABLING {
+            get {
+                return ResourceManager.GetString("EVACUATE_HOST_HA_DISABLING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot nominate a new coordinator while HA is being enabled on the pool. ähnelt.
+        /// </summary>
+        public static string EVACUATE_HOST_HA_ENABLING {
+            get {
+                return ResourceManager.GetString("EVACUATE_HOST_HA_ENABLING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0} Install Management Agent ähnelt.
         /// </summary>
         public static string EVACUATE_HOST_INSTALL_MGMNT_PROMPT {
@@ -15573,7 +16672,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Install [Citrix VM Tools] ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Install {1} ähnelt.
         /// </summary>
         public static string EVACUATE_HOST_INSTALL_TOOLS_PROMPT {
             get {
@@ -15600,20 +16699,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die There are no other servers available in the pool to migrate the running VMs to.  Please suspend the VMs instead. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die There are no other servers available in the pool to migrate the running VMs to. Please suspend the VMs instead. ähnelt.
         /// </summary>
         public static string EVACUATE_HOST_NO_OTHER_HOSTS {
             get {
                 return ResourceManager.GetString("EVACUATE_HOST_NO_OTHER_HOSTS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die No servers available ähnelt.
-        /// </summary>
-        public static string EVACUATE_HOST_NO_OTHER_HOSTS_TITLE {
-            get {
-                return ResourceManager.GetString("EVACUATE_HOST_NO_OTHER_HOSTS_TITLE", resourceCulture);
             }
         }
         
@@ -15623,15 +16713,6 @@ namespace XenAdmin {
         public static string EVACUATE_HOST_NOT_ENOUGH_MEMORY {
             get {
                 return ResourceManager.GetString("EVACUATE_HOST_NOT_ENOUGH_MEMORY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Not enough memory ähnelt.
-        /// </summary>
-        public static string EVACUATE_HOST_NOT_ENOUGH_MEMORY_TITLE {
-            get {
-                return ResourceManager.GetString("EVACUATE_HOST_NOT_ENOUGH_MEMORY_TITLE", resourceCulture);
             }
         }
         
@@ -15650,15 +16731,6 @@ namespace XenAdmin {
         public static string EVACUATE_HOST_SUSPEND_VM_PROMPT {
             get {
                 return ResourceManager.GetString("EVACUATE_HOST_SUSPEND_VM_PROMPT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Action in progress... ähnelt.
-        /// </summary>
-        public static string EVACUATE_SOLUTION_IN_PROGRESS {
-            get {
-                return ResourceManager.GetString("EVACUATE_SOLUTION_IN_PROGRESS", resourceCulture);
             }
         }
         
@@ -15699,22 +16771,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die User canceled. Master needs to be upgraded first. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die User canceled. Coordinator needs to be upgraded first. ähnelt.
         /// </summary>
-        public static string EXCEPTION_USER_CANCELLED_MASTER {
+        public static string EXCEPTION_USER_CANCELLED_COORDINATOR {
             get {
-                return ResourceManager.GetString("EXCEPTION_USER_CANCELLED_MASTER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die An existing {0} SR was found on the selected LUN. Click Reattach to use the existing SR, or click Format to destroy any data present on the disk and create a new {1} SR.
-        ///
-        ///Warning: to prevent data loss you must ensure that the LUN is not in use by any other system, including servers that are not connected to [XenCenter]. ähnelt.
-        /// </summary>
-        public static string EXISTING_SR_FOUND_ON_LUN {
-            get {
-                return ResourceManager.GetString("EXISTING_SR_FOUND_ON_LUN", resourceCulture);
+                return ResourceManager.GetString("EXCEPTION_USER_CANCELLED_COORDINATOR", resourceCulture);
             }
         }
         
@@ -15752,6 +16813,24 @@ namespace XenAdmin {
         public static string EXPAND_ALL {
             get {
                 return ResourceManager.GetString("EXPAND_ALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your Customer Success Services (CSS) agreement has expired. This server will not receive any updates, including security updates. ähnelt.
+        /// </summary>
+        public static string EXPIRED_CSS_UPSELLING_MESSAGE_HOST {
+            get {
+                return ResourceManager.GetString("EXPIRED_CSS_UPSELLING_MESSAGE_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your Customer Success Services (CSS) agreement has expired. This pool will not receive any updates, including security updates ähnelt.
+        /// </summary>
+        public static string EXPIRED_CSS_UPSELLING_MESSAGE_POOL {
+            get {
+                return ResourceManager.GetString("EXPIRED_CSS_UPSELLING_MESSAGE_POOL", resourceCulture);
             }
         }
         
@@ -16017,24 +17096,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Security ähnelt.
-        /// </summary>
-        public static string EXPORT_SECURITY_PAGE_TEXT {
-            get {
-                return ResourceManager.GetString("EXPORT_SECURITY_PAGE_TEXT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select security options ähnelt.
-        /// </summary>
-        public static string EXPORT_SECURITY_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("EXPORT_SECURITY_PAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Target destination has only {0} of free space and you need at least {1} to export the selected VMs. ähnelt.
         /// </summary>
         public static string EXPORT_SELECTVMS_PAGE_ERROR_TARGET_SPACE_NOT_ENOUGH {
@@ -16161,11 +17222,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Exporting VMs... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Exporting disk &apos;{0}&apos; to &apos;{1}&apos; ({2} of {3})... ähnelt.
         /// </summary>
-        public static string EXPORTING_VMS {
+        public static string EXPORTING_VDI {
             get {
-                return ResourceManager.GetString("EXPORTING_VMS", resourceCulture);
+                return ResourceManager.GetString("EXPORTING_VDI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Verifying disk &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string EXPORTING_VDI_VERIFICATION {
+            get {
+                return ResourceManager.GetString("EXPORTING_VDI_VERIFICATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Verification for disk &apos;{0}&apos; failed. See logs for details. ähnelt.
+        /// </summary>
+        public static string EXPORTING_VDI_VERIFICATION_FAILURE {
+            get {
+                return ResourceManager.GetString("EXPORTING_VDI_VERIFICATION_FAILURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preparing to export VM &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string EXPORTING_VM_PREPARE {
+            get {
+                return ResourceManager.GetString("EXPORTING_VM_PREPARE", resourceCulture);
             }
         }
         
@@ -16175,15 +17263,6 @@ namespace XenAdmin {
         public static string EXPORTVM_COULD_NOT_SHOW {
             get {
                 return ResourceManager.GetString("EXPORTVM_COULD_NOT_SHOW", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Should not happen ähnelt.
-        /// </summary>
-        public static string EXPORTVM_NOT_HAPPEN {
-            get {
-                return ResourceManager.GetString("EXPORTVM_NOT_HAPPEN", resourceCulture);
             }
         }
         
@@ -16242,6 +17321,51 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die External Tools ähnelt.
+        /// </summary>
+        public static string EXTERNAL_TOOLS {
+            get {
+                return ResourceManager.GetString("EXTERNAL_TOOLS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Manage external tools ähnelt.
+        /// </summary>
+        public static string EXTERNAL_TOOLS_DETAILS {
+            get {
+                return ResourceManager.GetString("EXTERNAL_TOOLS_DETAILS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die File is invalid. Please select an .exe file. ähnelt.
+        /// </summary>
+        public static string EXTERNAL_TOOLS_FILE_INVALID {
+            get {
+                return ResourceManager.GetString("EXTERNAL_TOOLS_FILE_INVALID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select SSH console ähnelt.
+        /// </summary>
+        public static string EXTERNAL_TOOLS_OPEN_FILE_TITLE {
+            get {
+                return ResourceManager.GetString("EXTERNAL_TOOLS_OPEN_FILE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Executables (*.exe)|*.exe ähnelt.
+        /// </summary>
+        public static string EXTERNAL_TOOLS_OPEN_FILE_TYPE {
+            get {
+                return ResourceManager.GetString("EXTERNAL_TOOLS_OPEN_FILE_TYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Failed ähnelt.
         /// </summary>
         public static string FAILED {
@@ -16292,6 +17416,15 @@ namespace XenAdmin {
         public static string FAST_CLONE_UNAVAILABLE {
             get {
                 return ResourceManager.GetString("FAST_CLONE_UNAVAILABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Support for Software FCoE storage repositories has been deprecated as of {0}. ähnelt.
+        /// </summary>
+        public static string FCOE_DEPRECATION_WARNING {
+            get {
+                return ResourceManager.GetString("FCOE_DEPRECATION_WARNING", resourceCulture);
             }
         }
         
@@ -16395,6 +17528,33 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A file name cannot be a device name. ähnelt.
+        /// </summary>
+        public static string FILE_NAME_IS_DEVICE_NAME_ERROR_MESSAGE {
+            get {
+                return ResourceManager.GetString("FILE_NAME_IS_DEVICE_NAME_ERROR_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die File not found ähnelt.
+        /// </summary>
+        public static string FILE_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("FILE_NOT_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path section {0} matches a device name. ähnelt.
+        /// </summary>
+        public static string FILE_PATH_DEVICE_NAME_ERROR_MESSAGE {
+            get {
+                return ResourceManager.GetString("FILE_PATH_DEVICE_NAME_ERROR_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Acrobat (PDF) file ähnelt.
         /// </summary>
         public static string FILE_PDF {
@@ -16427,6 +17587,105 @@ namespace XenAdmin {
         public static string FILER_PARAM_INVALID_CHAR {
             get {
                 return ResourceManager.GetString("FILER_PARAM_INVALID_CHAR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not authenticate your [Citrix] account. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_AUTHENTICATE_ERROR {
+            get {
+                return ResourceManager.GetString("FILESERVICE_AUTHENTICATE_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Client ID file (*.json)|*.json ähnelt.
+        /// </summary>
+        public static string FILESERVICE_CLIENTID_FILETYPE {
+            get {
+                return ResourceManager.GetString("FILESERVICE_CLIENTID_FILETYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A Client ID has been specified. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_CLIENTID_FOUND {
+            get {
+                return ResourceManager.GetString("FILESERVICE_CLIENTID_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid or corrupt Client ID file. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_CLIENTID_INVALID_FILE {
+            get {
+                return ResourceManager.GetString("FILESERVICE_CLIENTID_INVALID_FILE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A Client ID has not been specified. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_CLIENTID_NOT_FOUND {
+            get {
+                return ResourceManager.GetString("FILESERVICE_CLIENTID_NOT_FOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select Client ID file. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_CLIENTID_TITLE {
+            get {
+                return ResourceManager.GetString("FILESERVICE_CLIENTID_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Received a bad request. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_ERROR_400 {
+            get {
+                return ResourceManager.GetString("FILESERVICE_ERROR_400", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Ensure the Client ID you have specified is valid and has not been revoked. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_ERROR_401 {
+            get {
+                return ResourceManager.GetString("FILESERVICE_ERROR_401", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your current subscription is insufficient for downloading this update. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_ERROR_403 {
+            get {
+                return ResourceManager.GetString("FILESERVICE_ERROR_403", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not download the update. The file was not found. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_ERROR_404 {
+            get {
+                return ResourceManager.GetString("FILESERVICE_ERROR_404", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The authentication server has encountered a situation it doesn&apos;t know how to handle. ähnelt.
+        /// </summary>
+        public static string FILESERVICE_ERROR_500 {
+            get {
+                return ResourceManager.GetString("FILESERVICE_ERROR_500", resourceCulture);
             }
         }
         
@@ -16638,16 +17897,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Target: ähnelt.
-        /// </summary>
-        public static string FINISH_PAGE_TARGET {
-            get {
-                return ResourceManager.GetString("FINISH_PAGE_TARGET", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} target: ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Home server: ähnelt.
         /// </summary>
         public static string FINISH_PAGE_TARGET_FOR_VM {
             get {
@@ -16679,51 +17929,6 @@ namespace XenAdmin {
         public static string FINISH_PAGE_TITLE_IMPORT {
             get {
                 return ResourceManager.GetString("FINISH_PAGE_TITLE_IMPORT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Obtain automatically through DHCP ähnelt.
-        /// </summary>
-        public static string FINISH_PAGE_TVM_DHCP {
-            get {
-                return ResourceManager.GetString("FINISH_PAGE_TVM_DHCP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Transfer VM gateway: ähnelt.
-        /// </summary>
-        public static string FINISH_PAGE_TVM_GATEWAY {
-            get {
-                return ResourceManager.GetString("FINISH_PAGE_TVM_GATEWAY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Transfer VM IP address: ähnelt.
-        /// </summary>
-        public static string FINISH_PAGE_TVM_IP {
-            get {
-                return ResourceManager.GetString("FINISH_PAGE_TVM_IP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Transfer VM subnet mask: ähnelt.
-        /// </summary>
-        public static string FINISH_PAGE_TVM_MASK {
-            get {
-                return ResourceManager.GetString("FINISH_PAGE_TVM_MASK", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Transfer VM network interface: ähnelt.
-        /// </summary>
-        public static string FINISH_PAGE_TVM_NETWORK {
-            get {
-                return ResourceManager.GetString("FINISH_PAGE_TVM_NETWORK", resourceCulture);
             }
         }
         
@@ -17367,15 +18572,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die None ähnelt.
-        /// </summary>
-        public static string GPU_NONE {
-            get {
-                return ResourceManager.GetString("GPU_NONE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die On {0}: ähnelt.
         /// </summary>
         public static string GPU_ON_HOST_LABEL {
@@ -17448,24 +18644,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You can improve graphics performance by assigning a dedicated graphics processing unit (GPU) to a VM. However, no GPUs have been detected in this pool, so this option is not currently available. ähnelt.
-        /// </summary>
-        public static string GPU_RUBRIC_NO_GPUS_POOL {
-            get {
-                return ResourceManager.GetString("GPU_RUBRIC_NO_GPUS_POOL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You can improve graphics performance by assigning a dedicated graphics processing unit (GPU) to a VM. However, no GPUs have been detected in this server, so this option is not currently available. ähnelt.
-        /// </summary>
-        public static string GPU_RUBRIC_NO_GPUS_SERVER {
-            get {
-                return ResourceManager.GetString("GPU_RUBRIC_NO_GPUS_SERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Select which virtual GPU types are allowed on these GPUs. ähnelt.
         /// </summary>
         public static string GPU_RUBRIC_PLEASE_SELECT_WHICH_GPU_MULTIPLE {
@@ -17502,7 +18680,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die To view memory data for this VM, you need to install [Citrix VM Tools] ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die To view memory data for this VM, you need to install {0} ähnelt.
         /// </summary>
         public static string GRAPH_NEEDS_TOOLS {
             get {
@@ -17565,20 +18743,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;{0}&apos; Details ähnelt.
-        /// </summary>
-        public static string GRAPHS_DETAILS_TITLE {
-            get {
-                return ResourceManager.GetString("GRAPHS_DETAILS_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Edit Graph... ähnelt.
         /// </summary>
         public static string GRAPHS_EDIT {
             get {
                 return ResourceManager.GetString("GRAPHS_EDIT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Edit &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string GRAPHS_EDIT_TITLE {
+            get {
+                return ResourceManager.GetString("GRAPHS_EDIT_TITLE", resourceCulture);
             }
         }
         
@@ -17648,99 +18826,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;UEFI Boot (experimental) ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die UEFI certificates are missing from your system ähnelt.
         /// </summary>
-        public static string GUEFI_BOOT_MODE_EXPERIMENTAL_LABEL {
+        public static string GUEFI_SECUREBOOT_MODE_MISSING_CERTIFICATES {
             get {
-                return ResourceManager.GetString("GUEFI_BOOT_MODE_EXPERIMENTAL_LABEL", resourceCulture);
+                return ResourceManager.GetString("GUEFI_SECUREBOOT_MODE_MISSING_CERTIFICATES", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Guest UEFI boot is an experimental feature. You can create UEFI-enabled VMs on hosts that are in a production environment. However, UEFI-enabled VMs must not be used for production purposes. You may have to re-create the VMs when you upgrade the host to a newer version of [XenServer]. ähnelt.
-        /// </summary>
-        public static string GUEFI_BOOT_MODE_EXPERIMENTAL_WARNING {
-            get {
-                return ResourceManager.GetString("GUEFI_BOOT_MODE_EXPERIMENTAL_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;UEFI Boot ähnelt.
-        /// </summary>
-        public static string GUEFI_BOOT_MODE_LABEL {
-            get {
-                return ResourceManager.GetString("GUEFI_BOOT_MODE_LABEL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The UEFI boot mode is not supported with the selected template. ähnelt.
-        /// </summary>
-        public static string GUEFI_BOOT_MODE_UNSUPPORTED_WARNING {
-            get {
-                return ResourceManager.GetString("GUEFI_BOOT_MODE_UNSUPPORTED_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Guest UEFI boot and guest UEFI secure boot are experimental features. You can create UEFI-enabled VMs on hosts that are in a production environment. However, UEFI-enabled VMs must not be used for production purposes. You may have to re-create the VMs when you upgrade the host to a newer version of [XenServer]. ähnelt.
-        /// </summary>
-        public static string GUEFI_BOOT_MODES_EXPERIMENTAL_WARNING {
-            get {
-                return ResourceManager.GetString("GUEFI_BOOT_MODES_EXPERIMENTAL_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The UEFI and UEFI secure boot modes are not supported with the selected template. ähnelt.
-        /// </summary>
-        public static string GUEFI_BOOT_MODES_UNSUPPORTED_WARNING {
-            get {
-                return ResourceManager.GetString("GUEFI_BOOT_MODES_UNSUPPORTED_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die UEFI &amp;Secure Boot (experimental) ähnelt.
-        /// </summary>
-        public static string GUEFI_SECURE_BOOT_MODE_EXPERIMENTAL_LABEL {
-            get {
-                return ResourceManager.GetString("GUEFI_SECURE_BOOT_MODE_EXPERIMENTAL_LABEL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die UEFI &amp;Secure Boot ähnelt.
-        /// </summary>
-        public static string GUEFI_SECURE_BOOT_MODE_LABEL {
-            get {
-                return ResourceManager.GetString("GUEFI_SECURE_BOOT_MODE_LABEL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Guest UEFI secure boot is an experimental feature. You can create VMs configured to use the UEFI secure boot mode on hosts that are in a production environment. However, these VMs must not be used for production purposes. You may have to re-create the VMs when you upgrade the host to a newer version of [XenServer]. ähnelt.
-        /// </summary>
-        public static string GUEFI_SECUREBOOT_MODE_EXPERIMENTAL_WARNING {
-            get {
-                return ResourceManager.GetString("GUEFI_SECUREBOOT_MODE_EXPERIMENTAL_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The UEFI secure boot mode is not supported with the selected template. ähnelt.
-        /// </summary>
-        public static string GUEFI_SECUREBOOT_MODE_UNSUPPORTED_WARNING {
-            get {
-                return ResourceManager.GetString("GUEFI_SECUREBOOT_MODE_UNSUPPORTED_WARNING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This version of [XenCenter] is out of date and cannot connect to {0}.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This version of {0} can only connect to {1}, and {2} or greater versions. It cannot connect to {3}.
         ///
-        ///You can get a compatible version of [XenCenter] from the following location: ähnelt.
+        ///You can get a compatible version of {0} from the following location: ähnelt.
+        /// </summary>
+        public static string GUI_NOT_COMPATIBLE {
+            get {
+                return ResourceManager.GetString("GUI_NOT_COMPATIBLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die This version of {0} is out of date and cannot connect to {1}.
+        ///
+        ///You can get a compatible version of {0} from the following location: ähnelt.
         /// </summary>
         public static string GUI_OUT_OF_DATE {
             get {
@@ -17827,16 +18935,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; cannot be placed in Maintenance Mode because it is the master of an HA-enabled pool. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; cannot be placed in Maintenance Mode because it is the coordinator of an HA-enabled pool. ähnelt.
         /// </summary>
-        public static string HA_CANNOT_EVACUATE_MASTER {
+        public static string HA_CANNOT_EVACUATE_COORDINATOR {
             get {
-                return ResourceManager.GetString("HA_CANNOT_EVACUATE_MASTER", resourceCulture);
+                return ResourceManager.GetString("HA_CANNOT_EVACUATE_COORDINATOR", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die HA and WLB check ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die HA check ähnelt.
         /// </summary>
         public static string HA_CHECK_DESCRIPTION {
             get {
@@ -17994,15 +19102,6 @@ namespace XenAdmin {
         public static string HA_DISABLE_QUERY {
             get {
                 return ResourceManager.GetString("HA_DISABLE_QUERY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] High Availability (HA) allows virtual machines to automatically be restarted in the event of an underlying hardware failure or loss of an individual server. HA is enabled for &apos;{0}&apos;. ähnelt.
-        /// </summary>
-        public static string HA_EDIT_DIALOG_BLURB {
-            get {
-                return ResourceManager.GetString("HA_EDIT_DIALOG_BLURB", resourceCulture);
             }
         }
         
@@ -18385,20 +19484,22 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die HA is not currently enabled for pool &apos;{0}&apos;.
+        ///
+        ///Click Configure HA to enable HA for this pool and allow your virtual machines to be automatically restarted in the event of unexpected server failure. ähnelt.
+        /// </summary>
+        public static string HA_PANEL_BLURB {
+            get {
+                return ResourceManager.GetString("HA_PANEL_BLURB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die HA restart priority ähnelt.
         /// </summary>
         public static string HA_RESTART_PRIORITY {
             get {
                 return ResourceManager.GetString("HA_RESTART_PRIORITY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Your changes to HA settings for pool &apos;{0}&apos; may not take effect because not all servers in the pool are reachable. Ensure that all servers in the pool are reachable and then apply the changes again. ähnelt.
-        /// </summary>
-        public static string HA_SAVE_SETTINGS_FAILED_DEAD_HOSTS {
-            get {
-                return ResourceManager.GetString("HA_SAVE_SETTINGS_FAILED_DEAD_HOSTS", resourceCulture);
             }
         }
         
@@ -18457,15 +19558,6 @@ namespace XenAdmin {
         public static string HA_TAB_CONFIGURED_BLURB {
             get {
                 return ResourceManager.GetString("HA_TAB_CONFIGURED_BLURB", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die HA is currently enabled for pool &apos;{0}&apos;. ähnelt.
-        /// </summary>
-        public static string HA_TAB_CONFIGURED_UNLICENSED {
-            get {
-                return ResourceManager.GetString("HA_TAB_CONFIGURED_UNLICENSED", resourceCulture);
             }
         }
         
@@ -18533,17 +19625,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die HA is not currently enabled for pool &apos;{0}&apos;.
-        ///
-        ///Click Configure HA to enable HA for this pool and allow your virtual machines to be automatically restarted in the event of unexpected server failure. ähnelt.
-        /// </summary>
-        public static string HAPANEL_BLURB {
-            get {
-                return ResourceManager.GetString("HAPANEL_BLURB", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Has any custom field ähnelt.
         /// </summary>
         public static string HAS_CUSTOM_FIELDS {
@@ -18567,195 +19648,6 @@ namespace XenAdmin {
         public static string HAWIZARD_ASSIGNPRIORITIESPAGE_TITLE {
             get {
                 return ResourceManager.GetString("HAWIZARD_ASSIGNPRIORITIESPAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die HealthCheck ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Authentication with [Citrix] Insight Services failed. See the application log files for more information. ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_AUTHENTICATION_FAILED {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_AUTHENTICATION_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid user name or password. Please try again. ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_AUTHENTICATION_INVALID_CREDENTIALS {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_AUTHENTICATION_INVALID_CREDENTIALS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_CIS_POLICY_URL {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_CIS_POLICY_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_CITRIX_POLICY_URL {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_CITRIX_POLICY_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The information that Health Check uploads to [Citrix] Insight Services will be used for troubleshooting and diagnostics support purposes, as well as to improve the quality, reliability, and performance of our products subject to the [Citrix] Insight Services Policy at {0} and [Citrix] Privacy Policy at {1}. ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_PRIVACY_POLICY {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_PRIVACY_POLICY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This user is not authorized to access this server. ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_USER_HAS_NO_PERMISSION_TO_CONNECT {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_USER_HAS_NO_PERMISSION_TO_CONNECT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This user is not authorized to perform Health Check operations. ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_USER_NOT_AUTHORIZED {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_USER_NOT_AUTHORIZED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Authentication with [Citrix] Insight Services is required in order to enable this feature. [XenCenter] detected a previous successful authentication for one of other connected pools. You can choose to re-use it or authenticate again. ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_AUTHENTICATION_RUBRIC_EXISTING_TOKEN {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_AUTHENTICATION_RUBRIC_EXISTING_TOKEN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Authentication with [Citrix] Insight Services is required in order to enable this feature. Please register by providing MyCitrix credentials (see {0}). These credentials will only be used to obtain an upload token and will not be stored on this machine or on your server. ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_AUTHENTICATION_RUBRIC_NO_TOKEN {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_AUTHENTICATION_RUBRIC_NO_TOKEN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die OK, Enable Health Check ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_ENROLLMENT_CONFIRMATION_BUTTON_LABEL {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_ENROLLMENT_CONFIRMATION_BUTTON_LABEL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Health Check Enrollment - {0} ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_ENROLLMENT_TITLE {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_ENROLLMENT_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Request an additional upload now ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_ON_DEMAND_REQUEST {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_ON_DEMAND_REQUEST", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Additional upload requested at {0} ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_ON_DEMAND_REQUESTED_AT {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_ON_DEMAND_REQUESTED_AT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upload a Health Check report every {0} weeks on {1} starting at {2} ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_SCHEDULE_DESCRIPTION {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_SCHEDULE_DESCRIPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} issues detected ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_STATUS_ISSUES_FOUND {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_STATUS_ISSUES_FOUND", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die No issues detected ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_STATUS_NO_ISSUES_FOUND {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_STATUS_NO_ISSUES_FOUND", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die No report uploaded yet ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_STATUS_NO_UPLOAD_YET {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_STATUS_NO_UPLOAD_YET", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Analysis not yet available ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_STATUS_NOT_AVAILABLE_YET {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_STATUS_NOT_AVAILABLE_YET", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Health Check not enabled ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_STATUS_NOT_ENROLLED {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_STATUS_NOT_ENROLLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die 1 issue detected ähnelt.
-        /// </summary>
-        public static string HEALTHCHECK_STATUS_ONE_ISSUE_FOUND {
-            get {
-                return ResourceManager.GetString("HEALTHCHECK_STATUS_ONE_ISSUE_FOUND", resourceCulture);
             }
         }
         
@@ -19021,7 +19913,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find host in [XenCenter]&apos;s cache. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find host in {0}&apos;s cache. ähnelt.
         /// </summary>
         public static string HOST_GONE {
             get {
@@ -19075,7 +19967,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to [XenServer] {1} and above, the Control Domain memory on {0} will be increased. 
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to {0} and above, the Control Domain memory on {1} will be increased. 
         ///
         ///This might result in failure to migrate VMs to this server during the RPU or to accommodate after the upgrade all the VMs that are currently residing on this server. ähnelt.
         /// </summary>
@@ -19115,7 +20007,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The Control Domain memory on {0} will be increased when upgrading to [XenServer] {1}. 
+        ///   Sucht eine lokalisierte Zeichenfolge, die The Control Domain memory on {0} will be increased when upgrading to {1} {2}. 
         ///
         ///This might result in failure to migrate VMs to this server during the RPU or to accommodate after the upgrade all the VMs that are currently residing on this server. ähnelt.
         /// </summary>
@@ -19324,15 +20216,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You must reboot your server &apos;{0}&apos; to complete the restore process. ähnelt.
-        /// </summary>
-        public static string HOST_REBOOT_REQUIRED {
-            get {
-                return ResourceManager.GetString("HOST_REBOOT_REQUIRED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade failed. The server rebooted with the same version. ähnelt.
         /// </summary>
         public static string HOST_REBOOTED_SAME_VERSION {
@@ -19423,6 +20306,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The server is unreachable. ähnelt.
+        /// </summary>
+        public static string HOST_UNREACHABLE {
+            get {
+                return ResourceManager.GetString("HOST_UNREACHABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Host &apos;{0}&apos;: ähnelt.
         /// </summary>
         public static string HOST_X {
@@ -19441,7 +20333,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; entering maintenance mode... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; is entering maintenance mode... ähnelt.
         /// </summary>
         public static string HOSTACTION_EVACUATING {
             get {
@@ -19459,7 +20351,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; exiting maintenance mode... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; is exiting maintenance mode... ähnelt.
         /// </summary>
         public static string HOSTACTION_EXITING_MAINTENANCE_MODE {
             get {
@@ -19486,20 +20378,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Nominated server {0} as new master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Nominated server {0} as new coordinator ähnelt.
         /// </summary>
-        public static string HOSTACTION_TRANSITIONED_NEW_MASTER {
+        public static string HOSTACTION_TRANSITIONED_NEW_COORDINATOR {
             get {
-                return ResourceManager.GetString("HOSTACTION_TRANSITIONED_NEW_MASTER", resourceCulture);
+                return ResourceManager.GetString("HOSTACTION_TRANSITIONED_NEW_COORDINATOR", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Nominating server {0} as new master... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Nominating server {0} as new coordinator... ähnelt.
         /// </summary>
-        public static string HOSTACTION_TRANSITIONING_NEW_MASTER {
+        public static string HOSTACTION_TRANSITIONING_NEW_COORDINATOR {
             get {
-                return ResourceManager.GetString("HOSTACTION_TRANSITIONING_NEW_MASTER", resourceCulture);
+                return ResourceManager.GetString("HOSTACTION_TRANSITIONING_NEW_COORDINATOR", resourceCulture);
             }
         }
         
@@ -19684,6 +20576,151 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Post-update tasks to be performed:
+        ///{0} ähnelt.
+        /// </summary>
+        public static string HOTFIX_POST_UPDATE_ACTIONS {
+            get {
+                return ResourceManager.GetString("HOTFIX_POST_UPDATE_ACTIONS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server will be live patched. If live patch fails, a server reboot will be required. ähnelt.
+        /// </summary>
+        public static string HOTFIX_POST_UPDATE_LIVEPATCH_ACTIONS {
+            get {
+                return ResourceManager.GetString("HOTFIX_POST_UPDATE_LIVEPATCH_ACTIONS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server will be evacuated prior to installing updates ähnelt.
+        /// </summary>
+        public static string HOTFIX_PRE_UPDATE_ACTIONS {
+            get {
+                return ResourceManager.GetString("HOTFIX_PRE_UPDATE_ACTIONS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} packages will be updated ähnelt.
+        /// </summary>
+        public static string HOTFIX_RPMS_TO_INSTALL {
+            get {
+                return ResourceManager.GetString("HOTFIX_RPMS_TO_INSTALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} bug fixes ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_BUG_FIX_MANY {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_BUG_FIX_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 bug fix ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_BUG_FIX_ONE {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_BUG_FIX_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} foundational changes ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_FOUNDATIONAL_MANY {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_FOUNDATIONAL_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 foundational change ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_FOUNDATIONAL_ONE {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_FOUNDATIONAL_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} improvements ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_IMPROVEMENT_MANY {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_IMPROVEMENT_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 improvement ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_IMPROVEMENT_ONE {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_IMPROVEMENT_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} new features ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_NEW_FEATURE_MANY {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_NEW_FEATURE_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 new feature ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_NEW_FEATURE_ONE {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_NEW_FEATURE_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} preview features ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_PREVIEW_FEATURE_MANY {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_PREVIEW_FEATURE_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 preview feature ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_PREVIEW_FEATURE_ONE {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_PREVIEW_FEATURE_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} security fixes ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_SECURITY_FIX_MANY {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_SECURITY_FIX_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die 1 security fix ähnelt.
+        /// </summary>
+        public static string HOTFIX_TYPE_SECURITY_FIX_ONE {
+            get {
+                return ResourceManager.GetString("HOTFIX_TYPE_SECURITY_FIX_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Hourly; at {0} minutes past each hour ähnelt.
         /// </summary>
         public static string HOURLY_SCHEDULE_FORMAT {
@@ -19716,6 +20753,15 @@ namespace XenAdmin {
         public static string IGNORE_BUTTON_LABEL {
             get {
                 return ResourceManager.GetString("IGNORE_BUTTON_LABEL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The following characters are invalid: {0} ähnelt.
+        /// </summary>
+        public static string ILLEGAL_CHARACTER_ERROR_MESSAGE {
+            get {
+                return ResourceManager.GetString("ILLEGAL_CHARACTER_ERROR_MESSAGE", resourceCulture);
             }
         }
         
@@ -19792,6 +20838,33 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preparing to import appliance &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string IMPORT_APPLIANCE_PREPARING {
+            get {
+                return ResourceManager.GetString("IMPORT_APPLIANCE_PREPARING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Creating appliance &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string IMPORT_CREATING_APPLIANCE {
+            get {
+                return ResourceManager.GetString("IMPORT_CREATING_APPLIANCE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Creating VM &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string IMPORT_CREATING_VM {
+            get {
+                return ResourceManager.GetString("IMPORT_CREATING_VM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Import VM &apos;{0}&apos; from Disk Image to &apos;{1}&apos; ähnelt.
         /// </summary>
         public static string IMPORT_DISK_IMAGE {
@@ -19815,15 +20888,6 @@ namespace XenAdmin {
         public static string IMPORT_EULA_PAGE_TITLE {
             get {
                 return ResourceManager.GetString("IMPORT_EULA_PAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The server could not complete the import due to an unknown error. ähnelt.
-        /// </summary>
-        public static string IMPORT_GENERIC_FAIL {
-            get {
-                return ResourceManager.GetString("IMPORT_GENERIC_FAIL", resourceCulture);
             }
         }
         
@@ -20008,15 +21072,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Path does not exist. ähnelt.
-        /// </summary>
-        public static string IMPORT_SELECT_APPLIANCE_PAGE_ERROR_NONE_EXIST_PATH {
-            get {
-                return ResourceManager.GetString("IMPORT_SELECT_APPLIANCE_PAGE_ERROR_NONE_EXIST_PATH", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The selected file is not a valid appliance file. ähnelt.
         /// </summary>
         public static string IMPORT_SELECT_APPLIANCE_PAGE_ERROR_NOT_SUPPORTED {
@@ -20164,7 +21219,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die All import options (*.ovf;*.ova;*.ova.gz;*.vhd;*.vmdk;*.xva;*.xva.gz;ova.xml)|*.ovf;*.ova;*.ova.gz;*.vhd;*.vmdk;*.xva;*.xva.gz;ova.xml|OVF/OVA Package files (*.ovf;*.ova;*.ova.gz)|*.ovf;*.ova*;*.ova.gz|Virtual Hard Disk images (*.vhd;*.vmdk;)|*.vhd;*.vmdk;|XVA files (*.xva;*.xva.gz)|*.xva;*.xva.gz|XVA Version 1|ova.xml ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die All import options (*.ovf;*.ova;*.ova.gz;*.vhd;*.vmdk;*.xva;*.xva.gz)|*.ovf;*.ova;*.ova.gz;*.vhd;*.vmdk;*.xva;*.xva.gz|OVF/OVA Package files (*.ovf;*.ova;*.ova.gz)|*.ovf;*.ova*;*.ova.gz|Virtual Hard Disk images (*.vhd;*.vmdk;)|*.vhd;*.vmdk;|XVA files (*.xva;*.xva.gz)|*.xva;*.xva.gz ähnelt.
         /// </summary>
         public static string IMPORT_SOURCE_PAGE_FILETYPES {
             get {
@@ -20218,7 +21273,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The [XenServer] Template that you are attempting to import already exists in the selected pool. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} Template that you are attempting to import already exists in the selected pool. ähnelt.
         /// </summary>
         public static string IMPORT_TEMPLATE_ALREADY_EXISTS {
             get {
@@ -20353,11 +21408,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Importing &apos;{0}&apos; ({1} of {2})... ähnelt.
+        /// </summary>
+        public static string IMPORT_VDI {
+            get {
+                return ResourceManager.GetString("IMPORT_VDI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preparing VDI for &apos;{0}&apos;... ähnelt.
+        /// </summary>
+        public static string IMPORT_VDI_PREPARE {
+            get {
+                return ResourceManager.GetString("IMPORT_VDI_PREPARE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Configure storage for the new VM ähnelt.
         /// </summary>
         public static string IMPORT_VM_CONFIGURE_STORAGE {
             get {
                 return ResourceManager.GetString("IMPORT_VM_CONFIGURE_STORAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The appliance contains {0} VM(s) with more than {1} vCPUs. Where a VM may be running actively hostile privileged code {2} recommends that the vCPU limit is set to {1} to prevent impact on system availability. ähnelt.
+        /// </summary>
+        public static string IMPORT_VM_CPUS_COUNT_UNTRUSTED_WARNING {
+            get {
+                return ResourceManager.GetString("IMPORT_VM_CPUS_COUNT_UNTRUSTED_WARNING", resourceCulture);
             }
         }
         
@@ -20452,7 +21534,34 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Import VM(s) to: ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die At least one VM in the imported appliance requires a minimum of {0} vCPUs, but there are servers with insufficient physical CPUs ({1}). Ensure that the VMs are mapped correctly or you will not be able to start the appliance on the selected server. ähnelt.
+        /// </summary>
+        public static string IMPORT_WIZARD_CPUS_COUNT_MISMATCH_HOST {
+            get {
+                return ResourceManager.GetString("IMPORT_WIZARD_CPUS_COUNT_MISMATCH_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die At least one VM in the imported appliance requires a minimum of {0} vCPUs, while the maximum number of physical CPUs in the selected servers is {1}. You will not be able to start all the VMs in the appliance with the current selection. ähnelt.
+        /// </summary>
+        public static string IMPORT_WIZARD_CPUS_COUNT_MISMATCH_HOST_ALL {
+            get {
+                return ResourceManager.GetString("IMPORT_WIZARD_CPUS_COUNT_MISMATCH_HOST_ALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die At least one VM in the imported appliance requires a minimum of {0} vCPUs, but not all servers have sufficient physical CPUs. You will not be able to start a VM if you place its disks in the local storage of a server with insufficient physical CPUs. ähnelt.
+        /// </summary>
+        public static string IMPORT_WIZARD_CPUS_COUNT_MISMATCH_POOL {
+            get {
+                return ResourceManager.GetString("IMPORT_WIZARD_CPUS_COUNT_MISMATCH_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Import to: ähnelt.
         /// </summary>
         public static string IMPORT_WIZARD_DESTINATION_DESTINATION {
             get {
@@ -20461,7 +21570,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Choose the pool or standalone server where you want to place the VM(s). If required, you can also specify a Home Server within the selected pool for each imported VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Choose the pool or standalone server where you want to import the VM(s). ähnelt.
         /// </summary>
         public static string IMPORT_WIZARD_DESTINATION_INSTRUCTIONS {
             get {
@@ -20470,7 +21579,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Assign imported VM(s) to a home server: ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you want to place the disks of a VM on local storage, specify the server below. ähnelt.
         /// </summary>
         public static string IMPORT_WIZARD_DESTINATION_TABLE_INTRO {
             get {
@@ -20502,6 +21611,24 @@ namespace XenAdmin {
         public static string IMPORT_WIZARD_FAILED_UNCOMPRESS {
             get {
                 return ResourceManager.GetString("IMPORT_WIZARD_FAILED_UNCOMPRESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The imported appliance requires a minimum of {0} of memory, while the available memory on the server is {1}. You will not be able to start the VM on the selected server. ähnelt.
+        /// </summary>
+        public static string IMPORT_WIZARD_INSUFFICIENT_MEMORY_HOST {
+            get {
+                return ResourceManager.GetString("IMPORT_WIZARD_INSUFFICIENT_MEMORY_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The imported appliance requires a minimum of {0} of memory, while the maximum available memory on the pool is {1}. You will not be able to start the VM on the selected pool. ähnelt.
+        /// </summary>
+        public static string IMPORT_WIZARD_INSUFFICIENT_MEMORY_POOL {
+            get {
+                return ResourceManager.GetString("IMPORT_WIZARD_INSUFFICIENT_MEMORY_POOL", resourceCulture);
             }
         }
         
@@ -20542,7 +21669,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Uncompressing file {0}, please wait... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Uncompressing file {0} ({1} done)... ähnelt.
         /// </summary>
         public static string IMPORT_WIZARD_UNCOMPRESSING {
             get {
@@ -20587,15 +21714,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Importing VMs... ähnelt.
-        /// </summary>
-        public static string IMPORTING_VMS {
-            get {
-                return ResourceManager.GetString("IMPORTING_VMS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Importing VM from backup file ähnelt.
         /// </summary>
         public static string IMPORTVM_DESCRIP {
@@ -20614,29 +21732,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Importing VM... ähnelt.
-        /// </summary>
-        public static string IMPORTVM_IMPORTING {
-            get {
-                return ResourceManager.GetString("IMPORTVM_IMPORTING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Preparing to Import VM ähnelt.
         /// </summary>
         public static string IMPORTVM_PREP {
             get {
                 return ResourceManager.GetString("IMPORTVM_PREP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Starting VM... ähnelt.
-        /// </summary>
-        public static string IMPORTVM_STARTING {
-            get {
-                return ResourceManager.GetString("IMPORTVM_STARTING", resourceCulture);
             }
         }
         
@@ -20664,6 +21764,15 @@ namespace XenAdmin {
         public static string IMPORTVM_UPDATING_VM {
             get {
                 return ResourceManager.GetString("IMPORTVM_UPDATING_VM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Uploading &apos;{0}&apos; to &apos;{1}&apos; ({2}% done)... ähnelt.
+        /// </summary>
+        public static string IMPORTVM_UPLOADING {
+            get {
+                return ResourceManager.GetString("IMPORTVM_UPLOADING", resourceCulture);
             }
         }
         
@@ -20713,7 +21822,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server version is incompatible with [XenCenter]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server version is incompatible with {0}. ähnelt.
         /// </summary>
         public static string INCOMPATIBLE_PRODUCTS {
             get {
@@ -20767,6 +21876,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Indeterminable ähnelt.
+        /// </summary>
+        public static string INDETERMINABLE {
+            get {
+                return ResourceManager.GetString("INDETERMINABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Disk snapshots are not currently available for this VM ähnelt.
         /// </summary>
         public static string INFO_DISK_MODE {
@@ -20794,7 +21912,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disk and memory snapshots need [Citrix VM Tools] to be installed ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disk and memory snapshots need {0} to be installed ähnelt.
         /// </summary>
         public static string INFO_DISKMEMORY_MODE_NO_TOOLS {
             get {
@@ -20830,7 +21948,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Quiesced snapshots need [Citrix VM Tools] to be installed ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Quiesced snapshots need {0} to be installed ähnelt.
         /// </summary>
         public static string INFO_QUIESCE_MODE_NO_TOOLS {
             get {
@@ -20920,7 +22038,52 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Install [Citrix VM Tools] ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Install certificate... ähnelt.
+        /// </summary>
+        public static string INSTALL_SERVER_CERTIFICATE_ACTION_LINK {
+            get {
+                return ResourceManager.GetString("INSTALL_SERVER_CERTIFICATE_ACTION_LINK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing server certificate... ähnelt.
+        /// </summary>
+        public static string INSTALL_SERVER_CERTIFICATE_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("INSTALL_SERVER_CERTIFICATE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot install a server certificate when HA is on. ähnelt.
+        /// </summary>
+        public static string INSTALL_SERVER_CERTIFICATE_HA {
+            get {
+                return ResourceManager.GetString("INSTALL_SERVER_CERTIFICATE_HA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Install certificate... ähnelt.
+        /// </summary>
+        public static string INSTALL_SERVER_CERTIFICATE_MENU {
+            get {
+                return ResourceManager.GetString("INSTALL_SERVER_CERTIFICATE_MENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing certificate on server {0}... ähnelt.
+        /// </summary>
+        public static string INSTALL_SERVER_CERTIFICATE_TITLE {
+            get {
+                return ResourceManager.GetString("INSTALL_SERVER_CERTIFICATE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Install {0} ähnelt.
         /// </summary>
         public static string INSTALL_XENSERVER_TOOLS {
             get {
@@ -20929,20 +22092,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Install [Citrix VM Tools]... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Install {0} ähnelt.
         /// </summary>
-        public static string INSTALL_XENSERVER_TOOLS_DOTS {
+        public static string INSTALL_XENSERVER_TOOLS_BUTTON {
             get {
-                return ResourceManager.GetString("INSTALL_XENSERVER_TOOLS_DOTS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Install [Citrix VM Tools] ähnelt.
-        /// </summary>
-        public static string INSTALL_XS_TOOLS {
-            get {
-                return ResourceManager.GetString("INSTALL_XS_TOOLS", resourceCulture);
+                return ResourceManager.GetString("INSTALL_XENSERVER_TOOLS_BUTTON", resourceCulture);
             }
         }
         
@@ -20965,7 +22119,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the [Citrix VM Tools] install disc. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the {0} install disk. ähnelt.
         /// </summary>
         public static string INSTALLTOOLS_COULDNOTFIND_WIN {
             get {
@@ -20974,7 +22128,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] installation launched. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} installation launched. ähnelt.
         /// </summary>
         public static string INSTALLTOOLS_DONE {
             get {
@@ -20983,7 +22137,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] are already installed on this VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} are already installed on this VM. ähnelt.
         /// </summary>
         public static string INSTALLTOOLS_EXIST {
             get {
@@ -20992,7 +22146,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Launching [Citrix VM Tools] installation. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Read more about installing {0} ähnelt.
+        /// </summary>
+        public static string INSTALLTOOLS_READ_MORE {
+            get {
+                return ResourceManager.GetString("INSTALLTOOLS_READ_MORE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Launching {0} installation. ähnelt.
         /// </summary>
         public static string INSTALLTOOLS_STARTING {
             get {
@@ -21001,7 +22164,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Installing [Citrix VM Tools] on VM {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing {0} on VM {1} ähnelt.
         /// </summary>
         public static string INSTALLTOOLS_TITLE {
             get {
@@ -21010,16 +22173,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Creating VM &apos;{0}&apos; from template &apos;{1}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Created VM &apos;{0}&apos; ähnelt.
         /// </summary>
-        public static string INSTANT_VM_CREATE_DESCRIPTION {
+        public static string INSTANT_VM_CREATE_DESC_COMPLETED {
             get {
-                return ResourceManager.GetString("INSTANT_VM_CREATE_DESCRIPTION", resourceCulture);
+                return ResourceManager.GetString("INSTANT_VM_CREATE_DESC_COMPLETED", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Instant VM create ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Creating VM quickly from template &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string INSTANT_VM_CREATE_TITLE {
             get {
@@ -21073,7 +22236,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid host name ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid disk size ähnelt.
+        /// </summary>
+        public static string INVALID_DISK_SIZE {
+            get {
+                return ResourceManager.GetString("INVALID_DISK_SIZE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid target host. ähnelt.
         /// </summary>
         public static string INVALID_HOST {
             get {
@@ -21082,7 +22254,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid disk size ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid number ähnelt.
         /// </summary>
         public static string INVALID_NUMBER {
             get {
@@ -21263,18 +22435,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Vendor: {0}
-        ///Serial Number: {1}
-        ///SCSI ID: {2}
-        ///Size: {3} ähnelt.
-        /// </summary>
-        public static string ISCSI_DIALOG_SR_DETAILS_FOR_FIBRECHANNEL {
-            get {
-                return ResourceManager.GetString("ISCSI_DIALOG_SR_DETAILS_FOR_FIBRECHANNEL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Interrogation failed -- call succeeded! ähnelt.
         /// </summary>
         public static string ISCSI_FAIL {
@@ -21289,15 +22449,6 @@ namespace XenAdmin {
         public static string ISCSI_SHOULD_NO_BE_CREATED {
             get {
                 return ResourceManager.GetString("ISCSI_SHOULD_NO_BE_CREATED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die StorageLink technology ähnelt.
-        /// </summary>
-        public static string ISL_SR {
-            get {
-                return ResourceManager.GetString("ISL_SR", resourceCulture);
             }
         }
         
@@ -21428,7 +22579,61 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Learn more ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Data merge for VDI &apos;{0}&apos; of VM &apos;{1}&apos; has completed. ähnelt.
+        /// </summary>
+        public static string LEAF_COALESCE_COMPLETED_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("LEAF_COALESCE_COMPLETED_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Data merge for VM {0} has completed. ähnelt.
+        /// </summary>
+        public static string LEAF_COALESCE_COMPLETED_TITLE {
+            get {
+                return ResourceManager.GetString("LEAF_COALESCE_COMPLETED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Data merge for VDI &apos;{0}&apos; of VM &apos;{1}&apos; has failed. ähnelt.
+        /// </summary>
+        public static string LEAF_COALESCE_FAILED_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("LEAF_COALESCE_FAILED_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Data merge for VM {0} has failed. ähnelt.
+        /// </summary>
+        public static string LEAF_COALESCE_FAILED_TITLE {
+            get {
+                return ResourceManager.GetString("LEAF_COALESCE_FAILED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Data merge for VDI &apos;{0}&apos; of VM &apos;{1}&apos; has started, performance may be reduced. ähnelt.
+        /// </summary>
+        public static string LEAF_COALESCE_START_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("LEAF_COALESCE_START_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Data merge for VM {0} has started. ähnelt.
+        /// </summary>
+        public static string LEAF_COALESCE_START_TITLE {
+            get {
+                return ResourceManager.GetString("LEAF_COALESCE_START_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Learn more... ähnelt.
         /// </summary>
         public static string LEARN_MORE {
             get {
@@ -21473,7 +22678,34 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix] Virtual &amp;Apps and Desktops ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Virtual Apps and Desktops {0} Cloud features enabled ähnelt.
+        /// </summary>
+        public static string LICENSE_DESKTOP_CLOUD_FEATURES_ENABLED {
+            get {
+                return ResourceManager.GetString("LICENSE_DESKTOP_CLOUD_FEATURES_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Virtual Apps and Desktops features enabled ähnelt.
+        /// </summary>
+        public static string LICENSE_DESKTOP_FEATURES_ENABLED {
+            get {
+                return ResourceManager.GetString("LICENSE_DESKTOP_FEATURES_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Virtual Apps and Desktops Premium features enabled ähnelt.
+        /// </summary>
+        public static string LICENSE_DESKTOP_PLUS_FEATURES_ENABLED {
+            get {
+                return ResourceManager.GetString("LICENSE_DESKTOP_PLUS_FEATURES_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Virtual &amp;Apps and Desktops ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_DESKTOP {
             get {
@@ -21482,7 +22714,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix] Virtual Apps and Desktops [Citrix] &amp;Cloud ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Virtual Apps and Desktops {0} &amp;Cloud ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_DESKTOP_CLOUD {
             get {
@@ -21491,7 +22723,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die XenApp/XenDesktop [Citrix] &amp;Cloud ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die XenApp/XenDesktop {0} &amp;Cloud ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_DESKTOP_CLOUD_LEGACY {
             get {
@@ -21509,7 +22741,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix] Virtual Apps and Desktops &amp;Premium ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Virtual Apps and Desktops &amp;Premium ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_DESKTOP_PLUS {
             get {
@@ -21527,7 +22759,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer product] P&amp;remium Per-Socket ({0} required) ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} P&amp;remium Per-Socket ({1} required) ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_ENTERPRISE_PERSOCKET {
             get {
@@ -21536,7 +22768,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {1} E&amp;nterprise Per-Socket ({0} required) ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} E&amp;nterprise Per-Socket ({1} required) ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_ENTERPRISE_PERSOCKET_LEGACY {
             get {
@@ -21545,7 +22777,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer product] Pr&amp;emium Per-User ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Pr&amp;emium Per-User ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_ENTERPRISE_PERUSER {
             get {
@@ -21563,25 +22795,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer product] Per-&amp;Socket ({0} required) ähnelt.
-        /// </summary>
-        public static string LICENSE_EDITION_PERSOCKET {
-            get {
-                return ResourceManager.GetString("LICENSE_EDITION_PERSOCKET", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {1} Per-&amp;Socket ({0} required) ähnelt.
-        /// </summary>
-        public static string LICENSE_EDITION_PERSOCKET_LEGACY {
-            get {
-                return ResourceManager.GetString("LICENSE_EDITION_PERSOCKET_LEGACY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer product] &amp;Standard Per-Socket ({0} required) ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} &amp;Standard Per-Socket ({1} required) ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_STANDARD_PERSOCKET {
             get {
@@ -21590,7 +22804,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {1} &amp;Standard Per-Socket ({0} required) ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} &amp;Standard Per-Socket ({1} required) ähnelt.
         /// </summary>
         public static string LICENSE_EDITION_STANDARD_PERSOCKET_LEGACY {
             get {
@@ -21599,20 +22813,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer product] for [Citrix] Virtual &amp;Desktops ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support ähnelt.
         /// </summary>
-        public static string LICENSE_EDITION_XENDESKTOP {
+        public static string LICENSE_ELIGIBLE_FOR_SUPPORT {
             get {
-                return ResourceManager.GetString("LICENSE_EDITION_XENDESKTOP", resourceCulture);
+                return ResourceManager.GetString("LICENSE_ELIGIBLE_FOR_SUPPORT", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} for &amp;XenDesktop ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Premium features enabled ähnelt.
         /// </summary>
-        public static string LICENSE_EDITION_XENDESKTOP_LEGACY {
+        public static string LICENSE_ENTERPRISE_FEATURES_ENABLED {
             get {
-                return ResourceManager.GetString("LICENSE_EDITION_XENDESKTOP_LEGACY", resourceCulture);
+                return ResourceManager.GetString("LICENSE_ENTERPRISE_FEATURES_ENABLED", resourceCulture);
             }
         }
         
@@ -21707,15 +22921,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Online ähnelt.
-        /// </summary>
-        public static string LICENSE_EXPIRY_PURCHACE {
-            get {
-                return ResourceManager.GetString("LICENSE_EXPIRY_PURCHACE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die This field is disabled due to license restrictions on the server. ähnelt.
         /// </summary>
         public static string LICENSE_FIELD_DISABLED {
@@ -21770,11 +22975,65 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Active CSS ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_ACTIVE_CSS {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_ACTIVE_CSS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Active support agreement ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_ACTIVE_CSS_LONG {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_ACTIVE_CSS_LONG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Buy Licenses... ähnelt.
         /// </summary>
         public static string LICENSE_MANAGER_BUY_LICENSE_LINK_TEXT {
             get {
                 return ResourceManager.GetString("LICENSE_MANAGER_BUY_LICENSE_LINK_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Expired CSS ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_EXPIRED_CSS {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_EXPIRED_CSS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Expired support agreement ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_EXPIRED_CSS_LONG {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_EXPIRED_CSS_LONG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Licensed ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_LICENSED {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_LICENSED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Purchase Support... ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_PURCHASE_SUPPORT_LINK_TEXT {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_PURCHASE_SUPPORT_LINK_TEXT", resourceCulture);
             }
         }
         
@@ -21815,6 +23074,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trial edition ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_TRIAL_EDITION {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_TRIAL_EDITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trial license ähnelt.
+        /// </summary>
+        public static string LICENSE_MANAGER_TRIAL_LICENSE {
+            get {
+                return ResourceManager.GetString("LICENSE_MANAGER_TRIAL_LICENSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Never ähnelt.
         /// </summary>
         public static string LICENSE_NEVER {
@@ -21833,20 +23110,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Servers must be selected one at a time when activating Express [XenServer]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Servers must be selected one at a time when activating Express {0}. ähnelt.
         /// </summary>
         public static string LICENSE_NO_MULTISELECT_ACTIVATE {
             get {
                 return ResourceManager.GetString("LICENSE_NO_MULTISELECT_ACTIVATE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die When licensing servers earlier than {0}, you must select one server at a time. ähnelt.
-        /// </summary>
-        public static string LICENSE_NO_MULTISELECT_LICENSE {
-            get {
-                return ResourceManager.GetString("LICENSE_NO_MULTISELECT_LICENSE", resourceCulture);
             }
         }
         
@@ -21860,20 +23128,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Premium features enabled ähnelt.
+        /// </summary>
+        public static string LICENSE_PREMIUM_FEATURES_ENABLED {
+            get {
+                return ResourceManager.GetString("LICENSE_PREMIUM_FEATURES_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The license server {0} could not be reached. You have until {1} to reconnect to the license server. ähnelt.
         /// </summary>
         public static string LICENSE_REGULAR_GRACE_TOOLTIP {
             get {
                 return ResourceManager.GetString("LICENSE_REGULAR_GRACE_TOOLTIP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die License Restriction: Could not connect to {0}, a server with an XE Express License already exists ({1}) ähnelt.
-        /// </summary>
-        public static string LICENSE_RESTRICTION_MESSAGE {
-            get {
-                return ResourceManager.GetString("LICENSE_RESTRICTION_MESSAGE", resourceCulture);
             }
         }
         
@@ -21932,6 +23200,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Standard features only ähnelt.
+        /// </summary>
+        public static string LICENSE_STANDARD_FEATURES_ENABLED {
+            get {
+                return ResourceManager.GetString("LICENSE_STANDARD_FEATURES_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Status ähnelt.
         /// </summary>
         public static string LICENSE_STATUS {
@@ -21941,71 +23218,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support 
-        ///[Citrix] Virtual Apps and Desktops [Citrix] Cloud features enabled ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trial ähnelt.
         /// </summary>
-        public static string LICENSE_SUPPORT_AND_DESKTOP_CLOUD_FEATURES_ENABLED {
+        public static string LICENSE_TRIAL {
             get {
-                return ResourceManager.GetString("LICENSE_SUPPORT_AND_DESKTOP_CLOUD_FEATURES_ENABLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support 
-        ///[Citrix] Virtual Apps and Desktops features enabled ähnelt.
-        /// </summary>
-        public static string LICENSE_SUPPORT_AND_DESKTOP_FEATURES_ENABLED {
-            get {
-                return ResourceManager.GetString("LICENSE_SUPPORT_AND_DESKTOP_FEATURES_ENABLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support 
-        ///[Citrix] Virtual Apps and Desktops Premium features enabled ähnelt.
-        /// </summary>
-        public static string LICENSE_SUPPORT_AND_DESKTOP_PLUS_FEATURES_ENABLED {
-            get {
-                return ResourceManager.GetString("LICENSE_SUPPORT_AND_DESKTOP_PLUS_FEATURES_ENABLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support 
-        ///Premium features enabled ähnelt.
-        /// </summary>
-        public static string LICENSE_SUPPORT_AND_ENTERPRISE_FEATURES_ENABLED {
-            get {
-                return ResourceManager.GetString("LICENSE_SUPPORT_AND_ENTERPRISE_FEATURES_ENABLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support 
-        ///Premium features enabled ähnelt.
-        /// </summary>
-        public static string LICENSE_SUPPORT_AND_PREMIUM_FEATURES_ENABLED {
-            get {
-                return ResourceManager.GetString("LICENSE_SUPPORT_AND_PREMIUM_FEATURES_ENABLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Eligible for support 
-        ///Standard features only ähnelt.
-        /// </summary>
-        public static string LICENSE_SUPPORT_AND_STANDARD_FEATURES_ENABLED {
-            get {
-                return ResourceManager.GetString("LICENSE_SUPPORT_AND_STANDARD_FEATURES_ENABLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Activation keys can only be applied to one Express [XenServer] product at a time. ähnelt.
-        /// </summary>
-        public static string LICENSE_TOO_MANY_SERVERS_SELECTED_CAPTION {
-            get {
-                return ResourceManager.GetString("LICENSE_TOO_MANY_SERVERS_SELECTED_CAPTION", resourceCulture);
+                return ResourceManager.GetString("LICENSE_TRIAL", resourceCulture);
             }
         }
         
@@ -22078,24 +23295,6 @@ namespace XenAdmin {
         public static string LICENSE_YOUR_LICENCE_HAS_EXPIRED {
             get {
                 return ResourceManager.GetString("LICENSE_YOUR_LICENCE_HAS_EXPIRED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die One or more managed servers have expired. Either assign [XenServer] licenses, or activate Express [XenServer] products. ähnelt.
-        /// </summary>
-        public static string LICENSING_DIALOG_EXPIRED_TEXT {
-            get {
-                return ResourceManager.GetString("LICENSING_DIALOG_EXPIRED_TEXT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die One or more managed servers will expire soon. Either assign [XenServer] licenses, or activate Express [XenServer] products. ähnelt.
-        /// </summary>
-        public static string LICENSING_DIALOG_EXPIRING_SOON_TEXT {
-            get {
-                return ResourceManager.GetString("LICENSING_DIALOG_EXPIRING_SOON_TEXT", resourceCulture);
             }
         }
         
@@ -22386,20 +23585,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Maintenance Mode ähnelt.
-        /// </summary>
-        public static string MAINTENANCE_MODE {
-            get {
-                return ResourceManager.GetString("MAINTENANCE_MODE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Add... ähnelt.
         /// </summary>
         public static string MAINWINDOW_ADD_HOST {
             get {
                 return ResourceManager.GetString("MAINWINDOW_ADD_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certi&amp;ficate ähnelt.
+        /// </summary>
+        public static string MAINWINDOW_CERTIFICATE_CONTEXT_MENU_TEXT {
+            get {
+                return ResourceManager.GetString("MAINWINDOW_CERTIFICATE_CONTEXT_MENU_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Cert&amp;ificate ähnelt.
+        /// </summary>
+        public static string MAINWINDOW_CERTIFICATE_MENU_TEXT {
+            get {
+                return ResourceManager.GetString("MAINWINDOW_CERTIFICATE_MENU_TEXT", resourceCulture);
             }
         }
         
@@ -22442,7 +23650,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Do you want to remove &apos;{0}&apos; from pool &apos;{1}&apos;? 
         ///
-        ///This will permanently delete and reinitialize all local storage on &apos;{2}&apos;. Your data will be lost, and the server will be rebooted. ähnelt.
+        ///This will permanently delete and reinitialize all local storage on &apos;{2}&apos;. Your data will be lost, and the server will be rebooted. If Active Directory is configured for pool &apos;{1}&apos;, the server will be removed from the domain. ähnelt.
         /// </summary>
         public static string MAINWINDOW_CONFIRM_REMOVE_FROM_POOL {
             get {
@@ -22453,7 +23661,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Do you want to remove the selected servers from pool &apos;{0}&apos;?
         ///
-        ///This will permanently delete and reinitialize all local storage on the servers. Your data will be lost, and the servers will be rebooted. ähnelt.
+        ///This will permanently delete and reinitialize all local storage on the servers. Your data will be lost, and the servers will be rebooted. If Active Directory is configured for pool &apos;{0}&apos;, the servers will be removed from the domain. ähnelt.
         /// </summary>
         public static string MAINWINDOW_CONFIRM_REMOVE_FROM_POOL_MULTIPLE {
             get {
@@ -22606,15 +23814,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Ctrl+S ähnelt.
-        /// </summary>
-        public static string MAINWINDOW_CTRL_S {
-            get {
-                return ResourceManager.GetString("MAINWINDOW_CTRL_S", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Ctrl+Y ähnelt.
         /// </summary>
         public static string MAINWINDOW_CTRL_Y {
@@ -22741,7 +23940,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The [XenServer] license on &apos;{0}&apos; will expire in {1}. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} license on &apos;{1}&apos; will expire in {2}. ähnelt.
         /// </summary>
         public static string MAINWINDOW_EXPIRE_MESSAGE {
             get {
@@ -22750,7 +23949,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The [XenServer] license on &apos;{0}&apos; has expired. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} license on &apos;{1}&apos; has expired. ähnelt.
         /// </summary>
         public static string MAINWINDOW_EXPIRE_MESSAGE_TOO_LATE {
             get {
@@ -22858,7 +24057,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;High Availability... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;High Availability ähnelt.
         /// </summary>
         public static string MAINWINDOW_HIGH_AVAILABILITY {
             get {
@@ -22867,7 +24066,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Inst&amp;all [Citrix VM Tools]... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Inst&amp;all {0}... ähnelt.
         /// </summary>
         public static string MAINWINDOW_INSTALL_TOOLS {
             get {
@@ -23065,7 +24264,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Remo&amp;ve from [XenCenter] ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Remo&amp;ve from {0} ähnelt.
         /// </summary>
         public static string MAINWINDOW_REMOVE_HOST {
             get {
@@ -23083,7 +24282,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Remove Crash Dump &amp;Files ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Remove Crash Dump Fi&amp;les ähnelt.
         /// </summary>
         public static string MAINWINDOW_REMOVE_HOST_CRASHDUMPS_CONTEXT_MENU {
             get {
@@ -23160,15 +24359,6 @@ namespace XenAdmin {
         public static string MAINWINDOW_RESUME_ON_HOST {
             get {
                 return ResourceManager.GetString("MAINWINDOW_RESUME_ON_HOST", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Sa&amp;ve and Restore... ähnelt.
-        /// </summary>
-        public static string MAINWINDOW_SAVE_AND_RESTORE {
-            get {
-                return ResourceManager.GetString("MAINWINDOW_SAVE_AND_RESTORE", resourceCulture);
             }
         }
         
@@ -23380,6 +24570,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die v{0} &amp;Release Notes ähnelt.
+        /// </summary>
+        public static string MAINWINDOW_UPDATE_RELEASE {
+            get {
+                return ResourceManager.GetString("MAINWINDOW_UPDATE_RELEASE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die XVA Files (*.xva)|*.xva|All Files (*.*)|*.* ähnelt.
         /// </summary>
         public static string MAINWINDOW_XVA_BLURB {
@@ -23479,15 +24678,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Master ähnelt.
-        /// </summary>
-        public static string MASTER {
-            get {
-                return ResourceManager.GetString("MASTER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Max ähnelt.
         /// </summary>
         public static string MAX {
@@ -23533,15 +24723,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] ähnelt.
-        /// </summary>
-        public static string MEMORY_XEN {
-            get {
-                return ResourceManager.GetString("MEMORY_XEN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Export... ähnelt.
         /// </summary>
         public static string MENU_EXPORT {
@@ -23556,15 +24737,6 @@ namespace XenAdmin {
         public static string MENU_MIGRATE_TO_HOME_SERVER {
             get {
                 return ResourceManager.GetString("MENU_MIGRATE_TO_HOME_SERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: {1} ähnelt.
-        /// </summary>
-        public static string MESSAGE_ALERT_TITLE {
-            get {
-                return ResourceManager.GetString("MESSAGE_ALERT_TITLE", resourceCulture);
             }
         }
         
@@ -23614,7 +24786,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This will delete &apos;{0}&apos; permanently, destroying all data associated with it. Continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This will delete &apos;{0}&apos; permanently, making it unavailable to all resources in the pool and destroying all data associated with it. Do you want to continue? ähnelt.
         /// </summary>
         public static string MESSAGEBOX_DELETE_CUSTOM_FIELD {
             get {
@@ -23909,6 +25081,33 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificate verification is not enabled on &apos;{0}&apos;. Would you like to enable it now? ähnelt.
+        /// </summary>
+        public static string MESSAGEBOX_ENABLE_TLS_VERIFICATION_BLURB {
+            get {
+                return ResourceManager.GetString("MESSAGEBOX_ENABLE_TLS_VERIFICATION_BLURB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Yes, Enable certificate verification ähnelt.
+        /// </summary>
+        public static string MESSAGEBOX_ENABLE_TLS_VERIFICATION_BUTTON {
+            get {
+                return ResourceManager.GetString("MESSAGEBOX_ENABLE_TLS_VERIFICATION_BUTTON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Before enabling certificate verification ensure that there are no operations running in the pool, otherwise they will be interrupted. ähnelt.
+        /// </summary>
+        public static string MESSAGEBOX_ENABLE_TLS_VERIFICATION_WARNING {
+            get {
+                return ResourceManager.GetString("MESSAGEBOX_ENABLE_TLS_VERIFICATION_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Unable to connect to server &apos;{0}&apos;.
         ///{1}
         ///
@@ -24073,7 +25272,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The pool Master will become a standalone server, are you sure you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot remove the coordinator from the pool. ähnelt.
+        /// </summary>
+        public static string MESSAGEBOX_POOL_COORDINATOR_REMOVE {
+            get {
+                return ResourceManager.GetString("MESSAGEBOX_POOL_COORDINATOR_REMOVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The pool Coordinator will become a standalone server, are you sure you want to continue? ähnelt.
         /// </summary>
         public static string MESSAGEBOX_POOL_DELETE {
             get {
@@ -24082,11 +25290,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot remove the master from the pool. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You must eject all other pool members from the pool before you can delete the pool. ähnelt.
         /// </summary>
-        public static string MESSAGEBOX_POOL_MASTER_REMOVE {
+        public static string MESSAGEBOX_POOL_MEMBERS_EJECT {
             get {
-                return ResourceManager.GetString("MESSAGEBOX_POOL_MASTER_REMOVE", resourceCulture);
+                return ResourceManager.GetString("MESSAGEBOX_POOL_MEMBERS_EJECT", resourceCulture);
             }
         }
         
@@ -24102,7 +25310,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] - Error ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} - Error ähnelt.
         /// </summary>
         public static string MESSAGEBOX_PROGRAM_UNEXPECTED_TITLE {
             get {
@@ -24111,7 +25319,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Unable to reconnect to {0} . Server is unavailable. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Unable to reconnect to {0}. Server is unavailable. ähnelt.
         /// </summary>
         public static string MESSAGEBOX_RECONNECT_FAIL {
             get {
@@ -24193,15 +25401,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You must eject all slaves from the pool before you can delete the pool. ähnelt.
-        /// </summary>
-        public static string MESSAGEBOX_SLAVES_EJECT {
-            get {
-                return ResourceManager.GetString("MESSAGEBOX_SLAVES_EJECT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die This will delete the selected network interface permanently. Continue? ähnelt.
         /// </summary>
         public static string MESSAGEBOX_VIF_DELETE {
@@ -24247,7 +25446,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This VM may not migrate at the moment ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;{0}&apos; may not migrate at the moment. Please ensure you have installed {1} on it ähnelt.
         /// </summary>
         public static string MIGRATION_NOT_ALLOWED {
             get {
@@ -24256,7 +25455,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This VM may not migrate because the destination host does not have some of the CPU features that the VM is currently using ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;{0}&apos; may not migrate because the destination host does not have some of the CPU features that the VM is currently using ähnelt.
         /// </summary>
         public static string MIGRATION_NOT_ALLOWED_CPU_FEATURES {
             get {
@@ -24265,7 +25464,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This VM may not migrate; it is not on shared storage ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;{0}&apos; may not migrate because it is not on shared storage ähnelt.
         /// </summary>
         public static string MIGRATION_NOT_ALLOWED_NO_SHARED_STORAGE {
             get {
@@ -24274,11 +25473,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die A VM may not migrate outside of its pool ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;{0}&apos; may not migrate outside its pool ähnelt.
         /// </summary>
         public static string MIGRATION_NOT_ALLOWED_OUTSIDE_POOL {
             get {
                 return ResourceManager.GetString("MIGRATION_NOT_ALLOWED_OUTSIDE_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &apos;{0}&apos; may not migrate because it is on storage that doesn&apos;t support migration ähnelt.
+        /// </summary>
+        public static string MIGRATION_NOT_ALLOWED_USUPPORTED_SR {
+            get {
+                return ResourceManager.GetString("MIGRATION_NOT_ALLOWED_USUPPORTED_SR", resourceCulture);
             }
         }
         
@@ -24337,15 +25545,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Moving {0} canceled ähnelt.
-        /// </summary>
-        public static string MOVE_CANCELLED {
-            get {
-                return ResourceManager.GetString("MOVE_CANCELLED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Move object &apos;{0}&apos; to folder &apos;{1}&apos;... ähnelt.
         /// </summary>
         public static string MOVE_OBJECT_TO_FOLDER {
@@ -24391,7 +25590,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Moved ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Move completed. ähnelt.
         /// </summary>
         public static string MOVED {
             get {
@@ -24463,7 +25662,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die One or more paths to at least one of your storages has failed. Refer to the &quot;[XenServer product] Administrator&apos;s Guide&quot; for information about configuring storage multipathing. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die One or more paths to at least one of your storages has failed. Refer to the &quot;{0} Administrator&apos;s Guide&quot; for information about configuring storage multipathing. ähnelt.
         /// </summary>
         public static string MULTIPATH_FAILED {
             get {
@@ -24555,15 +25754,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} {1} ähnelt.
-        /// </summary>
-        public static string NAME_WITH_LOCATION {
-            get {
-                return ResourceManager.GetString("NAME_WITH_LOCATION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Select the SR to reattach or create a new SR ähnelt.
         /// </summary>
         public static string NETAPP_EQUAL_PAGE_TITLE {
@@ -24618,6 +25808,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Allowed VLAN range: {0} to {1} ähnelt.
+        /// </summary>
+        public static string NETW_DETAILS_VLAN_RANGE {
+            get {
+                return ResourceManager.GetString("NETW_DETAILS_VLAN_RANGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Configure the new network ähnelt.
         /// </summary>
         public static string NETW_EXTERNAL_DETAILS_TITLE {
@@ -24668,6 +25867,15 @@ namespace XenAdmin {
         public static string NETW_TYPE_SELECT_TITLE {
             get {
                 return ResourceManager.GetString("NETW_TYPE_SELECT_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die VLAN 0 will receive all traffic not on any other VLAN ähnelt.
+        /// </summary>
+        public static string NETW_VLAN_ZERO {
+            get {
+                return ResourceManager.GetString("NETW_VLAN_ZERO", resourceCulture);
             }
         }
         
@@ -24780,6 +25988,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die currently in use by a different operation ähnelt.
+        /// </summary>
+        public static string NETWORK_LOCKED {
+            get {
+                return ResourceManager.GetString("NETWORK_LOCKED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Network {0} ähnelt.
         /// </summary>
         public static string NETWORK_NAME {
@@ -24789,7 +26006,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Network Options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Network ähnelt.
         /// </summary>
         public static string NETWORK_OPTIONS {
             get {
@@ -24953,7 +26170,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are reconfiguring the primary management interface.  If the new settings are incorrect then [XenCenter] may permanently lose the connection to the server.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are reconfiguring the primary management interface.  If the new settings are incorrect then {0} may permanently lose the connection to the server.
         ///
         ///You should only proceed if you have verified that these settings are correct. ähnelt.
         /// </summary>
@@ -24964,7 +26181,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are reconfiguring the primary management interface.  If the new settings are incorrect then [XenCenter] may permanently lose the connection to the server, or pool members may be unable to contact each other.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are reconfiguring the primary management interface.  If the new settings are incorrect then {0} may permanently lose the connection to the server, or pool members may be unable to contact each other.
         ///
         ///You should only proceed if you have verified that these settings are correct. ähnelt.
         /// </summary>
@@ -25074,11 +26291,31 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to create a new DVD drive on VM &apos;{0}&apos;?
+        ///
+        ///This action will create a new Virtual Block Device (VBD) that cannot be hot-unplugged. ähnelt.
+        /// </summary>
+        public static string NEW_DVD_DRIVE_CREATE_CONFIRMATION {
+            get {
+                return ResourceManager.GetString("NEW_DVD_DRIVE_CREATE_CONFIRMATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Creating new DVD drive on VM {0} ähnelt.
         /// </summary>
         public static string NEW_DVD_DRIVE_CREATE_TITLE {
             get {
                 return ResourceManager.GetString("NEW_DVD_DRIVE_CREATE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Yes, Create ähnelt.
+        /// </summary>
+        public static string NEW_DVD_DRIVE_CREATE_YES_BUTTON {
+            get {
+                return ResourceManager.GetString("NEW_DVD_DRIVE_CREATE_YES_BUTTON", resourceCulture);
             }
         }
         
@@ -25111,7 +26348,7 @@ namespace XenAdmin {
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You must shut down and then restart the VM to finish the installation of the new DVD drive.
-        ///Once the VM has restarted click the Install [Citrix VM Tools] menu item once again. ähnelt.
+        ///Once the VM has restarted click the Install {0} menu item once again. ähnelt.
         /// </summary>
         public static string NEW_DVD_DRIVE_REBOOT_TOOLS {
             get {
@@ -25120,7 +26357,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The VM you want to install [Citrix VM Tools] onto has no DVD drive, would you like to create one? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The VM you want to install {0} onto has no DVD drive, would you like to create one? ähnelt.
         /// </summary>
         public static string NEW_DVD_DRIVE_REQUIRED {
             get {
@@ -25129,7 +26366,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die At least one of the VMs you want to install [Citrix VM Tools] onto has no DVD drive. Would you like to create a new DVD drive for each of the VMs that requires one? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die At least one of the VMs you want to install {0} onto has no DVD drive. Would you like to create a new DVD drive for each of the VMs that requires one? ähnelt.
         /// </summary>
         public static string NEW_DVD_DRIVES_REQUIRED {
             get {
@@ -25183,7 +26420,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the server &apos;{0}&apos; to a pool with a master that is configured to use AD authentication. All pool members must use the same authentication method.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the server &apos;{0}&apos; to a pool with a coordinator that is configured to use AD authentication. All pool members must use the same authentication method.
         ///
         ///Do you want to enable AD authentication on your server and join it to the same domain as the pool? ähnelt.
         /// </summary>
@@ -25194,7 +26431,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the following servers to a pool with a master that is configured to use AD authentication:
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the following servers to a pool with a coordinator that is configured to use AD authentication:
         ///
         ///{0}
         ///
@@ -25207,9 +26444,18 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the server &apos;{0}&apos; to a pool with a master that is using an older CPU.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Clustering is enabled on this server. ähnelt.
+        /// </summary>
+        public static string NEW_POOL_CLUSTERING_ENABLED {
+            get {
+                return ResourceManager.GetString("NEW_POOL_CLUSTERING_ENABLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the server &apos;{0}&apos; to a pool with a coordinator that is using an older CPU.
         ///
-        ///[XenServer] can continue by rebooting the server and reducing its CPU to the level of the master. This will shut down any VMs running on the server. This feature is supported for CPU combinations listed in the [XenServer] Hardware Compatibility List.
+        ///{1} can continue by rebooting the server and reducing its CPU to the level of the coordinator. This will shut down any VMs running on the server. This feature is supported for CPU combinations listed in the {1} Hardware Compatibility List.
         ///
         ///Do you want to do this? ähnelt.
         /// </summary>
@@ -25220,11 +26466,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the following servers to a pool with a master that is using an older CPU:
+        ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the following servers to a pool with a coordinator that is using an older CPU:
         ///
         ///{0}
         ///
-        ///[XenServer] can continue by rebooting the servers and reducing their CPUs to the level of the master. This will shut down any VMs running on the servers. This feature is supported for CPU combinations listed in the [XenServer] Hardware Compatibility List.
+        ///{1} can continue by rebooting the servers and reducing their CPUs to the level of the coordinator. This will shut down any VMs running on the servers. This feature is supported for CPU combinations listed in the {1} Hardware Compatibility List.
         ///
         ///Do you want to do this? ähnelt.
         /// </summary>
@@ -25237,7 +26483,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You are attempting to add the server &apos;{0}&apos; to a licensed pool.
         ///
-        ///Do you want to apply the licensing from the master to this server? ähnelt.
+        ///Do you want to apply the licensing from the coordinator to this server? ähnelt.
         /// </summary>
         public static string NEW_POOL_LICENSE_MESSAGE {
             get {
@@ -25250,7 +26496,7 @@ namespace XenAdmin {
         ///
         ///{0}
         ///
-        ///Do you want to apply the licensing from the master to these servers? ähnelt.
+        ///Do you want to apply the licensing from the coordinator to these servers? ähnelt.
         /// </summary>
         public static string NEW_POOL_LICENSE_MESSAGE_MULTIPLE {
             get {
@@ -25367,7 +26613,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Enter &amp;name for new template: ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enter a &amp;name for the new template: ähnelt.
         /// </summary>
         public static string NEW_TEMPLATE_PROMPT {
             get {
@@ -25502,15 +26748,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die New [XenCenter] version required ähnelt.
-        /// </summary>
-        public static string NEW_XENCENTER_REQUIRED_INFO {
-            get {
-                return ResourceManager.GetString("NEW_XENCENTER_REQUIRED_INFO", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You need to shut down and then restart the VM before it can access the new disk. ähnelt.
         /// </summary>
         public static string NEWDISKWIZARD_MESSAGE {
@@ -25520,7 +26757,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die There is a newer version of [XenCenter] available. Please contact your support representative. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die There is a newer version of {0} available. Please contact your support representative. ähnelt.
         /// </summary>
         public static string NEWER_GUI_AVAILABLE {
             get {
@@ -25556,7 +26793,34 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server&apos;s hardware is incompatible with the master&apos;s ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The coordinator is still connecting ähnelt.
+        /// </summary>
+        public static string NEWPOOL_COORDINATOR_CONNECTING {
+            get {
+                return ResourceManager.GetString("NEWPOOL_COORDINATOR_CONNECTING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The coordinator is disconnected ähnelt.
+        /// </summary>
+        public static string NEWPOOL_COORDINATOR_DISCONNECTED {
+            get {
+                return ResourceManager.GetString("NEWPOOL_COORDINATOR_DISCONNECTED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your current role on the coordinator is not authorized to add hosts to the coordinator&apos;s pool ähnelt.
+        /// </summary>
+        public static string NEWPOOL_COORDINATOR_ROLE {
+            get {
+                return ResourceManager.GetString("NEWPOOL_COORDINATOR_ROLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server&apos;s hardware is incompatible with the coordinator&apos;s ähnelt.
         /// </summary>
         public static string NEWPOOL_DIFF_HARDWARE {
             get {
@@ -25565,7 +26829,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server is a different version to the master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server is a different version to the coordinator ähnelt.
         /// </summary>
         public static string NEWPOOL_DIFF_SERVER {
             get {
@@ -25574,11 +26838,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server has different updates from the master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server has different updates from the coordinator ähnelt.
         /// </summary>
-        public static string NEWPOOL_DIFFERENT_HOMOGENEOUS_UPDATES_FROM_MASTER {
+        public static string NEWPOOL_DIFFERENT_HOMOGENEOUS_UPDATES_FROM_COORDINATOR {
             get {
-                return ResourceManager.GetString("NEWPOOL_DIFFERENT_HOMOGENEOUS_UPDATES_FROM_MASTER", resourceCulture);
+                return ResourceManager.GetString("NEWPOOL_DIFFERENT_HOMOGENEOUS_UPDATES_FROM_COORDINATOR", resourceCulture);
             }
         }
         
@@ -25592,7 +26856,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server&apos;s network backend is different from the master&apos;s ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server&apos;s network backend is different from the coordinator&apos;s ähnelt.
         /// </summary>
         public static string NEWPOOL_DIFFERENT_NETWORK_BACKENDS {
             get {
@@ -25601,7 +26865,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server has a different Active Directory configuration to the master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server has a different Active Directory configuration to the coordinator ähnelt.
         /// </summary>
         public static string NEWPOOL_DIFFERING_AD_CONFIG {
             get {
@@ -25646,7 +26910,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server is master of an existing pool ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server is coordinator of an existing pool ähnelt.
         /// </summary>
         public static string NEWPOOL_IS_A_POOL {
             get {
@@ -25657,14 +26921,14 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You cannot add a licensed server to an unlicensed pool ähnelt.
         /// </summary>
-        public static string NEWPOOL_LICENSED_HOST_UNLICENSED_MASTER {
+        public static string NEWPOOL_LICENSED_HOST_UNLICENSED_COORDINATOR {
             get {
-                return ResourceManager.GetString("NEWPOOL_LICENSED_HOST_UNLICENSED_MASTER", resourceCulture);
+                return ResourceManager.GetString("NEWPOOL_LICENSED_HOST_UNLICENSED_COORDINATOR", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server does not have the same license as the pool master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server does not have the same license as the pool coordinator ähnelt.
         /// </summary>
         public static string NEWPOOL_LICENSEMISMATCH {
             get {
@@ -25673,7 +26937,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server&apos;s Linux pack installation state differs from that of the master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server&apos;s Linux pack installation state differs from that of the coordinator ähnelt.
         /// </summary>
         public static string NEWPOOL_LINUXPACK {
             get {
@@ -25682,34 +26946,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The master is still connecting ähnelt.
-        /// </summary>
-        public static string NEWPOOL_MASTER_CONNECTING {
-            get {
-                return ResourceManager.GetString("NEWPOOL_MASTER_CONNECTING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The master is disconnected ähnelt.
-        /// </summary>
-        public static string NEWPOOL_MASTER_DISCONNECTED {
-            get {
-                return ResourceManager.GetString("NEWPOOL_MASTER_DISCONNECTED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Your current role on the master is not authorized to add hosts to the master&apos;s pool ähnelt.
-        /// </summary>
-        public static string NEWPOOL_MASTER_ROLE {
-            get {
-                return ResourceManager.GetString("NEWPOOL_MASTER_ROLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The pool has already reached the maximum number of servers allowed by your license ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The pool has already reached the maximum number of servers allowed by your license. Go to {0} to purchase licenses ähnelt.
         /// </summary>
         public static string NEWPOOL_MAX_NUMBER_HOST_REACHED {
             get {
@@ -25727,25 +26964,25 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Your current role on the slave is not authorized to add the slave to a pool ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your current role on this server is not authorized to add it to a pool ähnelt.
         /// </summary>
-        public static string NEWPOOL_SLAVE_ROLE {
+        public static string NEWPOOL_SUPPORTER_ROLE {
             get {
-                return ResourceManager.GetString("NEWPOOL_SLAVE_ROLE", resourceCulture);
+                return ResourceManager.GetString("NEWPOOL_SUPPORTER_ROLE", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die You cannot add an unlicensed server to a licensed pool ähnelt.
         /// </summary>
-        public static string NEWPOOL_UNLICENSED_HOST_LICENSED_MASTER {
+        public static string NEWPOOL_UNLICENSED_HOST_LICENSED_COORDINATOR {
             get {
-                return ResourceManager.GetString("NEWPOOL_UNLICENSED_HOST_LICENSED_MASTER", resourceCulture);
+                return ResourceManager.GetString("NEWPOOL_UNLICENSED_HOST_LICENSED_COORDINATOR", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The pool will exceed the maximum number of servers allowed by your license ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The pool will exceed the maximum number of servers allowed by your license. Go to {0} to purchase licenses ähnelt.
         /// </summary>
         public static string NEWPOOL_WILL_EXCEED_POOL_MAX_SIZE {
             get {
@@ -25812,173 +27049,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die SMB/CIFS ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die SMB ähnelt.
         /// </summary>
         public static string NEWSR_CIFS_TYPE_NAME {
             get {
                 return ResourceManager.GetString("NEWSR_CIFS_TYPE_NAME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the storage system adapter ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_ADAPTER_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_ADAPTER_PAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Auto ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_AUTO {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_AUTO", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die StorageLink technology is used to connect to any of the leading storage architectures and protocols, including DAS, NAS, SAN, iSCSI and Fibre Channel. ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_BLURB {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_BLURB", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Deduplication ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_DEDUPLICATION {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_DEDUPLICATION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Default ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_DEFAULT_PROVISIONING {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_DEFAULT_PROVISIONING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Fibre Channel ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_FC {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_FC", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die iSCSI ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_ISCSI {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_ISCSI", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die None ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_NONE {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_NONE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the storage system for your storage repository ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_PAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the storage repository settings for use with the provisioning of new storage volumes ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_SETTINGS_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_SETTINGS_PAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Thick ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_THICK_PROVISIONING {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_THICK_PROVISIONING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Thin ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_THIN_PROVISIONING {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_THIN_PROVISIONING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die StorageLink technology ähnelt.
-        /// </summary>
-        public static string NEWSR_CSLG_TYPE_NAME {
-            get {
-                return ResourceManager.GetString("NEWSR_CSLG_TYPE_NAME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Dell EqualLogic is a scalable form of high performance network attached storage, which supports the addition of capacity without downtime. You can use Dell EqualLogic shared storage to support [XenServer] features such as Live Migration and High Availability. ähnelt.
-        /// </summary>
-        public static string NEWSR_EQUAL_LOGIC_BLURB {
-            get {
-                return ResourceManager.GetString("NEWSR_EQUAL_LOGIC_BLURB", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Dell EqualLogic SR [{0} ({1})] ähnelt.
-        /// </summary>
-        public static string NEWSR_EQUAL_LOGIC_DESCRIPTION {
-            get {
-                return ResourceManager.GetString("NEWSR_EQUAL_LOGIC_DESCRIPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Dell EqualLogic filer &amp;address: ähnelt.
-        /// </summary>
-        public static string NEWSR_EQUAL_LOGIC_FILER_ADDRESS {
-            get {
-                return ResourceManager.GetString("NEWSR_EQUAL_LOGIC_FILER_ADDRESS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die EqualLogic Filer Details ähnelt.
-        /// </summary>
-        public static string NEWSR_EQUAL_LOGIC_FILER_DETAILS_TEXT {
-            get {
-                return ResourceManager.GetString("NEWSR_EQUAL_LOGIC_FILER_DETAILS_TEXT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Enter the Dell EqualLogic filer details ähnelt.
-        /// </summary>
-        public static string NEWSR_EQUAL_LOGIC_FILER_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("NEWSR_EQUAL_LOGIC_FILER_PAGE_TITLE", resourceCulture);
             }
         }
         
@@ -26006,17 +27081,6 @@ namespace XenAdmin {
         public static string NEWSR_ISCSI_DESCRIPTION {
             get {
                 return ResourceManager.GetString("NEWSR_ISCSI_DESCRIPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Creating a new virtual disk on this LUN will destroy any data present. You must ensure that no other system is using the LUN, including any servers, or the virtual disk may become corrupted while in use.
-        ///
-        ///Do you want to format the disk? ähnelt.
-        /// </summary>
-        public static string NEWSR_ISCSI_FORMAT_WARNING {
-            get {
-                return ResourceManager.GetString("NEWSR_ISCSI_FORMAT_WARNING", resourceCulture);
             }
         }
         
@@ -26093,11 +27157,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] hosts support Software based Fibre Channel over Ethernet using supported Converged Network Adapters (CNAs) which support FCoE in this way.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} hosts support Software based Fibre Channel over Ethernet using supported Converged Network Adapters (CNAs) which support FCoE in this way.
         ///
         ///All configuration required to expose a LUN to the host must be completed manually, including configuring your FCoE fabric, and allocating LUN(s) to your CNA’s public world wide name (PWWN). 
         ///
-        ///Once this configuration has been carried out, this wizard will walk you through discovering and mounting a LUN available to the hosts CNA’s as a SCSI device. The SC [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///Once this configuration has been carried out, this wizard will walk you through discovering and mounting a LUN available to the hosts CNA’s as a SCSI device. The SCSI devic [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         public static string NEWSR_LVMOFCOE_BLURB {
             get {
@@ -26124,11 +27188,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] hosts support Fibre Channel (FC), Fibre Channel over Ethernet (FCoE) and shared Serial Attached SCSI (SAS) storage area networks (SANs) using host bus adapters (HBAs).
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} hosts support Fibre Channel (FC), Fibre Channel over Ethernet (FCoE) and shared Serial Attached SCSI (SAS) storage area networks (SANs) using host bus adapters (HBAs).
         ///
-        ///All configuration required to expose a LUN to the host must be completed manually, including storage devices, network devices, and the HBA within the [XenServer] host.
+        ///All configuration required to expose a LUN to the host must be completed manually, including storage devices, network devices, and the HBA within the {0} host.
         ///
-        ///Once all configuration is complete the HBA will expose a SCSI device backed by the LUN to the host. The SCSI device can then be used to access the LUN as if i [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///Once all configuration is complete the HBA will expose a SCSI device backed by the LUN to the host. The SCSI device can then be used to access the LUN as if it were a locally [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         public static string NEWSR_LVMOHBA_BLURB {
             get {
@@ -26254,9 +27318,9 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Warning: you must ensure that the following SR is not in use by any server not connected to [XenCenter]. Failure to do so may result in data loss.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Warning: you must ensure that the following SR is not in use by any server not connected to {0}. Failure to do so may result in data loss.
         ///
-        ///SR:  {0}
+        ///SR:  {1}
         ///
         ///Do you want to reattach the SR? ähnelt.
         /// </summary>
@@ -26281,64 +27345,6 @@ namespace XenAdmin {
         public static string NEWSR_NAMEPAGE_TITLE {
             get {
                 return ResourceManager.GetString("NEWSR_NAMEPAGE_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die If you have access to a Network Appliance (NetApp) filer with sufficient disk space, running a version of Data ONTAP 7G (version 7.2 or greater), you can configure a custom NetApp Storage Repository. 
-        ///
-        ///The driver uses the XAPI interface to the filer to create a group of FlexVols which correspond to an SR. VDIs are created as virtual LUNs on the filer, and attached to the host using an iSCSI data path. 
-        ///
-        ///VM cloning uses the snapshot and clone capabilities of the filer to provide high performance and to e [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
-        /// </summary>
-        public static string NEWSR_NETAPP_BLURB {
-            get {
-                return ResourceManager.GetString("NEWSR_NETAPP_BLURB", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This aggregate does not support FAS deduplication ähnelt.
-        /// </summary>
-        public static string NEWSR_NETAPP_DEDUP_UNAVAILABLE {
-            get {
-                return ResourceManager.GetString("NEWSR_NETAPP_DEDUP_UNAVAILABLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die NetApp SR [{0} ({1})] ähnelt.
-        /// </summary>
-        public static string NEWSR_NETAPP_DESCRIPTION {
-            get {
-                return ResourceManager.GetString("NEWSR_NETAPP_DESCRIPTION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die NetApp filer &amp;address: ähnelt.
-        /// </summary>
-        public static string NEWSR_NETAPP_FILER_ADDRESS {
-            get {
-                return ResourceManager.GetString("NEWSR_NETAPP_FILER_ADDRESS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die NetApp Filer Details ähnelt.
-        /// </summary>
-        public static string NEWSR_NETAPP_FILER_DETAILS_TEXT {
-            get {
-                return ResourceManager.GetString("NEWSR_NETAPP_FILER_DETAILS_TEXT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Enter the NetApp filer details ähnelt.
-        /// </summary>
-        public static string NEWSR_NETAPP_FILER_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("NEWSR_NETAPP_FILER_PAGE_TITLE", resourceCulture);
             }
         }
         
@@ -26707,28 +27713,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The amount of memory allocated to the new VM is greater than the amount of physical memory on any server in the pool.
-        ///
-        ///Server &apos;{0}&apos; has {1} of physical memory in total.
-        ///
-        ///You will not be able to start this VM without increasing the amount of physical memory on one of the servers in the pool. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The amount of memory allocated to the new VM is greater than the amount of physical memory available on any server in the pool ({0}). ähnelt.
         /// </summary>
-        public static string NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN1 {
+        public static string NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN_FREE {
             get {
-                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN1", resourceCulture);
+                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN_FREE", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The amount of memory allocated to the new VM is greater than the amount of physical memory available on any server in the pool.
-        ///
-        ///Server &apos;{0}&apos; has {1} of physical memory available.
-        ///
-        ///You will not be able to start this VM without freeing some space on one of the servers. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The amount of memory allocated to the new VM is greater than the amount of physical memory on any server in the pool ({0}). ähnelt.
         /// </summary>
-        public static string NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN2 {
+        public static string NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN_TOTAL {
             get {
-                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN2", resourceCulture);
+                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_MEMORYWARN_TOTAL", resourceCulture);
             }
         }
         
@@ -26742,7 +27740,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Specify the number of virtual CPUs, their topology, and the amount of memory that will be allocated to the new virtual machine.  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Specify the number of vCPUs, their topology, and the amount of memory that will be allocated to the new virtual machine.  ähnelt.
         /// </summary>
         public static string NEWVMWIZARD_CPUMEMPAGE_RUBRIC {
             get {
@@ -26778,26 +27776,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The number of vCPUs given to the new VM is greater than the number of physical CPUs on any server in the pool.
-        ///
-        ///Server &apos;{0}&apos; has {1} physical CPUs.
-        ///
-        ///Performance of this VM will be greatly reduced if it is started with this many vCPUs. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have specified {0} vCPUs, but none of the pool servers have more than {1} physical CPUs. You will not be able to start the VM. ähnelt.
         /// </summary>
-        public static string NEWVMWIZARD_CPUMEMPAGE_VCPUSWARN {
+        public static string NEWVMWIZARD_CPUMEMPAGE_VCPUSWARN_POOL {
             get {
-                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_VCPUSWARN", resourceCulture);
+                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_VCPUSWARN_POOL", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die All the necessary information has been collected and the wizard is ready to provision the new virtual machine using the settings shown below.
-        ///
-        ///Review these settings, then click Previous if you need to change anything. Otherwise, click Create Now to create the new VM. It may take several minutes to create the new VM. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have specified {0} vCPUs, but the server has only {1} physical CPUs. You will not be able to start the VM. ähnelt.
         /// </summary>
-        public static string NEWVMWIZARD_FINISHPAGE {
+        public static string NEWVMWIZARD_CPUMEMPAGE_VCPUSWARN_STANDALONE_HOST {
             get {
-                return ResourceManager.GetString("NEWVMWIZARD_FINISHPAGE", resourceCulture);
+                return ResourceManager.GetString("NEWVMWIZARD_CPUMEMPAGE_VCPUSWARN_STANDALONE_HOST", resourceCulture);
             }
         }
         
@@ -27090,11 +28082,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die VMs without a home server cannot have disks on the default SR &apos;{0}&apos;. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The default SR &apos;{0}&apos; cannot be seen from the VM&apos;s home server. ähnelt.
         /// </summary>
         public static string NEWVMWIZARD_STORAGEPAGE_DEFAULT_LOCAL {
             get {
                 return ResourceManager.GetString("NEWVMWIZARD_STORAGEPAGE_DEFAULT_LOCAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die VMs without a home server cannot have disks on the default SR &apos;{0}&apos;. ähnelt.
+        /// </summary>
+        public static string NEWVMWIZARD_STORAGEPAGE_DEFAULT_LOCAL_NO_HOME {
+            get {
+                return ResourceManager.GetString("NEWVMWIZARD_STORAGEPAGE_DEFAULT_LOCAL_NO_HOME", resourceCulture);
             }
         }
         
@@ -27153,11 +28154,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die VMs without a home server cannot have disks on the SR suggested by the template (&apos;{0}&apos;). ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The SR suggested by the template (&apos;{0}&apos;) cannot be seen from the VM&apos;s home server. ähnelt.
         /// </summary>
         public static string NEWVMWIZARD_STORAGEPAGE_SUGGESTED_LOCAL {
             get {
                 return ResourceManager.GetString("NEWVMWIZARD_STORAGEPAGE_SUGGESTED_LOCAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die VMs without a home server cannot have disks on the SR suggested by the template (&apos;{0}&apos;). ähnelt.
+        /// </summary>
+        public static string NEWVMWIZARD_STORAGEPAGE_SUGGESTED_LOCAL_NO_HOME {
+            get {
+                return ResourceManager.GetString("NEWVMWIZARD_STORAGEPAGE_SUGGESTED_LOCAL_NO_HOME", resourceCulture);
             }
         }
         
@@ -27180,16 +28190,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} {1} ähnelt.
-        /// </summary>
-        public static string NEWVMWIZARD_STORAGEPAGE_VDINAME {
-            get {
-                return ResourceManager.GetString("NEWVMWIZARD_STORAGEPAGE_VDINAME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] has selected a different SR for you. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} has selected a different SR for you. ähnelt.
         /// </summary>
         public static string NEWVMWIZARD_STORAGEPAGE_XC_SELECTION {
             get {
@@ -27203,15 +28204,6 @@ namespace XenAdmin {
         public static string NEWVMWIZARD_TEMPLATEPAGE_CENTOS {
             get {
                 return ResourceManager.GetString("NEWVMWIZARD_TEMPLATEPAGE_CENTOS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix] ähnelt.
-        /// </summary>
-        public static string NEWVMWIZARD_TEMPLATEPAGE_CITRIX {
-            get {
-                return ResourceManager.GetString("NEWVMWIZARD_TEMPLATEPAGE_CITRIX", resourceCulture);
             }
         }
         
@@ -27239,6 +28231,15 @@ namespace XenAdmin {
         public static string NEWVMWIZARD_TEMPLATEPAGE_DEBIAN {
             get {
                 return ResourceManager.GetString("NEWVMWIZARD_TEMPLATEPAGE_DEBIAN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Gooroom ähnelt.
+        /// </summary>
+        public static string NEWVMWIZARD_TEMPLATEPAGE_GOOROOM {
+            get {
+                return ResourceManager.GetString("NEWVMWIZARD_TEMPLATEPAGE_GOOROOM", resourceCulture);
             }
         }
         
@@ -27293,6 +28294,15 @@ namespace XenAdmin {
         public static string NEWVMWIZARD_TEMPLATEPAGE_REDHAT {
             get {
                 return ResourceManager.GetString("NEWVMWIZARD_TEMPLATEPAGE_REDHAT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Rocky ähnelt.
+        /// </summary>
+        public static string NEWVMWIZARD_TEMPLATEPAGE_ROCKY {
+            get {
+                return ResourceManager.GetString("NEWVMWIZARD_TEMPLATEPAGE_ROCKY", resourceCulture);
             }
         }
         
@@ -27387,7 +28397,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This pool is only licensed for [Citrix] Virtual Apps and Desktops workloads ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This pool is only licensed for {0} Virtual Apps and Desktops workloads ähnelt.
         /// </summary>
         public static string NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_POOL {
             get {
@@ -27396,7 +28406,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server is only licensed for [Citrix] Virtual Apps and Desktops workloads ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server is only licensed for {0} Virtual Apps and Desktops workloads ähnelt.
         /// </summary>
         public static string NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_SERVER {
             get {
@@ -27441,20 +28451,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} (Bonded member) ähnelt.
+        /// </summary>
+        public static string NIC_BONDED_MEMBER {
+            get {
+                return ResourceManager.GetString("NIC_BONDED_MEMBER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0} (Hidden) ähnelt.
         /// </summary>
         public static string NIC_HIDDEN {
             get {
                 return ResourceManager.GetString("NIC_HIDDEN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} (Slave) ähnelt.
-        /// </summary>
-        public static string NIC_SLAVE {
-            get {
-                return ResourceManager.GetString("NIC_SLAVE", resourceCulture);
             }
         }
         
@@ -27540,16 +28550,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die There is no server eligible to become the master of your new pool ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die There is no server eligible to become the coordinator of your new pool ähnelt.
         /// </summary>
-        public static string NO_ELIGIBLE_MASTER {
+        public static string NO_ELIGIBLE_COORDINATOR {
             get {
-                return ResourceManager.GetString("NO_ELIGIBLE_MASTER", resourceCulture);
+                return ResourceManager.GetString("NO_ELIGIBLE_COORDINATOR", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die GPU configuration and monitoring is disabled, because there are no GPUs available in this pool. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die GPU configuration and monitoring are disabled, because there are no GPUs available in this pool. ähnelt.
         /// </summary>
         public static string NO_GPU_IN_POOL {
             get {
@@ -27558,7 +28568,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die GPU configuration and monitoring is disabled, because there are no GPUs available on this host. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die GPU configuration and monitoring are disabled, because there are no GPUs available on this host. ähnelt.
         /// </summary>
         public static string NO_GPU_ON_HOST {
             get {
@@ -27711,6 +28721,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die None ähnelt.
+        /// </summary>
+        public static string NONE_UPPER {
+            get {
+                return ResourceManager.GetString("NONE_UPPER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The VM is not using a shared network. Restart cannot be guaranteed. ähnelt.
         /// </summary>
         public static string NOT_AGILE_NETWORK_NOT_SHARED {
@@ -27779,6 +28798,15 @@ namespace XenAdmin {
         public static string NOT_ATTACHED_TO {
             get {
                 return ResourceManager.GetString("NOT_ATTACHED_TO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Not configured ähnelt.
+        /// </summary>
+        public static string NOT_CONFIGURED {
+            get {
+                return ResourceManager.GetString("NOT_CONFIGURED", resourceCulture);
             }
         }
         
@@ -27855,7 +28883,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] can free up {0} by removing residual update files. Do you want to proceed with the cleanup? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} can free up {1} by removing residual update files. Do you want to proceed with the cleanup? ähnelt.
         /// </summary>
         public static string NOT_ENOUGH_SPACE_MESSAGE_CLEANUP {
             get {
@@ -27909,46 +28937,146 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die VMs on local disk will prevent disk repartitioning.
-        ///
-        ///A new disk partitioning scheme is available in [XenServer] {0} and above that includes larger dom0 and backup partitions, and dedicated partitions for logging, swap and UEFI.
-        ///
-        ///However, there are VMs on local storage, so the current partitioning scheme will be retained. To benefit from repartitioning on upgrade to [XenServer] {0} or above, VMs must be moved from local storage first. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disk repartitioning is not possible. ähnelt.
         /// </summary>
-        public static string NOT_SAFE_TO_UPGRADE_DEFAULT_WARNING_LONG {
+        public static string NOT_SAFE_TO_UPGRADE_DEFAULT {
             get {
-                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_DEFAULT_WARNING_LONG", resourceCulture);
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_DEFAULT", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: VMs on local disk will prevent disk repartitioning. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, the new partitioning scheme cannot be applied on your server. This could be because there are VMs on local storage, the partition table type is DOS or there is a utility partition present. To upgrade to {0}, you must identify and resolve the issue first. ähnelt.
         /// </summary>
-        public static string NOT_SAFE_TO_UPGRADE_DEFAULT_WARNING_SHORT {
+        public static string NOT_SAFE_TO_UPGRADE_DEFAULT_PROBLEM {
             get {
-                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_DEFAULT_WARNING_SHORT", resourceCulture);
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_DEFAULT_PROBLEM", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The disk size of the local storage prevents repartitioning.
-        ///
-        ///A new disk partitioning scheme is available in [XenServer] {0} and above that includes larger dom0 and backup partitions, and dedicated partitions for logging, swap and UEFI.
-        ///
-        ///However, there is not enough space to perform the repartitioning, so the current partitioning scheme will be retained. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, the new partitioning scheme cannot be applied on your server. This could be because there are VMs on local storage, the partition table type is DOS or there is a utility partition present. To upgrade to {0} or above, or to benefit from repartitioning on upgrade to a version older than {0}, you must identify and resolve the issue first. ähnelt.
         /// </summary>
-        public static string NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_LONG {
+        public static string NOT_SAFE_TO_UPGRADE_DEFAULT_WARNING {
             get {
-                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_LONG", resourceCulture);
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_DEFAULT_WARNING", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The disk size of the local storage prevents repartitioning. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The partition table type prevents repartitioning. ähnelt.
         /// </summary>
-        public static string NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_SHORT {
+        public static string NOT_SAFE_TO_UPGRADE_LEGACY_PARTITION_TABLE {
             get {
-                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_SHORT", resourceCulture);
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_LEGACY_PARTITION_TABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, the partition table type on your server is DOS, which prevents repartitioning. The current partitioning scheme cannot be retained. Therefore the server cannot be upgraded to {0}. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_LEGACY_PARTITION_TABLE_PROBLEM {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_LEGACY_PARTITION_TABLE_PROBLEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, the partition table type on your server is DOS, which prevents repartitioning. The current partitioning scheme cannot be retained if you upgrade to {0} or above, so an upgrade to {0} or above is not possible.  ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_LEGACY_PARTITION_TABLE_WARNING {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_LEGACY_PARTITION_TABLE_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die As of {0} the current partitioning scheme is no longer supported. A new disk partitioning scheme is available that includes larger dom0 and backup partitions, and dedicated partitions for logging, swap and UEFI. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_NEW_PARTITION_INFO {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_NEW_PARTITION_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The disk size of the local storage prevents repartitioning. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, there is not enough space to perform the repartitioning. To upgrade to {0}, the size of the local storage needs to be increased first. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_PROBLEM {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_PROBLEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, there is not enough space to perform the repartitioning. The current partitioning scheme cannot be retained if you upgrade to {0} or above, so the size of the local storage needs to be increased first. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_WARNING {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_NOT_ENOUGH_SPACE_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A utility partition prevents repartitioning. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_UTILITY_PARTITION {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_UTILITY_PARTITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, there is a utility partition present which prevents repartitioning. To upgrade to {0}, the utility partition must be removed. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_UTILITY_PARTITION_PROBLEM {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_UTILITY_PARTITION_PROBLEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, there is a utility partition present which prevents repartitioning. The current partitioning scheme cannot be retained if you upgrade to {0} or above, so the existing utility partition must be removed first. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_UTILITY_PARTITION_WARNING {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_UTILITY_PARTITION_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die VMs on local disk will prevent disk repartitioning. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_VDI_PRESENT {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_VDI_PRESENT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, there are VMs on local storage, so the new disk partitioning can not be applied. To upgrade to {0} or above, VMs must be moved from local storage first. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_VDI_PRESENT_PROBLEM {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_VDI_PRESENT_PROBLEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die However, there are VMs on local storage, so the new partitioning scheme cannot be applied.  To upgrade to {0} or above, or to benefit from repartitioning on upgrade to a version older than {0}, VMs must be moved from local storage first. ähnelt.
+        /// </summary>
+        public static string NOT_SAFE_TO_UPGRADE_VDI_PRESENT_WARNING {
+            get {
+                return ResourceManager.GetString("NOT_SAFE_TO_UPGRADE_VDI_PRESENT_WARNING", resourceCulture);
             }
         }
         
@@ -28093,6 +29221,294 @@ namespace XenAdmin {
         public static string NOW {
             get {
                 return ResourceManager.GetString("NOW", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die NRPE ähnelt.
+        /// </summary>
+        public static string NRPE {
+            get {
+                return ResourceManager.GetString("NRPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Changing NRPE configuration ähnelt.
+        /// </summary>
+        public static string NRPE_ACTION_CHANGING {
+            get {
+                return ResourceManager.GetString("NRPE_ACTION_CHANGING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving NRPE configuration ähnelt.
+        /// </summary>
+        public static string NRPE_ACTION_RETRIEVING {
+            get {
+                return ResourceManager.GetString("NRPE_ACTION_RETRIEVING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die NRPE service is active ähnelt.
+        /// </summary>
+        public static string NRPE_ACTIVE {
+            get {
+                return ResourceManager.GetString("NRPE_ACTIVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Monitoring servers should not be empty. ähnelt.
+        /// </summary>
+        public static string NRPE_ALLOW_HOSTS_EMPTY_ERROR {
+            get {
+                return ResourceManager.GetString("NRPE_ALLOW_HOSTS_EMPTY_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Monitoring servers format is not correct ähnelt.
+        /// </summary>
+        public static string NRPE_ALLOW_HOSTS_ERROR_TITLE {
+            get {
+                return ResourceManager.GetString("NRPE_ALLOW_HOSTS_ERROR_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Monitoring servers should be comma separated IP address or domain list, e.g. 192.168.1.1, test.domain.com ähnelt.
+        /// </summary>
+        public static string NRPE_ALLOW_HOSTS_FORMAT_ERROR {
+            get {
+                return ResourceManager.GetString("NRPE_ALLOW_HOSTS_FORMAT_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Comma separated IP address or domain list, e.g. 192.168.1.1, test.domain.com ähnelt.
+        /// </summary>
+        public static string NRPE_ALLOW_HOSTS_PLACE_HOLDER {
+            get {
+                return ResourceManager.GetString("NRPE_ALLOW_HOSTS_PLACE_HOLDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Please remove duplicate addresses ähnelt.
+        /// </summary>
+        public static string NRPE_ALLOW_HOSTS_SAME_ADDRESS {
+            get {
+                return ResourceManager.GetString("NRPE_ALLOW_HOSTS_SAME_ADDRESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die NRPE batch configuration ähnelt.
+        /// </summary>
+        public static string NRPE_BATCH_CONFIGURATION {
+            get {
+                return ResourceManager.GetString("NRPE_BATCH_CONFIGURATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Dom0 CPU Usage (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_CPU {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_CPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Dom0 Log Partition Free Space (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_DISK_LOG {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_DISK_LOG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Dom0 Root Partition Free Space (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_DISK_ROOT {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_DISK_ROOT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Host CPU Usage (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_HOST_CPU {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_HOST_CPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Host CPU Load ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_HOST_LOAD {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_HOST_LOAD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Host Memory Usage (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_HOST_MEMORY {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_HOST_MEMORY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Dom0 CPU Load ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_LOAD {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_LOAD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Dom0 Memory Usage (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_MEMORY {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_MEMORY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Dom0 Free Swap (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_SWAP {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_SWAP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Host vGPU Usage (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_VGPU {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_VGPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Host vGPU Memory Usage (%) ähnelt.
+        /// </summary>
+        public static string NRPE_CHECK_VGPU_MEMORY {
+            get {
+                return ResourceManager.GetString("NRPE_CHECK_VGPU_MEMORY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die NRPE Configuration ähnelt.
+        /// </summary>
+        public static string NRPE_EDIT_PAGE_TEXT {
+            get {
+                return ResourceManager.GetString("NRPE_EDIT_PAGE_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die NRPE service is inactive ähnelt.
+        /// </summary>
+        public static string NRPE_INACTIVE {
+            get {
+                return ResourceManager.GetString("NRPE_INACTIVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die NRPE check name: {0} ähnelt.
+        /// </summary>
+        public static string NRPE_METRIC_TOOLTIP {
+            get {
+                return ResourceManager.GetString("NRPE_METRIC_TOOLTIP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Failed to retrieve NRPE configuration, please check the application logs. ähnelt.
+        /// </summary>
+        public static string NRPE_RETRIEVE_FAILED {
+            get {
+                return ResourceManager.GetString("NRPE_RETRIEVE_FAILED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving NRPE configuration... ähnelt.
+        /// </summary>
+        public static string NRPE_RETRIEVING_CONFIGURATION {
+            get {
+                return ResourceManager.GetString("NRPE_RETRIEVING_CONFIGURATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Threshold value should range from {0} to {1}. ähnelt.
+        /// </summary>
+        public static string NRPE_THRESHOLD_RANGE_ERROR {
+            get {
+                return ResourceManager.GetString("NRPE_THRESHOLD_RANGE_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Threshold value should consist of 3 comma separated numbers. ähnelt.
+        /// </summary>
+        public static string NRPE_THRESHOLD_SHOULD_BE_3_NUMBERS {
+            get {
+                return ResourceManager.GetString("NRPE_THRESHOLD_SHOULD_BE_3_NUMBERS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Threshold value should be a number. ähnelt.
+        /// </summary>
+        public static string NRPE_THRESHOLD_SHOULD_BE_NUMBER {
+            get {
+                return ResourceManager.GetString("NRPE_THRESHOLD_SHOULD_BE_NUMBER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Threshold value should not be empty. ähnelt.
+        /// </summary>
+        public static string NRPE_THRESHOLD_SHOULD_NOT_BE_EMPTY {
+            get {
+                return ResourceManager.GetString("NRPE_THRESHOLD_SHOULD_NOT_BE_EMPTY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Warning threshold should be greater than critical threshold. ähnelt.
+        /// </summary>
+        public static string NRPE_THRESHOLD_WARNING_SHOULD_BIGGER_THAN_CRITICAL {
+            get {
+                return ResourceManager.GetString("NRPE_THRESHOLD_WARNING_SHOULD_BIGGER_THAN_CRITICAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Warning threshold should be less than critical threshold. ähnelt.
+        /// </summary>
+        public static string NRPE_THRESHOLD_WARNING_SHOULD_LESS_THAN_CRITICAL {
+            get {
+                return ResourceManager.GetString("NRPE_THRESHOLD_WARNING_SHOULD_LESS_THAN_CRITICAL", resourceCulture);
             }
         }
         
@@ -28506,30 +29922,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This version requires [XenCenter] {0} or newer ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This version requires {0} {1} or newer ähnelt.
         /// </summary>
         public static string PATCH_NEEDS_NEW_XENCENTER {
             get {
                 return ResourceManager.GetString("PATCH_NEEDS_NEW_XENCENTER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Not found ähnelt.
-        /// </summary>
-        public static string PATCH_NOT_FOUND {
-            get {
-                return ResourceManager.GetString("PATCH_NOT_FOUND", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}
-        ///File not found ähnelt.
-        /// </summary>
-        public static string PATCH_NOT_FOUND_EXPANDED_DESCRIPTION {
-            get {
-                return ResourceManager.GetString("PATCH_NOT_FOUND_EXPANDED_DESCRIPTION", resourceCulture);
             }
         }
         
@@ -28561,11 +29958,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} ok. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} OK. ähnelt.
         /// </summary>
         public static string PATCHING_WIZARD_CHECK_OK {
             get {
                 return ResourceManager.GetString("PATCHING_WIZARD_CHECK_OK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: {1} OK. ähnelt.
+        /// </summary>
+        public static string PATCHING_WIZARD_CHECK_ON_XENOBJECT_OK {
+            get {
+                return ResourceManager.GetString("PATCHING_WIZARD_CHECK_ON_XENOBJECT_OK", resourceCulture);
             }
         }
         
@@ -28584,15 +29990,6 @@ namespace XenAdmin {
         public static string PATCHING_WIZARD_DESC_CELL_INDENT {
             get {
                 return ResourceManager.GetString("PATCHING_WIZARD_DESC_CELL_INDENT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: {1} ok. ähnelt.
-        /// </summary>
-        public static string PATCHING_WIZARD_HOST_CHECK_OK {
-            get {
-                return ResourceManager.GetString("PATCHING_WIZARD_HOST_CHECK_OK", resourceCulture);
             }
         }
         
@@ -28726,6 +30123,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Install Updates ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_AUTOUPDATINGPAGE_TEXT_CDN {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_AUTOUPDATINGPAGE_TEXT_CDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Uploading and installing updates ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_AUTOUPDATINGPAGE_TITLE {
@@ -28789,7 +30195,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Restart these servers in this order (master always first): ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Restart these servers in this order (coordinator always first): ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_MODEPAGE_RESTARTSERVERS {
             get {
@@ -28807,7 +30213,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Restart toolstack on these servers in this order (master always first): ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Restart toolstack on these servers in this order (coordinator always first): ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_MODEPAGE_RESTARTXAPI {
             get {
@@ -29086,11 +30492,92 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} will download and install all released updates on the current version, usually with only a single reboot at the end. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_AUTO_LABEL {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_AUTO_LABEL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} will install all released updates on the current version, usually with only a single reboot at the end. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_AUTO_LABEL_CDN {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_AUTO_LABEL_CDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select Automated Updates, choose an update to download, or browse your computer for an update or supplemental pack file. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_BLURB {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_BLURB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select Automated Updates, or browse your computer for a supplemental pack file. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_BLURB_CDN {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_BLURB_CDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Browse your computer for an update or supplemental pack file. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_BLURB_CDN_UNLICENSED {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_BLURB_CDN_UNLICENSED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select an update to download, or browse your computer for an update or supplemental pack file. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_BLURB_UNLICENSED {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_BLURB_UNLICENSED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Choose Update File ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_SELECTPATCHPAGE_CHOOSE {
             get {
                 return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_CHOOSE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Select an update or supplemental pack from disk ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_DISK_RADIO {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_DISK_RADIO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Select a supplemental pack from disk ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_DISK_RADIO_CDN {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_DISK_RADIO_CDN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The file you have selected is a Base Installation ISO file and cannot be used to update your system. Please select an Update ISO file, or use the Rolling Pool Upgrade wizard instead to upgrade to a new version. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTPATCHPAGE_ERROR_MAINISO {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTPATCHPAGE_ERROR_MAINISO", resourceCulture);
             }
         }
         
@@ -29104,7 +30591,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Choose an existing update to install or upload a new one ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Choose the update you want to install ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_SELECTPATCHPAGE_TITLE {
             get {
@@ -29113,7 +30600,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Updates and Supplemental Packs (*.{0}, *.iso,*.zip)|*.{0};*.iso;*.zip ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Updates and Supplemental Packs (*.iso,*.zip)|*.iso;*.zip ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_SELECTPATCHPAGE_UPDATESEXT {
             get {
@@ -29140,16 +30627,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Automated updates are not supported on this [XenServer] version ähnelt.
-        /// </summary>
-        public static string PATCHINGWIZARD_SELECTSERVERPAGE_AUTOMATED_UPDATES_NOT_SUPPORTED_HOST_VERSION {
-            get {
-                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_AUTOMATED_UPDATES_NOT_SUPPORTED_HOST_VERSION", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Automated updates are not supported on partially upgraded [XenServer] pools ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Automated updates are not supported on partially upgraded {0} pools ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_SELECTSERVERPAGE_AUTOMATED_UPDATES_NOT_SUPPORTED_PARTIALLY_UPGRADED {
             get {
@@ -29159,20 +30637,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot install supplemental packs on this [XenServer] version ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot install updates on this host because the coordinator is running a version higher than {0} ähnelt.
         /// </summary>
-        public static string PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_SUPP_PACKS {
+        public static string PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_UPDATE_COORDINATOR_POST_7_0 {
             get {
-                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_SUPP_PACKS", resourceCulture);
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_UPDATE_COORDINATOR_POST_7_0", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot install updates on this host because the master is running a version higher than {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have never synchronized with the update channel. ähnelt.
         /// </summary>
-        public static string PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_UPDATE_MASTER_POST_7_0 {
+        public static string PATCHINGWIZARD_SELECTSERVERPAGE_CDN_NOT_SYNCHRONIZED {
             get {
-                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_UPDATE_MASTER_POST_7_0", resourceCulture);
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_CDN_NOT_SYNCHRONIZED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have not configured an update channel. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTSERVERPAGE_CDN_REPOS_NOT_CONFIGURED {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_CDN_REPOS_NOT_CONFIGURED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die All updates available at the last synchronization have been applied. ähnelt.
+        /// </summary>
+        public static string PATCHINGWIZARD_SELECTSERVERPAGE_CDN_UPDATES_APPLIED {
+            get {
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_CDN_UPDATES_APPLIED", resourceCulture);
             }
         }
         
@@ -29195,20 +30691,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The server is unreachable ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die One or more servers in the pool have to be upgraded before {0} can apply the selected new version. ähnelt.
         /// </summary>
-        public static string PATCHINGWIZARD_SELECTSERVERPAGE_HOST_UNREACHABLE {
+        public static string PATCHINGWIZARD_SELECTSERVERPAGE_NEW_VERSION_UPGRADE_SUPPORTERS_FIRST {
             get {
-                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_HOST_UNREACHABLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die One or more servers in the pool have to be upgraded before [XenCenter] can apply the selected new version. ähnelt.
-        /// </summary>
-        public static string PATCHINGWIZARD_SELECTSERVERPAGE_NEW_VERSION_UPGRADE_SLAVES_FIRST {
-            get {
-                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_NEW_VERSION_UPGRADE_SLAVES_FIRST", resourceCulture);
+                return ResourceManager.GetString("PATCHINGWIZARD_SELECTSERVERPAGE_NEW_VERSION_UPGRADE_SUPPORTERS_FIRST", resourceCulture);
             }
         }
         
@@ -29379,7 +30866,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] is now installing update {0} on your system. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now installing update {1} on your system. ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_SINGLEUPDATE_TITLE {
             get {
@@ -29480,7 +30967,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] is now performing the operations necessary to upload your update to the servers specified in the previous step. Please wait for these operations to complete, then click Next to continue with the installation. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now performing the operations necessary to upload your update to the servers specified in the previous step. Please wait for these operations to complete, then click Next to continue with the installation. ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_SINGLEUPLOAD_TITLE {
             get {
@@ -29507,7 +30994,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] is now installing updates on your system. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now installing updates on your system. ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_UPLOAD_AND_INSTALL_TITLE_AUTOMATED_MODE {
             get {
@@ -29516,7 +31003,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] is now installing the new version on your system. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is now installing the new version on your system. ähnelt.
         /// </summary>
         public static string PATCHINGWIZARD_UPLOAD_AND_INSTALL_TITLE_NEW_VERSION_AUTOMATED_MODE {
             get {
@@ -29543,11 +31030,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die XVA (*.xva)|*.xva|XVA Version 1 (ova.xml)|ova.xml ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path cannot be null or empty. ähnelt.
         /// </summary>
-        public static string PATHPICKER_FILETYPE {
+        public static string PATH_CAN_NOT_BE_NULL_ERROR_MESSAGE {
             get {
-                return ResourceManager.GetString("PATHPICKER_FILETYPE", resourceCulture);
+                return ResourceManager.GetString("PATH_CAN_NOT_BE_NULL_ERROR_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path does not exist. ähnelt.
+        /// </summary>
+        public static string PATH_DOES_NOT_EXIST {
+            get {
+                return ResourceManager.GetString("PATH_DOES_NOT_EXIST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Path {0} does not exist. ähnelt.
+        /// </summary>
+        public static string PATH_DOES_NOT_EXIST_PLACEHOLDER {
+            get {
+                return ResourceManager.GetString("PATH_DOES_NOT_EXIST_PLACEHOLDER", resourceCulture);
             }
         }
         
@@ -29660,15 +31165,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die None ähnelt.
-        /// </summary>
-        public static string PIF_NONE {
-            get {
-                return ResourceManager.GetString("PIF_NONE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Static ähnelt.
         /// </summary>
         public static string PIF_STATIC {
@@ -29768,7 +31264,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Installing [XenServer] on &apos;{0}&apos;... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; could not be evacuated because VM &apos;{1}&apos; lacks the feature the attempted operation needs. ähnelt.
+        /// </summary>
+        public static string PLAN_ACTION_FAILURE_VM_LACKS_FEATURE {
+            get {
+                return ResourceManager.GetString("PLAN_ACTION_FAILURE_VM_LACKS_FEATURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing {0} on &apos;{1}&apos;... ähnelt.
         /// </summary>
         public static string PLAN_ACTION_STATUS_INSTALLING_XENSERVER {
             get {
@@ -29777,7 +31282,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Installing [XenServer] {0} on &apos;{1}&apos;... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing {0} {1} on &apos;{2}&apos;... ähnelt.
         /// </summary>
         public static string PLAN_ACTION_STATUS_INSTALLING_XENSERVER_VERSION {
             get {
@@ -29959,15 +31464,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Adjust settings for plug-ins to [XenCenter] ähnelt.
-        /// </summary>
-        public static string PLUGINS_DESC {
-            get {
-                return ResourceManager.GetString("PLUGINS_DESC", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Menu item features must only have a single command XML node as a child ähnelt.
         /// </summary>
         public static string PLUGINS_MENU_ITEMS_ONLY_ONE_CHILD_ALLOWED {
@@ -30085,6 +31581,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pool coordinator ähnelt.
+        /// </summary>
+        public static string POOL_COORDINATOR {
+            get {
+                return ResourceManager.GetString("POOL_COORDINATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the pool coordinator in {0}&apos;s cache. ähnelt.
+        /// </summary>
+        public static string POOL_COORDINATOR_GONE {
+            get {
+                return ResourceManager.GetString("POOL_COORDINATOR_GONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Pool &apos;{0}&apos; has HA enabled. You must disable HA before making the pool into a standalone server. ähnelt.
         /// </summary>
         public static string POOL_DELETE_HA_ENABLED {
@@ -30157,11 +31671,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the pool in [XenCenter]&apos;s cache. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the pool in {0}&apos;s cache. ähnelt.
         /// </summary>
         public static string POOL_GONE {
             get {
                 return ResourceManager.GetString("POOL_GONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for Software FCoE SRs has been deprecated in {1} ähnelt.
+        /// </summary>
+        public static string POOL_HAS_DEPRECATED_FCOE_SHORT {
+            get {
+                return ResourceManager.GetString("POOL_HAS_DEPRECATED_FCOE_SHORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Support for Software FCoE SRs has been deprecated in {0} and will be removed in a future release. It is recommended that you move your VMs to a different type of storage and remove Software FCoE SRs from your systems as soon as possible. ähnelt.
+        /// </summary>
+        public static string POOL_HAS_DEPRECATED_FCOE_WARNING {
+            get {
+                return ResourceManager.GetString("POOL_HAS_DEPRECATED_FCOE_WARNING", resourceCulture);
             }
         }
         
@@ -30184,11 +31716,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for paravirtualized (PV) guests is dropped as of [XenServer] {1}. Click &quot;Learn more&quot; to see the list of supported guest operating systems.  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for paravirtualized (PV) guests has been removed in {1}. ähnelt.
         /// </summary>
         public static string POOL_HAS_PV_GUEST_WARNING {
             get {
                 return ResourceManager.GetString("POOL_HAS_PV_GUEST_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The following VMs are paravirtualized (PV):
+        ///
+        ///{0}
+        ///
+        ///Support for PV guests has been removed in {1}. Click Learn more to see the list of supported guest operating systems. ähnelt.
+        /// </summary>
+        public static string POOL_HAS_PV_GUEST_WARNING_DETAIL {
+            get {
+                return ResourceManager.GetString("POOL_HAS_PV_GUEST_WARNING_DETAIL", resourceCulture);
             }
         }
         
@@ -30198,6 +31743,42 @@ namespace XenAdmin {
         public static string POOL_IS_PARTIALLY_LICENSED {
             get {
                 return ResourceManager.GetString("POOL_IS_PARTIALLY_LICENSED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificate verification is enabled on coordinator, but not on this server. To create the pool, first enable certificate verification on the server. ähnelt.
+        /// </summary>
+        public static string POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_COORDINATOR {
+            get {
+                return ResourceManager.GetString("POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_COORDINATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificate verification is enabled on this server, but not on coordinator. To create the pool, first enable certificate verification on coordinator. ähnelt.
+        /// </summary>
+        public static string POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_COORDINATOR_JOINER {
+            get {
+                return ResourceManager.GetString("POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_COORDINATOR_JOINER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificate verification is enabled on the pool, but not on this server. To add the server to the pool, first enable certificate verification on the server. ähnelt.
+        /// </summary>
+        public static string POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_POOL {
+            get {
+                return ResourceManager.GetString("POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificate verification is enabled on this server, but not on the pool. To add the server to the pool, first enable certificate verification on the pool. ähnelt.
+        /// </summary>
+        public static string POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_POOL_JOINER {
+            get {
+                return ResourceManager.GetString("POOL_JOIN_CERTIFICATE_CHECKING_ONLY_ON_POOL_JOINER", resourceCulture);
             }
         }
         
@@ -30247,20 +31828,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Pool master ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Support for Software FCoE SRs has been deprecated in {0} and will be removed in a future release. If you are upgrading to this version, it is recommended that you move your VMs to a different type of storage and remove Software FCoE SRs from your system as soon as possible. ähnelt.
         /// </summary>
-        public static string POOL_MASTER {
+        public static string POOL_MAY_HAVE_DEPRECATED_FCOE_WARNING {
             get {
-                return ResourceManager.GetString("POOL_MASTER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the pool master in [XenCenter]&apos;s cache. ähnelt.
-        /// </summary>
-        public static string POOL_MASTER_GONE {
-            get {
-                return ResourceManager.GetString("POOL_MASTER_GONE", resourceCulture);
+                return ResourceManager.GetString("POOL_MAY_HAVE_DEPRECATED_FCOE_WARNING", resourceCulture);
             }
         }
         
@@ -30292,7 +31864,9 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select a pool or stand alone server to import this VM to. The home server setting will be taken from the template.\n\nIf this value does not correspond to a server within the selected resource pool then it will be ignored for all resourcing decisions. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select a pool or stand alone server to import this VM to. The home server setting will be taken from the template.
+        ///
+        ///If this value does not correspond to a server within the selected resource pool then it will be ignored for all resourcing decisions. ähnelt.
         /// </summary>
         public static string POOL_PICKER_BLURB_NO_AFFINITY {
             get {
@@ -30301,7 +31875,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the pool update in [XenCenter]&apos;s cache. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not find the pool update in {0}&apos;s cache. ähnelt.
         /// </summary>
         public static string POOL_UPDATE_GONE {
             get {
@@ -30310,7 +31884,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Pool partially upgraded to [XenServer] {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pool partially upgraded to {0} ähnelt.
         /// </summary>
         public static string POOL_VERSIONS_LINK_TEXT {
             get {
@@ -30427,6 +32001,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Please specify a script name ähnelt.
+        /// </summary>
+        public static string POWER_ON_CUSTOM_MODE_ERROR {
+            get {
+                return ResourceManager.GetString("POWER_ON_CUSTOM_MODE_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Power on request to {0} failed. Check the network connectivity. ähnelt.
         /// </summary>
         public static string POWER_ON_REQUEST_FAILED {
@@ -30490,11 +32073,138 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for container management has been removed as of {1}. ähnelt.
+        /// </summary>
+        public static string PROBLEM_CONTAINER_MANAGEMENT_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("PROBLEM_CONTAINER_MANAGEMENT_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You will no longer be able to use the Container Management supplemental pack for managing Docker containers. The  update will not remove the supplemental pack from your system, but it may not be fully, if at all, functional. ähnelt.
+        /// </summary>
+        public static string PROBLEM_CONTAINER_MANAGEMENT_UPDATE {
+            get {
+                return ResourceManager.GetString("PROBLEM_CONTAINER_MANAGEMENT_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to {0} or above, you will no longer be able to use the Container Management supplemental pack for managing Docker containers. The upgrade will remove the supplemental pack from your system. ähnelt.
+        /// </summary>
+        public static string PROBLEM_CONTAINER_MANAGEMENT_UPGRADE {
+            get {
+                return ResourceManager.GetString("PROBLEM_CONTAINER_MANAGEMENT_UPGRADE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The coordinator needs to be rebooted first ähnelt.
+        /// </summary>
+        public static string PROBLEM_COORDINATOR_PENDING_RESTART_HOST {
+            get {
+                return ResourceManager.GetString("PROBLEM_COORDINATOR_PENDING_RESTART_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: This update requires the coordinator to be rebooted first ähnelt.
+        /// </summary>
+        public static string PROBLEM_COORDINATOR_PENDING_RESTART_HOST_THIS_UPDATE {
+            get {
+                return ResourceManager.GetString("PROBLEM_COORDINATOR_PENDING_RESTART_HOST_THIS_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Toolstack on coordinator needs to be restarted first ähnelt.
+        /// </summary>
+        public static string PROBLEM_COORDINATOR_PENDING_RESTART_TOOLSTACK {
+            get {
+                return ResourceManager.GetString("PROBLEM_COORDINATOR_PENDING_RESTART_TOOLSTACK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: This update requires the toolstack on coordinator to be restarted first ähnelt.
+        /// </summary>
+        public static string PROBLEM_COORDINATOR_PENDING_RESTART_TOOLSTACK_THIS_UPDATE {
+            get {
+                return ResourceManager.GetString("PROBLEM_COORDINATOR_PENDING_RESTART_TOOLSTACK_THIS_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disable Health Check ähnelt.
+        /// </summary>
+        public static string PROBLEM_HEALTH_CHECK_HELP {
+            get {
+                return ResourceManager.GetString("PROBLEM_HEALTH_CHECK_HELP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Health Check has been removed, but &apos;{0}&apos; is still enrolled to it.
+        ///{1} will disable Health Check and clear the enrollment before you can proceed to manage your system. ähnelt.
+        /// </summary>
+        public static string PROBLEM_HEALTH_CHECK_ON_CONNECTION {
+            get {
+                return ResourceManager.GetString("PROBLEM_HEALTH_CHECK_ON_CONNECTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Health Check has been removed. ähnelt.
+        /// </summary>
+        public static string PROBLEM_HEALTH_CHECK_SERVICE_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("PROBLEM_HEALTH_CHECK_SERVICE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string PROBLEM_HOSTPROBLEM_TITLE {
             get {
                 return ResourceManager.GetString("PROBLEM_HOSTPROBLEM_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for protocols earlier than TLS 1.2 has been removed as of {1} ähnelt.
+        /// </summary>
+        public static string PROBLEM_LEGACY_PROTOCOL_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("PROBLEM_LEGACY_PROTOCOL_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disable legacy protocols ähnelt.
+        /// </summary>
+        public static string PROBLEM_LEGACY_PROTOCOL_HELP {
+            get {
+                return ResourceManager.GetString("PROBLEM_LEGACY_PROTOCOL_HELP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to {0} and above, you will not be able to use security protocols earlier than TLS 1.2 for communication with the pool and you may lose permanently access to it. ähnelt.
+        /// </summary>
+        public static string PROBLEM_LEGACY_PROTOCOL_INFO_POOL {
+            get {
+                return ResourceManager.GetString("PROBLEM_LEGACY_PROTOCOL_INFO_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to {0} and above, you will not be able to use security protocols earlier than TLS 1.2 for communication with the server and you may lose permanently access to it. ähnelt.
+        /// </summary>
+        public static string PROBLEM_LEGACY_PROTOCOL_INFO_SERVER {
+            get {
+                return ResourceManager.GetString("PROBLEM_LEGACY_PROTOCOL_INFO_SERVER", resourceCulture);
             }
         }
         
@@ -30520,47 +32230,38 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The master needs to be rebooted first ähnelt.
-        /// </summary>
-        public static string PROBLEM_MASTER_PENDING_RESTART_HOST {
-            get {
-                return ResourceManager.GetString("PROBLEM_MASTER_PENDING_RESTART_HOST", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: This update requires the master to be rebooted first ähnelt.
-        /// </summary>
-        public static string PROBLEM_MASTER_PENDING_RESTART_HOST_THIS_UPDATE {
-            get {
-                return ResourceManager.GetString("PROBLEM_MASTER_PENDING_RESTART_HOST_THIS_UPDATE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Toolstack on master needs to be restarted first ähnelt.
-        /// </summary>
-        public static string PROBLEM_MASTER_PENDING_RESTART_TOOLSTACK {
-            get {
-                return ResourceManager.GetString("PROBLEM_MASTER_PENDING_RESTART_TOOLSTACK", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: This update requires the toolstack on master to be restarted first ähnelt.
-        /// </summary>
-        public static string PROBLEM_MASTER_PENDING_RESTART_TOOLSTACK_THIS_UPDATE {
-            get {
-                return ResourceManager.GetString("PROBLEM_MASTER_PENDING_RESTART_TOOLSTACK_THIS_UPDATE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Pool &apos;{0}&apos; ähnelt.
         /// </summary>
         public static string PROBLEM_POOLPROBLEM_TITLE {
             get {
                 return ResourceManager.GetString("PROBLEM_POOLPROBLEM_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for the Power On mode iLO has been removed as of {1} ähnelt.
+        /// </summary>
+        public static string PROBLEM_POWER_ON_ILO_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("PROBLEM_POWER_ON_ILO_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disable Power On mode iLO ähnelt.
+        /// </summary>
+        public static string PROBLEM_POWER_ON_ILO_HELP {
+            get {
+                return ResourceManager.GetString("PROBLEM_POWER_ON_ILO_HELP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to {0} and above, you will not be able to use the Hewlett-Packard Integrated Lights-Out (iLO) feature to power on your server remotely. ähnelt.
+        /// </summary>
+        public static string PROBLEM_POWER_ON_ILO_INFO {
+            get {
+                return ResourceManager.GetString("PROBLEM_POWER_ON_ILO_INFO", resourceCulture);
             }
         }
         
@@ -30576,29 +32277,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die SR &apos;{0}&apos; ähnelt.
-        /// </summary>
-        public static string PROBLEM_SRPROBLEM_TITLE {
-            get {
-                return ResourceManager.GetString("PROBLEM_SRPROBLEM_TITLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die An error has occurred while attempting to connect to Storage Link Gateway: \n\n{0}\n\nPlease review the settings for this host and reconnect. ähnelt.
         /// </summary>
         public static string PROBLEM_STORAGELINK_CONNECTION_FAILED {
             get {
                 return ResourceManager.GetString("PROBLEM_STORAGELINK_CONNECTION_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The use of StorageLink SRs has been deprecated. Please remove StorageLink SRs before upgrading. ähnelt.
-        /// </summary>
-        public static string PROBLEM_UNSUPPORTED_STORAGELINK_SR {
-            get {
-                return ResourceManager.GetString("PROBLEM_UNSUPPORTED_STORAGELINK_SR", resourceCulture);
             }
         }
         
@@ -30621,7 +32304,34 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] version ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Support for the vSwitch Controller has been removed in {1}. ähnelt.
+        /// </summary>
+        public static string PROBLEM_VSWITCH_CONTROLLER_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("PROBLEM_VSWITCH_CONTROLLER_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Support for the vSwitch Controller has been removed in {0}. You must deconfigure the controller because any features that require it will no longer work. Please click the link below for more information. ähnelt.
+        /// </summary>
+        public static string PROBLEM_VSWITCH_CONTROLLER_INFO_ERROR {
+            get {
+                return ResourceManager.GetString("PROBLEM_VSWITCH_CONTROLLER_INFO_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die If you are upgrading to {0} and above, you must deconfigure the vSwitch Controller because support for it has been removed in this release and any features that require it will no longer work. Please click the link below for more information. ähnelt.
+        /// </summary>
+        public static string PROBLEM_VSWITCH_CONTROLLER_INFO_WARNING {
+            get {
+                return ResourceManager.GetString("PROBLEM_VSWITCH_CONTROLLER_INFO_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} version ähnelt.
         /// </summary>
         public static string PROBLEM_XENCENTER_VERSION_TITLE {
             get {
@@ -30635,16 +32345,6 @@ namespace XenAdmin {
         public static string PROCEED {
             get {
                 return ResourceManager.GetString("PROCEED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Please insert the [XenServer] CD into the physical drive on server &apos;{0}&apos;.
-        ///Press OK to continue the wizard and return to the server and follow the instructions on screen. ähnelt.
-        /// </summary>
-        public static string PROMPT_XS_CD {
-            get {
-                return ResourceManager.GetString("PROMPT_XS_CD", resourceCulture);
             }
         }
         
@@ -30694,15 +32394,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Provisioning Options ähnelt.
-        /// </summary>
-        public static string PROVISIONING_OPTIONS {
-            get {
-                return ResourceManager.GetString("PROVISIONING_OPTIONS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Provisioning Type ähnelt.
         /// </summary>
         public static string PROVISIONING_TYPE {
@@ -30730,7 +32421,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] not installed ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} not installed ähnelt.
         /// </summary>
         public static string PV_DRIVERS_NOT_INSTALLED {
             get {
@@ -30739,7 +32430,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] out of date (version {0} installed) ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} out of date (version {1}.{2} installed) ähnelt.
         /// </summary>
         public static string PV_DRIVERS_OUT_OF_DATE {
             get {
@@ -30748,7 +32439,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] out of date ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} out of date ähnelt.
         /// </summary>
         public static string PV_DRIVERS_OUT_OF_DATE_UNKNOWN_VERSION {
             get {
@@ -30816,15 +32507,6 @@ namespace XenAdmin {
         public static string PVS_CACHE_MEMORY_SR_NAME {
             get {
                 return ResourceManager.GetString("PVS_CACHE_MEMORY_SR_NAME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Not configured ähnelt.
-        /// </summary>
-        public static string PVS_CACHE_NOT_CONFIGURED {
-            get {
-                return ResourceManager.GetString("PVS_CACHE_NOT_CONFIGURED", resourceCulture);
             }
         }
         
@@ -30937,55 +32619,47 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to log out {0} users.
-        ///
-        ///Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die To reduce the risk of unauthorized access to your system, it is recommended that you also change the server root password and rotate the pool secret. ähnelt.
         /// </summary>
-        public static string QUESTION_LOGOUT_AD_USER_MANY {
+        public static string QUESTION_ADMIN_EXIT_PROCEDURE_ADVISORY {
             get {
-                return ResourceManager.GetString("QUESTION_LOGOUT_AD_USER_MANY", resourceCulture);
+                return ResourceManager.GetString("QUESTION_ADMIN_EXIT_PROCEDURE_ADVISORY", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to log out the user &apos;{0}&apos;.
-        ///
-        ///Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The users you are about to remove are Pool Administrators. ähnelt.
         /// </summary>
-        public static string QUESTION_LOGOUT_AD_USER_ONE {
+        public static string QUESTION_ADMIN_EXIT_PROCEDURE_MANY {
             get {
-                return ResourceManager.GetString("QUESTION_LOGOUT_AD_USER_ONE", resourceCulture);
+                return ResourceManager.GetString("QUESTION_ADMIN_EXIT_PROCEDURE_MANY", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die ? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The user you are about to remove is a Pool Administrator. ähnelt.
         /// </summary>
-        public static string QUESTION_MARK {
+        public static string QUESTION_ADMIN_EXIT_PROCEDURE_ONE {
             get {
-                return ResourceManager.GetString("QUESTION_MARK", resourceCulture);
+                return ResourceManager.GetString("QUESTION_ADMIN_EXIT_PROCEDURE_ONE", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to remove {0} users.
-        ///
-        ///Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die One of the users you are about to remove is a Pool Administrator. ähnelt.
         /// </summary>
-        public static string QUESTION_REMOVE_AD_USER_MANY {
+        public static string QUESTION_ADMIN_EXIT_PROCEDURE_ONE_OF_MANY {
             get {
-                return ResourceManager.GetString("QUESTION_REMOVE_AD_USER_MANY", resourceCulture);
+                return ResourceManager.GetString("QUESTION_ADMIN_EXIT_PROCEDURE_ONE_OF_MANY", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You are about to remove the user &apos;{0}&apos;.
-        ///
-        ///Do you want to continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} of the users you are about to remove are Pool Administrators. ähnelt.
         /// </summary>
-        public static string QUESTION_REMOVE_AD_USER_ONE {
+        public static string QUESTION_ADMIN_EXIT_PROCEDURE_SOME_OF_MANY {
             get {
-                return ResourceManager.GetString("QUESTION_REMOVE_AD_USER_ONE", resourceCulture);
+                return ResourceManager.GetString("QUESTION_ADMIN_EXIT_PROCEDURE_SOME_OF_MANY", resourceCulture);
             }
         }
         
@@ -31043,7 +32717,34 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Current access levels do not allow migration of VMs across pools. Log in as a different user with sufficient privileges on both source and target hosts and try again. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot copy templates across pools. Log in as a different user with sufficient privileges on both source and destination servers and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_CROSS_POOL_COPY_TEMPLATE_BLOCKED {
+            get {
+                return ResourceManager.GetString("RBAC_CROSS_POOL_COPY_TEMPLATE_BLOCKED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot copy VMs across pools. Log in as a different user with sufficient privileges on both source and destination servers and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_CROSS_POOL_COPY_VM_BLOCKED {
+            get {
+                return ResourceManager.GetString("RBAC_CROSS_POOL_COPY_VM_BLOCKED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot migrate templates across pools. Log in as a different user with sufficient privileges on both source and destination servers and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_CROSS_POOL_MIGRATE_TEMPLATE_BLOCKED {
+            get {
+                return ResourceManager.GetString("RBAC_CROSS_POOL_MIGRATE_TEMPLATE_BLOCKED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot migrate VMs across pools. Log in as a different user with sufficient privileges on both source and destination servers and try again. ähnelt.
         /// </summary>
         public static string RBAC_CROSS_POOL_MIGRATE_VM_BLOCKED {
             get {
@@ -31052,11 +32753,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die User {0} does not have sufficient permissions to run a Disaster Recovery wizard. Login as a different user with sufficient privileges and try again. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user does not have sufficient permissions to use Disaster Recovery. Login as a different user with sufficient privileges and try again. ähnelt.
         /// </summary>
         public static string RBAC_DR_WIZARD_MESSAGE {
             get {
                 return ResourceManager.GetString("RBAC_DR_WIZARD_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot download system status reports. Log in as a different user with sufficient privileges and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_GET_SYSTEM_STATUS_BLOCKED {
+            get {
+                return ResourceManager.GetString("RBAC_GET_SYSTEM_STATUS_BLOCKED", resourceCulture);
             }
         }
         
@@ -31067,9 +32777,18 @@ namespace XenAdmin {
         ///
         ///{0} ähnelt.
         /// </summary>
-        public static string RBAC_HA_TAB_WARNING {
+        public static string RBAC_HA_CONFIGURE_WARNING {
             get {
-                return ResourceManager.GetString("RBAC_HA_TAB_WARNING", resourceCulture);
+                return ResourceManager.GetString("RBAC_HA_CONFIGURE_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot configure HA settings. Log in as a different user with sufficient privileges and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_HA_ENABLE_WARNING {
+            get {
+                return ResourceManager.GetString("RBAC_HA_ENABLE_WARNING", resourceCulture);
             }
         }
         
@@ -31079,6 +32798,24 @@ namespace XenAdmin {
         public static string RBAC_HTTP_FAILURE {
             get {
                 return ResourceManager.GetString("RBAC_HTTP_FAILURE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot copy templates. Log in as a different user with sufficient privileges and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_INTRA_POOL_COPY_TEMPLATE_BLOCKED {
+            get {
+                return ResourceManager.GetString("RBAC_INTRA_POOL_COPY_TEMPLATE_BLOCKED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user cannot copy VMs. Log in as a different user with sufficient privileges and try again. ähnelt.
+        /// </summary>
+        public static string RBAC_INTRA_POOL_COPY_VM_BLOCKED {
+            get {
+                return ResourceManager.GetString("RBAC_INTRA_POOL_COPY_VM_BLOCKED", resourceCulture);
             }
         }
         
@@ -31276,6 +33013,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Read Caching ähnelt.
+        /// </summary>
+        public static string READ_CACHING {
+            get {
+                return ResourceManager.GetString("READ_CACHING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Read Only ähnelt.
         /// </summary>
         public static string READ_ONLY {
@@ -31423,6 +33169,15 @@ namespace XenAdmin {
         public static string REMOVE_CRASHDUMP_WARNING {
             get {
                 return ResourceManager.GetString("REMOVE_CRASHDUMP_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Remove Files ähnelt.
+        /// </summary>
+        public static string REMOVE_FILES {
+            get {
+                return ResourceManager.GetString("REMOVE_FILES", resourceCulture);
             }
         }
         
@@ -31870,9 +33625,18 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The required hotfix is not installed ähnelt.
         /// </summary>
-        public static string REQUIRED_HOTFIX_ISNOT_INSTALLED {
+        public static string REQUIRED_HOTFIX_NOT_INSTALLED {
             get {
-                return ResourceManager.GetString("REQUIRED_HOTFIX_ISNOT_INSTALLED", resourceCulture);
+                return ResourceManager.GetString("REQUIRED_HOTFIX_NOT_INSTALLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Check skipped because the required hotfix is not installed ähnelt.
+        /// </summary>
+        public static string REQUIRED_HOTFIX_NOT_INSTALLED_WARNING {
+            get {
+                return ResourceManager.GetString("REQUIRED_HOTFIX_NOT_INSTALLED_WARNING", resourceCulture);
             }
         }
         
@@ -31882,6 +33646,42 @@ namespace XenAdmin {
         public static string REQUIRED_UPDATES {
             get {
                 return ResourceManager.GetString("REQUIRED_UPDATES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Resetting certificate... ähnelt.
+        /// </summary>
+        public static string RESET_SERVER_CERTIFICATE_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("RESET_SERVER_CERTIFICATE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Reset certificate... ähnelt.
+        /// </summary>
+        public static string RESET_SERVER_CERTIFICATE_MENU {
+            get {
+                return ResourceManager.GetString("RESET_SERVER_CERTIFICATE_MENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Resetting certificate on server {0}... ähnelt.
+        /// </summary>
+        public static string RESET_SERVER_CERTIFICATE_TITLE {
+            get {
+                return ResourceManager.GetString("RESET_SERVER_CERTIFICATE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The server&apos;s identity certificate will be replaced by a self-signed certificate. Do you want to continue? ähnelt.
+        /// </summary>
+        public static string RESET_SERVER_CERTIFICATE_WARNING {
+            get {
+                return ResourceManager.GetString("RESET_SERVER_CERTIFICATE_WARNING", resourceCulture);
             }
         }
         
@@ -31904,7 +33704,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Backup file loaded to server &apos;{0}&apos;.  Refer to the &quot;[XenServer product] Administrator&apos;s Guide&quot; for instructions on how to complete the restore procedure. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Backup file loaded to server &apos;{0}&apos;. Refer to the &quot;{1} Administrator&apos;s Guide&quot; for instructions on how to complete the restore procedure. ähnelt.
         /// </summary>
         public static string RESTORE_FROM_BACKUP_FINALIZE {
             get {
@@ -32295,13 +34095,13 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die To install the [XenServer] upgrade on {0}, follow these steps:
+        ///   Sucht eine lokalisierte Zeichenfolge, die To install the {0} upgrade on {1}, follow these steps:
         ///    
-        ///1. Insert the [XenServer] installation CD-ROM in the server’s CD/DVD drive or set up a PXE network boot.
+        ///1. Insert the {0} installation CD-ROM in the server&apos;s CD/DVD drive or set up a PXE network boot.
         ///2. Click the Reboot Now button below to reboot the server and begin the installation.
         ///3. Go to the server’s console and follow the on-screen instructions to install the upgrade.
         ///
-        ///To skip this server and continue to the next server in the pool, click Skip This Server. Note that running a pool with servers on different versions of [X [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///To skip this server and continue to the next server in the pool, click Skip This Server. Note that running a pool with servers on different versions of {0} is not support [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         public static string ROLLING_UPGRADE_REBOOT_MESSAGE {
             get {
@@ -32328,7 +34128,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Still waiting for the installation of [XenServer] on &apos;{0}&apos; to complete. Please check the server console for possible errors. Keep waiting if the installation is still running... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Still waiting for the installation of {0} on &apos;{1}&apos; to complete. Please check the server console for possible errors. Keep waiting if the installation is still running... ähnelt.
         /// </summary>
         public static string ROLLING_UPGRADE_TIMEOUT {
             get {
@@ -32337,7 +34137,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Still waiting for the installation of [XenServer] {0} on &apos;{1}&apos; to complete. Please check the server console for possible errors. Keep waiting if the installation is still running... ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Still waiting for the installation of {0} {1} on &apos;{2}&apos; to complete. Please check the server console for possible errors. Keep waiting if the installation is still running... ähnelt.
         /// </summary>
         public static string ROLLING_UPGRADE_TIMEOUT_VERSION {
             get {
@@ -32423,6 +34223,89 @@ namespace XenAdmin {
         public static string ROLLINGUPGRADE_PRECHECKS {
             get {
                 return ResourceManager.GetString("ROLLINGUPGRADE_PRECHECKS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot rotate the pool secret when HA is on. ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_HA {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_HA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Rotate &amp;Pool Secret ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_MENU {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_MENU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot enable clustering while a pool secret rotation is in progress. ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_PENDING_CLUSTER {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_PENDING_CLUSTER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot configure HA while a pool secret rotation is in progress. ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_PENDING_HA {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_PENDING_HA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot nominate a new coordinator while a pool secret rotation is in progress. ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_PENDING_NEW_COORDINATOR {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_PENDING_NEW_COORDINATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A {0} user does not have sufficient permissions to rotate the pool secret. Please login using an account with one of the following roles:
+        ///
+        ///{1} ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_RBAC_RESTRICTION {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_RBAC_RESTRICTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die To reduce the risk of unauthorized access to your system, it is recommended that you also change the server root password. ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_REMIND_CHANGE_PASSWORD {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_REMIND_CHANGE_PASSWORD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You cannot rotate the pool secret when a Rolling Pool Upgrade is in progress. ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_RPU {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_RPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Rotating pool secret ähnelt.
+        /// </summary>
+        public static string ROTATE_POOL_SECRET_TITLE {
+            get {
+                return ResourceManager.GetString("ROTATE_POOL_SECRET_TITLE", resourceCulture);
             }
         }
         
@@ -32580,15 +34463,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Instance is already locked ähnelt.
-        /// </summary>
-        public static string SAVECHANGES_LOCKED {
-            get {
-                return ResourceManager.GetString("SAVECHANGES_LOCKED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Saving file {0} ähnelt.
         /// </summary>
         public static string SAVING_FILE_X {
@@ -32618,18 +34492,18 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Saving configuration... ähnelt.
         /// </summary>
-        public static string SAVING_VMS_ACTION_DESC {
+        public static string SAVING_VM_PROPERTIES_ACTION_DESC {
             get {
-                return ResourceManager.GetString("SAVING_VMS_ACTION_DESC", resourceCulture);
+                return ResourceManager.GetString("SAVING_VM_PROPERTIES_ACTION_DESC", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Saving VM Configuration ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Saving VM properties ähnelt.
         /// </summary>
-        public static string SAVING_VMS_ACTION_TITLE {
+        public static string SAVING_VM_PROPERTIES_ACTION_TITLE {
             get {
-                return ResourceManager.GetString("SAVING_VMS_ACTION_TITLE", resourceCulture);
+                return ResourceManager.GetString("SAVING_VM_PROPERTIES_ACTION_TITLE", resourceCulture);
             }
         }
         
@@ -32657,15 +34531,6 @@ namespace XenAdmin {
         public static string SCAN_IN_PROGRESS_TOOLTIP {
             get {
                 return ResourceManager.GetString("SCAN_IN_PROGRESS_TOOLTIP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Scanning adapters ähnelt.
-        /// </summary>
-        public static string SCANNING_ADAPTERS {
-            get {
-                return ResourceManager.GetString("SCANNING_ADAPTERS", resourceCulture);
             }
         }
         
@@ -32760,7 +34625,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die SSL certificate options ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Certificates and pool secrets ähnelt.
         /// </summary>
         public static string SECURITY_DESC {
             get {
@@ -32805,6 +34670,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Changing this setting will cause you to lose access to the server temporarily. ähnelt.
+        /// </summary>
+        public static string SECURITYEDITPAGE_WARNING_HOST {
+            get {
+                return ResourceManager.GetString("SECURITYEDITPAGE_WARNING_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Select a filter... ähnelt.
         /// </summary>
         public static string SELECT_A_FILTER {
@@ -32819,6 +34693,15 @@ namespace XenAdmin {
         public static string SELECT_DEFAULT_SR {
             get {
                 return ResourceManager.GetString("SELECT_DEFAULT_SR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Select License Key ähnelt.
+        /// </summary>
+        public static string SELECT_LICENSE_KEY {
+            get {
+                return ResourceManager.GetString("SELECT_LICENSE_KEY", resourceCulture);
             }
         }
         
@@ -32895,7 +34778,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This server is using an API that is incompatible with [XenCenter]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This server is using an API that is incompatible with {0}. ähnelt.
         /// </summary>
         public static string SERVER_API_INCOMPATIBLE {
             get {
@@ -32913,29 +34796,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server failure: {0} ähnelt.
-        /// </summary>
-        public static string SERVER_FAILURE {
-            get {
-                return ResourceManager.GetString("SERVER_FAILURE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Server: ähnelt.
         /// </summary>
         public static string SERVER_LABLE {
             get {
                 return ResourceManager.GetString("SERVER_LABLE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Out of Date ähnelt.
-        /// </summary>
-        public static string SERVER_OUT_OF_DATE {
-            get {
-                return ResourceManager.GetString("SERVER_OUT_OF_DATE", resourceCulture);
             }
         }
         
@@ -32985,7 +34850,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server Status Report ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Server Status Report ähnelt.
         /// </summary>
         public static string SERVER_STATUS_REPORT {
             get {
@@ -33012,7 +34877,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The current time on the pool master is: {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The current time on the pool coordinator is: {0} ähnelt.
         /// </summary>
         public static string SERVER_TIME {
             get {
@@ -33021,7 +34886,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This version of [XenCenter] supports [XenServer] {0} onwards. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This version of {0} can only connect to {1}, and {2} or greater versions. ähnelt.
         /// </summary>
         public static string SERVER_TOO_OLD {
             get {
@@ -33030,7 +34895,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Use an earlier version of [XenCenter] to manage this server. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Use an earlier version of {0} to manage this server. ähnelt.
         /// </summary>
         public static string SERVER_TOO_OLD_SOLUTION {
             get {
@@ -33426,20 +35291,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} are pool masters. It is strongly recommended to nominate a new master for each affected pool before proceeding. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} are pool coordinators. It is strongly recommended to nominate a new coordinator for each affected pool before proceeding. ähnelt.
         /// </summary>
-        public static string SHUT_DOWN_POOL_MASTER_MULTIPLE {
+        public static string SHUT_DOWN_POOL_COORDINATOR_MULTIPLE {
             get {
-                return ResourceManager.GetString("SHUT_DOWN_POOL_MASTER_MULTIPLE", resourceCulture);
+                return ResourceManager.GetString("SHUT_DOWN_POOL_COORDINATOR_MULTIPLE", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is the pool master. It is strongly recommended to nominate a new master for the pool before proceeding. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} is the pool coordinator. It is strongly recommended to nominate a new coordinator for the pool before proceeding. ähnelt.
         /// </summary>
-        public static string SHUT_DOWN_POOL_MASTER_SINGLE {
+        public static string SHUT_DOWN_POOL_COORDINATOR_SINGLE {
             get {
-                return ResourceManager.GetString("SHUT_DOWN_POOL_MASTER_SINGLE", resourceCulture);
+                return ResourceManager.GetString("SHUT_DOWN_POOL_COORDINATOR_SINGLE", resourceCulture);
             }
         }
         
@@ -33534,15 +35399,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}, {1} ähnelt.
-        /// </summary>
-        public static string SIZE_LOCATION_SUB {
-            get {
-                return ResourceManager.GetString("SIZE_LOCATION_SUB", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Negligible ähnelt.
         /// </summary>
         public static string SIZE_NEGLIGIBLE {
@@ -33566,34 +35422,6 @@ namespace XenAdmin {
         public static string SLACK_LABEL {
             get {
                 return ResourceManager.GetString("SLACK_LABEL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; is a member of pool &apos;{1}&apos; and is already connected. ähnelt.
-        /// </summary>
-        public static string SLAVE_ALREADY_CONNECTED {
-            get {
-                return ResourceManager.GetString("SLAVE_ALREADY_CONNECTED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; is in a pool.  To connect to a pool, you must connect to the pool master.
-        ///Do you want to connect to the pool master &apos;{1}&apos;? ähnelt.
-        /// </summary>
-        public static string SLAVE_CONNECTION_ERROR {
-            get {
-                return ResourceManager.GetString("SLAVE_CONNECTION_ERROR", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This pool contains servers earlier than [XenServer] {0}. Please use an earlier version of [XenCenter] to manage this pool. ähnelt.
-        /// </summary>
-        public static string SLAVE_TOO_OLD {
-            get {
-                return ResourceManager.GetString("SLAVE_TOO_OLD", resourceCulture);
             }
         }
         
@@ -33702,6 +35530,26 @@ namespace XenAdmin {
         public static string SNAPSHOT_REVERT {
             get {
                 return ResourceManager.GetString("SNAPSHOT_REVERT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to revert to &apos;{0}&apos;?
+        ///
+        ///Reverting to this snapshot will revert the VM back to the point in time that the snapshot was created, and the current state of the VM will be lost. ähnelt.
+        /// </summary>
+        public static string SNAPSHOT_REVERT_BLURB {
+            get {
+                return ResourceManager.GetString("SNAPSHOT_REVERT_BLURB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Take a snapshot of the VM&apos;s current state and then revert ähnelt.
+        /// </summary>
+        public static string SNAPSHOT_REVERT_NEW_SNAPSHOT {
+            get {
+                return ResourceManager.GetString("SNAPSHOT_REVERT_NEW_SNAPSHOT", resourceCulture);
             }
         }
         
@@ -33823,6 +35671,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Software FCoE storage repositories ähnelt.
+        /// </summary>
+        public static string SOFTWARE_FCOE_STORAGE_REPOSITORIES {
+            get {
+                return ResourceManager.GetString("SOFTWARE_FCOE_STORAGE_REPOSITORIES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Build number ähnelt.
         /// </summary>
         public static string SOFTWARE_VERSION_BUILD_NUMBER {
@@ -33837,6 +35694,15 @@ namespace XenAdmin {
         public static string SOFTWARE_VERSION_DATE {
             get {
                 return ResourceManager.GetString("SOFTWARE_VERSION_DATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Last updated ähnelt.
+        /// </summary>
+        public static string SOFTWARE_VERSION_LAST_UPDATED {
+            get {
+                return ResourceManager.GetString("SOFTWARE_VERSION_LAST_UPDATED", resourceCulture);
             }
         }
         
@@ -33859,7 +35725,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Check that the proxy server on &apos;{0}&apos; is configured correctly and [XenCenter]&apos;s connection settings are correct and try again. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Check that the proxy server on &apos;{0}&apos; is configured correctly and {1}&apos;s connection settings are correct and try again. ähnelt.
         /// </summary>
         public static string SOLUTION_CHECK_PROXY {
             get {
@@ -33868,7 +35734,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Check that [XenServer] is configured correctly on &apos;{0}&apos; and try again. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Check that {0} is configured correctly on &apos;{1}&apos; and try again. ähnelt.
         /// </summary>
         public static string SOLUTION_CHECK_XENSERVER {
             get {
@@ -33877,7 +35743,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Check the proxy settings and that the server is configured correctly on &apos;{0}&apos; and try again. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Check the proxy settings and that {0} is configured correctly on &apos;{1}&apos; and try again. ähnelt.
         /// </summary>
         public static string SOLUTION_CHECK_XENSERVER_WITH_PROXY {
             get {
@@ -33922,7 +35788,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Some errors were encountered. See the [XenCenter] log for more information. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Some errors were encountered. See the application log for more information. ähnelt.
         /// </summary>
         public static string SOME_ERRORS_ENCOUNTERED {
             get {
@@ -33967,7 +35833,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This SR cannot be destroyed with [XenCenter]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This SR cannot be destroyed with {0}. ähnelt.
         /// </summary>
         public static string SR_CANNOT_BE_DESTROYED_WITH_XC {
             get {
@@ -33976,7 +35842,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This SR cannot be forgotten with [XenCenter]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This SR cannot be forgotten with {0}. ähnelt.
         /// </summary>
         public static string SR_CANNOT_BE_FORGOTTEN_WITH_XC {
             get {
@@ -34008,6 +35874,15 @@ namespace XenAdmin {
         public static string SR_DETACHED {
             get {
                 return ResourceManager.GetString("SR_DETACHED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The SR is currently unplugged from {0} ähnelt.
+        /// </summary>
+        public static string SR_DETACHED_FROM_HOST {
+            get {
+                return ResourceManager.GetString("SR_DETACHED_FROM_HOST", resourceCulture);
             }
         }
         
@@ -34067,7 +35942,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This storage repository is broken ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die This SR is broken or not fully attached. ähnelt.
         /// </summary>
         public static string SR_IS_BROKEN {
             get {
@@ -34081,6 +35956,15 @@ namespace XenAdmin {
         public static string SR_IS_LOCAL {
             get {
                 return ResourceManager.GetString("SR_IS_LOCAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die SR &apos;{0}&apos; does not have {1} of free space to import virtual disk {2}. ähnelt.
+        /// </summary>
+        public static string SR_NOT_ENOUGH_SPACE {
+            get {
+                return ResourceManager.GetString("SR_NOT_ENOUGH_SPACE", resourceCulture);
             }
         }
         
@@ -34114,7 +35998,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Scanning SR ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Scanning SR &apos;{0}&apos;... ähnelt.
         /// </summary>
         public static string SR_REFRESH_ACTION_DESC {
             get {
@@ -34128,6 +36012,15 @@ namespace XenAdmin {
         public static string SR_REFRESH_ACTION_TITLE {
             get {
                 return ResourceManager.GetString("SR_REFRESH_ACTION_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Scanning... ähnelt.
+        /// </summary>
+        public static string SR_REFRESH_ACTION_TITLE_GENERIC {
+            get {
+                return ResourceManager.GetString("SR_REFRESH_ACTION_TITLE_GENERIC", resourceCulture);
             }
         }
         
@@ -34177,7 +36070,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot reclaim freed space, because the SR is detached. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Cannot reclaim freed space because the SR is detached. ähnelt.
         /// </summary>
         public static string SR_TRIM_NO_STORAGE_HOST_ERROR {
             get {
@@ -34231,7 +36124,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Creating this SR-IOV network will temporarily disturb [XenCenter] connections to the pool.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Creating this SR-IOV network will temporarily disturb {0} connections to the pool.
         ///
         ///You may need to reboot your server(s) to enable SR-IOV network. ähnelt.
         /// </summary>
@@ -34350,6 +36243,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Decrypting {0}...  ähnelt.
+        /// </summary>
+        public static string START_FILE_DECRYPTION {
+            get {
+                return ResourceManager.GetString("START_FILE_DECRYPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Expanding {0}...  ähnelt.
+        /// </summary>
+        public static string START_FILE_EXPANSION {
+            get {
+                return ResourceManager.GetString("START_FILE_EXPANSION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Start host ähnelt.
         /// </summary>
         public static string START_HOST {
@@ -34373,6 +36284,15 @@ namespace XenAdmin {
         public static string START_ON {
             get {
                 return ResourceManager.GetString("START_ON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuring VM for the server...  ähnelt.
+        /// </summary>
+        public static string START_POST_INSTALL_INSTRUCTIONS {
+            get {
+                return ResourceManager.GetString("START_POST_INSTALL_INSTRUCTIONS", resourceCulture);
             }
         }
         
@@ -34575,24 +36495,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Enter your MyCitrix credentials (see {0}). These credentials will only be used to authenticate with [Citrix] Insight Services once and will not be stored on this machine or on your server. ähnelt.
-        /// </summary>
-        public static string STATUS_REPORT_ENTER_CREDENTIALS_MESSAGE {
-            get {
-                return ResourceManager.GetString("STATUS_REPORT_ENTER_CREDENTIALS_MESSAGE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die There was an error while packaging the server status report. Only a partial report may be available ähnelt.
-        /// </summary>
-        public static string STATUS_REPORT_ZIP_FAILED {
-            get {
-                return ResourceManager.GetString("STATUS_REPORT_ZIP_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Stopped ähnelt.
         /// </summary>
         public static string STOPPED {
@@ -34791,15 +36693,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die StorageLink SR status ähnelt.
-        /// </summary>
-        public static string STORAGELINK_UPGRADE_TEST {
-            get {
-                return ResourceManager.GetString("STORAGELINK_UPGRADE_TEST", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Storage Pools ähnelt.
         /// </summary>
         public static string STORAGEPOOLS {
@@ -34814,6 +36707,24 @@ namespace XenAdmin {
         public static string STORAGEVOLUMES {
             get {
                 return ResourceManager.GetString("STORAGEVOLUMES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: {1} ähnelt.
+        /// </summary>
+        public static string STRING_COLON_SPACE_STRING {
+            get {
+                return ResourceManager.GetString("STRING_COLON_SPACE_STRING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}, {1} ähnelt.
+        /// </summary>
+        public static string STRING_COMMA_SPACE_STRING {
+            get {
+                return ResourceManager.GetString("STRING_COMMA_SPACE_STRING", resourceCulture);
             }
         }
         
@@ -34845,7 +36756,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die succeeded ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Succeeded ähnelt.
         /// </summary>
         public static string SUCCEEDED {
             get {
@@ -34883,7 +36794,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Failed to install supplemental pack &apos;{0}&apos; on &apos;{1}&apos;.
         ///
-        ///Refer to the &quot;[XenServer product] Administrator&apos;s Guide&quot; for instructions on how to manually install a supplemental pack on a server. ähnelt.
+        ///Refer to the &quot;{2} Administrator&apos;s Guide&quot; for instructions on how to manually install a supplemental pack on a server. ähnelt.
         /// </summary>
         public static string SUPP_PACK_INSTALL_FAILED {
             get {
@@ -34942,6 +36853,34 @@ namespace XenAdmin {
         public static string SUPP_PACK_VERSIONS_DIFFER {
             get {
                 return ResourceManager.GetString("SUPP_PACK_VERSIONS_DIFFER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; is a member of pool &apos;{1}&apos; and is already connected. ähnelt.
+        /// </summary>
+        public static string SUPPORTER_ALREADY_CONNECTED {
+            get {
+                return ResourceManager.GetString("SUPPORTER_ALREADY_CONNECTED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Server &apos;{0}&apos; is in a pool.  To connect to a pool, you must connect to the pool coordinator.
+        ///Do you want to connect to the pool coordinator &apos;{1}&apos;? ähnelt.
+        /// </summary>
+        public static string SUPPORTER_CONNECTION_ERROR {
+            get {
+                return ResourceManager.GetString("SUPPORTER_CONNECTION_ERROR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die This pool contains servers earlier than {0}. Please use an earlier version of {1} to manage this pool. ähnelt.
+        /// </summary>
+        public static string SUPPORTER_TOO_OLD {
+            get {
+                return ResourceManager.GetString("SUPPORTER_TOO_OLD", resourceCulture);
             }
         }
         
@@ -35054,15 +36993,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Target Server ähnelt.
-        /// </summary>
-        public static string TARGET_SERVER {
-            get {
-                return ResourceManager.GetString("TARGET_SERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Tell me more ... ähnelt.
         /// </summary>
         public static string TELL_ME_MORE {
@@ -35086,6 +37016,15 @@ namespace XenAdmin {
         public static string TEMPLATE {
             get {
                 return ResourceManager.GetString("TEMPLATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Template generated by {0} from snapshot &apos;{1}&apos; ähnelt.
+        /// </summary>
+        public static string TEMPLATE_FROM_SNAPSHOT_DEFAULT_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("TEMPLATE_FROM_SNAPSHOT_DEFAULT_DESCRIPTION", resourceCulture);
             }
         }
         
@@ -35144,33 +37083,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools]: Not present ähnelt.
-        /// </summary>
-        public static string TEMPLATE_INFO_TOOLSNOTPRESENT {
-            get {
-                return ResourceManager.GetString("TEMPLATE_INFO_TOOLSNOTPRESENT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools]: Out of date (version {0}.{1} installed) ähnelt.
-        /// </summary>
-        public static string TEMPLATE_INFO_TOOLSOLD {
-            get {
-                return ResourceManager.GetString("TEMPLATE_INFO_TOOLSOLD", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools]: Up to date ähnelt.
-        /// </summary>
-        public static string TEMPLATE_INFO_TOOLSUPTODATE {
-            get {
-                return ResourceManager.GetString("TEMPLATE_INFO_TOOLSUPTODATE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die vCPUs: {0} ähnelt.
         /// </summary>
         public static string TEMPLATE_INFO_VCPUS {
@@ -35212,6 +37124,15 @@ namespace XenAdmin {
         public static string TERMINATING_USER_SESSION {
             get {
                 return ResourceManager.GetString("TERMINATING_USER_SESSION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Terminating session for users &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string TERMINATING_USER_SESSION_MULTIPLE {
+            get {
+                return ResourceManager.GetString("TERMINATING_USER_SESSION_MULTIPLE", resourceCulture);
             }
         }
         
@@ -35459,15 +37380,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disks cannot be activated or deactivated from running VMs without [Citrix VM Tools] installed ähnelt.
-        /// </summary>
-        public static string TOOLTIP_DEACTIVATE_VDI_NEED_TOOLS {
-            get {
-                return ResourceManager.GetString("TOOLTIP_DEACTIVATE_VDI_NEED_TOOLS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Networks cannot be deactivated while the VM is suspended ähnelt.
         /// </summary>
         public static string TOOLTIP_DEACTIVATE_VIF_SUSPENDED {
@@ -35504,15 +37416,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disks cannot be deleted from running VMs without [Citrix VM Tools] installed ähnelt.
-        /// </summary>
-        public static string TOOLTIP_DELETE_VDI_NEED_TOOLS {
-            get {
-                return ResourceManager.GetString("TOOLTIP_DELETE_VDI_NEED_TOOLS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Disks cannot be removed while the VM is suspended ähnelt.
         /// </summary>
         public static string TOOLTIP_DETACH_SUSPENDED {
@@ -35540,15 +37443,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Disks cannot be removed from running VMs without [Citrix VM Tools] installed ähnelt.
-        /// </summary>
-        public static string TOOLTIP_DETACH_VDI_NEED_TOOLS {
-            get {
-                return ResourceManager.GetString("TOOLTIP_DETACH_VDI_NEED_TOOLS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die I/O drivers must be installed to edit a network on a running VM ähnelt.
         /// </summary>
         public static string TOOLTIP_EDIT_NETWORK_IO_DRIVERS {
@@ -35558,7 +37452,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] must be installed to edit a network on a running VM ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} must be installed to edit a network on a running VM ähnelt.
         /// </summary>
         public static string TOOLTIP_EDIT_NETWORK_TOOLS {
             get {
@@ -35585,15 +37479,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] only supports {0} NICs per Bond. ähnelt.
-        /// </summary>
-        public static string TOOLTIP_NICS_PER_BOND_LIMIT {
-            get {
-                return ResourceManager.GetString("TOOLTIP_NICS_PER_BOND_LIMIT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die I/O drivers must be installed to remove a network on a running VM ähnelt.
         /// </summary>
         public static string TOOLTIP_REMOVE_NETWORK_IO_DRIVERS {
@@ -35612,7 +37497,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] must be installed to remove a network on a running VM ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} must be installed to remove a network on a running VM ähnelt.
         /// </summary>
         public static string TOOLTIP_REMOVE_NETWORK_TOOLS {
             get {
@@ -35630,7 +37515,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Reclaiming freed space not supported on this SR ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Reclaiming freed space is not supported on this SR ähnelt.
         /// </summary>
         public static string TOOLTIP_SR_TRIM_UNSUPPORTED {
             get {
@@ -35639,7 +37524,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Reclaiming freed space not supported on these SRs ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Reclaiming freed space is not supported on these SRs ähnelt.
         /// </summary>
         public static string TOOLTIP_SR_TRIM_UNSUPPORTED_MULTIPLE {
             get {
@@ -35653,6 +37538,15 @@ namespace XenAdmin {
         public static string TREESEARCHBOX_DROPDOWN_TOOLTIP {
             get {
                 return ResourceManager.GetString("TREESEARCHBOX_DROPDOWN_TOOLTIP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Unlicensed servers will not receive any updates, including security updates. ähnelt.
+        /// </summary>
+        public static string TRIAL_EDITION_UPSELLING_MESSAGE {
+            get {
+                return ResourceManager.GetString("TRIAL_EDITION_UPSELLING_MESSAGE", resourceCulture);
             }
         }
         
@@ -35698,42 +37592,6 @@ namespace XenAdmin {
         public static string TURN_HA_OFF {
             get {
                 return ResourceManager.GetString("TURN_HA_OFF", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the network on which the temporary VM (Transfer VM) used to perform the export operation will run. ähnelt.
-        /// </summary>
-        public static string TVM_PAGE_DESCRIPTION_EXPORT {
-            get {
-                return ResourceManager.GetString("TVM_PAGE_DESCRIPTION_EXPORT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Select the network on which the temporary VM (Transfer VM) used to perform the import operation will run. ähnelt.
-        /// </summary>
-        public static string TVM_PAGE_DESCRIPTION_IMPORT {
-            get {
-                return ResourceManager.GetString("TVM_PAGE_DESCRIPTION_IMPORT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Transfer VM Settings ähnelt.
-        /// </summary>
-        public static string TVM_PAGE_TEXT {
-            get {
-                return ResourceManager.GetString("TVM_PAGE_TEXT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Configure networking options for the Transfer VM ähnelt.
-        /// </summary>
-        public static string TVM_PAGE_TITLE {
-            get {
-                return ResourceManager.GetString("TVM_PAGE_TITLE", resourceCulture);
             }
         }
         
@@ -35810,9 +37668,9 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] was unable to import a saved search from file &apos;{0}&apos;.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} was unable to import a saved search from file &apos;{1}&apos;.
         ///
-        ///Verify that the file is a valid {1} export. ähnelt.
+        ///Verify that the file is a valid {2} export. ähnelt.
         /// </summary>
         public static string UNABLE_TO_IMPORT_SEARCH {
             get {
@@ -35830,11 +37688,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] will uncompress the file to &apos;{0}&apos;. After uncompression the original file &apos;{1}&apos; will be deleted. Continue? ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} will uncompress the file to &apos;{1}&apos;. After uncompression the original file &apos;{2}&apos; will be deleted. Continue? ähnelt.
         /// </summary>
         public static string UNCOMPRESS_APPLIANCE_DESCRIPTION {
             get {
                 return ResourceManager.GetString("UNCOMPRESS_APPLIANCE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Imported VM ähnelt.
+        /// </summary>
+        public static string UNDEFINED_NAME_LABEL {
+            get {
+                return ResourceManager.GetString("UNDEFINED_NAME_LABEL", resourceCulture);
             }
         }
         
@@ -35893,6 +37760,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die File type {0} is not supported. ähnelt.
+        /// </summary>
+        public static string UNSUPPORTED_FILE_TYPE {
+            get {
+                return ResourceManager.GetString("UNSUPPORTED_FILE_TYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Unsupported SR type ähnelt.
         /// </summary>
         public static string UNSUPPORTED_SR_TYPE {
@@ -35929,7 +37805,52 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die You have applied filters to the list of updates. Do you want to dismiss all updates from every connected server, or only the updates you have chosen to view? In both cases the dismissed updates will be removed from the servers permanently.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Could not validate the certificate associated with the downloaded installer. ähnelt.
+        /// </summary>
+        public static string UPDATE_CLIENT_FAILED_CERTIFICATE_CHECK {
+            get {
+                return ResourceManager.GetString("UPDATE_CLIENT_FAILED_CERTIFICATE_CHECK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die An error occurred when launching the downloaded installer. Please see the logs for more information. ähnelt.
+        /// </summary>
+        public static string UPDATE_CLIENT_FAILED_INSTALLER_LAUNCH {
+            get {
+                return ResourceManager.GetString("UPDATE_CLIENT_FAILED_INSTALLER_LAUNCH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The checksum of the downloaded installer does not match the expected value. ähnelt.
+        /// </summary>
+        public static string UPDATE_CLIENT_INVALID_CHECKSUM {
+            get {
+                return ResourceManager.GetString("UPDATE_CLIENT_INVALID_CHECKSUM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid digital signature on msi. ähnelt.
+        /// </summary>
+        public static string UPDATE_CLIENT_INVALID_DIGITAL_CERTIFICATE {
+            get {
+                return ResourceManager.GetString("UPDATE_CLIENT_INVALID_DIGITAL_CERTIFICATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Validating the downloaded installer... ähnelt.
+        /// </summary>
+        public static string UPDATE_CLIENT_VALIDATING_INSTALLER {
+            get {
+                return ResourceManager.GetString("UPDATE_CLIENT_VALIDATING_INSTALLER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have applied filters to the list of update notifications. Do you want to dismiss all update notifications for every connected server, or only the update notifications you have chosen to view?
         ///
         ///Note that if RBAC is enabled, only updates which you have privileges to dismiss will be affected. ähnelt.
         /// </summary>
@@ -35940,7 +37861,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This operation will remove permanently all updates from every connected server. Do you want to continue?
+        ///   Sucht eine lokalisierte Zeichenfolge, die This operation will dismiss all update notifications for every connected server. Do you want to continue?
         ///
         ///Note that if RBAC is enabled, only updates which you have privileges to dismiss will be affected. ähnelt.
         /// </summary>
@@ -35960,7 +37881,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die This operation will remove the selected updates from the servers permanently. Do you want to continue?
+        ///   Sucht eine lokalisierte Zeichenfolge, die This operation will dismiss all the selected update notifications. Do you want to continue?
         ///
         ///Note that if RBAC is enabled, only updates which you have privileges to dismiss will be affected. ähnelt.
         /// </summary>
@@ -36084,15 +38005,6 @@ namespace XenAdmin {
         public static string UPDATES {
             get {
                 return ResourceManager.GetString("UPDATES", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Automatically check for [XenServer] or [XenCenter] updates ähnelt.
-        /// </summary>
-        public static string UPDATES_DESC {
-            get {
-                return ResourceManager.GetString("UPDATES_DESC", resourceCulture);
             }
         }
         
@@ -36242,7 +38154,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Download [XenCenter] ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Download {0} ähnelt.
         /// </summary>
         public static string UPDATES_DOWNLOAD_REQUIRED_XENCENTER {
             get {
@@ -36251,7 +38163,79 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Install Update ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configure Updates... ähnelt.
+        /// </summary>
+        public static string UPDATES_GENERAL_TAB_CONFIG {
+            get {
+                return ResourceManager.GetString("UPDATES_GENERAL_TAB_CONFIG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die (full application required) ähnelt.
+        /// </summary>
+        public static string UPDATES_GENERAL_TAB_ENFORCE_HOMOGENEITY {
+            get {
+                return ResourceManager.GetString("UPDATES_GENERAL_TAB_ENFORCE_HOMOGENEITY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Last synchronized ähnelt.
+        /// </summary>
+        public static string UPDATES_GENERAL_TAB_LAST_SYNCED {
+            get {
+                return ResourceManager.GetString("UPDATES_GENERAL_TAB_LAST_SYNCED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Update channel ähnelt.
+        /// </summary>
+        public static string UPDATES_GENERAL_TAB_REPO {
+            get {
+                return ResourceManager.GetString("UPDATES_GENERAL_TAB_REPO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Synchronize Now ähnelt.
+        /// </summary>
+        public static string UPDATES_GENERAL_TAB_SYNC_NOW {
+            get {
+                return ResourceManager.GetString("UPDATES_GENERAL_TAB_SYNC_NOW", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Updates ähnelt.
+        /// </summary>
+        public static string UPDATES_MENU_ITEM {
+            get {
+                return ResourceManager.GetString("UPDATES_MENU_ITEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Automatically check for {0} updates ähnelt.
+        /// </summary>
+        public static string UPDATES_OPTIONS_DESC {
+            get {
+                return ResourceManager.GetString("UPDATES_OPTIONS_DESC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Updates ähnelt.
+        /// </summary>
+        public static string UPDATES_OPTIONS_TITLE {
+            get {
+                return ResourceManager.GetString("UPDATES_OPTIONS_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Install Updates ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD {
             get {
@@ -36296,6 +38280,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Install updates ähnelt.
+        /// </summary>
+        public static string UPDATES_WIZARD_APPLY_UPDATES {
+            get {
+                return ResourceManager.GetString("UPDATES_WIZARD_APPLY_UPDATES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Installing update {0} on {1}...  ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD_APPLYING_UPDATE {
@@ -36310,6 +38303,15 @@ namespace XenAdmin {
         public static string UPDATES_WIZARD_APPLYING_UPDATE_MULTIPLE_HOSTS {
             get {
                 return ResourceManager.GetString("UPDATES_WIZARD_APPLYING_UPDATE_MULTIPLE_HOSTS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Installing updates on {0}...  ähnelt.
+        /// </summary>
+        public static string UPDATES_WIZARD_APPLYING_UPDATES_FROM_CDN {
+            get {
+                return ResourceManager.GetString("UPDATES_WIZARD_APPLYING_UPDATES_FROM_CDN", resourceCulture);
             }
         }
         
@@ -36469,6 +38471,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: Check skipped because HA and WLB are enabled on pool {1}. ähnelt.
+        /// </summary>
+        public static string UPDATES_WIZARD_HA_AND_WLB_ON_WARNING {
+            get {
+                return ResourceManager.GetString("UPDATES_WIZARD_HA_AND_WLB_ON_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Pool &apos;{0}&apos; cannot have HA enabled. ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD_HA_ON_DESCRIPTION {
@@ -36606,7 +38617,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] version {0} or newer is required. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} version {1} or newer is required. ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD_NEWER_XENCENTER_REQUIRED {
             get {
@@ -36615,7 +38626,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Ensure you have upgraded [XenCenter] before upgrading [XenServer]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Ensure you have upgraded to {0} {1} before upgrading {2}. ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD_NEWER_XENCENTER_WARNING {
             get {
@@ -36669,7 +38680,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The VM {1} does not have [Citrix VM Tools] installed. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The VM {1} does not have {2} installed. ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD_NO_TOOLS {
             get {
@@ -36678,7 +38689,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The VM {1} cannot be suspended until it has up to date [Citrix VM Tools]. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: The VM {1} cannot be suspended until it has up to date {2}. ähnelt.
         /// </summary>
         public static string UPDATES_WIZARD_OUT_OF_DATE_TOOLS {
             get {
@@ -36719,15 +38730,6 @@ namespace XenAdmin {
         public static string UPDATES_WIZARD_PRECHECK_ERROR {
             get {
                 return ResourceManager.GetString("UPDATES_WIZARD_PRECHECK_ERROR", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}: {1} ähnelt.
-        /// </summary>
-        public static string UPDATES_WIZARD_PRECHECK_FAILED {
-            get {
-                return ResourceManager.GetString("UPDATES_WIZARD_PRECHECK_FAILED", resourceCulture);
             }
         }
         
@@ -36809,6 +38811,15 @@ namespace XenAdmin {
         public static string UPDATES_WIZARD_REBOOTING {
             get {
                 return ResourceManager.GetString("UPDATES_WIZARD_REBOOTING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Refreshing the updates list for {0}...  ähnelt.
+        /// </summary>
+        public static string UPDATES_WIZARD_REFRESHING_CDN_UPDATES_LIST {
+            get {
+                return ResourceManager.GetString("UPDATES_WIZARD_REFRESHING_CDN_UPDATES_LIST", resourceCulture);
             }
         }
         
@@ -36995,20 +39006,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade coordinator {0} ähnelt.
+        /// </summary>
+        public static string UPGRADE_COORDINATOR {
+            get {
+                return ResourceManager.GetString("UPGRADE_COORDINATOR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade host {0} ähnelt.
         /// </summary>
         public static string UPGRADE_HOST {
             get {
                 return ResourceManager.GetString("UPGRADE_HOST", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade master {0} ähnelt.
-        /// </summary>
-        public static string UPGRADE_MASTER {
-            get {
-                return ResourceManager.GetString("UPGRADE_MASTER", resourceCulture);
             }
         }
         
@@ -37031,11 +39042,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade pool master &apos;{0}&apos; ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade pool coordinator &apos;{0}&apos; ähnelt.
         /// </summary>
-        public static string UPGRADE_POOL_MASTER {
+        public static string UPGRADE_POOL_COORDINATOR {
             get {
-                return ResourceManager.GetString("UPGRADE_POOL_MASTER", resourceCulture);
+                return ResourceManager.GetString("UPGRADE_POOL_COORDINATOR", resourceCulture);
             }
         }
         
@@ -37069,9 +39080,9 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade &apos;{0}&apos; ähnelt.
         /// </summary>
-        public static string UPGRADE_SLAVE {
+        public static string UPGRADE_SUPPORTER {
             get {
-                return ResourceManager.GetString("UPGRADE_SLAVE", resourceCulture);
+                return ResourceManager.GetString("UPGRADE_SUPPORTER", resourceCulture);
             }
         }
         
@@ -37238,7 +39249,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your server license to enable Active Directory.  Active Directory allows you to configure [XenServer] access control by adding named user accounts. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your server license to enable Active Directory.  Active Directory allows you to configure {0} access control by adding named user accounts. ähnelt.
         /// </summary>
         public static string UPSELL_BLURB_AD {
             get {
@@ -37256,7 +39267,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your server license to enable the Conversion Manager. This feature helps you migrate workloads from VMware to [XenServer] by moving batches of VMware virtual machines to your [XenServer] environment. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your server license to enable the Conversion Manager. This feature helps you migrate workloads from VMware to {0} by moving batches of VMware virtual machines to your {0} environment. ähnelt.
         /// </summary>
         public static string UPSELL_BLURB_CONVERSION {
             get {
@@ -37328,7 +39339,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your [XenServer] license to enable VDI live migration. This feature enables you to migrate multiple running VDIs between SRs in the same pool with no VM downtime.  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your {0} license to enable VDI live migration. This feature enables you to migrate multiple running VDIs between SRs in the same pool with no VM downtime.  ähnelt.
         /// </summary>
         public static string UPSELL_BLURB_MIGRATE_VDI {
             get {
@@ -37346,7 +39357,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your server license to enable Role Based Access Control. Using the RBAC feature, you will be able to control access to vital components in your [XenServer] resource pools, with full audit logging capabilities and seamless integration with your current Active Directory setup. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade your server license to enable Role Based Access Control. Using the RBAC feature, you will be able to control access to vital components in your {0} resource pools, with full audit logging capabilities and seamless integration with your current Active Directory setup. ähnelt.
         /// </summary>
         public static string UPSELL_BLURB_RBAC {
             get {
@@ -37357,7 +39368,7 @@ namespace XenAdmin {
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die 
         ///
-        ///To start a [XenServer] trial, click the button below. ähnelt.
+        ///To start a {0} trial, click the button below. ähnelt.
         /// </summary>
         public static string UPSELL_BLURB_TRIAL {
             get {
@@ -37510,7 +39521,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] was unable to authorize the action as {0}. See the application log files for more information. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} was unable to authorize the action as {1}. See the application log files for more information. ähnelt.
         /// </summary>
         public static string USER_AUTHORIZATION_FAILED {
             get {
@@ -37636,7 +39647,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die GBps ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die GB/s ähnelt.
         /// </summary>
         public static string VAL_GIGRATE {
             get {
@@ -37672,7 +39683,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die kBps ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die kB/s ähnelt.
         /// </summary>
         public static string VAL_KILRATE {
             get {
@@ -37708,7 +39719,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die MBps ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die MB/s ähnelt.
         /// </summary>
         public static string VAL_MEGRATE {
             get {
@@ -37762,7 +39773,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Bps ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die B/s ähnelt.
         /// </summary>
         public static string VAL_RATE {
             get {
@@ -37798,7 +39809,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die TBps ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die TB/s ähnelt.
         /// </summary>
         public static string VAL_TERRATE {
             get {
@@ -37897,6 +39908,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have selected more than {0} vCPUs for the new VM. Where a VM may be running actively hostile privileged code {1} recommends that the vCPU limit is set to {0} to prevent impact on system availability. ähnelt.
+        /// </summary>
+        public static string VCPUS_UNTRUSTED_VM_WARNING {
+            get {
+                return ResourceManager.GetString("VCPUS_UNTRUSTED_VM_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die VDI ähnelt.
         /// </summary>
         public static string VDI {
@@ -37920,6 +39940,15 @@ namespace XenAdmin {
         public static string VDI_COPYING {
             get {
                 return ResourceManager.GetString("VDI_COPYING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A VDI with size {0} is required to import virtual disk {1}. ähnelt.
+        /// </summary>
+        public static string VDI_NOT_ENOUGH_SPACE {
+            get {
+                return ResourceManager.GetString("VDI_NOT_ENOUGH_SPACE", resourceCulture);
             }
         }
         
@@ -37987,7 +40016,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] version {0} (build {1}.{2}) {3}-bit ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} version {1} (build {2}) {3}-bit. ähnelt.
         /// </summary>
         public static string VERSION_NUMBER {
             get {
@@ -37996,56 +40025,20 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU, {2}, {3} displays) ähnelt.
-        /// </summary>
-        public static string VGPU_DESCRIPTION_MANY {
-            get {
-                return ResourceManager.GetString("VGPU_DESCRIPTION_MANY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU, {2}, {3} displays, multiple vGPU support) ähnelt.
-        /// </summary>
-        public static string VGPU_DESCRIPTION_MANY_MULTIPLE_VGPU_SUPPORT {
-            get {
-                return ResourceManager.GetString("VGPU_DESCRIPTION_MANY_MULTIPLE_VGPU_SUPPORT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU, {2}, {3} display) ähnelt.
-        /// </summary>
-        public static string VGPU_DESCRIPTION_ONE {
-            get {
-                return ResourceManager.GetString("VGPU_DESCRIPTION_ONE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU, {2}, {3} display, multiple vGPU support) ähnelt.
-        /// </summary>
-        public static string VGPU_DESCRIPTION_ONE_MULTIPLE_VGPU_SUPPORT {
-            get {
-                return ResourceManager.GetString("VGPU_DESCRIPTION_ONE_MULTIPLE_VGPU_SUPPORT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU) ähnelt.
         /// </summary>
-        public static string VGPU_DESCRIPTION_ZEROES {
+        public static string VGPU_DESCRIPTION {
             get {
-                return ResourceManager.GetString("VGPU_DESCRIPTION_ZEROES", resourceCulture);
+                return ResourceManager.GetString("VGPU_DESCRIPTION", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU, multiple vGPU support) ähnelt.
         /// </summary>
-        public static string VGPU_DESCRIPTION_ZEROES_MULTIPLE_VGPU_SUPPORT {
+        public static string VGPU_DESCRIPTION_MULTIPLE_VGPU_SUPPORT {
             get {
-                return ResourceManager.GetString("VGPU_DESCRIPTION_ZEROES_MULTIPLE_VGPU_SUPPORT", resourceCulture);
+                return ResourceManager.GetString("VGPU_DESCRIPTION_MULTIPLE_VGPU_SUPPORT", resourceCulture);
             }
         }
         
@@ -38055,15 +40048,6 @@ namespace XenAdmin {
         public static string VGPU_PASSTHRU_TOSTRING {
             get {
                 return ResourceManager.GetString("VGPU_PASSTHRU_TOSTRING", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0} virtual GPU ({1} per GPU) ähnelt.
-        /// </summary>
-        public static string VGPU_TOSTRING {
-            get {
-                return ResourceManager.GetString("VGPU_TOSTRING", resourceCulture);
             }
         }
         
@@ -38262,6 +40246,15 @@ namespace XenAdmin {
         public static string VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_INSTALLED {
             get {
                 return ResourceManager.GetString("VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_INSTALLED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Management Agent installed only ähnelt.
+        /// </summary>
+        public static string VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_INSTALLED_ONLY {
+            get {
+                return ResourceManager.GetString("VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_INSTALLED_ONLY", resourceCulture);
             }
         }
         
@@ -38572,6 +40565,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The amount of physical memory allocated to this VM is greater than the total memory of its home server. ähnelt.
+        /// </summary>
+        public static string VM_CPUMEMPAGE_INSUFFICIENT_MEMORY_HOST {
+            get {
+                return ResourceManager.GetString("VM_CPUMEMPAGE_INSUFFICIENT_MEMORY_HOST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The amount of physical memory allocated to this VM is greater than the total memory of any server in the pool. ähnelt.
+        /// </summary>
+        public static string VM_CPUMEMPAGE_INSUFFICIENT_MEMORY_POOL {
+            get {
+                return ResourceManager.GetString("VM_CPUMEMPAGE_INSUFFICIENT_MEMORY_POOL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Maximum number of &amp;vCPUs: ähnelt.
         /// </summary>
         public static string VM_CPUMEMPAGE_MAX_VCPUS_LABEL {
@@ -38608,7 +40619,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die It is recommended to allocate at least {0} vCPUs for this VM ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The VM&apos;s home server does not have enough physical CPUs to start the VM. The VM will start on another server. ähnelt.
+        /// </summary>
+        public static string VM_CPUMEMPAGE_VCPU_HOME_HOST_WARNING {
+            get {
+                return ResourceManager.GetString("VM_CPUMEMPAGE_VCPU_HOME_HOST_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die It is recommended to allocate at least {0} vCPUs for this VM. ähnelt.
         /// </summary>
         public static string VM_CPUMEMPAGE_VCPU_MIN_WARNING {
             get {
@@ -38617,7 +40637,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die More vCPUs than physical CPUs may lead to reduced VM performance ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die There are no servers with enough physical CPUs to start the VM. ähnelt.
         /// </summary>
         public static string VM_CPUMEMPAGE_VCPU_WARNING {
             get {
@@ -39040,7 +41060,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die {0}. {1}: {2} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die - {0}: {1} ähnelt.
         /// </summary>
         public static string VMSS_ALERT_VM_ERROR_FORMAT {
             get {
@@ -39085,7 +41105,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Pool master unreachable ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pool coordinator unreachable ähnelt.
         /// </summary>
         public static string VMSS_HOST_NOT_LIVE {
             get {
@@ -39181,15 +41201,6 @@ namespace XenAdmin {
         public static string VMSS_SCHEDULED_SNAPSHOTS_DEFINED_FOR_SERVER {
             get {
                 return ResourceManager.GetString("VMSS_SCHEDULED_SNAPSHOTS_DEFINED_FOR_SERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Succeeded ähnelt.
-        /// </summary>
-        public static string VMSS_SUCCEEDED {
-            get {
-                return ResourceManager.GetString("VMSS_SUCCEEDED", resourceCulture);
             }
         }
         
@@ -39410,6 +41421,177 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Trusted Platform Module ähnelt.
+        /// </summary>
+        public static string VTPM {
+            get {
+                return ResourceManager.GetString("VTPM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Attaching vTPM... ähnelt.
+        /// </summary>
+        public static string VTPM_ATTACH_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("VTPM_ATTACH_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Attaching a new vTPM to VM &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string VTPM_ATTACH_TITLE {
+            get {
+                return ResourceManager.GetString("VTPM_ATTACH_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} vTPMs are attached to this VM. ähnelt.
+        /// </summary>
+        public static string VTPM_ATTACHED_MANY {
+            get {
+                return ResourceManager.GetString("VTPM_ATTACHED_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die A vTPM is attached to this VM. ähnelt.
+        /// </summary>
+        public static string VTPM_ATTACHED_ONE {
+            get {
+                return ResourceManager.GetString("VTPM_ATTACHED_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Your selection includes VMs with attached vTPMs. If you export and re-import these VMs, the vTPM data will not be preserved. Some of the VMs&apos; security features may be deactivated and the VMs may not start. ähnelt.
+        /// </summary>
+        public static string VTPM_EXPORT_UNSUPPORTED_FOR_ALL {
+            get {
+                return ResourceManager.GetString("VTPM_EXPORT_UNSUPPORTED_FOR_ALL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The OVF/OVA format does not preserve vTPM data. Some of the VMs&apos; security features may be deactivated and the VMs may not start. Use the XVA format to preserve vTPM data. ähnelt.
+        /// </summary>
+        public static string VTPM_EXPORT_UNSUPPORTED_FOR_OVF {
+            get {
+                return ResourceManager.GetString("VTPM_EXPORT_UNSUPPORTED_FOR_OVF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The maximum number of vTPMs that can be attached to this VM is {0}. ähnelt.
+        /// </summary>
+        public static string VTPM_MAX_REACHED {
+            get {
+                return ResourceManager.GetString("VTPM_MAX_REACHED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The selected template has {0} vTPMs attached to it, which is the maximum number that can be attached to the VM. ähnelt.
+        /// </summary>
+        public static string VTPM_MAX_REACHED_CUSTOM_TEMPLATE_MANY {
+            get {
+                return ResourceManager.GetString("VTPM_MAX_REACHED_CUSTOM_TEMPLATE_MANY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The selected template has 1 vTPM attached to it, which is the maximum number that can be attached to the VM. ähnelt.
+        /// </summary>
+        public static string VTPM_MAX_REACHED_CUSTOM_TEMPLATE_ONE {
+            get {
+                return ResourceManager.GetString("VTPM_MAX_REACHED_CUSTOM_TEMPLATE_ONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die There are no vTPMs attached to this VM. ähnelt.
+        /// </summary>
+        public static string VTPM_NONE_ATTACHED {
+            get {
+                return ResourceManager.GetString("VTPM_NONE_ATTACHED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Attaching a new vTPM to this VM is currently not allowed. ähnelt.
+        /// </summary>
+        public static string VTPM_OPERATION_DISALLOWED_ADD {
+            get {
+                return ResourceManager.GetString("VTPM_OPERATION_DISALLOWED_ADD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Removing this vTPM from the VM is currently not allowed. ähnelt.
+        /// </summary>
+        public static string VTPM_OPERATION_DISALLOWED_REMOVE {
+            get {
+                return ResourceManager.GetString("VTPM_OPERATION_DISALLOWED_REMOVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You need to shut down this VM before you can attach a new vTPM to it. ähnelt.
+        /// </summary>
+        public static string VTPM_POWER_STATE_WRONG_ATTACH {
+            get {
+                return ResourceManager.GetString("VTPM_POWER_STATE_WRONG_ATTACH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You need to shut down the VM before you can remove this vTPM. ähnelt.
+        /// </summary>
+        public static string VTPM_POWER_STATE_WRONG_REMOVE {
+            get {
+                return ResourceManager.GetString("VTPM_POWER_STATE_WRONG_REMOVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Remove vTPM ähnelt.
+        /// </summary>
+        public static string VTPM_REMOVE {
+            get {
+                return ResourceManager.GetString("VTPM_REMOVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Removing vTPM... ähnelt.
+        /// </summary>
+        public static string VTPM_REMOVE_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("VTPM_REMOVE_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Removing a vTPM from VM &apos;{0}&apos; ähnelt.
+        /// </summary>
+        public static string VTPM_REMOVE_TITLE {
+            get {
+                return ResourceManager.GetString("VTPM_REMOVE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Removing the vTPM may result in the deactivation of some security features on the VM and prevent it from starting. Do you want to continue? ähnelt.
+        /// </summary>
+        public static string VTPM_REMOVE_WARNING {
+            get {
+                return ResourceManager.GetString("VTPM_REMOVE_WARNING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Waiting ähnelt.
         /// </summary>
         public static string WAITING {
@@ -39518,6 +41700,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Health Check has been removed. You must disable Health Check first. ähnelt.
+        /// </summary>
+        public static string WARNING_HEALTH_CHECK_SERVICE_INFO {
+            get {
+                return ResourceManager.GetString("WARNING_HEALTH_CHECK_SERVICE_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Cannot find &apos;{0}&apos;. ähnelt.
         /// </summary>
         public static string WEB_BROWSER_FAILED {
@@ -39622,24 +41813,6 @@ namespace XenAdmin {
         public static string WIZARD_BUTTON_NEXT {
             get {
                 return ResourceManager.GetString("WIZARD_BUTTON_NEXT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Your new network will be mapped to an existing physical network interface and assigned a VLAN number to use on that interface. You can select the physical interface you would like to use below. ähnelt.
-        /// </summary>
-        public static string WIZARD_DESC_NETWORK_SETTINGS_EXTERNAL {
-            get {
-                return ResourceManager.GetString("WIZARD_DESC_NETWORK_SETTINGS_EXTERNAL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Check the box below if you would like to automatically add this network to new VMs. ähnelt.
-        /// </summary>
-        public static string WIZARD_DESC_NETWORK_SETTINGS_INTERNAL {
-            get {
-                return ResourceManager.GetString("WIZARD_DESC_NETWORK_SETTINGS_INTERNAL", resourceCulture);
             }
         }
         
@@ -39770,6 +41943,24 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die WLB check ähnelt.
+        /// </summary>
+        public static string WLB_CHECK_DESCRIPTION {
+            get {
+                return ResourceManager.GetString("WLB_CHECK_DESCRIPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Workload &amp;Balancing ähnelt.
+        /// </summary>
+        public static string WLB_COMMAND_MENU_ITEM {
+            get {
+                return ResourceManager.GetString("WLB_COMMAND_MENU_ITEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Workload Balancing Configuration for {0} ähnelt.
         /// </summary>
         public static string WLB_CONFIGURATION_DIALOG {
@@ -39864,6 +42055,26 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Disconnect WLB server... ähnelt.
+        /// </summary>
+        public static string WLB_DISCONNECT_MENU_ITEM {
+            get {
+                return ResourceManager.GetString("WLB_DISCONNECT_MENU_ITEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to disconnect the Workload Balancing server from this pool?
+        ///
+        ///Disconnecting will stop all Workload Balancing operations for this resource pool and delete all information about this pool from the Workload Balancing database. ähnelt.
+        /// </summary>
+        public static string WLB_DISCONNECT_SERVER {
+            get {
+                return ResourceManager.GetString("WLB_DISCONNECT_SERVER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Workload Balancing is currently paused for pool {0}.
         ///
         ///Click Resume to continue analyzing the pool for possible optimizations. ähnelt.
@@ -39954,6 +42165,15 @@ namespace XenAdmin {
         public static string WLB_ERROR_4005 {
             get {
                 return ResourceManager.GetString("WLB_ERROR_4005", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die WLB received an argument from the server that is not implemented. ähnelt.
+        /// </summary>
+        public static string WLB_ERROR_4006 {
+            get {
+                return ResourceManager.GetString("WLB_ERROR_4006", resourceCulture);
             }
         }
         
@@ -40511,15 +42731,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die None ähnelt.
-        /// </summary>
-        public static string WLB_OPT_REASON_NONE {
-            get {
-                return ResourceManager.GetString("WLB_OPT_REASON_NONE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Release Resource ähnelt.
         /// </summary>
         public static string WLB_OPT_REASON_POWEROFF {
@@ -40675,7 +42886,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die An error occurred when attempting to bind report datasources: {0} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die An error occurred when attempting to bind report data sources: {0} ähnelt.
         /// </summary>
         public static string WLB_REPORT_BIND_DATASOURCE {
             get {
@@ -41143,6 +43354,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die View Workload &amp;Reports... ähnelt.
+        /// </summary>
+        public static string WLB_REPORT_VIEW_MENU_ITEM {
+            get {
+                return ResourceManager.GetString("WLB_REPORT_VIEW_MENU_ITEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Filter Item ähnelt.
         /// </summary>
         public static string WLB_REPORT_VIEW_TAG_COLUMN_HEADER {
@@ -41197,6 +43417,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving WLB recommendations on VMs to migrate from server {0} ähnelt.
+        /// </summary>
+        public static string WLB_RETRIEVING_EVACUATE_RECOMMENDATIONS {
+            get {
+                return ResourceManager.GetString("WLB_RETRIEVING_EVACUATE_RECOMMENDATIONS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving WLB recommendations for pool {0} ähnelt.
         /// </summary>
         public static string WLB_RETRIEVING_RECOMMENDATIONS {
@@ -41206,7 +43435,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving WLB recommendations  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving WLB recommendations ähnelt.
         /// </summary>
         public static string WLB_RETRIEVING_VM_RECOMMENDATIONS {
             get {
@@ -41568,15 +43797,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Pool Audit Log History ähnelt.
-        /// </summary>
-        public static string WLBREPORT_POOL_AUDIT_HISTORY {
-            get {
-                return ResourceManager.GetString("WLBREPORT_POOL_AUDIT_HISTORY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Pool Connection Lost ähnelt.
         /// </summary>
         public static string WLBREPORT_POOL_CONNECTION_LOST_CAPTION {
@@ -41600,24 +43820,6 @@ namespace XenAdmin {
         public static string WLBREPORT_POOL_HEALTH_HISTORY {
             get {
                 return ResourceManager.GetString("WLBREPORT_POOL_HEALTH_HISTORY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Pool Optimization History ähnelt.
-        /// </summary>
-        public static string WLBREPORT_POOL_OPTIMIZATION_HISTORY {
-            get {
-                return ResourceManager.GetString("WLBREPORT_POOL_OPTIMIZATION_HISTORY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die An error occurred when attempting to open the Workload Balancing report window.  Please check the report configuration file. ähnelt.
-        /// </summary>
-        public static string WLBREPORT_REPORT_CONFIG_ERROR {
-            get {
-                return ResourceManager.GetString("WLBREPORT_REPORT_CONFIG_ERROR", resourceCulture);
             }
         }
         
@@ -41676,7 +43878,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} feature was deprecated in {1} and may be retired in future versions ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} feature was deprecated in {1} and may be retired in future versions. ähnelt.
         /// </summary>
         public static string X_IS_DEPRECATED_IN_X {
             get {
@@ -41685,7 +43887,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} feature is not available in {1} and later versions ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} feature is not available in {1} and later versions. ähnelt.
         /// </summary>
         public static string X_IS_REMOVED_IN_X {
             get {
@@ -41703,16 +43905,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] ähnelt.
-        /// </summary>
-        public static string XENCENTER {
-            get {
-                return ResourceManager.GetString("XENCENTER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] Settings|*.config ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Settings|*.config ähnelt.
         /// </summary>
         public static string XENCENTER_CONFIG_FILTER {
             get {
@@ -41721,7 +43914,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Newer [XenCenter] Available ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Newer {0} Available ähnelt.
         /// </summary>
         public static string XENCENTER_NEWER_AVAILABLE {
             get {
@@ -41730,7 +43923,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter] version check ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} version check ähnelt.
         /// </summary>
         public static string XENCENTER_VERSION_CHECK_DESCRIPTION {
             get {
@@ -41748,34 +43941,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] ähnelt.
-        /// </summary>
-        public static string XENSERVER {
-            get {
-                return ResourceManager.GetString("XENSERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] {0} ähnelt.
-        /// </summary>
-        public static string XENSERVER_6_5 {
-            get {
-                return ResourceManager.GetString("XENSERVER_6_5", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] {0} ähnelt.
-        /// </summary>
-        public static string XENSERVER_8_1 {
-            get {
-                return ResourceManager.GetString("XENSERVER_8_1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Templates ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Templates ähnelt.
         /// </summary>
         public static string XENSERVER_TEMPLATES {
             get {
@@ -41793,7 +43959,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Backup Files ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} Backup Files ähnelt.
         /// </summary>
         public static string XS_BACKUP_FILES {
             get {
@@ -41802,7 +43968,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] License Files ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} License Files ähnelt.
         /// </summary>
         public static string XS_LICENSE_FILES {
             get {
@@ -41811,7 +43977,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [Citrix VM Tools] DVDs will now be inserted into the DVD drive of each of the selected VMs. Any disks currently in the drives will be ejected.
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} DVDs will now be inserted into the DVD drive of each of the selected VMs. Any disks currently in the drives will be ejected.
         ///
         ///You will need to navigate to the Console on each of the selected VMs to complete the installation. ähnelt.
         /// </summary>
@@ -41822,20 +43988,22 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The [Citrix VM Tools] SR could not be found. ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Do you want {0} to insert the {1} DVD into your VM&apos;s DVD drive and take you to the VM&apos;s console?
+        ///
+        ///Any disk in your VM&apos;s DVD drive will be ejected when installing {1}. ähnelt.
         /// </summary>
-        public static string XS_TOOLS_SR_NOT_FOUND {
+        public static string XS_TOOLS_MESSAGE_ONE_VM {
             get {
-                return ResourceManager.GetString("XS_TOOLS_SR_NOT_FOUND", resourceCulture);
+                return ResourceManager.GetString("XS_TOOLS_MESSAGE_ONE_VM", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenServer] Update Files ({0})|{0}|All files ({1})|{1} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The {0} SR could not be found. ähnelt.
         /// </summary>
-        public static string XSUPDATE {
+        public static string XS_TOOLS_SR_NOT_FOUND {
             get {
-                return ResourceManager.GetString("XSUPDATE", resourceCulture);
+                return ResourceManager.GetString("XS_TOOLS_SR_NOT_FOUND", resourceCulture);
             }
         }
         
@@ -41872,6 +44040,215 @@ namespace XenAdmin {
         public static string YOU_ARE_HERE {
             get {
                 return ResourceManager.GetString("YOU_ARE_HERE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Retrieving list of available updates for {0}... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_CHECK_FOR_UPDATES {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_CHECK_FOR_UPDATES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disabling repository {0}... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_CONFIG_DESCRIPTION_DISABLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_CONFIG_DESCRIPTION_DISABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabling repository {0}... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_CONFIG_DESCRIPTION_ENABLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_CONFIG_DESCRIPTION_ENABLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Introducing repository {0}... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_CONFIG_DESCRIPTION_INTRODUCE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_CONFIG_DESCRIPTION_INTRODUCE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuring {0} to retrieve updates from the {1} repo... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_CONFIG_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_CONFIG_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuring proxy for accessing the update channel ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_PROXY_CONFIG_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_PROXY_CONFIG_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disabling proxy for accessing the update channel ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_PROXY_DISABLE_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_PROXY_DISABLE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Configuring periodic synchronization with the update channel... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_SYNC_SCHEDULE_CONFIG_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_SYNC_SCHEDULE_CONFIG_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Disabling periodic synchronization with the update channel... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_SYNC_SCHEDULE_DISABLE_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_SYNC_SCHEDULE_DISABLE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Enabling periodic synchronization with the update channel... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_SYNC_SCHEDULE_ENABLE_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_SYNC_SCHEDULE_ENABLE_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Synchronizing {0} with update channel... ähnelt.
+        /// </summary>
+        public static string YUM_REPO_ACTION_SYNCING_TITLE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_ACTION_SYNCING_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Base ähnelt.
+        /// </summary>
+        public static string YUM_REPO_BASE {
+            get {
+                return ResourceManager.GetString("YUM_REPO_BASE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Early Access ähnelt.
+        /// </summary>
+        public static string YUM_REPO_EARLY_ACCESS {
+            get {
+                return ResourceManager.GetString("YUM_REPO_EARLY_ACCESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Normal ähnelt.
+        /// </summary>
+        public static string YUM_REPO_NORMAL {
+            get {
+                return ResourceManager.GetString("YUM_REPO_NORMAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        /// </summary>
+        public static string YUM_REPO_PROXY {
+            get {
+                return ResourceManager.GetString("YUM_REPO_PROXY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die {0} recommends that you synchronize the selected pool(s) or standalone host(s) with the specified update channel as soon as possible to retrieve the latest available updates.
+        ///
+        ///Do you want to synchronize immediately? ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_AFTER_CONFIG {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_AFTER_CONFIG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Are you sure you want to synchronize all connected pools or standalone servers with their respective update channel? ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_ALL_CONFIRMATION {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_ALL_CONFIRMATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die You have applied filters to the list of pools or standalone servers. Do you want to synchronize all connected systems with their respective update channel, or only the systems you have chosen to view? ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_FILTER_CONFIRMATION {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_FILTER_CONFIRMATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Synchronization with the update channel is in progress. Please try again later. ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_IN_PROGRESS {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_IN_PROGRESS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Synchronize with update channel ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_MENU_ITEM {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_MENU_ITEM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Synchronize &amp;all ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_YES_ALL_BUTTON {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_YES_ALL_BUTTON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &amp;Yes, Synchronize ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_YES_BUTTON {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_YES_BUTTON", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Only synchronize &amp;visible ähnelt.
+        /// </summary>
+        public static string YUM_REPO_SYNC_YES_VISIBLE_BUTTON {
+            get {
+                return ResourceManager.GetString("YUM_REPO_SYNC_YES_VISIBLE_BUTTON", resourceCulture);
             }
         }
     }

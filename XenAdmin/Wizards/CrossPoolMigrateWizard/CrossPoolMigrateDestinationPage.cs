@@ -53,7 +53,6 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
         {
             this.selectedVMs = selectedVMs;
             this.wizardMode = wizardMode;
-            this.force = force;
             this.ignoredConnections = ignoredConnections ?? new List<IXenConnection>();
 
             InitializeText();

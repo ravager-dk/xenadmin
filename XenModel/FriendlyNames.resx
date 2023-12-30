@@ -400,7 +400,7 @@
     <value>{0} Basic Edition</value>
   </data>
   <data name="Label-SR.SRTypes-ext" xml:space="preserve">
-    <value>Ext</value>
+    <value>Ext3</value>
   </data>
   <data name="Label-host.edition-legacy-desktop-cloud" xml:space="preserve">
     <value>XenApp/XenDesktop Citrix Cloud</value>
@@ -1076,9 +1076,6 @@
   </data>
   <data name="Label-SR.SRTypes-equal" xml:space="preserve">
     <value>Dell EqualLogic</value>
-  </data>
-  <data name="Label-SR.SRTypes-ext" xml:space="preserve">
-    <value>Ext3</value>
   </data>
   <data name="Label-SR.SRTypes-gfs2" xml:space="preserve">
     <value>GFS2</value>
@@ -2014,5 +2011,14 @@
   </data>
   <data name="VM.TemplateDescription-Other install media" xml:space="preserve">
     <value>If the operating system you plan to use is not listed, you may be able to install it by selecting this template.  We recommend that only advanced users attempt to use this template, and you should note that our products have been tested running only the supported distributions and specific versions covered by the standard supplied templates.</value>
+  </data>
+  <data name="Label-SR.SRTypes-ext4" xml:space="preserve">
+    <value>Ext4</value>
+  </data>
+  <data name="Label-SR.SRTypes-file" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Label-SR.SRTypes-xfs" xml:space="preserve">
+    <value>XFS</value>
   </data>
 </root>

@@ -36,7 +36,7 @@ using XenAdmin.Core;
 
 namespace XenAdmin.Actions.VMActions
 {
-    public abstract class VMPauseAction : PureAsyncAction
+    public abstract class VMPauseAction : AsyncAction
     {
         protected VMPauseAction(VM vm, string title)
             : base(vm.Connection, title)

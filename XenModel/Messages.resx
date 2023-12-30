@@ -168,6 +168,21 @@
   <data name="ACTION_CHANGE_LOG_DESTINATION" xml:space="preserve">
     <value>Change log destination</value>
   </data>
+   <data name="INSTALL_SERVER_CERTIFICATE_ACTION_LINK" xml:space="preserve">
+    <value>Install certificate...</value>
+  </data>
+  <data name="INSTALL_SERVER_CERTIFICATE_DESCRIPTION" xml:space="preserve">
+    <value>Installing server certificate...</value>
+  </data>
+  <data name="INSTALL_SERVER_CERTIFICATE_HA" xml:space="preserve">
+    <value>You cannot install a server certificate when HA is on.</value>
+  </data>
+  <data name="INSTALL_SERVER_CERTIFICATE_MENU" xml:space="preserve">
+    <value>&amp;Install certificate...</value>
+  </data>
+  <data name="INSTALL_SERVER_CERTIFICATE_TITLE" xml:space="preserve">
+    <value>Installing certificate on server {0}...</value>
+  </data>
   <data name="ACTION_CHANGE_MEMORY_SETTINGS" xml:space="preserve">
     <value>Changing memory settings for {0}...</value>
   </data>
@@ -1063,6 +1078,15 @@ This could be because the data source is not generating any data. Ensure the pre
   </data>
   <data name="ACTION_VGPU_CONFIGURATION_SAVING" xml:space="preserve">
     <value>Saving virtual GPU configuration</value>
+  </data>
+    <data name="NEWVMWIZARD_VGPUPAGE_MULTIPLE_VGPU_INFO" xml:space="preserve">
+    <value>The selected virtual GPU type supports multiple instances.</value>
+  </data>
+  <data name="NEWVMWIZARD_VGPUPAGE_SINGLE_VGPU_INFO" xml:space="preserve">
+    <value>The selected virtual GPU type does not support multiple instances.</value>
+  </data>
+  <data name="NEWVMWIZARD_VGPUPAGE_TITLE" xml:space="preserve">
+    <value>Assign a virtual GPU</value>
   </data>
   <data name="ACTION_VIF_CREATED" xml:space="preserve">
     <value>Virtual network interface created</value>

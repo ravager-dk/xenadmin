@@ -276,7 +276,7 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
                     var isCopy = wizardMode == WizardMode.Copy;
                     AsyncAction migrateAction;
                     if (isCopy || IsStorageMotion(pair))
-                        migrateAction = new VMCrossPoolMigrateAction(vm, target, SelectedTransferNetwork, pair.Value, isCopy, _force);
+                        migrateAction = new VMCrossPoolMigrateAction(vm, target, SelectedTransferNetwork, pair.Value, isCopy);
                     else
                         migrateAction = new VMMigrateAction(vm, target);
 
@@ -337,10 +337,6 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
                         ? Messages.MOVE_VM_WIZARD_TITLE
                         : IsCopyTemplate() ? Messages.COPY_TEMPLATE_WIZARD_TITLE : Messages.COPY_VM_WIZARD_TITLE;
 
-            if (_force)
-            {
-                Text = "Force " + Text;
-            }
         }
 
         protected override void UpdateWizardContent(XenTabPage page)

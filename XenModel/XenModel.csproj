@@ -80,6 +80,7 @@
     <Compile Include="Actions\DR\VdiLoadMetadataAction.cs" />
     <Compile Include="Actions\Folders\FolderAction.cs" />
     <Compile Include="Actions\GPU\VgpuConfigurationAction.cs" />
+    <Compile Include="Actions\Healthcheck\DisableHealthCheckAction.cs" />
     <Compile Include="Actions\Host\ApplyLicenseEditionAction.cs" />
     <Compile Include="Actions\Host\ChangeControlDomainMemoryAction.cs" />
     <Compile Include="Actions\Host\InstallCertificateAction.cs" />
@@ -176,6 +177,8 @@
     <Compile Include="Actions\VM\VMStartAction.cs" />
     <Compile Include="Actions\VM\VMPauseAction.cs" />
     <Compile Include="Actions\VM\VMUnPauseAction.cs" />
+    <Compile Include="Actions\VtpmAction.cs" />
+    <Compile Include="Actions\WLB\WlbEvacuateRecommendationsAction.cs" />
     <Compile Include="Actions\WLB\WlbRetrieveVmRecommendationsAction.cs" />
     <Compile Include="Actions\XCM\ActivateConversionVpxAction.cs" />
     <Compile Include="Actions\StatusReport\ZipStatusReportAction.cs" />
@@ -552,10 +555,7 @@
     <Compile Include="Db.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\Branding\Branding.resx">
-      <Link>Branding.resx</Link>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Branding.resx" />
     <EmbeddedResource Include="FriendlyNames.resx">
       <SubType>Designer</SubType>
       <Generator>PublicResXFileCodeGenerator</Generator>

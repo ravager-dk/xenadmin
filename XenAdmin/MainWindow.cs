@@ -235,7 +235,7 @@ namespace XenAdmin
             PluginManager.PluginsChanged += pluginManager_PluginsChanged;
             PluginManager.LoadPlugins();
             contextMenuBuilder = new ContextMenuBuilder(PluginManager, this);
-            ((WinformsXenAdminConfigProvider) XenAdminConfigManager.Provider).PluginManager = PluginManager;
+            ((WinformsXenAdminConfigProvider)XenAdminConfigManager.Provider).PluginManager = PluginManager;
 
             FormFontFixer.Fix(this);
 
@@ -307,15 +307,15 @@ namespace XenAdmin
 
         private void Default_SettingChanging(object sender, SettingChangingEventArgs e)
         {
-			if (e == null)
-				return;
+            if (e == null)
+                return;
 
             if (e.SettingName == "AutoSwitchToRDP" || e.SettingName == "EnableRDPPolling")
             {
                 ConsolePanel.ResetAllViews();
 
-				if (SelectionManager.Selection.FirstIsRealVM)
-					ConsolePanel.SetCurrentSource((VM)SelectionManager.Selection.First);
+                if (SelectionManager.Selection.FirstIsRealVM)
+                    ConsolePanel.SetCurrentSource((VM)SelectionManager.Selection.First);
                 else if (SelectionManager.Selection.FirstIs<Host>())
                     ConsolePanel.SetCurrentSource((Host)SelectionManager.Selection.First);
 
@@ -378,16 +378,11 @@ namespace XenAdmin
 
                 Point savedLocation = Properties.Settings.Default.WindowLocation;
                 Size savedSize = Properties.Settings.Default.WindowSize;
-                FormWindowState savedState = Properties.Settings.Default.WindowState;
 
-                if (savedState == FormWindowState.Normal && HelpersGUI.WindowIsOnScreen(savedLocation, savedSize))
+                if (HelpersGUI.WindowIsOnScreen(savedLocation, savedSize))
                 {
                     this.Location = savedLocation;
                     this.Size = savedSize;
-                }
-                else
-                {
-                    this.WindowState = FormWindowState.Maximized;
                 }
             }
             catch
@@ -604,7 +599,7 @@ namespace XenAdmin
             RequestRefreshTreeView();
 
             ConnectionsManager.XenConnections.CollectionChanged += XenConnection_CollectionChanged;
-            
+
             //no need to catch ConfigurationErrorsException as the settings have already been loaded
             Settings.RestoreSession();
 
@@ -705,7 +700,7 @@ namespace XenAdmin
                 // show the About dialog if this was the last connection in progress and the connection failed
                 if (!c.IsConnected)
                     ShowAboutDialogOnStartup();
-            }); 
+            });
         }
 
         /// <summary>
@@ -915,11 +910,11 @@ namespace XenAdmin
                     new DummyAction(title, "", string.Format(Messages.INCOMPATIBLE_PRODUCTS, BrandManager.BrandConsole)).Run();
 
                     using (var dlog = new ErrorDialog(string.Format(Messages.INCOMPATIBLE_PRODUCTS, BrandManager.BrandConsole))
-                        {WindowTitle = title})
+                    { WindowTitle = title })
                         dlog.ShowDialog(this);
                 });
                 return;
-             }
+            }
 
             //check the pool has no supporters earlier than the lowest supported version 
             //(could happen if trying to connect to a partially upgraded pool where
@@ -941,7 +936,7 @@ namespace XenAdmin
                     new DummyAction(title, "", msg).Run();
 
                     using (var dlg = new ErrorDialog(msg, ThreeButtonDialog.ButtonOK)
-                        {WindowTitle = Messages.CONNECT_TO_SERVER})
+                    { WindowTitle = Messages.CONNECT_TO_SERVER })
                     {
                         dlg.ShowDialog(this);
                     }
@@ -1018,7 +1013,7 @@ namespace XenAdmin
                     });
                     return;
                 }
-                
+
                 if (serverMax > currentVersion)
                     Alert.AddAlert(new GuiOldAlert());
 
@@ -1034,7 +1029,7 @@ namespace XenAdmin
             if (HelpersGUI.iSCSIisUsed())
                 HelpersGUI.PerformIQNCheck();
 
-            if(licenseTimer != null)
+            if (licenseTimer != null)
                 licenseTimer.CheckActiveServerLicense(connection, false);
 
             if (BrandManager.BrandConsole == "[XenCenter]" || BrandManager.BrandConsole == "XenCenter")
@@ -1062,18 +1057,18 @@ namespace XenAdmin
                 {
                     if (Properties.Settings.Default.SeenAllowCfuUpdatesDialog)
                         return;
-                    
+
                     Properties.Settings.Default.SeenAllowCfuUpdatesDialog = true;
                     Settings.TrySaveSettings();
 
                     bool launch;
                     using (var dlg = new NoIconDialog(string.Format(Messages.ALLOWED_UPDATES_DIALOG_MESSAGE_CFU, BrandManager.BrandConsole, BrandManager.ProductVersion821),
                                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
-                           {
-                               HelpButton = true,
-                               HelpNameSetter = "AllowUpdatesDialog",
-                               ShowCheckbox = false
-                           })
+                    {
+                        HelpButton = true,
+                        HelpNameSetter = "AllowUpdatesDialog",
+                        ShowCheckbox = false
+                    })
                     {
                         launch = dlg.ShowDialog(this) == DialogResult.Yes;
                     }
@@ -1280,7 +1275,7 @@ namespace XenAdmin
 
                 case "name_label":
                     //check whether it's a standalone host
-                    if(Helpers.GetPool(host.Connection) == null)
+                    if (Helpers.GetPool(host.Connection) == null)
                         host.Connection.FriendlyName = Helpers.GetName(host);
                     break;
 
@@ -1333,7 +1328,7 @@ namespace XenAdmin
                 case "enabled":
                 case "other_config":
                     UpdateToolbars();  //other_config may contain HideFromXenCenter
-                break;
+                    break;
             }
         }
 
@@ -1379,7 +1374,7 @@ namespace XenAdmin
             if (Program.Exiting)
                 return;
 
-            IXenConnection connection = (IXenConnection) sender;
+            IXenConnection connection = (IXenConnection)sender;
 
             if (hostsInInvalidState.Count > 0)
             {
@@ -1431,14 +1426,14 @@ namespace XenAdmin
 
             try
             {
-            ToolStrip.SuspendLayout();
-            UpdateToolbarsCore();
-            MainMenuBar_MenuActivate(null, null);
+                ToolStrip.SuspendLayout();
+                UpdateToolbarsCore();
+                MainMenuBar_MenuActivate(null, null);
             }
             finally
             {
-            ToolStrip.ResumeLayout();
-        }
+                ToolStrip.ResumeLayout();
+            }
 
             // Save and restore focus on treeView, since selecting tabs in ChangeToNewTabs() has the
             // unavoidable side-effect of giving them focus - this is irritating if trying to navigate
@@ -1461,7 +1456,7 @@ namespace XenAdmin
             ToolStrip.Enabled = Properties.Settings.Default.ToolbarsEnabled;
             ShowToolbarMenuItem.Checked = toolbarToolStripMenuItem.Checked = Properties.Settings.Default.ToolbarsEnabled;
 
-            bool containerButtonsAvailable = startContainerToolStripButton.Enabled || stopContainerToolStripButton.Enabled || 
+            bool containerButtonsAvailable = startContainerToolStripButton.Enabled || stopContainerToolStripButton.Enabled ||
                 resumeContainerToolStripButton.Enabled || pauseContainerToolStripButton.Enabled || restartContainerToolStripButton.Enabled;
 
             startContainerToolStripButton.Available = containerButtonsAvailable && startContainerToolStripButton.Enabled;
@@ -1479,7 +1474,7 @@ namespace XenAdmin
             SuspendToolbarButton.Available = SuspendToolbarButton.Enabled || (!resumeToolStripButton.Available && !containerButtonsAvailable);
 
             UnpauseVmToolbarButton.Available = UnpauseVmToolbarButton.Enabled;
-            PauseVmToolbarButton.Available = PauseVmToolbarButton.Enabled || (!UnpauseVmToolbarButton.Available);            
+            PauseVmToolbarButton.Available = PauseVmToolbarButton.Enabled || (!UnpauseVmToolbarButton.Available);
 
             ForceRebootToolbarButton.Available = ((ForceVMRebootCommand)ForceRebootToolbarButton.Command).ShowOnMainToolBar;
             ForceShutdownToolbarButton.Available = ((ForceVMShutDownCommand)ForceShutdownToolbarButton.Command).ShowOnMainToolBar;
@@ -1579,8 +1574,8 @@ namespace XenAdmin
 
             if (!multi && !SearchMode && isPoolSelected)
                 newTabs.Add(ha_upsell ? TabPageHAUpsell : TabPageHA);
-            
-            if(!multi && !SearchMode && isRealVMSelected)
+
+            if (!multi && !SearchMode && isRealVMSelected)
                 newTabs.Add(TabPageSnapshots);
 
             if (!multi && !SearchMode && isPoolSelected)
@@ -1627,14 +1622,14 @@ namespace XenAdmin
                         f.SetUrl();
                         if (!f.IsError)
                             consoleFeatures.Add(f);
-            }
+                    }
                     else
                     {
                         var page = GetLastSelectedPage(xenObject);
                         if (page != null && page.Tag == f)
                             f.SetUrl();
                         otherFeatures.Add(f);
-        }
+                    }
                 }
             }
         }
@@ -1656,25 +1651,25 @@ namespace XenAdmin
                 {
                     if (!newTabs.Contains(page))
                         TheTabControl.TabPages.Remove(page);
-                    }
+                }
 
                 int m = 0; // Index into TheTabControl.TabPages
 
                 foreach (var newTab in newTabs)
-                    {
+                {
                     var index = TheTabControl.TabPages.IndexOf(newTab);
                     if (index < 0)
                         TheTabControl.TabPages.Insert(m, newTab);
 
-                        m++;
+                    m++;
 
                     if (newTab == pageToSelect)
                         TheTabControl.SelectedTab = newTab;
-                    }
+                }
 
                 if (pageToSelect == null)
                     TheTabControl.SelectedTab = TheTabControl.TabPages[0];
-                    }
+            }
             finally
             {
                 IgnoreTabChanges = false;
@@ -1717,7 +1712,7 @@ namespace XenAdmin
                 {
                     CommandToolStripMenuItem commandMenuItem = menu.DropDownItems[i] as CommandToolStripMenuItem;
 
-                    if (commandMenuItem != null && (commandMenuItem.Command is MenuItemFeatureCommand 
+                    if (commandMenuItem != null && (commandMenuItem.Command is MenuItemFeatureCommand
                                                  || commandMenuItem.Command is ParentMenuItemFeatureCommand))
                     {
                         menu.DropDownItems.RemoveAt(i);
@@ -1794,7 +1789,7 @@ namespace XenAdmin
             sendCtrlAltDelToolStripMenuItem.Enabled = (TheTabControl.SelectedTab == TabPageConsole) && vm && ((VM)SelectionManager.Selection.First).power_state == vm_power_state.Running;
 
             IXenConnection conn = SelectionManager.Selection.GetConnectionOfAllItems();
-            
+
             bool vmssOn = conn != null && Helpers.FalconOrGreater(conn);
             assignSnapshotScheduleToolStripMenuItem.Available = vmssOn;
             VMSnapshotScheduleToolStripMenuItem.Available = vmssOn;
@@ -1807,11 +1802,11 @@ namespace XenAdmin
             conversionToolStripMenuItem.Available = conn != null && conn.Cache.VMs.Any(v => v.IsConversionVM());
             installToolsToolStripMenuItem.Available = SelectionManager.Selection.Any(v => !Helpers.StockholmOrGreater(v.Connection));
             toolStripMenuItemInstallCertificate.Available = Helpers.StockholmOrGreater(conn);
-            
+
             toolStripMenuItemRotateSecret.Available = SelectionManager.Selection.Any(s =>
                 s.Connection != null && Helpers.StockholmOrGreater(s.Connection) &&
                 !s.Connection.Cache.Hosts.Any(Host.RestrictPoolSecretRotation));
-            
+
             toolStripMenuItemEnableTls.Available = SelectionManager.Selection.Any(s =>
                 s.Connection != null && Helpers.CloudOrGreater(s.Connection) && Helpers.XapiEqualOrGreater_1_290_0(s.Connection) &&
                 !s.Connection.Cache.Hosts.Any(Host.RestrictCertificateVerification) &&
@@ -1969,7 +1964,7 @@ namespace XenAdmin
             }
             else
             {
-                ConsolePanel.PauseAllDockedViews();  
+                ConsolePanel.PauseAllDockedViews();
                 CvmConsolePanel.PauseAllDockedViews();
 
                 if (t == TabPageGeneral)
@@ -2320,7 +2315,7 @@ namespace XenAdmin
 
                     foreach (ActionBase a in ConnectionsManager.History)
                     {
-                        if(!Program.RunInAutomatedTestMode)
+                        if (!Program.RunInAutomatedTestMode)
                         {
                             if (a is AsyncAction asyncAction)
                                 asyncAction.PrepareForEventReloadAfterRestart();
@@ -2363,15 +2358,15 @@ namespace XenAdmin
                 XenDialogBase.CloseAll(connection.Cache.VMs.Cast<IXenObject>().ToArray());
 
                 if (activePoolWizards.TryGetValue(connection, out IList<Form> wizards))
-        {
-                foreach (var wizard in wizards)
                 {
-                    if (!wizard.IsDisposed)
-                        wizard.Close();
+                    foreach (var wizard in wizards)
+                    {
+                        if (!wizard.IsDisposed)
+                            wizard.Close();
                     }
 
-                activePoolWizards.Remove(connection);
-            }
+                    activePoolWizards.Remove(connection);
+                }
             });
         }
 
@@ -2607,7 +2602,7 @@ namespace XenAdmin
         {
             if (connection != null)
             {
-                TrySelectNewNode(delegate(object o)
+                TrySelectNewNode(delegate (object o)
                 {
                     if (o == null)
                     {
@@ -2718,7 +2713,7 @@ namespace XenAdmin
             {
                 toolStripMenuItemCfu.Enabled = true;
                 SetClientUpdateAlert();
-            });            
+            });
         }
 
         private void SetClientUpdateAlert()
@@ -2826,7 +2821,7 @@ namespace XenAdmin
             List<Search> searches = Search.LoadFile(filename);
             if (searches != null && searches.Count > 0)
             {
-                Program.Invoke(Program.MainWindow, delegate()
+                Program.Invoke(Program.MainWindow, delegate ()
                 {
                     DoSearch(searches[0]);
                 });
@@ -2913,26 +2908,14 @@ namespace XenAdmin
             foreColor = VerticalGradientPanel.TextColor;
 
             if (xenObject is Pool pool && pool.Connection != null && pool.Connection.IsConnected && pool.Connection.CacheIsPopulated)
-            {
-                if (pool.IsFreeLicenseOrExpired() && !Helpers.NileOrGreater(xenObject.Connection))
-                {
-                    foreColor = Color.Red;
-                    return Messages.MAINWINDOW_HEADER_UNLICENSED;
-                    }
-
+            { 
                 return string.Format(Messages.MAINWINDOW_HEADER_LICENSED_WITH, Helpers.GetFriendlyLicenseName(pool));
-                    }
+            }
 
             if (xenObject is Host host && host.Connection != null && host.Connection.IsConnected && host.Connection.CacheIsPopulated)
             {
-                if (host.IsFreeLicenseOrExpired() && !Helpers.NileOrGreater(xenObject.Connection))
-                {
-                    foreColor = Color.Red;
-                    return Messages.MAINWINDOW_HEADER_UNLICENSED;
-                    }
-
                 return string.Format(Messages.MAINWINDOW_HEADER_LICENSED_WITH, Helpers.GetFriendlyLicenseName(host));
-                    }
+            }
 
             return string.Empty;
         }
@@ -2945,7 +2928,7 @@ namespace XenAdmin
         private void UpdateViewMenu(NavigationPane.NavigationMode mode)
         {
             //the order is the reverse from the order in which we want them to appear
-            var items = new ToolStripItem []
+            var items = new ToolStripItem[]
                 {
                     toolStripSeparator24,
                     ShowHiddenObjectsToolStripMenuItem,
@@ -2964,7 +2947,7 @@ namespace XenAdmin
             }
             else if (mode == NavigationPane.NavigationMode.Notifications)
             {
-                 foreach (var item in items)
+                foreach (var item in items)
                     viewToolStripMenuItem.DropDownItems.Remove(item);
             }
             else
@@ -3065,7 +3048,7 @@ namespace XenAdmin
 
         private void navigationPane_TreeNodeRightClicked()
         {
-           MainMenuBar_MenuActivate(MainMenuBar, new EventArgs());
+            MainMenuBar_MenuActivate(MainMenuBar, new EventArgs());
         }
 
         private void navigationPane_TreeViewRefreshed()
@@ -3077,7 +3060,7 @@ namespace XenAdmin
                 SearchPage.BuildList();
 
             UpdateHeader();
-                UpdateToolbars();
+            UpdateToolbars();
         }
 
         #endregion
@@ -3218,7 +3201,7 @@ namespace XenAdmin
                         XmlDocument xmlDocument = new XmlDocument();
                         using (var stream = dialog.OpenFile())
                             xmlDocument.Load(stream);
-                        
+
                         foreach (XmlNode itemConnection in xmlDocument.GetElementsByTagName("XenConnection"))
                         {
                             var conn = new XenConnection();
@@ -3341,11 +3324,11 @@ namespace XenAdmin
             else if (splitContainer1.SplitterDistance > max)
                 splitContainer1.SplitterDistance = max;
         }
-      
+
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
         {
             TabPage t = TheTabControl.SelectedTab;
-            if (t == TabPageConsole) 
+            if (t == TabPageConsole)
             {
                 if (mainWindowResized)
                     ConsolePanel.UpdateRDPResolution();
@@ -3378,7 +3361,7 @@ namespace XenAdmin
         }
 
         private void statusButtonErrors_Click(object sender, EventArgs e)
-        { 
+        {
             navigationPane.SwitchToNotificationsView(NotificationsSubMode.Events);
         }
 

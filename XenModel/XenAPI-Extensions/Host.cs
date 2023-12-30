@@ -527,15 +527,15 @@ namespace XenAPI
 
         #region Experimental Features
 
-        //public static bool CorosyncDisabled(Host h)
-        //{
-        //    return  RestrictCorosync(h) && FeatureDisabled(h, "corosync");
-        //}
+        public static bool CorosyncDisabled(Host h)
+        {
+            return RestrictCorosync(h) && FeatureDisabled(h, "corosync");
+        }
 
-        //public static bool SriovNetworkDisabled(Host h)
-        //{
-        //    return RestrictSriovNetwork(h) && FeatureDisabled(h, "network_sriov");
-        //}
+        public static bool SriovNetworkDisabled(Host h)
+        {
+            return RestrictSriovNetwork(h) && FeatureDisabled(h, "network_sriov");
+        }
 
         public static bool UefiBootDisabled(Host h)
         {

@@ -56,7 +56,7 @@ namespace XenAdmin.Controls
         {
             InitializeComponent();
             HelperLinkVisible = !Core.HiddenFeatures.LinkLabelHidden;
-            LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
+            //LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
             Visible = false;
         }
 

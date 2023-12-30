@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XenAdmin</RootNamespace>
     <AssemblyName>[XenCenter]</AssemblyName>
-    <ApplicationIcon>..\Branding\Images\AppIcon.ico</ApplicationIcon>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -62,7 +62,7 @@
     <Reference Include="DiscUtils, Version=0.11.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DiscUtils.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=2.0.15.0, Culture=neutral, PublicKeyToken=d247b8b0ac7959e9, processorArchitecture=MSIL">
+    <Reference Include="log4net">
       <HintPath>..\packages\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ReportViewer.WinForms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -118,6 +118,7 @@
     <Compile Include="Alerts\Types\MessageAlert.cs" />
     <Compile Include="Alerts\Types\XenServerPatchAlert.cs" />
     <Compile Include="Alerts\Types\XenServerVersionAlert.cs" />
+    <Compile Include="Commands\DockerContainerCommand.cs" />
     <Compile Include="Commands\PoolUpdatesCommand.cs" />
     <Compile Include="Commands\VtpmCommand.cs" />
     <Compile Include="Controls\ClientIdControl.cs">
@@ -130,7 +131,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Commands\ChangeControlDomainMemoryCommand.cs" />
-    <Compile Include="Commands\DockerContainerCommand.cs" />
     <Compile Include="Commands\Controls\PoolRemoveServerToolStripMenuItem.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -144,11 +144,6 @@
     <Compile Include="Commands\DisablePvsReadCachingCommand.cs" />
     <Compile Include="Commands\EnablePvsReadCachingCommand.cs" />
     <Compile Include="Commands\PauseVMCommand.cs" />
-    <Compile Include="Commands\RestartDockerContainerCommand.cs" />
-    <Compile Include="Commands\ResumeDockerContainerCommand.cs" />
-    <Compile Include="Commands\PauseDockerContainerCommand.cs" />
-    <Compile Include="Commands\StopDockerContainerCommand.cs" />
-    <Compile Include="Commands\StartDockerContainerCommand.cs" />
     <Compile Include="Commands\Controls\EditPropertiesToolStripMenuItem.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -580,6 +575,10 @@
     <Compile Include="TabPages\DockerDetailsPage.Designer.cs">
       <DependentUpon>DockerDetailsPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="TabPages\DockerProcessPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabPages\DockerProcessPage.Designer.cs" />
     <Compile Include="TabPages\HomePage.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -1561,12 +1560,6 @@
     <Compile Include="TabPages\NICPage.Designer.cs">
       <DependentUpon>NICPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="TabPages\DockerProcessPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TabPages\DockerProcessPage.Designer.cs">
-      <DependentUpon>DockerProcessPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="TabPages\SrStoragePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -2304,17 +2297,8 @@
       <SubType>Designer</SubType>
       <DependentUpon>BaseTabPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\DockerDetailsPage.ja.resx">
-      <DependentUpon>DockerDetailsPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\DockerDetailsPage.resx">
-      <DependentUpon>DockerDetailsPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\DockerDetailsPage.zh-CN.resx">
-      <DependentUpon>DockerDetailsPage.cs</DependentUpon>
-    </EmbeddedResource>
+    <EmbeddedResource Include="TabPages\DockerDetailsPage.resx" />
+    <EmbeddedResource Include="TabPages\DockerProcessPage.resx" />
     <EmbeddedResource Include="TabPages\GeneralTabPage.resx">
       <DependentUpon>GeneralTabPage.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2867,10 +2851,6 @@
       <DependentUpon>NICPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\DockerProcessPage.resx">
-      <DependentUpon>DockerProcessPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="TabPages\SrStoragePage.resx">
       <DependentUpon>SrStoragePage.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2944,12 +2924,6 @@
     <None Include="..\Branding\HomePage.html">
       <Link>HomePage.html</Link>
     </None>
-    <None Include="..\Branding\HomePage.ja.html">
-      <Link>HomePage.ja.html</Link>
-    </None>
-    <None Include="..\Branding\HomePage.zh-CN.html">
-      <Link>HomePage.zh-CN.html</Link>
-    </None>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
@@ -2970,7 +2944,6 @@
     <Content Include="..\Branding\Images\about_box_graphic.png">
       <Link>Images\about_box_graphic.png</Link>
     </Content>
-    <Content Include="..\Branding\Images\AppIcon.ico" />
     <Compile Include="Actions\GUIActions\MeddlingActionManager.cs" />
     <Compile Include="Alerts\AlertExtensions.cs" />
     <Compile Include="Alerts\Types\LicenseAlert.cs" />
@@ -4429,6 +4402,7 @@
     <Content Include="..\Branding\Images\xcm_32x32.png">
       <Link>Images\xcm_32x32.png</Link>
     </Content>
+    <Content Include="AppIcon.ico" />
     <Content Include="Images\000_AddSite_h32bit_16.png" />
     <Content Include="Images\000_FilterDates_h32bit_16.png" />
     <Content Include="Images\000_FilterServer_h32bit_16.png" />
@@ -5750,12 +5724,6 @@
     <EmbeddedResource Include="Plugins\UI\TabPageCredentialsDialog.zh-CN.resx">
       <DependentUpon>TabPageCredentialsDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.ja.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.zh-CN.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\BootOptionsEditPage.zh-CN.resx">
       <DependentUpon>BootOptionsEditPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -5965,12 +5933,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\NICPage.zh-CN.resx">
       <DependentUpon>NICPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\DockerProcessPage.ja.resx">
-      <DependentUpon>DockerProcessPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\DockerProcessPage.zh-CN.resx">
-      <DependentUpon>DockerProcessPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\PerformancePage.ja.resx">
       <DependentUpon>PerformancePage.cs</DependentUpon>
@@ -6765,10 +6727,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\splash-xcp-ng\splash-xcp-ng.csproj">
-      <Project>{cd563857-6159-4415-b7b2-a21991f572e3}</Project>
-      <Name>splash-xcp-ng</Name>
-    </ProjectReference>
     <ProjectReference Include="..\XenCenterLib\XenCenterLib.csproj">
       <Project>{9861DFA1-B41F-432D-A43F-226257DEBBB9}</Project>
       <Name>XenCenterLib</Name>
@@ -6780,10 +6738,6 @@
     <ProjectReference Include="..\XenOvfApi\XenOvfApi.csproj">
       <Project>{2D78AC6C-B867-484A-A447-3C6FC8B8EAF7}</Project>
       <Name>XenOvfApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\xe\Xe.csproj">
-      <Project>{727e885d-14be-40f0-9d0b-3853d44d3984}</Project>
-      <Name>Xe</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
