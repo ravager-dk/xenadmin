@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -82,57 +82,22 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new Data_source from a Proxy_Data_source.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public Data_source(Proxy_Data_source proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given Data_source.
         /// </summary>
-        public override void UpdateFrom(Data_source update)
+        public override void UpdateFrom(Data_source record)
         {
-            name_label = update.name_label;
-            name_description = update.name_description;
-            enabled = update.enabled;
-            standard = update.standard;
-            units = update.units;
-            min = update.min;
-            max = update.max;
-            value = update.value;
-        }
-
-        internal void UpdateFrom(Proxy_Data_source proxy)
-        {
-            name_label = proxy.name_label == null ? null : proxy.name_label;
-            name_description = proxy.name_description == null ? null : proxy.name_description;
-            enabled = (bool)proxy.enabled;
-            standard = (bool)proxy.standard;
-            units = proxy.units == null ? null : proxy.units;
-            min = Convert.ToDouble(proxy.min);
-            max = Convert.ToDouble(proxy.max);
-            value = Convert.ToDouble(proxy.value);
-        }
-
-        public Proxy_Data_source ToProxy()
-        {
-            Proxy_Data_source result_ = new Proxy_Data_source();
-            result_.name_label = name_label ?? "";
-            result_.name_description = name_description ?? "";
-            result_.enabled = enabled;
-            result_.standard = standard;
-            result_.units = units ?? "";
-            result_.min = min;
-            result_.max = max;
-            result_.value = value;
-            return result_;
+            name_label = record.name_label;
+            name_description = record.name_description;
+            enabled = record.enabled;
+            standard = record.standard;
+            units = record.units;
+            min = record.min;
+            max = record.max;
+            value = record.value;
         }
 
         /// <summary>
@@ -168,23 +133,14 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._name_label, other._name_label) &&
-                Helper.AreEqual2(this._name_description, other._name_description) &&
-                Helper.AreEqual2(this._enabled, other._enabled) &&
-                Helper.AreEqual2(this._standard, other._standard) &&
-                Helper.AreEqual2(this._units, other._units) &&
-                Helper.AreEqual2(this._min, other._min) &&
-                Helper.AreEqual2(this._max, other._max) &&
-                Helper.AreEqual2(this._value, other._value);
-        }
-
-        internal static List<Data_source> ProxyArrayToObjectList(Proxy_Data_source[] input)
-        {
-            var result = new List<Data_source>();
-            foreach (var item in input)
-                result.Add(new Data_source(item));
-
-            return result;
+            return Helper.AreEqual2(_name_label, other._name_label) &&
+                Helper.AreEqual2(_name_description, other._name_description) &&
+                Helper.AreEqual2(_enabled, other._enabled) &&
+                Helper.AreEqual2(_standard, other._standard) &&
+                Helper.AreEqual2(_units, other._units) &&
+                Helper.AreEqual2(_min, other._min) &&
+                Helper.AreEqual2(_max, other._max) &&
+                Helper.AreEqual2(_value, other._value);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, Data_source server)
@@ -199,6 +155,7 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// a human-readable name
         /// </summary>

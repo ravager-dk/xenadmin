@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,10 +29,7 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
+using System.Globalization;
 
 
 namespace XenAdmin
@@ -171,34 +167,68 @@ namespace XenAdmin
 
         private static string ByteSizeString(double bytes, int decPlaces, bool isRate, out string unit, string format = null)
         {
+            if (isRate)
+            {
+                if (bytes >= DEC_TERA)
+                {
+                    unit = Messages.VAL_TERRATE;
+                    var result = Math.Round(bytes / DEC_TERA, decPlaces);
+                    return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
+                }
+
+                if (bytes >= DEC_GIGA)
+                {
+                    unit = Messages.VAL_GIGRATE;
+                    var result = Math.Round(bytes / DEC_GIGA, decPlaces);
+                    return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
+                }
+
+                if (bytes >= DEC_MEGA)
+                {
+                    unit = Messages.VAL_MEGRATE;
+                    var result = Math.Round(bytes / DEC_MEGA, decPlaces);
+                    return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
+                }
+
+                if (bytes >= DEC_KILO)
+                {
+                    unit = Messages.VAL_KILRATE;
+                    var result = Math.Round(bytes / DEC_KILO, decPlaces);
+                    return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
+                }
+
+                unit = Messages.VAL_RATE;
+                return bytes.ToString();
+            }
+
             if (bytes >= BINARY_TERA)
             {
-                unit = isRate ? Messages.VAL_TERRATE : Messages.VAL_TERB;
+                unit = Messages.VAL_TERB;
                 var result = Math.Round(bytes / BINARY_TERA, decPlaces);
                 return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
             }
             if (bytes >= BINARY_GIGA)
             {
-                unit = isRate ? Messages.VAL_GIGRATE : Messages.VAL_GIGB;
+                unit = Messages.VAL_GIGB;
                 var result = Math.Round(bytes / BINARY_GIGA, decPlaces);
                 return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
             }
 
             if (bytes >= BINARY_MEGA)
             {
-                unit = isRate ? Messages.VAL_MEGRATE : Messages.VAL_MEGB;
+                unit = Messages.VAL_MEGB;
                 var result = Math.Round(bytes / BINARY_MEGA, decPlaces);
                 return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
             }
 
             if (bytes >= BINARY_KILO)
             {
-                unit = isRate ? Messages.VAL_KILRATE : Messages.VAL_KILB;
+                unit = Messages.VAL_KILB;
                 var result = Math.Round(bytes / BINARY_KILO, decPlaces);
                 return string.IsNullOrEmpty(format) ? result.ToString() : result.ToString(format);
             }
 
-            unit = isRate ? Messages.VAL_RATE : Messages.VAL_BYTE;
+            unit = Messages.VAL_BYTE;
             return bytes.ToString();
         }
 
@@ -315,15 +345,49 @@ namespace XenAdmin
                 return amount;
         }
 
+        #region DateTime Utils
+
+        public const long TicksBefore1970 = 621355968000000000;
+
+        public static readonly string[] Iso8601DateFormats = {"yyyyMMddTHH:mm:ssZ", "yyyy-MM-ddTHH:mm:ssZ"};
+        public static readonly string[] NonIso8601DateFormats = { "yyyy-MM-dd", "yyyy.MMdd" };
+
+        public static DateTime GetUnixMinDateTime()
+        {
+            return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        }
+
+        public static long TicksToSecondsSince1970(long ticks)
+        {
+            return (long)Math.Floor(new TimeSpan(ticks - TicksBefore1970).TotalSeconds);
+        }
+
+        public static bool TryParseIso8601DateTime(string toParse, out DateTime result)
+        {
+            return DateTime.TryParseExact(toParse, Iso8601DateFormats, CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out result);
+        }
+
+        public static bool TryParseNonIso8601DateTime(string toParse, out DateTime result)
+        {
+            return DateTime.TryParseExact(toParse, NonIso8601DateFormats, CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out result);
+        }
+
+        public static string ToISO8601DateTime(DateTime t)
+        {
+            return t.ToUniversalTime().ToString(Iso8601DateFormats[0], CultureInfo.InvariantCulture);
+        }
+        
         public static double ToUnixTime(DateTime time)
         {
-            TimeSpan diff = time - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan diff = time - GetUnixMinDateTime();
             return diff.TotalSeconds;
         }
 
         public static DateTime FromUnixTime(double time)
         {
-            DateTime bootTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime bootTime = GetUnixMinDateTime();
             return bootTime.AddSeconds(time);
         }
 
@@ -338,6 +402,8 @@ namespace XenAdmin
             return Messages.TIME_NEGLIGIBLE;
         }
 
+        #endregion
+
         internal static string GThanSize(long min)
         {
             return string.Format(Messages.GREATER_THAN, DiskSizeString(min));
@@ -351,6 +417,11 @@ namespace XenAdmin
         public static string CountsPerSecondString(double p)
         {
             return string.Format(Messages.VAL_FORMAT, p, Messages.COUNTS_PER_SEC_UNIT);
+        }
+
+        public static string SecondsPerSecondString(double p)
+        {
+            return string.Format(Messages.VAL_FORMAT, p, UnitStrings.SEC_PER_SEC_UNIT);
         }
 
         public static string MegaHertzString(double t)
@@ -413,63 +484,9 @@ namespace XenAdmin
             }
         }
 
-        public static void ThrowIfEnumerableParameterNullOrEmpty(IEnumerable value, string name)
-        {
-            ThrowIfParameterNull(value, name);
-
-#pragma warning disable 0168
-            foreach (object _ in value)
-            {
-                return;
-            }
-#pragma warning restore 0168
-
-            ThrowBecauseZeroLength(name);
-        }
-
         private static void ThrowBecauseZeroLength(string name)
         {
             throw new ArgumentException(string.Format("{0} cannot have 0 length.", name), name);
-        }
-
-        /// <summary>
-        /// Loads the specified non-generic IEnumerable into a generic List&lt;T&gt;.
-        /// </summary>
-        /// <typeparam name="T">The type to convert each element to</typeparam>
-        /// <param name="input">The input non-generic IEnumerable.</param>
-        /// <returns>Generic List&lt;T&gt;</returns>
-        public static List<T> PopulateList<T>(IEnumerable input)
-        {
-            ThrowIfParameterNull(input, "input");
-            List<T> output = new List<T>();
-            foreach (T t in input)
-            {
-                output.Add(t);
-            }
-            return output;
-        }
-
-        /// <summary>
-        /// Gets a List that represents the specified IEnumerable. If the input isn't a List then one gets created by passing the input into
-        /// List's constructor. If the input is already a List then it is returned directly.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="input">The input.</param>
-        /// <returns>A list for the specified enumerable</returns>
-        public static List<T> GetList<T>(IEnumerable<T> input)
-        {
-            if (input == null)
-            {
-                return null;
-            }
-
-            var list = input as List<T>;
-
-            if (list != null)
-            {
-                return list;
-            }
-            return new List<T>(input);
         }
 
         /// <summary>
@@ -486,43 +503,5 @@ namespace XenAdmin
 
             return 0 < port && port <= 65535;
         }
-
-        public static string GetXmlNodeInnerText(XmlNode node, string xPath)
-        {
-            ThrowIfParameterNull(node, "node");
-            ThrowIfStringParameterNullOrEmpty(xPath, "xPath");
-
-            XmlNodeList nodes = node.SelectNodes(xPath);
-
-            if (nodes == null || nodes.Count == 0)
-            {
-                throw new InvalidOperationException("Node not found: " + xPath);
-            }
-
-            return nodes[0].InnerText;
-        }
-
-        /// <summary>
-        /// Get the first node with name 'value' and returns its innerText. Used for getting results of CGSL async actions.
-        /// </summary>
-        /// <param name="xml">The XML.</param>
-        /// <returns>The contents of the first node with name 'value'.</returns>
-        public static string GetContentsOfValueNode(string xml)
-        {
-            ThrowIfStringParameterNullOrEmpty(xml, "xml");
-
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-
-            // If we've got this from an async task result, then it will be wrapped
-            // in a <value> element.
-            foreach (XmlNode node in doc.GetElementsByTagName("value"))
-            {
-                return node.InnerText;
-            }
-
-            return null;
-        }
-
     }
 }

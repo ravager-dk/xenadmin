@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -45,6 +44,7 @@ using XenAdmin.Help;
 using System.Threading;
 using XenAdmin.Actions;
 using System.IO;
+using XenAdmin.Controls.MainWindowControls;
 
 
 namespace XenAdmin.TabPages
@@ -69,17 +69,16 @@ namespace XenAdmin.TabPages
             UpdateActionEnablement();
 
             m_alertCollectionChangedWithInvoke = Program.ProgramInvokeHandler(AlertsCollectionChanged);
-            RegisterCheckForUpdatesEvents();
 
             toolStripSplitButtonDismiss.DefaultItem = tsmiDismissAll;
             toolStripSplitButtonDismiss.Text = tsmiDismissAll.Text;
         }
 
         #region NotificationPage overrides
+
         protected override void RefreshPage()
         {
             toolStripDropDownButtonServerFilter.InitializeHostList();
-            toolStripDropDownButtonServerFilter.BuildFilterList();
             Rebuild();
         }
 
@@ -95,24 +94,14 @@ namespace XenAdmin.TabPages
 
         public override string HelpID => "AlertSummaryDialog";
 
+        public override NotificationsSubMode NotificationsSubMode => NotificationsSubMode.Alerts;
+
         #endregion
 
-        private void SetFilterLabel()
-        {
-            toolStripLabelFiltersOnOff.Text = FilterIsOn
-                                                  ? Messages.FILTERS_ON
-                                                  : Messages.FILTERS_OFF;
-        }
-
-        private bool FilterIsOn
-        {
-            get
-            {
-                return toolStripDropDownButtonDateFilter.FilterIsOn
-                                 || toolStripDropDownButtonServerFilter.FilterIsOn
-                                 || toolStripDropDownSeveritiesFilter.FilterIsOn;
-            }
-        }
+        public override bool FilterIsOn =>
+            toolStripDropDownButtonDateFilter.FilterIsOn
+            || toolStripDropDownButtonServerFilter.FilterIsOn
+            || toolStripDropDownSeveritiesFilter.FilterIsOn;
 
         #region AlertListCode
 
@@ -152,7 +141,7 @@ namespace XenAdmin.TabPages
                 // 4) Take the top n as set by the filters
                 // 5) Add them to the control using the optimized AddRange()
 
-                Program.Invoke(Program.MainWindow, SetFilterLabel);
+                Program.Invoke(Program.MainWindow, OnFiltersChanged);
                 
                 List<Alert> alerts = Alert.NonDismissingAlerts;
                 alerts.RemoveAll(FilterAlert);
@@ -506,10 +495,8 @@ namespace XenAdmin.TabPages
 
             if (!Properties.Settings.Default.DoNotConfirmDismissAlerts)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.ALERT_DISMISS_CONFIRM, Messages.XENCENTER),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo)
+                using (var dlog = new NoIconDialog(Messages.ALERT_DISMISS_CONFIRM,
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
                 {
                     ShowCheckbox = true,
                     CheckboxCaption = Messages.DO_NOT_SHOW_THIS_MESSAGE
@@ -524,7 +511,7 @@ namespace XenAdmin.TabPages
                 }
             }
 
-            DismissAlerts(new List<Alert> {(Alert) clickedRow.Tag});
+            DismissAlerts((Alert)clickedRow.Tag);
         }
 
         private void tsmiDismissAll_Click(object sender, EventArgs e)
@@ -533,8 +520,7 @@ namespace XenAdmin.TabPages
 
             if (FilterIsOn)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.ALERT_DISMISS_ALL_CONTINUE),
+                using (var dlog = new NoIconDialog(Messages.ALERT_DISMISS_ALL_CONTINUE,
                     new ThreeButtonDialog.TBDButton(Messages.DISMISS_ALL_CONFIRM_BUTTON, DialogResult.Yes),
                     new ThreeButtonDialog.TBDButton(Messages.DISMISS_FILTERED_CONFIRM_BUTTON, DialogResult.No, ThreeButtonDialog.ButtonType.NONE),
                     ThreeButtonDialog.ButtonCancel))
@@ -544,8 +530,7 @@ namespace XenAdmin.TabPages
             }
             else if (!Properties.Settings.Default.DoNotConfirmDismissAlerts)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.ALERT_DISMISS_ALL_NO_FILTER_CONTINUE),
+                using (var dlog = new NoIconDialog(Messages.ALERT_DISMISS_ALL_NO_FILTER_CONTINUE,
                     new ThreeButtonDialog.TBDButton(Messages.DISMISS_ALL_YES_CONFIRM_BUTTON, DialogResult.Yes),
                     ThreeButtonDialog.ButtonCancel)
                 {
@@ -563,7 +548,7 @@ namespace XenAdmin.TabPages
                 return;
 
             var alerts = result == DialogResult.No
-                ? (from DataGridViewRow row in GridViewAlerts.Rows select row.Tag as Alert)
+                ? (from DataGridViewRow row in GridViewAlerts.Rows select row.Tag as Alert).ToArray()
                 : Alert.Alerts;
 
             DismissAlerts(alerts);
@@ -573,8 +558,7 @@ namespace XenAdmin.TabPages
         {
             if (!Properties.Settings.Default.DoNotConfirmDismissAlerts)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.ALERT_DISMISS_SELECTED_CONFIRM, Messages.XENCENTER),
+                using (var dlog = new NoIconDialog(Messages.ALERT_DISMISS_SELECTED_CONFIRM,
                     ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
                 {
                     ShowCheckbox = true,
@@ -593,7 +577,7 @@ namespace XenAdmin.TabPages
             if (GridViewAlerts.SelectedRows.Count > 0)
             {
                 var selectedAlerts = from DataGridViewRow row in GridViewAlerts.SelectedRows select row.Tag as Alert;
-                DismissAlerts(selectedAlerts);
+                DismissAlerts(selectedAlerts.ToArray());
             }
         }
 
@@ -608,16 +592,10 @@ namespace XenAdmin.TabPages
                     Rebuild(); // rebuild entire alert list to ensure filtering and sorting
                     break;
                 case CollectionChangeAction.Remove:
-
-                    var a = e.Element as Alert;
-                    if (a != null)
+                    if (e.Element is Alert a)
                         RemoveAlertRow(a);
-                    else
-                    {
-                        var range = e.Element as List<Alert>;
-                        if (range != null)
-                            Rebuild();
-                    }
+                    else if (e.Element is List<Alert>)
+                        Rebuild();
                     break;
             }
         }
@@ -626,7 +604,7 @@ namespace XenAdmin.TabPages
         {
             toolStripButtonExportAll.Enabled = Alert.NonDismissingAlertCount > 0;
 
-            tsmiDismissAll.Enabled = Alert.AllowedToDismiss(Alert.Alerts);
+            tsmiDismissAll.Enabled = Alert.Alerts.Any(a => a.AllowedToDismiss());
             tsmiDismissAll.AutoToolTip = !tsmiDismissAll.Enabled;
             tsmiDismissAll.ToolTipText = tsmiDismissAll.Enabled
                                                           ? string.Empty
@@ -634,16 +612,25 @@ namespace XenAdmin.TabPages
                                                                 ? Messages.DELETE_ANY_MESSAGE_RBAC_BLOCKED
                                                                 : Messages.NO_MESSAGES_TO_DISMISS;
 
-            var selectedAlerts = from DataGridViewRow row in GridViewAlerts.SelectedRows
-                                 select row.Tag as Alert;
+            var selectedAlerts = (from DataGridViewRow row in GridViewAlerts.SelectedRows
+                select row.Tag as Alert).ToArray();
 
-            tsmiDismissSelected.Enabled = Alert.AllowedToDismiss(selectedAlerts);
+            tsmiDismissSelected.Enabled = selectedAlerts.Any(a => a.AllowedToDismiss());
             tsmiDismissSelected.AutoToolTip = !tsmiDismissSelected.Enabled;
             tsmiDismissSelected.ToolTipText = tsmiDismissSelected.Enabled
                                                   ? string.Empty
                                                   : Messages.DELETE_MESSAGE_RBAC_BLOCKED;
 
             toolStripSplitButtonDismiss.Enabled = tsmiDismissAll.Enabled || tsmiDismissSelected.Enabled;
+            toolStripSplitButtonDismiss.AutoToolTip = tsmiDismissAll.AutoToolTip || tsmiDismissSelected.AutoToolTip;
+
+            if (toolStripSplitButtonDismiss.AutoToolTip)
+            {
+                if (!string.IsNullOrEmpty(tsmiDismissAll.ToolTipText))
+                    toolStripSplitButtonDismiss.ToolTipText = tsmiDismissAll.ToolTipText;
+                else if (!string.IsNullOrEmpty(tsmiDismissSelected.ToolTipText))
+                    toolStripSplitButtonDismiss.ToolTipText = tsmiDismissSelected.ToolTipText;
+            }
 
             if (toolStripSplitButtonDismiss.DefaultItem != null && !toolStripSplitButtonDismiss.DefaultItem.Enabled)
             {
@@ -661,23 +648,20 @@ namespace XenAdmin.TabPages
 
         #region Alert dismissal
 
-        private void DismissAlerts(IEnumerable<Alert> alerts)
+        private void DismissAlerts(params Alert[] alerts)
         {
-            var groups = from Alert alert in alerts
-                         where alert != null && !alert.Dismissing
-                         group alert by alert.Connection
-                         into g
-                         select new { Connection = g.Key, Alerts = g };
+            var groups = (from Alert alert in alerts
+                where alert != null && alert.AllowedToDismiss()
+                group alert by alert.Connection
+                into g
+                select new { Connection = g.Key, Alerts = g }).ToList();
 
             foreach (var g in groups)
             {
-                if (Alert.AllowedToDismiss(g.Connection))
-                {
-                    foreach (var alert in g.Alerts)
-                        alert.Dismissing = true;
-                    Rebuild();
-                    new DeleteAllAlertsAction(g.Connection, g.Alerts).RunAsync();
-                }
+                foreach (var alert in g.Alerts)
+                    alert.Dismissing = true;
+
+                new DismissAlertsAction(g.Alerts.ToList(), g.Connection).RunAsync();
             }
         }
 
@@ -687,18 +671,18 @@ namespace XenAdmin.TabPages
         {
             var items = new List<ToolStripItem>();
 
-            if (Alert.AllowedToDismiss(alert))
-            {
-                var dismiss = new ToolStripMenuItem(Messages.ALERT_DISMISS);
-                dismiss.Click += ToolStripMenuItemDismiss_Click;
-                items.Add(dismiss);
-            }
-
             if (!string.IsNullOrEmpty(alert.FixLinkText) && alert.FixLinkAction != null)
             {
                 var fix = new ToolStripMenuItem(alert.FixLinkText);
                 fix.Click += ToolStripMenuItemFix_Click;
                 items.Add(fix);
+            }
+
+            if (alert.AllowedToDismiss())
+            {
+                var dismiss = new ToolStripMenuItem(Messages.ALERT_DISMISS);
+                dismiss.Click += ToolStripMenuItemDismiss_Click;
+                items.Add(dismiss);
             }
 
             if (!string.IsNullOrEmpty(alert.HelpID))
@@ -746,8 +730,7 @@ namespace XenAdmin.TabPages
 
             if (FilterIsOn)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.ALERT_EXPORT_ALL_OR_FILTERED),
+                using (var dlog = new NoIconDialog(Messages.ALERT_EXPORT_ALL_OR_FILTERED,
                     new ThreeButtonDialog.TBDButton(Messages.EXPORT_ALL_BUTTON, DialogResult.Yes),
                     new ThreeButtonDialog.TBDButton(Messages.EXPORT_FILTERED_BUTTON, DialogResult.No, ThreeButtonDialog.ButtonType.NONE),
                     ThreeButtonDialog.ButtonCancel))
@@ -803,8 +786,7 @@ namespace XenAdmin.TabPages
                         {
                             foreach (DataGridViewRow row in GridViewAlerts.Rows)
                             {
-                                var a = row.Tag as Alert;
-                                if (a != null && !a.Dismissing)
+                                if (row.Tag is Alert a && !a.Dismissing)
                                     stream.WriteLine(a.GetAlertDetailsCSVQuotes());
                             }
                         }
@@ -838,22 +820,5 @@ namespace XenAdmin.TabPages
 
             Clip.SetClipboardText(alert.GetUpdateDetailsCSVQuotes());
         }
-
-        #region CheckForUpdates events
-        private void RegisterCheckForUpdatesEvents()
-        {
-            Updates.CheckForUpdatesCompleted += CheckForUpdatesCompleted;
-        }
-
-        private void DeregisterCheckForUpdatesEvents()
-        {
-            Updates.CheckForUpdatesCompleted -= CheckForUpdatesCompleted;
-        }
-
-        private void CheckForUpdatesCompleted(bool succeeded, string errorMessage)
-        {
-            Updates.CheckHotfixEligibility();
-        }
-        #endregion
     }
 }

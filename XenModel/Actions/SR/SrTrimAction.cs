@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,7 +38,7 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class SrTrimAction : PureAsyncAction
+    public class SrTrimAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -47,6 +46,7 @@ namespace XenAdmin.Actions
             : base(connection, string.Format(Messages.ACTION_SR_TRIM_TITLE, sr.NameWithoutHost()), false)
         {
             SR = sr;
+            ApiMethodsToRoleCheck.Add("Host.call_plugin");
         }
 
         protected override void Run()
@@ -62,7 +62,7 @@ namespace XenAdmin.Actions
                 return;
             }
 
-            var result = false;
+            bool result;
             try
             {
                 var args = new Dictionary<string, string> { { "sr_uuid", SR.uuid } };

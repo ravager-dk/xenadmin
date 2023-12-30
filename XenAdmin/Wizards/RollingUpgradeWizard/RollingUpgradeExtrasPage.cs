@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using XenAdmin.Controls;
 using XenAdmin.Core;
+using XenAdmin.Dialogs;
 using XenAPI;
 
 
@@ -46,6 +46,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
         public RollingUpgradeExtrasPage()
         {
             InitializeComponent();
+            applyUpdatesLabel.Text = string.Format(applyUpdatesLabel.Text, BrandManager.BrandConsole);
+            label2.Text = string.Format(label2.Text, BrandManager.BrandConsole, BrandManager.ProductBrand);
         }
 
         #region XenTabPage overrides
@@ -72,27 +74,32 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
         {
             var licensedPoolCount = 0;
             var poolCount = 0;
-            foreach (Host master in SelectedMasters)
-            {
-                var hosts = master.Connection.Cache.Hosts;
+            var upgradeToVersionWithCdn = false;
 
+            foreach (Host coordinator in SelectedCoordinators)
+            {
+                var hosts = coordinator.Connection.Cache.Hosts;
                 if (hosts.Length == 0)
                     continue;
 
+                //hosts earlier than yangtze can only upgrade to Yangtze
+                if (Helpers.YangtzeOrGreater(coordinator.Connection))
+                    upgradeToVersionWithCdn = true;
+
                 poolCount++;
-                var automatedUpdatesRestricted = hosts.Any(h => Helpers.DundeeOrGreater(h) && Host.RestrictBatchHotfixApply(h)); //if any host is not licensed for automated updates
+                var automatedUpdatesRestricted = hosts.Any(Host.RestrictBatchHotfixApply);
                 if (!automatedUpdatesRestricted)
                     licensedPoolCount++;
             }
 
-            if (licensedPoolCount > 0) // at least one pool licensed for automated updates 
+            if (!upgradeToVersionWithCdn && licensedPoolCount > 0)
             {
                 applyUpdatesCheckBox.Visible = applyUpdatesLabel.Visible = true;
                 applyUpdatesCheckBox.Text = poolCount == licensedPoolCount
                     ? Messages.ROLLING_UPGRADE_APPLY_UPDATES
                     : Messages.ROLLING_UPGRADE_APPLY_UPDATES_MIXED;
             }
-            else  // all pools unlicensed
+            else
             {
                 applyUpdatesCheckBox.Visible = applyUpdatesLabel.Visible = false;
             }
@@ -100,36 +107,33 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
         {
-            if (direction == PageLoadedDirection.Forward && ApplySuppPackAfterUpgrade && !string.IsNullOrEmpty(FilePath))
+            if (direction == PageLoadedDirection.Forward)
             {
-                SelectedSuppPack = WizardHelpers.ParseSuppPackFile(FilePath, this, ref cancel);
+                if (ApplyUpdatesToNewVersion && !Updates.CheckCanDownloadUpdates())
+                {
+                    cancel = true;
+                    using (var errDlg = new ClientIdDialog())
+                        errDlg.ShowDialog(ParentForm);
+                    return;
+                }
+
+                if (ApplySuppPackAfterUpgrade && !string.IsNullOrEmpty(FilePath))
+                    SelectedSuppPack = WizardHelpers.ParseSuppPackFile(FilePath, this, ref cancel);
             }
         }
         #endregion
 
-        public IEnumerable<Host> SelectedMasters { private get; set; }
+        public IEnumerable<Host> SelectedCoordinators { private get; set; }
 
         private string FilePath
         {
-            get { return fileNameTextBox.Text; }
-            set { fileNameTextBox.Text = value; }
+            get => fileNameTextBox.Text;
+            set => fileNameTextBox.Text = value;
         }
 
-        public bool ApplySuppPackAfterUpgrade
-        {
-            get
-            {
-                return checkBoxInstallSuppPack.Checked;
-            }
-        }
+        public bool ApplySuppPackAfterUpgrade => checkBoxInstallSuppPack.Checked;
 
-        public bool ApplyUpdatesToNewVersion
-        {
-            get
-            {
-                return applyUpdatesCheckBox.Visible && applyUpdatesCheckBox.Checked;
-            }
-        }
+        public bool ApplyUpdatesToNewVersion => applyUpdatesCheckBox.Visible && applyUpdatesCheckBox.Checked;
 
         private void BrowseButton_Click(object sender, EventArgs e)
         {

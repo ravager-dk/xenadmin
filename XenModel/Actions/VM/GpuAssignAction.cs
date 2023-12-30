@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,13 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-
 using XenAdmin.Core;
 using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class GpuAssignAction : PureAsyncAction
+    public class GpuAssignAction : AsyncAction
     {
         private readonly VM vm;
         private readonly List<VGPU> vGpus;
@@ -48,6 +44,7 @@ namespace XenAdmin.Actions
         {
             this.vm = vm;
             this.vGpus = vGpus;
+            ApiMethodsToRoleCheck.AddRange("VGPU.destroy", "VGPU.async_create");
         }
 
         protected override void Run()

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System;
 using System.Drawing;
 using XenAdmin.Actions;
 using XenAdmin.Controls;
-using XenAdmin.Properties;
 using XenAdmin.SettingsPanels;
 using XenAPI;
 
@@ -60,10 +58,7 @@ namespace XenAdmin.Wizards.NewVMApplianceWizard
             get { return string.Empty; }
         }
 
-        public Image Image
-        {
-            get { return Resources.edit_16; }
-        }
+        public Image Image => Images.StaticImages.edit_16;
 
         public override string PageTitle
         {
@@ -123,6 +118,9 @@ namespace XenAdmin.Wizards.NewVMApplianceWizard
         public void ShowLocalValidationMessages()
         {
         }
+
+        public void HideLocalValidationMessages()
+        { }
 
         public void Cleanup()
         {

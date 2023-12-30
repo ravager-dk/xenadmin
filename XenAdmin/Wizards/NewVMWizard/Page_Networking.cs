@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -145,7 +144,7 @@ namespace XenAdmin.Wizards.NewVMWizard
                     // CA-218956 - Expose HIMN when showing hidden objects
                     // HIMN shouldn't be autoplugged
                     if (network.IsGuestInstallerNetwork() ||
-                        !network.GetAutoPlug() || !network.Show(Properties.Settings.Default.ShowHiddenVMs) || network.IsSlave() || (network.IsSriov() && !Template.HasSriovRecommendation()))
+                        !network.GetAutoPlug() || !network.Show(Properties.Settings.Default.ShowHiddenVMs) || network.IsMember() || (network.IsSriov() && !Template.HasSriovRecommendation()))
                         continue;
 
                     if (NetworksGridView.Rows.Count < MAX_NETWORKS_FOR_DEFAULT_TEMPLATES)
@@ -286,7 +285,7 @@ namespace XenAdmin.Wizards.NewVMWizard
 
         public void UpdateDetails()
         {
-            ImageCell.Value = Properties.Resources._000_Network_h32bit_16;
+            ImageCell.Value = Images.StaticImages._000_Network_h32bit_16;
             MacCell.Value = string.IsNullOrEmpty(Vif.MAC) ? Messages.NEWVMWIZARD_NETWORKINGPAGE_AUTOGEN : Vif.MAC;
             NetworkCell.Value = Helpers.GetName(Vif.Connection.Resolve(Vif.network));
         }

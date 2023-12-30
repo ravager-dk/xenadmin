@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using XenAdmin.Core;
+using XenAdmin.Diagnostics.Hotfixing;
 using XenAdmin.Diagnostics.Problems;
 using XenAdmin.Diagnostics.Problems.HostProblem;
 using XenAPI;
@@ -43,26 +43,59 @@ namespace XenAdmin.Diagnostics.Checks
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public SafeToUpgradeCheck(Host host)
+        private readonly Dictionary<string, string> _installMethodConfig;
+
+        public SafeToUpgradeCheck(Host host, Dictionary<string, string> installMethodConfig)
             : base(host)
-        {
+        {           
+            _installMethodConfig = installMethodConfig;
         }
+        public override bool CanRun() => !Helpers.CloudOrGreater(Host);
 
         protected override Problem RunHostCheck()
         {
+            var hotfix = HotfixFactory.Hotfix(Host);
+            if (hotfix != null && hotfix.ShouldBeAppliedTo(Host))
+                return new HostDoesNotHaveHotfixWarning(this, Host);
+
             try
             {
-                var config = new Dictionary<string, string>();
-                var result = Host.call_plugin(Host.Connection.Session, Host.opaque_ref, "prepare_host_upgrade.py", "testSafe2Upgrade", config);
+                var result = Host.call_plugin(Host.Connection.Session, Host.opaque_ref, "prepare_host_upgrade.py", "testSafe2Upgrade", _installMethodConfig);
 
+                if (result.ToLowerInvariant() == "true")
+                    return null;
+
+                Host.TryGetUpgradeVersion(Host, _installMethodConfig, out var upgradePlatformVersion, out _);
+
+                // block the upgrade to a post-8.2.X version
+                if (Helpers.CloudOrGreater(upgradePlatformVersion))
+                {
+                    switch (result.ToLowerInvariant())
+                    {
+                        case "not_enough_space":
+                            return new HostNotSafeToUpgradeProblem(this, Host, HostNotSafeToUpgradeReason.NotEnoughSpace);
+                        case "vdi_present":
+                            return new HostNotSafeToUpgradeProblem(this, Host, HostNotSafeToUpgradeReason.VdiPresent);
+                        case "utility_part_present":
+                            return new HostNotSafeToUpgradeProblem(this, Host, HostNotSafeToUpgradeReason.UtilityPartitionPresent);
+                        case "legacy_partition_table":
+                            return new HostNotSafeToUpgradeProblem(this, Host, HostNotSafeToUpgradeReason.LegacyPartitionTable);
+                        default:
+                            return new HostNotSafeToUpgradeProblem(this, Host, HostNotSafeToUpgradeReason.Default);
+                    }
+                }
+
+                // add a warning for older or unknown upgrade version
                 switch (result.ToLowerInvariant())
                 {
-                    case "true":
-                        return null;
-
                     case "not_enough_space":
                         return new HostNotSafeToUpgradeWarning(this, Host, HostNotSafeToUpgradeReason.NotEnoughSpace);
-
+                    case "vdi_present":
+                        return new HostNotSafeToUpgradeWarning(this, Host, HostNotSafeToUpgradeReason.VdiPresent);
+                    case "utility_part_present":
+                        return new HostNotSafeToUpgradeWarning(this, Host, HostNotSafeToUpgradeReason.UtilityPartitionPresent);
+                    case "legacy_partition_table":
+                        return new HostNotSafeToUpgradeWarning(this, Host, HostNotSafeToUpgradeReason.LegacyPartitionTable);
                     default:
                         return new HostNotSafeToUpgradeWarning(this, Host, HostNotSafeToUpgradeReason.Default);
                 }
@@ -76,9 +109,6 @@ namespace XenAdmin.Diagnostics.Checks
             return null;
         }
 
-        public override string Description
-        {
-            get { return Messages.CHECKING_SAFE_TO_UPGRADE_DESCRIPTION; }
-        }
+        public override string Description => Messages.CHECKING_SAFE_TO_UPGRADE_DESCRIPTION;
     }
 }

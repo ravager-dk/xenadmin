@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,8 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace XenAdmin.Controls.CustomGridView
@@ -42,16 +39,9 @@ namespace XenAdmin.Controls.CustomGridView
         public GridHeaderItem DefaultSortColumn;
         public List<String> Columns = new List<String>();
 
-        public GridHeaderRow(int rowheight, Color backColor, Pen borderPen)
-            : base(rowheight, backColor, borderPen)
+        public GridHeaderRow()
+            : base("1")
         {
-            OpaqueRef = "1";
-        }
-
-        public GridHeaderRow(int rowheight)
-            : base(rowheight)
-        {
-            OpaqueRef = "1";
         }
 
         public int GetColumnWidth(string col)

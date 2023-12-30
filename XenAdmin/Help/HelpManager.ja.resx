@@ -174,13 +174,16 @@
   <data name="CancelActionDialog" xml:space="preserve">
     <value>troubleshooting-bugtool</value>
   </data>
+  <data name="CertificateAlert" xml:space="preserve">
+    <value>hosts-certificates</value>
+  </data>
   <data name="CertificateChangedDialog" xml:space="preserve">
     <value>hosts-reconnect</value>
   </data>
   <data name="ChangeHomeDialog" xml:space="preserve">
     <value>vms-properties</value>
   </data>
-  <data name="ChangeMasterPasswordDialog" xml:space="preserve">
+  <data name="ChangeMainPasswordDialog" xml:space="preserve">
     <value>hosts-connect-save</value>
   </data>
   <data name="ChangeServerPasswordDialog" xml:space="preserve">
@@ -420,7 +423,7 @@
   <data name="EnableRDPonVM" xml:space="preserve">
     <value>tabs</value>
   </data>
-  <data name="EnterMasterPasswordDialog" xml:space="preserve">
+  <data name="EnterMainPasswordDialog" xml:space="preserve">
     <value>hosts-connect-save</value>
   </data>
   <data name="EvacuateHostDialog" xml:space="preserve">
@@ -455,9 +458,6 @@
   </data>
   <data name="ExportApplianceWizard_SelectVMsXvaPane" xml:space="preserve">
     <value>vms-export</value>
-  </data>
-  <data name="ExportApplianceWizard_TvmIpExportPane" xml:space="preserve">
-    <value>vms-export-ovf</value>
   </data>
   <data name="ExportVMDialog" xml:space="preserve">
     <value>vms-export</value>
@@ -503,12 +503,6 @@
   </data>
   <data name="HAWizard" xml:space="preserve">
     <value>pools-ha-enable</value>
-  </data>
-  <data name="HealthCheckOverviewDialog" xml:space="preserve">
-    <value>health-check</value>
-  </data>
-  <data name="HealthCheckSettingsDialog" xml:space="preserve">
-    <value>health-check</value>
   </data>
   <data name="HotfixEligibilityAlert" xml:space="preserve">
     <value>updates-about</value>
@@ -573,14 +567,11 @@
   <data name="ImportWizard_StoragePickerPane" xml:space="preserve">
     <value>vms-import</value>
   </data>
-  <data name="ImportWizard_TvmIpImportImagePane" xml:space="preserve">
-    <value>vms-importdiskimage</value>
-  </data>
-  <data name="ImportWizard_TvmIpImportOvfPane" xml:space="preserve">
-    <value>vms-import-ovf</value>
-  </data>
   <data name="ImportWizard_VMConfigPane" xml:space="preserve">
     <value>vms-importdiskimage</value>
+  </data>
+  <data name="InstallCertificate" xml:space="preserve">
+    <value>hosts-certificates</value>
   </data>
   <data name="InstallToolsWarningDialog" xml:space="preserve">
     <value>vms-installtools</value>
@@ -963,7 +954,7 @@
   <data name="SelectVMsToSuspendDialog" xml:space="preserve">
     <value>vms-suspend</value>
   </data>
-  <data name="SetMasterPasswordDialog" xml:space="preserve">
+  <data name="SetMainPasswordDialog" xml:space="preserve">
     <value>hosts-connect-save</value>
   </data>
   <data name="StorageUsageMessageAlert" xml:space="preserve">
@@ -1142,5 +1133,8 @@
   </data>
   <data name="XenServerUpdateAlert" xml:space="preserve">
     <value>updates-applying</value>
+  </data>
+  <data name="StorageReadCaching" xml:space="preserve">
+    <value>storage-readcaching</value>
   </data>
 </root>

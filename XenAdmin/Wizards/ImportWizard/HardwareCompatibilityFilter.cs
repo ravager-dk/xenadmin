@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,13 +38,13 @@ namespace XenAdmin.Wizards.ImportWizard.Filters
 {
     public class HardwareCompatibilityFilter : ReasoningFilter
     {
-        private List<Xen_ConfigurationSettingData_Type> _hardwarePlatformSettings = new List<Xen_ConfigurationSettingData_Type>();
-        private List<Host> _hosts = new List<Host>();
+        private readonly List<Xen_ConfigurationSettingData_Type> _hardwarePlatformSettings;
+        private readonly List<Host> _hosts = new List<Host>();
 
         public HardwareCompatibilityFilter(IXenObject itemAddedToComboBox, List<Xen_ConfigurationSettingData_Type> hardwarePlatformSettings)
             : base(itemAddedToComboBox)
         {
-            _hardwarePlatformSettings = hardwarePlatformSettings;
+            _hardwarePlatformSettings = hardwarePlatformSettings ?? new List<Xen_ConfigurationSettingData_Type>();
 
             if (itemAddedToComboBox is Host host)
                 _hosts.Add(host);
@@ -54,12 +53,13 @@ namespace XenAdmin.Wizards.ImportWizard.Filters
                 _hosts.AddRange(pool.Connection.Cache.Hosts);
         }
     
-        public override bool FailureFoundFor(IXenObject itemToFilterOn)
+        protected override bool FailureFoundFor(IXenObject itemToFilterOn, out string failureReason)
         {
+            failureReason = Messages.CPM_FAILURE_REASON_HARDWARE_PLATFORM;
+
             foreach (var setting in _hardwarePlatformSettings)
             {
-                long hardwarePlatformVersion;
-                if (!long.TryParse(setting.Value.Value, out hardwarePlatformVersion))
+                if (!long.TryParse(setting.Value.Value, out var hardwarePlatformVersion))
                     continue;
 
                 if (_hosts.Count > 0)
@@ -76,7 +76,5 @@ namespace XenAdmin.Wizards.ImportWizard.Filters
 
             return false;
         }
-
-        public override string Reason => Messages.CPM_FAILURE_REASON_HARDWARE_PLATFORM;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAPI;
 
@@ -67,30 +65,15 @@ namespace XenAdmin.Wizards.GenericPages
 
         public void CopyFrom(DelayLoadingOptionComboBoxItem toCopy)
         {
-            xenObject = toCopy.xenObject;
+            xenObject = toCopy.Item;
             failureReason = toCopy.FailureReason;
             Enabled = toCopy.Enabled;
-            PreferAsSelectedItem = toCopy.PreferAsSelectedItem;
         }
 
         /// <summary>
         /// Underlying Xen Object
         /// </summary>
-        public IXenObject Item
-        {
-            get { return xenObject; }
-        }
-
-        /// <summary>
-        /// You would prefer this item to be the one that is selected
-        /// As the items are threaded they may exist and be disabled but required
-        /// as a selected item if they load successfully.
-        /// 
-        /// Use this in the event handler for the ReasonUpdated flag to find out
-        /// which item should be the selected one and thus which to 
-        /// set in the combo box
-        /// </summary>
-        public bool PreferAsSelectedItem { get; set; }
+        public IXenObject Item => xenObject;
 
         /// <summary>
         /// Create a thread and fetch the reason
@@ -103,14 +86,6 @@ namespace XenAdmin.Wizards.GenericPages
             ThreadPool.QueueUserWorkItem(delegate { FetchFailureReasonWithRetry(DEFAULT_RETRIES, DEFAULT_TIMEOUT); });
         }
 
-        /// <summary>
-        /// Fetch the reason on the current thread
-        /// </summary>
-        public void LoadSync()
-        {
-            FetchFailureReasonWithRetry(DEFAULT_RETRIES, DEFAULT_TIMEOUT);
-        }
- 
         public void CancelFilters()
         {
             foreach (ReasoningFilter filter in _filters)
@@ -126,7 +101,18 @@ namespace XenAdmin.Wizards.GenericPages
             {
                 try
                 {
-                    FailureReason = FetchFailureReason();
+                    var result = string.Empty;
+
+                    foreach (ReasoningFilter filter in _filters)
+                    {
+                        if (filter.FailureFound(out var reason))
+                        {
+                            result = reason;
+                            break;
+                        }
+                    }
+
+                    FailureReason = result;
                     return;
                 }
                 catch
@@ -137,15 +123,6 @@ namespace XenAdmin.Wizards.GenericPages
             } while (retries-- > 0);
 
             FailureReason = Messages.DELAY_LOADED_COMBO_BOX_ITEM_FAILURE_UNKNOWN;
-        }
-
-        /// <summary>
-        /// Trigger event
-        /// </summary>
-        private void OnReasonChanged()
-        {
-            if (ReasonUpdated != null)
-                ReasonUpdated(this);
         }
 
         public bool Enabled { get; private set; }
@@ -161,11 +138,12 @@ namespace XenAdmin.Wizards.GenericPages
             {
                 if (failureReason == value)
                     return;
+
                 failureReason = value;
 
-                Enabled = String.IsNullOrEmpty(failureReason);
+                Enabled = string.IsNullOrEmpty(failureReason);
 
-                OnReasonChanged();
+                ReasonUpdated?.Invoke(this);
             }
         }
 
@@ -178,26 +156,7 @@ namespace XenAdmin.Wizards.GenericPages
             if (string.IsNullOrEmpty(FailureReason))
                 return Item.Name();
 
-            return String.Format(Messages.DELAY_LOADED_COMBO_BOX_ITEM_FAILURE_REASON, Item.Name(), FailureReason);
-        }
-
-        /// <summary>
-        /// Fetch the reason from somewhere that may take some time
-        /// Called in a separate thread by the constructor
-        /// Returning String.Empty or null will mean no failure has been found
-        /// </summary>
-        /// <returns></returns>
-        protected virtual string FetchFailureReason()
-        {
-            foreach (ReasoningFilter filter in _filters)
-            {
-                if (filter.FailureFoundFor(Item))
-                {
-                    return filter.Reason;
-                }
-            }
-
-            return string.Empty;
+            return string.Format(Messages.DELAY_LOADED_COMBO_BOX_ITEM_FAILURE_REASON, Item.Name(), FailureReason);
         }
     }
 }

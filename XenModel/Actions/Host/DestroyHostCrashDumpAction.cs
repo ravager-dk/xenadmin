@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,14 +29,13 @@
  */
 
 using System;
-using XenAdmin.Network;
 using XenAdmin.Core;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class DestroyHostCrashDumpAction : PureAsyncAction
+    public class DestroyHostCrashDumpAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -45,6 +43,7 @@ namespace XenAdmin.Actions
             : base(host.Connection, string.Format(Messages.HOST_REMOVING_CRASHDUMPS_TITLE, host.Name()))
         {
             Host = host;
+            ApiMethodsToRoleCheck.Add("Host_crashdump.destroy");
         }
 
         protected override void Run()

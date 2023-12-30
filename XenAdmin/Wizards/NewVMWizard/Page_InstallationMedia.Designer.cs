@@ -60,7 +60,7 @@ namespace XenAdmin.Wizards.NewVMWizard
             this.CdRadioButton.Name = "CdRadioButton";
             this.CdRadioButton.TabStop = true;
             this.CdRadioButton.UseVisualStyleBackColor = true;
-            this.CdRadioButton.CheckedChanged += new System.EventHandler(this.PhysicalRadioButton_CheckedChanged);
+            this.CdRadioButton.CheckedChanged += new System.EventHandler(this.CdRadioButton_CheckedChanged);
             // 
             // UrlRadioButton
             // 
@@ -99,25 +99,27 @@ namespace XenAdmin.Wizards.NewVMWizard
             // 
             resources.ApplyResources(this.CdDropDownBox, "CdDropDownBox");
             this.CdDropDownBox.connection = null;
-            this.CdDropDownBox.DisplayISO = false;
-            this.CdDropDownBox.DisplayPhysical = false;
             this.CdDropDownBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.CdDropDownBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.CdDropDownBox.Empty = false;
             this.CdDropDownBox.FormattingEnabled = true;
             this.CdDropDownBox.Name = "CdDropDownBox";
-            this.CdDropDownBox.SelectedCD = null;
+            this.CdDropDownBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.CdDropDownBox_DrawItem);
+            this.CdDropDownBox.SelectedIndexChanged += new System.EventHandler(this.CdDropDownBox_SelectedIndexChanged);
+            this.CdDropDownBox.DropDownClosed += new System.EventHandler(this.CdDropDownBox_DropDownClosed);
+            this.CdDropDownBox.Enter += new System.EventHandler(this.CdDropDownBox_Enter);
             // 
             // UrlTextBox
             // 
             resources.ApplyResources(this.UrlTextBox, "UrlTextBox");
             this.UrlTextBox.Name = "UrlTextBox";
+            this.UrlTextBox.TextChanged += new System.EventHandler(this.UrlTextBox_TextChanged);
+            this.UrlTextBox.Enter += new System.EventHandler(this.UrlTextBox_Enter);
             // 
             // panelInstallationMethod
             // 
             resources.ApplyResources(this.panelInstallationMethod, "panelInstallationMethod");
-            this.panelInstallationMethod.Controls.Add(this.bootModesControl1, 0, 7);
-            this.panelInstallationMethod.Controls.Add(this.PvBootBox, 0, 6);
+            this.panelInstallationMethod.Controls.Add(this.bootModesControl1, 0, 6);
+            this.panelInstallationMethod.Controls.Add(this.PvBootBox, 0, 5);
             this.panelInstallationMethod.Controls.Add(this.CdRadioButton, 0, 1);
             this.panelInstallationMethod.Controls.Add(this.UrlRadioButton, 0, 3);
             this.panelInstallationMethod.Controls.Add(this.label1, 0, 0);

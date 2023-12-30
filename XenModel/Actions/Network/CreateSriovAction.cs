@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -38,47 +37,51 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class CreateSriovAction : PureAsyncAction
+    public class CreateSriovAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         XenAPI.Network newNetwork;
         private List<PIF> selectedPifs;
 
-        public CreateSriovAction(IXenConnection connection, XenAPI.Network newNetwork, List<XenAPI.PIF> pifs)
+        public CreateSriovAction(IXenConnection connection, XenAPI.Network newNetwork, List<PIF> pifs)
             : base(connection,
                 string.Format(Messages.NETWORK_ACTION_CREATING_NETWORK_TITLE, newNetwork.Name(), Helpers.GetName(connection)))
         {
             this.newNetwork = newNetwork;
-            this.selectedPifs = pifs;
+            selectedPifs = pifs;
+
+            ApiMethodsToRoleCheck.AddRange("Network.create", "Network_sriov.async_create");
+            //omitted Network.destroy as it's only called in case of an error
+            //and failure is inconsequential
         }
 
         protected override void Run()
         {  
-            PIF pifOnMaster =null;
+            PIF pifOnCoordinator =null;
 
             if (selectedPifs.Count == 0)
                 return;
 
             foreach (PIF thePif in selectedPifs)
             {
-                Host host = thePif.Connection.Resolve<XenAPI.Host>(thePif.host);
+                Host host = thePif.Connection.Resolve(thePif.host);
                 if (host == null)
                     continue;
 
-                if (host.IsMaster())
+                if (host.IsCoordinator())
                 {
-                    pifOnMaster = thePif;
+                    pifOnCoordinator = thePif;
                     break;
                 }
             }
             Connection.ExpectDisruption = true;
 
-            //Enable SR-IOV network on Pool requires enabling master first.
-            if (pifOnMaster != null)
+            //Enable SR-IOV network on Pool requires enabling coordinator first.
+            if (pifOnCoordinator != null)
             {
-                selectedPifs.Remove(pifOnMaster);
-                selectedPifs.Insert(0, pifOnMaster);
+                selectedPifs.Remove(pifOnCoordinator);
+                selectedPifs.Insert(0, pifOnCoordinator);
             }
 
             int inc = 100 / selectedPifs.Count;
@@ -96,9 +99,9 @@ namespace XenAdmin.Actions
                     lo += inc;
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
-                if(lo == 0)
+                if (lo == 0)
                     DestroyNetwork(networkRef);
                 throw;
             }

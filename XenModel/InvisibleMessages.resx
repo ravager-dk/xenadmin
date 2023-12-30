@@ -117,32 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ACTIVATION_FORM_URL" xml:space="preserve">
-    <value />
-  </data>
-  <data name="ACTIVATION_SERVER" xml:space="preserve">
-    <value />
-  </data>
-  <data name="ACTIVATION_URL" xml:space="preserve">
-    <value />
-  </data>
-  <data name="COMMUNITY_URL" xml:space="preserve">
-    <value>https://xcp-ng.org</value>
-  </data>
-  <data name="HEALTH_CHECK_PRIVACY_STATEMENT_URL" xml:space="preserve">
-    <value />
-  </data>
   <data name="HOMEPAGE" xml:space="preserve">
     <value>https://xcp-ng.org</value>
-  </data>
-  <data name="HOMEPAGE_FILENAME" xml:space="preserve">
-    <value>HomePage.mht</value>
   </data>
   <data name="HTTP_LICENSES" xml:space="preserve">
     <value />
   </data>
-  <data name="ISL_DEPRECATION_URL" xml:space="preserve">
-    <value />
+  <data name="DOCS_URL" xml:space="preserve">
+    <value>https://docs.xenserver.com/en-us/</value>
   </data>
   <data name="LICENSE_EXPIRY_WEBPAGE" xml:space="preserve">
     <value />
@@ -150,29 +132,20 @@
   <data name="LICENSE_SERVER_DOWNLOAD_LINK" xml:space="preserve">
     <value />
   </data>
+  <data name="LICENSE_BUY_URL" xml:space="preserve">
+    <value>https://xenserver.com/buy</value>
+  </data>
+  <data name="LICENSE_SERVER_DOCS_LINK" xml:space="preserve">
+    <value>https://docs.citrix.com/en-us/licensing/current-release/license-server-getting-started.html</value>
+  </data>
   <data name="LOCALE" xml:space="preserve">
     <value>en-US</value>
-  </data>
-  <data name="LOG_FILENAME" xml:space="preserve">
-    <value>[XenCenter].log</value>
-  </data>
-  <data name="MAINWINDOW_HOME_PATH" xml:space="preserve">
-    <value>Home.htm</value>
-  </data>
-  <data name="OUT_OF_DATE_WEBSITE" xml:space="preserve">
-    <value />
-  </data>
-  <data name="PARTNEROFFERS_URL" xml:space="preserve">
-    <value />
   </data>
   <data name="PLUGINS_URL" xml:space="preserve">
     <value>https://xcp-ng.org</value>
   </data>
-  <data name="PRIVACY" xml:space="preserve">
-    <value />
-  </data>
-  <data name="XEN_SEARCH" xml:space="preserve">
-    <value>xensearch</value>
+  <data name="RELEASE_NOTES_URL" xml:space="preserve">
+    <value>https://docs.xenserver.com/en-us/xencenter/current-release/whats-new.html</value>
   </data>
   <data name="SUPPORT_URL" xml:space="preserve">
     <value>https://xcp-ng.com</value>
@@ -180,31 +153,10 @@
   <data name="UPSELL_SA" xml:space="preserve">
     <value />
   </data>
-  <data name="XENDESKTOP_URL" xml:space="preserve">
-    <value />
-  </data>
-  <data name="XEN_UPDATE" xml:space="preserve">
-    <value>xsupdate</value>
-  </data>
-  <data name="XENSERVER_UPDATE_URL" xml:space="preserve">
-    <value />
-  </data>
-  <data name="ISO_UPDATE" xml:space="preserve">
-    <value>iso</value>
-  </data>
   <data name="UPSELL_LEARNMOREURL_TRIAL" xml:space="preserve">
     <value />
   </data>
   <data name="HELP_URL" xml:space="preserve">
-    <value />
-  </data>
-  <data name="DEPRECATION_URL" xml:space="preserve">
-    <value>https://github.com/xcp-ng/xcp/wiki/XCP-ng-8.1-Release-Notes</value>
-  </data>
-  <data name="PV_GUESTS_CHECK_URL" xml:space="preserve">
-    <value />
-  </data>
-  <data name="HELP_URL_QUERY" xml:space="preserve">
     <value />
   </data>
 </root>

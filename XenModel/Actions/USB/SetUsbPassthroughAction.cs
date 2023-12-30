@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,25 +28,22 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class SetUsbPassthroughAction : PureAsyncAction
+    public class SetUsbPassthroughAction : AsyncAction
     {
-        private PUSB _pusb;
-        private bool _passthroughEnabled;
+        private readonly PUSB _pusb;
+        private readonly bool _passthroughEnabled;
 
         public SetUsbPassthroughAction (PUSB pusb, bool passthroughEnabled) :
-            base(pusb.Connection, String.Format(passthroughEnabled ? Messages.ACTION_USB_PASSTHROUGH_ENABLING : Messages.ACTION_USB_PASSTHROUGH_DISABLING, pusb.Name()))
+            base(pusb.Connection, "")
         {
             _pusb = pusb;
             _passthroughEnabled = passthroughEnabled;
+            Title = string.Format(passthroughEnabled ? Messages.ACTION_USB_PASSTHROUGH_ENABLING : Messages.ACTION_USB_PASSTHROUGH_DISABLING, pusb.Name());
+            ApiMethodsToRoleCheck.Add("PUSB.set_passthrough_enabled");
         }
 
         protected override void Run()

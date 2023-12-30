@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Core;
@@ -43,35 +41,25 @@ using XenAdmin.Actions.DR;
 
 namespace XenAdmin.Diagnostics.Problems.VMProblem
 {
-    public class ExistingVmProblem: VMProblem
+    public class ExistingVmProblem : VMProblem
     {
         public ExistingVmProblem(Check check, VM vm)
             : base(check, vm)
         {
         }
 
-        public override string Description
-        {
-            get
-            {
-                return String.Format(Messages.DR_WIZARD_PROBLEM_EXISTING_VM, Helpers.GetPoolOfOne(VM.Connection).Name()); 
-            } 
-        }
+        public override string Description => String.Format(Messages.DR_WIZARD_PROBLEM_EXISTING_VM, Helpers.GetPoolOfOne(VM.Connection).Name());
 
-        public override string HelpMessage
-        {
-            get { return Messages.DR_WIZARD_PROBLEM_EXISTING_VM_HELPMESSAGE; } 
-        }
+        public override string HelpMessage => Messages.DR_WIZARD_PROBLEM_EXISTING_VM_HELPMESSAGE;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
             Program.AssertOnEventThread();
 
             DialogResult dialogResult;
-            using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, String.Format(Messages.CONFIRM_DELETE_VM, VM.Name(), VM.Connection.Name), Messages.ACTION_SHUTDOWN_AND_DESTROY_VM_TITLE),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+            using (var dlg = new WarningDialog(string.Format(Messages.CONFIRM_DELETE_VM, VM.Name(), VM.Connection.Name),
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+            { WindowTitle = Messages.ACTION_SHUTDOWN_AND_DESTROY_VM_TITLE })
             {
                 dialogResult = dlg.ShowDialog();
             }

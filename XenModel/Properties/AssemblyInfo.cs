@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,43 +28,98 @@
  * SUCH DAMAGE.
  */
 
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using XenAdmin.Properties;
 
-// General Information about an assembly is controlled through the following 
+// General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
 [assembly: AssemblyTitle("XenModel")]
-[assembly: AssemblyDescription("[Citrix] [XenCenter]")]
+[assembly: AssemblyDescription("[XenCenter] library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("[Citrix]")]
 [assembly: AssemblyProduct("[XenCenter]")]
-[assembly: AssemblyCopyright("Copyright © [BRANDING_COMPANY_NAME_LEGAL]")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("e80f8412-2075-4c6b-bf10-c94576b26de4")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers 
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("0.0.0.0")]
-[assembly: AssemblyFileVersion("0000")]
-[assembly: XenCenterLib.XSVersion("[BRANDING_PRODUCT_VERSION]")]
 [assembly: InternalsVisibleTo("XenAdminTests")]
+
+[assembly: CustomBranding(
+    "[XenCenter]",
+    "[Vendor]",
+    "[XenServerProduct]",
+    "[XenServer version]",
+    "[Xc updates url]",
+    "[Cfu url]",
+    "[Guest Tools]",
+    "[XenServer host]",
+    "[YumRepoBaseBin]",
+    "[YumRepoBaseSource]",
+    "[YumRepoEarlyAccessBin]",
+    "[YumRepoEarlyAccessSource]",
+    "[YumRepoNormalBin]",
+    "[YumRepoNormalSource]")]
+
+namespace XenAdmin.Properties
+{
+    [AttributeUsage(AttributeTargets.Assembly)]
+    public class CustomBrandingAttribute : Attribute
+    {
+        public CustomBrandingAttribute(
+            string brandConsole,
+            string companyNameShort,
+            string productBrand,
+            string productVersionText,
+            string xcUpdatesUrl,
+            string cfuUrl,
+            string vmTools,
+            string xenHost,
+            string yumRepoBaseBin,
+            string yumRepoBaseSource,
+            string yumRepoEarlyAccessBin,
+            string yumRepoEarlyAccessSource,
+            string yumRepoNormalBin,
+            string yumRepoNormalSource
+        )
+        {
+            BrandConsole = brandConsole;
+            CompanyNameShort = companyNameShort;
+            ProductBrand = productBrand;
+            ProductVersionText = productVersionText;
+            XcUpdatesUrl = xcUpdatesUrl;
+            CfuUrl = cfuUrl;
+            VmTools = vmTools;
+            XenHost = xenHost;
+            YumRepoBaseBin = yumRepoBaseBin;
+            YumRepoBaseSource = yumRepoBaseSource;
+            YumRepoEarlyAccessBin = yumRepoEarlyAccessBin;
+            YumRepoEarlyAccessSource = yumRepoEarlyAccessSource;
+            YumRepoNormalBin = yumRepoNormalBin;
+            YumRepoNormalSource = yumRepoNormalSource;
+        }
+
+        public string BrandConsole { get; }
+        public string CompanyNameShort { get; }
+        public string ProductBrand { get; }
+        public string ProductVersionText { get; }
+        public string VmTools { get; }
+        public string XcUpdatesUrl { get; }
+        public string CfuUrl { get; }
+        public string XenHost { get; }
+        public string YumRepoBaseBin { get; }
+        public string YumRepoBaseSource { get; }
+        public string YumRepoEarlyAccessBin { get; }
+        public string YumRepoEarlyAccessSource { get; }
+        public string YumRepoNormalBin { get; }
+        public string YumRepoNormalSource { get; }
+    }
+}

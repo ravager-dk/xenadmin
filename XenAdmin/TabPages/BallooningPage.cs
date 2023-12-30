@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,9 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows.Forms;
-using XenAdmin.Controls;
 using XenAdmin.Controls.Ballooning;
 using XenAdmin.Core;
 using XenAPI;
@@ -126,7 +123,7 @@ namespace XenAdmin.TabPages
 
         private bool VMWanted(VM vm, Host host)
         {
-            return vm.is_a_real_vm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs) && vm.Home() == host;
+            return vm.IsRealVm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs) && vm.Home() == host;
         }
 
         private readonly CollectionChangeEventHandler VM_CollectionChangedWithInvoke;
@@ -261,7 +258,7 @@ namespace XenAdmin.TabPages
         {
             // Only observe real VMs (but templates come through here too because
             // they change into real VMs during VM creation).
-            if (!((VM)sender).is_a_real_vm())
+            if (!((VM)sender).IsRealVm())
                 return;
 
             // These are used by MainWindow.VMHome() to determine which host the VM belongs to
@@ -336,7 +333,7 @@ namespace XenAdmin.TabPages
             foreach (VM vm in vms)
             {
                 MemSettings settings =
-                    vm.has_ballooning()
+                    vm.SupportsBallooning()
                         ? new MemSettings(true, vm.power_state, vm.memory_static_min, vm.memory_static_max,
                             vm.memory_dynamic_min, vm.memory_dynamic_max)
                         : new MemSettings(false, vm.power_state, 0, vm.memory_static_max, 0, 0);  // don't consider other mem settings if ballooning off
@@ -391,7 +388,7 @@ namespace XenAdmin.TabPages
             pageContainerPanel.ResumeLayout();
             ReLayout();
 
-            SetupDeprecationBanner();
+            Banner.Visible = false;
         }
 
         private void ReLayout()
@@ -452,22 +449,6 @@ namespace XenAdmin.TabPages
         private void SetRowWidth(Control row)
         {
             row.Width = pageContainerPanel.Width - pageContainerPanel.Padding.Left - 25;  // It won't drop below row.MinimumSize.Width though
-        }
-
-        private void SetupDeprecationBanner()
-        {
-            Banner.Visible = false;
-            if (!Helpers.QuebecOrGreater(xenObject.Connection))
-                return;
-                
-            if (vms.Any(vm => vm.has_ballooning() && vm.memory_dynamic_min != vm.memory_static_max))
-            {
-                Banner.AppliesToVersion = string.Format(Messages.XENSERVER_8_1, BrandManager.ProductVersion81);
-                Banner.BannerType = DeprecationBanner.Type.Deprecation;
-                Banner.FeatureName = Messages.DMC;
-                Banner.LinkUri = HiddenFeatures.LinkLabelHidden ? null : new Uri(InvisibleMessages.DEPRECATION_URL);
-                Banner.Visible = !HiddenFeatures.LinkLabelHidden;
-            }
         }
     }
 }

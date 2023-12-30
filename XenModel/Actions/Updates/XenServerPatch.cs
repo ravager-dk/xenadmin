@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,7 +38,7 @@ namespace XenAdmin.Core
     [DebuggerDisplay("XenServerPatch (Name={Name}; Uuid={Uuid})")]
     public class XenServerPatch : IEquatable<XenServerPatch>
     {
-        private string _uuid;
+        private readonly string _uuid;
         public readonly string Name;
         public readonly string Description;
         public readonly string Guidance;
@@ -49,8 +48,8 @@ namespace XenAdmin.Core
         public readonly string PatchUrl;
         public readonly DateTime TimeStamp;
         public readonly int Priority;
-        public readonly long InstallationSize; // installation size, in btyes
-        public readonly long DownloadSize; // download size, in btyes
+        public readonly long InstallationSize; // installation size, in bytes
+        public readonly long DownloadSize; // download size, in bytes
         public readonly bool ContainsLivepatch;
 
         public readonly List<string> ConflictingPatches;
@@ -99,6 +98,11 @@ namespace XenAdmin.Core
                 return false;
 
             return string.Equals(Uuid, other.Uuid, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return _uuid.GetHashCode();
         }
 
         public after_apply_guidance after_apply_guidance

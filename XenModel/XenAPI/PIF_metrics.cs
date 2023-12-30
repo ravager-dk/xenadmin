@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -92,72 +92,27 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new PIF_metrics from a Proxy_PIF_metrics.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public PIF_metrics(Proxy_PIF_metrics proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given PIF_metrics.
         /// </summary>
-        public override void UpdateFrom(PIF_metrics update)
+        public override void UpdateFrom(PIF_metrics record)
         {
-            uuid = update.uuid;
-            io_read_kbs = update.io_read_kbs;
-            io_write_kbs = update.io_write_kbs;
-            carrier = update.carrier;
-            vendor_id = update.vendor_id;
-            vendor_name = update.vendor_name;
-            device_id = update.device_id;
-            device_name = update.device_name;
-            speed = update.speed;
-            duplex = update.duplex;
-            pci_bus_path = update.pci_bus_path;
-            last_updated = update.last_updated;
-            other_config = update.other_config;
-        }
-
-        internal void UpdateFrom(Proxy_PIF_metrics proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            io_read_kbs = Convert.ToDouble(proxy.io_read_kbs);
-            io_write_kbs = Convert.ToDouble(proxy.io_write_kbs);
-            carrier = (bool)proxy.carrier;
-            vendor_id = proxy.vendor_id == null ? null : proxy.vendor_id;
-            vendor_name = proxy.vendor_name == null ? null : proxy.vendor_name;
-            device_id = proxy.device_id == null ? null : proxy.device_id;
-            device_name = proxy.device_name == null ? null : proxy.device_name;
-            speed = proxy.speed == null ? 0 : long.Parse(proxy.speed);
-            duplex = (bool)proxy.duplex;
-            pci_bus_path = proxy.pci_bus_path == null ? null : proxy.pci_bus_path;
-            last_updated = proxy.last_updated;
-            other_config = proxy.other_config == null ? null : Maps.convert_from_proxy_string_string(proxy.other_config);
-        }
-
-        public Proxy_PIF_metrics ToProxy()
-        {
-            Proxy_PIF_metrics result_ = new Proxy_PIF_metrics();
-            result_.uuid = uuid ?? "";
-            result_.io_read_kbs = io_read_kbs;
-            result_.io_write_kbs = io_write_kbs;
-            result_.carrier = carrier;
-            result_.vendor_id = vendor_id ?? "";
-            result_.vendor_name = vendor_name ?? "";
-            result_.device_id = device_id ?? "";
-            result_.device_name = device_name ?? "";
-            result_.speed = speed.ToString();
-            result_.duplex = duplex;
-            result_.pci_bus_path = pci_bus_path ?? "";
-            result_.last_updated = last_updated;
-            result_.other_config = Maps.convert_to_proxy_string_string(other_config);
-            return result_;
+            uuid = record.uuid;
+            io_read_kbs = record.io_read_kbs;
+            io_write_kbs = record.io_write_kbs;
+            carrier = record.carrier;
+            vendor_id = record.vendor_id;
+            vendor_name = record.vendor_name;
+            device_id = record.device_id;
+            device_name = record.device_name;
+            speed = record.speed;
+            duplex = record.duplex;
+            pci_bus_path = record.pci_bus_path;
+            last_updated = record.last_updated;
+            other_config = record.other_config;
         }
 
         /// <summary>
@@ -193,7 +148,7 @@ namespace XenAPI
             if (table.ContainsKey("last_updated"))
                 last_updated = Marshalling.ParseDateTime(table, "last_updated");
             if (table.ContainsKey("other_config"))
-                other_config = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "other_config"));
+                other_config = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "other_config"));
         }
 
         public bool DeepEquals(PIF_metrics other)
@@ -203,28 +158,19 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._io_read_kbs, other._io_read_kbs) &&
-                Helper.AreEqual2(this._io_write_kbs, other._io_write_kbs) &&
-                Helper.AreEqual2(this._carrier, other._carrier) &&
-                Helper.AreEqual2(this._vendor_id, other._vendor_id) &&
-                Helper.AreEqual2(this._vendor_name, other._vendor_name) &&
-                Helper.AreEqual2(this._device_id, other._device_id) &&
-                Helper.AreEqual2(this._device_name, other._device_name) &&
-                Helper.AreEqual2(this._speed, other._speed) &&
-                Helper.AreEqual2(this._duplex, other._duplex) &&
-                Helper.AreEqual2(this._pci_bus_path, other._pci_bus_path) &&
-                Helper.AreEqual2(this._last_updated, other._last_updated) &&
-                Helper.AreEqual2(this._other_config, other._other_config);
-        }
-
-        internal static List<PIF_metrics> ProxyArrayToObjectList(Proxy_PIF_metrics[] input)
-        {
-            var result = new List<PIF_metrics>();
-            foreach (var item in input)
-                result.Add(new PIF_metrics(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_io_read_kbs, other._io_read_kbs) &&
+                Helper.AreEqual2(_io_write_kbs, other._io_write_kbs) &&
+                Helper.AreEqual2(_carrier, other._carrier) &&
+                Helper.AreEqual2(_vendor_id, other._vendor_id) &&
+                Helper.AreEqual2(_vendor_name, other._vendor_name) &&
+                Helper.AreEqual2(_device_id, other._device_id) &&
+                Helper.AreEqual2(_device_name, other._device_name) &&
+                Helper.AreEqual2(_speed, other._speed) &&
+                Helper.AreEqual2(_duplex, other._duplex) &&
+                Helper.AreEqual2(_pci_bus_path, other._pci_bus_path) &&
+                Helper.AreEqual2(_last_updated, other._last_updated) &&
+                Helper.AreEqual2(_other_config, other._other_config);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, PIF_metrics server)
@@ -244,6 +190,7 @@ namespace XenAPI
                 return null;
             }
         }
+
         /// <summary>
         /// Get a record containing the current state of the given PIF_metrics.
         /// First published in XenServer 4.0.
@@ -252,10 +199,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static PIF_metrics get_record(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_record(session.opaque_ref, _pif_metrics);
-            else
-                return new PIF_metrics(session.XmlRpcProxy.pif_metrics_get_record(session.opaque_ref, _pif_metrics ?? "").parse());
+            return session.JsonRpcClient.pif_metrics_get_record(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -266,10 +210,7 @@ namespace XenAPI
         /// <param name="_uuid">UUID of object to return</param>
         public static XenRef<PIF_metrics> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<PIF_metrics>.Create(session.XmlRpcProxy.pif_metrics_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.pif_metrics_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -280,38 +221,33 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static string get_uuid(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_uuid(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_uuid(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_uuid(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
         /// Get the io/read_kbs field of the given PIF_metrics.
         /// First published in XenServer 4.0.
+        /// Deprecated since XenServer 6.1.
         /// </summary>
         /// <param name="session">The session</param>
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
+        [Deprecated("XenServer 6.1")]
         public static double get_io_read_kbs(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_io_read_kbs(session.opaque_ref, _pif_metrics);
-            else
-                return Convert.ToDouble(session.XmlRpcProxy.pif_metrics_get_io_read_kbs(session.opaque_ref, _pif_metrics ?? "").parse());
+            return session.JsonRpcClient.pif_metrics_get_io_read_kbs(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
         /// Get the io/write_kbs field of the given PIF_metrics.
         /// First published in XenServer 4.0.
+        /// Deprecated since XenServer 6.1.
         /// </summary>
         /// <param name="session">The session</param>
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
+        [Deprecated("XenServer 6.1")]
         public static double get_io_write_kbs(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_io_write_kbs(session.opaque_ref, _pif_metrics);
-            else
-                return Convert.ToDouble(session.XmlRpcProxy.pif_metrics_get_io_write_kbs(session.opaque_ref, _pif_metrics ?? "").parse());
+            return session.JsonRpcClient.pif_metrics_get_io_write_kbs(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -322,10 +258,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static bool get_carrier(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_carrier(session.opaque_ref, _pif_metrics);
-            else
-                return (bool)session.XmlRpcProxy.pif_metrics_get_carrier(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_carrier(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -336,10 +269,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static string get_vendor_id(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_vendor_id(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_vendor_id(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_vendor_id(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -350,10 +280,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static string get_vendor_name(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_vendor_name(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_vendor_name(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_vendor_name(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -364,10 +291,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static string get_device_id(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_device_id(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_device_id(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_device_id(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -378,10 +302,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static string get_device_name(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_device_name(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_device_name(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_device_name(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -392,10 +313,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static long get_speed(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_speed(session.opaque_ref, _pif_metrics);
-            else
-                return long.Parse(session.XmlRpcProxy.pif_metrics_get_speed(session.opaque_ref, _pif_metrics ?? "").parse());
+            return session.JsonRpcClient.pif_metrics_get_speed(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -406,10 +324,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static bool get_duplex(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_duplex(session.opaque_ref, _pif_metrics);
-            else
-                return (bool)session.XmlRpcProxy.pif_metrics_get_duplex(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_duplex(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -420,10 +335,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static string get_pci_bus_path(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_pci_bus_path(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_pci_bus_path(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_pci_bus_path(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -434,10 +346,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static DateTime get_last_updated(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_last_updated(session.opaque_ref, _pif_metrics);
-            else
-                return session.XmlRpcProxy.pif_metrics_get_last_updated(session.opaque_ref, _pif_metrics ?? "").parse();
+            return session.JsonRpcClient.pif_metrics_get_last_updated(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -448,10 +357,7 @@ namespace XenAPI
         /// <param name="_pif_metrics">The opaque_ref of the given pif_metrics</param>
         public static Dictionary<string, string> get_other_config(Session session, string _pif_metrics)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_other_config(session.opaque_ref, _pif_metrics);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.pif_metrics_get_other_config(session.opaque_ref, _pif_metrics ?? "").parse());
+            return session.JsonRpcClient.pif_metrics_get_other_config(session.opaque_ref, _pif_metrics);
         }
 
         /// <summary>
@@ -463,10 +369,7 @@ namespace XenAPI
         /// <param name="_other_config">New value to set</param>
         public static void set_other_config(Session session, string _pif_metrics, Dictionary<string, string> _other_config)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.pif_metrics_set_other_config(session.opaque_ref, _pif_metrics, _other_config);
-            else
-                session.XmlRpcProxy.pif_metrics_set_other_config(session.opaque_ref, _pif_metrics ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse();
+            session.JsonRpcClient.pif_metrics_set_other_config(session.opaque_ref, _pif_metrics, _other_config);
         }
 
         /// <summary>
@@ -479,10 +382,7 @@ namespace XenAPI
         /// <param name="_value">Value to add</param>
         public static void add_to_other_config(Session session, string _pif_metrics, string _key, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.pif_metrics_add_to_other_config(session.opaque_ref, _pif_metrics, _key, _value);
-            else
-                session.XmlRpcProxy.pif_metrics_add_to_other_config(session.opaque_ref, _pif_metrics ?? "", _key ?? "", _value ?? "").parse();
+            session.JsonRpcClient.pif_metrics_add_to_other_config(session.opaque_ref, _pif_metrics, _key, _value);
         }
 
         /// <summary>
@@ -494,10 +394,7 @@ namespace XenAPI
         /// <param name="_key">Key to remove</param>
         public static void remove_from_other_config(Session session, string _pif_metrics, string _key)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.pif_metrics_remove_from_other_config(session.opaque_ref, _pif_metrics, _key);
-            else
-                session.XmlRpcProxy.pif_metrics_remove_from_other_config(session.opaque_ref, _pif_metrics ?? "", _key ?? "").parse();
+            session.JsonRpcClient.pif_metrics_remove_from_other_config(session.opaque_ref, _pif_metrics, _key);
         }
 
         /// <summary>
@@ -507,10 +404,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<PIF_metrics>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_all(session.opaque_ref);
-            else
-                return XenRef<PIF_metrics>.Create(session.XmlRpcProxy.pif_metrics_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.pif_metrics_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -520,10 +414,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<PIF_metrics>, PIF_metrics> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pif_metrics_get_all_records(session.opaque_ref);
-            else
-                return XenRef<PIF_metrics>.Create<Proxy_PIF_metrics>(session.XmlRpcProxy.pif_metrics_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.pif_metrics_get_all_records(session.opaque_ref);
         }
 
         /// <summary>
@@ -558,7 +449,7 @@ namespace XenAPI
                 }
             }
         }
-        private double _io_read_kbs;
+        private double _io_read_kbs = 0.000;
 
         /// <summary>
         /// Write bandwidth (KiB/s)
@@ -575,7 +466,7 @@ namespace XenAPI
                 }
             }
         }
-        private double _io_write_kbs;
+        private double _io_write_kbs = 0.000;
 
         /// <summary>
         /// Report if the PIF got a carrier or not

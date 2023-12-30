@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -103,7 +102,7 @@ namespace XenAdmin.Plugins
             if (Enabled)
             {
                 // catch all exceptions, the most likely cause of errors is user mistakes with plugin creation.
-                // we must not let this kill XenCenter
+                // we must not let this stop XenCenter
                 try
                 {
                     //CA-71469: check whether the plugins folder exists

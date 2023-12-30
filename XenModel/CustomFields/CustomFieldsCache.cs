@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using XenAdmin.Network;
-using XenAPI;
 using XenAdmin.Core;
 using System.Xml;
 
@@ -68,36 +66,25 @@ namespace XenAdmin.CustomFields
 
         private static List<CustomFieldDefinition> GetCustomFieldsFromGuiConfig(IXenConnection connection)
         {
-            Pool pool = Helpers.GetPoolOfOne(connection);
+            var pool = Helpers.GetPoolOfOne(connection);
             if (pool == null)
             {
                 return new List<CustomFieldDefinition>();
             }
 
-            Dictionary<String, String> other_config = Helpers.GetGuiConfig(pool);
-            if (other_config == null)
+            var otherConfig = Helpers.GetGuiConfig(pool);
+            if (otherConfig == null)
             {
                 return new List<CustomFieldDefinition>();
             }
 
-            if (!other_config.ContainsKey(CustomFieldsManager.CUSTOM_FIELD_BASE_KEY))
+            if (!otherConfig.ContainsKey(CustomFieldsManager.CUSTOM_FIELD_BASE_KEY))
             {
                 return new List<CustomFieldDefinition>();
             }
 
-            String customFields = other_config[CustomFieldsManager.CUSTOM_FIELD_BASE_KEY];
-            if (customFields == null)
-            {
-                return new List<CustomFieldDefinition>();
-            }
-
-            customFields.Trim();
-            if (String.IsNullOrEmpty(customFields))
-            {
-                return new List<CustomFieldDefinition>();
-            }
-
-            return GetCustomFieldDefinitions(customFields);
+            var customFields = otherConfig[CustomFieldsManager.CUSTOM_FIELD_BASE_KEY]?.Trim();
+            return string.IsNullOrEmpty(customFields) ? new List<CustomFieldDefinition>() : GetCustomFieldDefinitions(customFields);
         }
 
         public List<CustomFieldDefinition> GetCustomFields()

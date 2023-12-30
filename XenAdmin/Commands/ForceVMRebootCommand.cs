@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,17 +28,13 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Actions;
 using System.Drawing;
-using XenAdmin.Properties;
 using XenAPI;
 using XenAdmin.Network;
 using System.Windows.Forms;
 using XenAdmin.Core;
-using System.Collections.ObjectModel;
 using XenAdmin.Dialogs;
 using XenAdmin.Actions.VMActions;
 
@@ -69,7 +64,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void Execute(List<VM> vms)
+        protected override void Run(List<VM> vms)
         {
             CancelAllTasks(vms);
             RunAction(vms, Messages.ACTION_VMS_REBOOTING_TITLE, Messages.ACTION_VMS_REBOOTING_TITLE, Messages.ACTION_VM_REBOOTED, null);
@@ -78,7 +73,7 @@ namespace XenAdmin.Commands
 
         
 
-        protected override bool CanExecute(VM vm)
+        protected override bool CanRun(VM vm)
         {
             if (vm != null && !vm.is_a_template && !vm.Locked)
             {
@@ -185,13 +180,13 @@ namespace XenAdmin.Commands
             get { return "WarningVmLifeCycleForceReboot"; }
         }
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
             foreach (VM vm in GetSelection().AsXenObjects<VM>())
             {
-                if (!CanExecute(vm) && vm.power_state != vm_power_state.Halted)
+                if (!CanRun(vm) && vm.power_state != vm_power_state.Halted)
                 {
-                    return new CommandErrorDialog(Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TITLE, Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TEXT, cantExecuteReasons);
+                    return new CommandErrorDialog(Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TITLE, Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TEXT, cantRunReasons);
                 }
             }
             return null;
@@ -206,7 +201,7 @@ namespace XenAdmin.Commands
         {
             get
             {
-                return CanExecute() && GetSelection().AllItemsAre<VM>(ShowOnMainToolBarInternal);
+                return CanRun() && GetSelection().AllItemsAre<VM>(ShowOnMainToolBarInternal);
             }
         }
 

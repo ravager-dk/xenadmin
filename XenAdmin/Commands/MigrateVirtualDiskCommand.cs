@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using XenAdmin.Core;
@@ -58,19 +56,14 @@ namespace XenAdmin.Commands
             get { return GetSelection().Count > 1 ? Messages.MAINWINDOW_MOVE_OBJECTS : Messages.MOVE_VDI_CONTEXT_MENU; }
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<VDI> vdis = selection.AsXenObjects<VDI>();
 
             bool featureForbidden = vdis.TrueForAll(vdi => Helpers.FeatureForbidden(vdi.Connection, Host.RestrictCrossPoolMigrate));
             if (featureForbidden)
             {
-                string theText = HiddenFeatures.LinkLabelHidden
-                    ? Messages.UPSELL_BLURB_MIGRATE_VDI
-                    : Messages.UPSELL_BLURB_MIGRATE_VDI + Messages.UPSELL_BLURB_TRIAL;
-
-                using (var dlg = new UpsellDialog(theText, InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL))
-                    dlg.ShowDialog(Parent);
+                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_MIGRATE_VDI, Parent);
             }
             else
             {
@@ -78,7 +71,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return selection.Count > 0 && selection.All(v => CanBeMigrated(v.XenObject as VDI));
         }
@@ -90,8 +83,6 @@ namespace XenAdmin.Commands
 
             if(vdi.Connection.ResolveAll(vdi.VBDs).Count == 0)
                 return false;
-            if (vdi.GetVMs().Any(vm => !vm.IsRunning()) && !Helpers.DundeeOrGreater(vdi.Connection))
-                return false;
 
             SR sr = vdi.Connection.Resolve(vdi.SR);
             if (sr == null || sr.HBALunPerVDI())
@@ -102,11 +93,11 @@ namespace XenAdmin.Commands
             return true;
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             VDI vdi = item as VDI;
             if (vdi == null)
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
 
             if (vdi.is_a_snapshot)
                 return Messages.CANNOT_MOVE_VDI_IS_SNAPSHOT;
@@ -118,18 +109,16 @@ namespace XenAdmin.Commands
                 return Messages.CANNOT_MOVE_CBT_ENABLED_VDI;
             if (vdi.IsMetadataForDR())
                 return Messages.CANNOT_MOVE_DR_VD;
-            if (vdi.GetVMs().Any(vm => !vm.IsRunning()) && !Helpers.DundeeOrGreater(vdi.Connection))
-                return Messages.CANNOT_MIGRATE_VDI_NON_RUNNING_VM;
 
             SR sr = vdi.Connection.Resolve(vdi.SR);
             if (sr == null)
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
             if (sr.HBALunPerVDI())
                 return Messages.UNSUPPORTED_SR_TYPE;
             if (!sr.SupportsStorageMigration())
                 return Messages.UNSUPPORTED_SR_TYPE;
 
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
     }
 }

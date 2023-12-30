@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using XenAPI;
 using System.Windows.Forms;
@@ -76,9 +73,9 @@ namespace XenAdmin.Commands
         }
 
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<VDI>(CanExecute);
+            return selection.AllItemsAre<VDI>(CanRun);
         }
 
         protected override bool ConfirmationRequired
@@ -293,7 +290,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected bool CanExecute(VDI vdi)
+        protected bool CanRun(VDI vdi)
         {
             if (vdi == null)
                 return false;
@@ -329,7 +326,7 @@ namespace XenAdmin.Commands
                 {
                     //Check if we can unplug
                     DeactivateVBDCommand cmd = new DeactivateVBDCommand(Program.MainWindow, vbd);
-                    if (!AllowRunningVMDelete || !cmd.CanExecute())
+                    if (!AllowRunningVMDelete || !cmd.CanRun())
                         return false;
                 }
             }
@@ -353,11 +350,11 @@ namespace XenAdmin.Commands
             return true;
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             VDI vdi = item as VDI;
             if (vdi == null)
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
 
             SR sr = vdi.Connection.Resolve<SR>(vdi.SR);
             if (sr == null)
@@ -374,7 +371,7 @@ namespace XenAdmin.Commands
                 return FriendlyErrorNames.VDI_IS_A_PHYSICAL_DEVICE;
 
             if (sr.IsToolsSR())
-                return Messages.CANNOT_DELETE_TOOLS_SR;
+                return string.Format(Messages.CANNOT_DELETE_TOOLS_SR, BrandManager.VmTools);
 
             if (vdi.IsUsedByHA())
                 return Messages.CANNOT_DELETE_HA_VD;
@@ -392,13 +389,10 @@ namespace XenAdmin.Commands
 
                 if (vdiType == VDI.FriendlyType.SYSTEM_DISK)
                 {
-                  
-
-                    if (vm.power_state == vm_power_state.Running)
-                        return string.Format(
-                            Messages.CANNOT_DELETE_IN_USE_SYS_VD,
-                            Helpers.GetName(vm).Ellipsise(20));
+                    if (vm != null && vm.power_state == vm_power_state.Running)
+                        return string.Format(Messages.CANNOT_DELETE_IN_USE_SYS_VD, vm.Name());
                 }
+
                 if (vbd.Locked)
                     return vdiType == VDI.FriendlyType.SNAPSHOT ? Messages.CANNOT_DELETE_SNAPSHOT_IN_USE
                     : vdiType == VDI.FriendlyType.ISO ? Messages.CANNOT_DELETE_ISO_IN_USE
@@ -406,18 +400,16 @@ namespace XenAdmin.Commands
 
                 if (vbd.currently_attached)
                 {
-                    if (!AllowRunningVMDelete)
-                    {
-                        return string.Format(Messages.CANNOT_DELETE_VDI_ACTIVE_ON,
-                            Helpers.GetName(vm).Ellipsise(20));
-                    }
+                    if (!AllowRunningVMDelete && vm != null)
+                        return string.Format(Messages.CANNOT_DELETE_VDI_ACTIVE_ON, vm.Name());
+
                     DeactivateVBDCommand cmd = new DeactivateVBDCommand(Program.MainWindow, vbd);
-                    if (!cmd.CanExecute())
+                    if (!cmd.CanRun())
                     {
-                        var reasons = cmd.GetCantExecuteReasons();
-                        return reasons.Count > 0
-                            ? string.Format(Messages.CANNOT_DELETE_CANNOT_DEACTIVATE_REASON,
-                                Helpers.GetName(vm).Ellipsise(20), reasons.ElementAt(0).Value)
+                        var reason = cmd.GetCantRunReasons().Values.FirstOrDefault();
+
+                        return vm != null && reason != null && reason != Messages.UNKNOWN
+                            ? string.Format(Messages.CANNOT_DELETE_CANNOT_DEACTIVATE_REASON, vm.Name(), reason)
                             : Messages.UNKNOWN;
                     }
                 }
@@ -432,15 +424,15 @@ namespace XenAdmin.Commands
                     : vdiType == VDI.FriendlyType.ISO ? Messages.CANNOT_DELETE_ISO_GENERIC
                     : Messages.CANNOT_DELETE_VD_GENERIC;
 
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
-            return new CommandErrorDialog(Messages.ERROR_DESTROYING_STORAGE_ITEMS_TITLE, Messages.ERROR_DESTROYING_STORAGE_ITEMS_MESSAGE, cantExecuteReasons);
+            return new CommandErrorDialog(Messages.ERROR_DESTROYING_STORAGE_ITEMS_TITLE, Messages.ERROR_DESTROYING_STORAGE_ITEMS_MESSAGE, cantRunReasons);
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actionsToComplete = new List<AsyncAction>();
             List<VM> deletedVMSnapshots = new List<VM>();
@@ -484,7 +476,7 @@ namespace XenAdmin.Commands
                 SR sr = vdi.Connection.Resolve(vdi.SR);
                 if (sr == null)
                 {
-                    // Nothing we can do here, but this should have been caught in the getcantexecutereason method and prompted
+                    // Nothing we can do here, but this should have been caught in the getcantrunreason method and prompted
                     return actions;
                 }
                 DestroyDiskAction a = new DestroyDiskAction(vdi);

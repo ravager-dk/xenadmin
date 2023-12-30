@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using XenAdmin.Core;
 using XenAPI;
 using XenAdmin.Network;
@@ -46,8 +43,8 @@ namespace XenAdmin.Actions
 
         private VDI vdi;
 
-        public MoveVirtualDiskAction(IXenConnection connection, XenAPI.VDI vdi, SR sr)
-            : base(connection, string.Format(Messages.ACTION_MOVING_VDI_TITLE, Helpers.GetName(vdi), Helpers.GetName(sr)))
+        public MoveVirtualDiskAction(IXenConnection connection, VDI vdi, SR sr)
+            : base(connection, string.Format(Messages.ACTION_MOVING_VDI_TO_SR, Helpers.GetName(vdi), Helpers.GetName(connection.Resolve(vdi.SR)), Helpers.GetName(sr)))
         {
             this.vdi = vdi;
             SR = sr;
@@ -63,7 +60,6 @@ namespace XenAdmin.Actions
 
         protected override void Run()
         {
-            Description = string.Format(Messages.ACTION_MOVING_VDI_STATUS, Helpers.GetName(vdi));
             PercentComplete = 10;
             log.DebugFormat("Moving VDI '{0}'", Helpers.GetName(vdi));
             RelatedTask = VDI.async_copy(Session, vdi.opaque_ref, SR.opaque_ref);
@@ -125,8 +121,7 @@ namespace XenAdmin.Actions
             foreach (var newVbd in newVbds)
                 Connection.WaitForCache(VBD.create(Session, newVbd));
 
-            PercentComplete = 100;
-            Description = Messages.COMPLETED;
+            Tick(100, Messages.MOVED);
             log.DebugFormat("Moved VDI '{0}'", Helpers.GetName(vdi));
         }
 

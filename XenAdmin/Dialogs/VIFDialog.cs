@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Network;
 using XenAPI;
@@ -76,7 +74,7 @@ namespace XenAdmin.Dialogs
         {
             // Check if vSwitch Controller is configured for the pool (CA-46299)
             Pool pool = Helpers.GetPoolOfOne(connection);
-            var vSwitchController = pool != null && pool.vSwitchController();
+            var vSwitchController = !Helpers.StockholmOrGreater(connection) && pool != null && pool.vSwitchController();
 
             if (vSwitchController) 
             {
@@ -190,7 +188,7 @@ namespace XenAdmin.Dialogs
             networks.Sort();
             foreach (XenAPI.Network network in networks)
             {
-                if (!network.Show(Properties.Settings.Default.ShowHiddenVMs) || network.IsSlave() || (network.IsSriov() && !allowSriov))
+                if (!network.Show(Properties.Settings.Default.ShowHiddenVMs) || network.IsMember() || (network.IsSriov() && !allowSriov))
                     continue;
 
                 comboBoxNetwork.Items.Add(new NetworkComboBoxItem(network));
@@ -203,21 +201,9 @@ namespace XenAdmin.Dialogs
             comboBoxNetwork.SelectedIndex = 0;
         }
 
-        private XenAPI.Network SelectedNetwork
-        {
-            get
-            {
-                return ((NetworkComboBoxItem)comboBoxNetwork.SelectedItem).Network;
-            }
-        }
+        private XenAPI.Network SelectedNetwork => (comboBoxNetwork.SelectedItem as NetworkComboBoxItem)?.Network;
 
-        private string SelectedMac
-        {
-            get
-            {
-                return radioButtonAutogenerate.Checked ? "" : promptTextBoxMac.Text;
-            }
-        }
+        private string SelectedMac => radioButtonAutogenerate.Checked ? "" : promptTextBoxMac.Text;
 
         public VIF NewVif()
         {
@@ -321,14 +307,12 @@ namespace XenAdmin.Dialogs
                     foreach (VIF vif in xenConnection.Cache.VIFs)
                     {
                         var vm = xenConnection.Resolve(vif.VM);
-                        if (vif != ExistingVif && vif.MAC == SelectedMac && vm != null && vm.is_a_real_vm())
+                        if (vif != ExistingVif && vif.MAC == SelectedMac && vm != null && vm.IsRealVm())
                         {
-                            using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(SystemIcons.Warning,
-                                    string.Format(Messages.PROBLEM_MAC_ADDRESS_IS_DUPLICATE, SelectedMac, vm.NameWithLocation()),
-                                    Messages.PROBLEM_MAC_ADDRESS_IS_DUPLICATE_TITLE),
-                                new ThreeButtonDialog.TBDButton(Messages.YES_BUTTON_CAPTION, DialogResult.Yes),
-                                new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                            using (var dlg = new WarningDialog(string.Format(Messages.PROBLEM_MAC_ADDRESS_IS_DUPLICATE, SelectedMac, vm.NameWithLocation()),
+                                ThreeButtonDialog.ButtonYes,
+                                new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                                {WindowTitle = Messages.PROBLEM_MAC_ADDRESS_IS_DUPLICATE_TITLE})
                             {
                                 e.Cancel = dlg.ShowDialog(this) == DialogResult.No;
                                 return;
@@ -387,37 +371,33 @@ namespace XenAdmin.Dialogs
 
         #endregion
 
-        internal override string HelpName
+        internal override string HelpName => ExistingVif == null ? "VIFDialog" : "EditVmNetworkSettingsDialog";
+
+        
+        private class NetworkComboBoxItem : IEquatable<NetworkComboBoxItem>
         {
-            get
+            public XenAPI.Network Network;
+
+            public NetworkComboBoxItem(XenAPI.Network network)
             {
-                if (ExistingVif != null)
-                    return "EditVmNetworkSettingsDialog";
-                else
-                    return "VIFDialog";
+                Network = network;
             }
-        }
-    }
 
-    public class NetworkComboBoxItem : IEquatable<NetworkComboBoxItem>
-    {
-        public XenAPI.Network Network;
+            public override string ToString()
+            {
+                return Network == null ? Messages.NONE : Helpers.GetName(Network);
+            }
 
-        public NetworkComboBoxItem(XenAPI.Network network)
-        {
-            Network = network;
-        }
+            public bool Equals(NetworkComboBoxItem other)
+            {
+                if (other == null)
+                    return false;
+                
+                if (Network == null)
+                    return other.Network == null;
 
-        public override string ToString()
-        {
-            return Network == null ? Messages.NONE : Helpers.GetName(Network);
-        }
-
-        public bool Equals(NetworkComboBoxItem other)
-        {
-            if (Network == null)
-                return other.Network == null;
-            return Network.Equals(other.Network);
+                return Network.Equals(other.Network);
+            }
         }
     }
 }

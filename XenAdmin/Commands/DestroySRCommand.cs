@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,6 +29,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAPI;
@@ -51,37 +51,37 @@ namespace XenAdmin.Commands
         {
         }
 
-        public DestroySRCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection)
-            : base(mainWindow, selection)
+        public DestroySRCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selectedItems)
+            : base(mainWindow, selectedItems)
         {
         }
 
-        public DestroySRCommand(IMainWindow mainWindow, SR selection)
-            : base(mainWindow, selection)
+        public DestroySRCommand(IMainWindow mainWindow, SR sr)
+            : base(mainWindow, sr)
         {
         }
 
-        public DestroySRCommand(IMainWindow mainWindow, IEnumerable<SR> selection)
-            : base(mainWindow, ConvertToSelection(selection))
+        public DestroySRCommand(IMainWindow mainWindow, IEnumerable<SR> srs)
+            : base(mainWindow, srs.Select(s => new SelectedItem(s)).ToList())
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actions = new List<AsyncAction>();
-            foreach (SR sr in selection.AsXenObjects<SR>(CanExecute))
+            foreach (SR sr in selection.AsXenObjects<SR>(CanRun))
             {
-                actions.Add(new SrAction(SrActionKind.Destroy, sr));
+                actions.Add(new DestroySrAction(sr));
             }
             RunMultipleActions(actions, Messages.ACTION_SRS_DESTROYING, string.Empty, string.Empty, true);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanExecute);
+            return selection.AllItemsAre<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanRun);
         }
 
-        private static bool CanExecute(SR sr)
+        private static bool CanRun(SR sr)
         {
             return sr != null && !sr.HasRunningVMs() && sr.CanCreateWithXenCenter()
                 && sr.allowed_operations.Contains(storage_operations.destroy) && !HelpersGUI.GetActionInProgress(sr);
@@ -90,21 +90,9 @@ namespace XenAdmin.Commands
         /// <summary>
         /// Gets the text for a menu item which launches this Command.
         /// </summary>
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_DESTROY_SR;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_DESTROY_SR;
 
-        protected override bool ConfirmationRequired
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationRequired => true;
 
         protected override string ConfirmationDialogText
         {
@@ -132,17 +120,17 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
-            return new CommandErrorDialog(Messages.ERROR_DIALOG_DESTROY_SR_TITLE, Messages.ERROR_DIALOG_DESTROY_SR_TEXT, cantExecuteReasons);
+            return new CommandErrorDialog(Messages.ERROR_DIALOG_DESTROY_SR_TITLE, Messages.ERROR_DIALOG_DESTROY_SR_TEXT, cantRunReasons);
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             SR sr = item as SR;
             if (sr == null)
             {
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
             }
             if (!sr.HasPBDs())
             {
@@ -154,29 +142,17 @@ namespace XenAdmin.Commands
             }
             else if (!sr.CanCreateWithXenCenter())
             {
-                return Messages.SR_CANNOT_BE_DESTROYED_WITH_XC;
+                return string.Format(Messages.SR_CANNOT_BE_DESTROYED_WITH_XC, BrandManager.BrandConsole);
             }
             else if (HelpersGUI.GetActionInProgress(sr))
             {
                 return Messages.SR_ACTION_IN_PROGRESS;
             }
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
 
-        protected override string ConfirmationDialogYesButtonLabel
-        {
-            get
-            {
-                return Messages.MESSAGEBOX_DESTROY_SR_YES_BUTTON_LABEL;
-            }
-        }
+        protected override string ConfirmationDialogYesButtonLabel => Messages.MESSAGEBOX_DESTROY_SR_YES_BUTTON_LABEL;
 
-        protected override bool ConfirmationDialogNoButtonSelected
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationDialogNoButtonSelected => true;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,8 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Commands;
 using XenAPI;
@@ -307,8 +304,6 @@ namespace XenAdmin.Controls.NetworkingTab
                     }
                     NetworksGridView.Rows.AddRange(vifRowsToAdd.ToArray());
 
-                    bool selected = true;
-
                     if (selectedVIF != null)
                     {
                         foreach (VifRow row in NetworksGridView.Rows)
@@ -320,11 +315,6 @@ namespace XenAdmin.Controls.NetworkingTab
                                 break;
                             }
                         }
-                    }
-
-                    if (!selected && NetworksGridView.Rows.Count > 0)
-                    {
-                        NetworksGridView.Rows[0].Selected = true;
                     }
                 }
                 else if (XenObject is Host || XenObject is Pool)
@@ -404,7 +394,7 @@ namespace XenAdmin.Controls.NetworkingTab
 
                 AddNetworkButton.Enabled = !locked;
 
-                EditNetworkButton.Enabled = !locked && !TheNetwork.Locked && !TheNetwork.IsSlave() && !TheNetwork.CreateInProgress()
+                EditNetworkButton.Enabled = !locked && !TheNetwork.Locked && !TheNetwork.IsMember() && !TheNetwork.CreateInProgress()
                     && !TheNetwork.IsGuestInstallerNetwork();
                 // CA-218956 - Expose HIMN when showing hidden objects
                 // HIMN should not be editable
@@ -440,16 +430,22 @@ namespace XenAdmin.Controls.NetworkingTab
                 if (vm.power_state == vm_power_state.Suspended)
                 {
                     RemoveButtonContainer.SetToolTip(Messages.TOOLTIP_REMOVE_NETWORK_SUSPENDED);
-                    EditButtonContainer.SetToolTip(vm.HasNewVirtualisationStates() ? Messages.TOOLTIP_EDIT_NETWORK_IO_DRIVERS : Messages.TOOLTIP_EDIT_NETWORK_TOOLS);
+                    EditButtonContainer.SetToolTip(vm.HasNewVirtualizationStates()
+                        ? Messages.TOOLTIP_EDIT_NETWORK_IO_DRIVERS
+                        : string.Format(Messages.TOOLTIP_EDIT_NETWORK_TOOLS, BrandManager.VmTools));
                     toolTipContainerActivateToggle.SetToolTip(vif.currently_attached 
                         ? Messages.TOOLTIP_DEACTIVATE_VIF_SUSPENDED : Messages.TOOLTIP_ACTIVATE_VIF_SUSPENDED);
                 }
                 else
                 {
-                    if (vm.power_state == vm_power_state.Running && !vm.GetVirtualisationStatus().HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED))
+                    if (vm.power_state == vm_power_state.Running && !vm.GetVirtualizationStatus(out _).HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
                     {
-                        RemoveButtonContainer.SetToolTip(vm.HasNewVirtualisationStates() ? Messages.TOOLTIP_REMOVE_NETWORK_IO_DRIVERS : Messages.TOOLTIP_REMOVE_NETWORK_TOOLS);
-                        EditButtonContainer.SetToolTip(vm.HasNewVirtualisationStates() ? Messages.TOOLTIP_EDIT_NETWORK_IO_DRIVERS : Messages.TOOLTIP_EDIT_NETWORK_TOOLS);
+                        RemoveButtonContainer.SetToolTip(vm.HasNewVirtualizationStates()
+                            ? Messages.TOOLTIP_REMOVE_NETWORK_IO_DRIVERS
+                            : string.Format(Messages.TOOLTIP_REMOVE_NETWORK_TOOLS, BrandManager.VmTools));
+                        EditButtonContainer.SetToolTip(vm.HasNewVirtualizationStates()
+                            ? Messages.TOOLTIP_EDIT_NETWORK_IO_DRIVERS
+                            : string.Format(Messages.TOOLTIP_EDIT_NETWORK_TOOLS, BrandManager.VmTools));
                         toolTipContainerActivateToggle.SetToolTip(vif.currently_attached
                             ? Messages.TOOLTIP_DEACTIVATE_VIF_TOOLS : Messages.TOOLTIP_ACTIVATE_VIF_TOOLS);
                     }
@@ -494,19 +490,16 @@ namespace XenAdmin.Controls.NetworkingTab
 
                 if (NetworksGridView.Rows.Count >= vm.MaxVIFsAllowed())
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Error,
-                            FriendlyErrorNames.VIFS_MAX_ALLOWED,
-                            FriendlyErrorNames.VIFS_MAX_ALLOWED_TITLE)))
+                    using (var dlg = new ErrorDialog(FriendlyErrorNames.VIFS_MAX_ALLOWED)
+                        {WindowTitle = FriendlyErrorNames.VIFS_MAX_ALLOWED_TITLE})
                     {
                         dlg.ShowDialog(Program.MainWindow);
                     }
                     return;
                 }
 
-                Host master = Helpers.GetMaster(vm.Connection);
-                if (master == null)
+                Host coordinator = Helpers.GetCoordinator(vm.Connection);
+                if (coordinator == null)
                 {
                     // Cache populating?
                     return;
@@ -554,11 +547,8 @@ namespace XenAdmin.Controls.NetworkingTab
 
         private void ShowHotPlugError()
         {
-            using (var dlg = new ThreeButtonDialog(
-                new ThreeButtonDialog.Details(
-                    SystemIcons.Information,
-                    Messages.VIF_HOTPLUG_FAILED_MESSAGE,
-                    Messages.VIF_HOTPLUG_FAILED_TITLE)))
+            using (var dlg = new InformationDialog(Messages.VIF_HOTPLUG_FAILED_MESSAGE)
+                {WindowTitle = Messages.VIF_HOTPLUG_FAILED_TITLE})
             {
                 dlg.ShowDialog(Program.MainWindow);
             }
@@ -605,7 +595,7 @@ namespace XenAdmin.Controls.NetworkingTab
             if (network != null && network.IsBond())
             {
                 var destroyBondCommand = new DestroyBondCommand(Program.MainWindow, network);
-                destroyBondCommand.Execute();
+                destroyBondCommand.Run();
             }
             else
             {
@@ -619,20 +609,18 @@ namespace XenAdmin.Controls.NetworkingTab
                 else if (XenObject is VM)
                 {
                     // Deleting a VIF, not a Network.
-                    using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.MESSAGEBOX_VIF_DELETE, Messages.MESSAGEBOX_VIF_DELETE_TITLE),
-                                ThreeButtonDialog.ButtonYes,
-                                ThreeButtonDialog.ButtonNo))
+                    using (var dlg = new WarningDialog(Messages.MESSAGEBOX_VIF_DELETE,
+                                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                        {WindowTitle = Messages.MESSAGEBOX_VIF_DELETE_TITLE})
                     {
                         result = dlg.ShowDialog(Program.MainWindow);
                     }
                 }
                 else
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.MESSAGEBOX_NETWORK_DELETE, Messages.MESSAGEBOX_NETWORK_DELETE_TITLE),
-                                ThreeButtonDialog.ButtonYes,
-                                ThreeButtonDialog.ButtonNo))
+                    using (var dlg = new WarningDialog(Messages.MESSAGEBOX_NETWORK_DELETE,
+                                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                        {WindowTitle = Messages.MESSAGEBOX_NETWORK_DELETE_TITLE})
                     {
                         result = dlg.ShowDialog(Program.MainWindow);
                     }
@@ -907,7 +895,7 @@ namespace XenAdmin.Controls.NetworkingTab
                 if (Metrics != null)
                     Metrics.PropertyChanged += Server_PropertyChanged;
 
-                ImageCell.Value = Properties.Resources._000_Network_h32bit_16;
+                ImageCell.Value = Images.StaticImages._000_Network_h32bit_16;
                 DeviceCell.Value = Vif.device;
                 MacCell.Value = Helpers.GetMacString(Vif.MAC);
                 LimitCell.Value = Vif.qos_algorithm_type != "" ? Vif.LimitString() : "";
@@ -970,7 +958,7 @@ namespace XenAdmin.Controls.NetworkingTab
 
             public void UpdateDetails()
             {
-                Enabled = !Network.IsSlave();
+                Enabled = !Network.IsMember();
 
                 DeregisterPifEvents();
 
@@ -978,7 +966,7 @@ namespace XenAdmin.Controls.NetworkingTab
 
                 RegisterPifEvents();
 
-                ImageCell.Value = Properties.Resources._000_Network_h32bit_16;
+                ImageCell.Value = Images.StaticImages._000_Network_h32bit_16;
                 NameCell.Value = NetworkName();
                 DescriptionCell.Value = Network.Description();
                 NicCell.Value = Helpers.GetName(Pif);
@@ -1014,11 +1002,11 @@ namespace XenAdmin.Controls.NetworkingTab
 
             private object NetworkName()
             {
-                bool isSlave = Network.IsSlave();
-                if (Network.Show(XenAdmin.Properties.Settings.Default.ShowHiddenVMs) && !isSlave)
+                bool isSupporter = Network.IsMember();
+                if (Network.Show(XenAdmin.Properties.Settings.Default.ShowHiddenVMs) && !isSupporter)
                     return Helpers.GetName(Network);
-                else if (isSlave && Properties.Settings.Default.ShowHiddenVMs)
-                    return string.Format(Messages.NIC_SLAVE, Helpers.GetName(Network));
+                else if (isSupporter && Properties.Settings.Default.ShowHiddenVMs)
+                    return string.Format(Messages.NIC_BONDED_MEMBER, Helpers.GetName(Network));
                 else if (Properties.Settings.Default.ShowHiddenVMs)
                     return string.Format(Messages.NIC_HIDDEN, Helpers.GetName(Network));
                 else

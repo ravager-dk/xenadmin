@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,15 +30,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using XenAPI;
-using XenAdmin.Core;
 using XenAdmin.Actions;
 using XenAdmin.Dialogs;
 using System.Windows.Forms;
-using System.Collections.ObjectModel;
-using System.Threading;
 
 
 namespace XenAdmin.Commands
@@ -83,13 +77,13 @@ namespace XenAdmin.Commands
             {
                 VM vm = (VM)GetSelection()[0].XenObject;
 
-                if (CanExecute(vm))
+                if (CanRun(vm))
                 {
                     using (VmSnapshotDialog dialog = new VmSnapshotDialog(vm))
                     {
                         if (dialog.ShowDialog(Parent) != DialogResult.Cancel && dialog.SnapshotName != null)
                         {
-                            Program.Invoke(Program.MainWindow, () => Program.MainWindow.ConsolePanel.setCurrentSource(vm));
+                            Program.Invoke(Program.MainWindow, () => Program.MainWindow.ConsolePanel.SetCurrentSource(vm));
                             return new VMSnapshotCreateAction(vm, dialog.SnapshotName, dialog.SnapshotDescription, dialog.SnapshotType,
                                                               (vmToSnapshot, username, password) =>
                                                               Program.MainWindow.ConsolePanel.Snapshot(
@@ -99,12 +93,8 @@ namespace XenAdmin.Commands
                 }
                 else
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.TAKE_SNAPSHOT_ERROR,
-                            Messages.XENCENTER)))
-                    {
+                    using (var dlg = new WarningDialog(Messages.TAKE_SNAPSHOT_ERROR))
                         dlg.ShowDialog(MainWindowCommandInterface.Form);
-                    }
                 }
             }
             return null;
@@ -116,7 +106,7 @@ namespace XenAdmin.Commands
             OnCompleted(new TakeSnapshotCommandCompletedEventArgs(sender.Succeeded));
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             AsyncAction snapshotAction = GetCreateSnapshotAction();
 
@@ -129,16 +119,16 @@ namespace XenAdmin.Commands
             }
         }
 
-        private static bool CanExecute(VM vm)
+        private static bool CanRun(VM vm)
         {
             return vm != null && !vm.is_a_template && !vm.Locked && (vm.allowed_operations.Contains(vm_operations.snapshot) || vm.allowed_operations.Contains(vm_operations.checkpoint)); 
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {
-                return CanExecute(selection[0].XenObject as VM);
+                return CanRun(selection[0].XenObject as VM);
             }
             return false;
         }

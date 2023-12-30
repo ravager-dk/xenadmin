@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,9 @@
  */
 
 using System.Diagnostics;
+using System.Reflection;
 using System.Resources;
+using XenAdmin.Properties;
 
 
 namespace XenAdmin.Core
@@ -39,38 +40,95 @@ namespace XenAdmin.Core
     {
         private static readonly ResourceManager Branding = new ResourceManager("XenAdmin.Branding", typeof(BrandManager).Assembly);
 
-        public static string UpdatesUrl => Get("UPDATES_URL");
+        static BrandManager()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
 
-        public static string PerfAlertMailDefaultLanguage => Get("PERF_ALERT_MAIL_DEFAULT_LANGUAGE");
+            var customBranding = (CustomBrandingAttribute)assembly.GetCustomAttribute(typeof(CustomBrandingAttribute));
 
-        public static string ExtensionSearch => Get("EXTENSION_SEARCH");
-
-        public static string ExtensionUpdate => Get("EXTENSION_UPDATE");
-
-        public static string ExtensionBackup => Get("EXTENSION_BACKUP");
-
-        public static string LegacyProduct => Get("LEGACY_PRODUCT");
-
-        public static string ProductVersion56 => Get("PRODUCT_VERSION_5_6");
-
-        public static string ProductVersion65 => Get("PRODUCT_VERSION_6_5");
-
-        public static string ProductVersion70 => Get("PRODUCT_VERSION_7_0");
-
-        public static string ProductVersion712 => Get("PRODUCT_VERSION_7_1_2");
-
-        public static string ProductVersion80 => Get("PRODUCT_VERSION_8_0");
-
-        public static string ProductVersion81 => Get("PRODUCT_VERSION_8_1");
+            BrandConsole = customBranding.BrandConsole;
+            CompanyNameShort = customBranding.CompanyNameShort;
+            ProductBrand = customBranding.ProductBrand;
+            ProductVersionPost82 = customBranding.ProductVersionText;
+            XcUpdatesUrl = customBranding.XcUpdatesUrl;
+            CfuUrl = customBranding.CfuUrl;
+            VmTools = customBranding.VmTools;
+            XenHost = customBranding.XenHost;
+            YumRepoBaseBin = customBranding.YumRepoBaseBin;
+            YumRepoBaseSource = customBranding.YumRepoBaseSource;
+            YumRepoEarlyAccessBin = customBranding.YumRepoEarlyAccessBin;
+            YumRepoEarlyAccessSource = customBranding.YumRepoEarlyAccessSource;
+            YumRepoNormalBin = customBranding.YumRepoNormalBin;
+            YumRepoNormalSource = customBranding.YumRepoNormalSource;
+        }
 
 
-        public const string PRODUCT_BRAND = "[XenServer product]";
-        public const string COMPANY_NAME_SHORT = "[Citrix]";
-        public const string COMPANY_AND_PRODUCT_BRAND = "[Citrix XenServer]";
-        public const string PRODUCT_VERSION_TEXT = "[BRANDING_PRODUCT_VERSION_TEXT]";
-        public const string XENCENTER_VERSION = "[BRANDING_PRODUCT_VERSION]";
-        public const string COMPANY_NAME_LEGAL = "[BRANDING_COMPANY_NAME_LEGAL]";
-        public const string BRAND_CONSOLE = "[XenCenter]";
+        public static readonly string BrandConsole;
+
+        public static readonly string Cis = Get("CIS");
+
+        public static readonly string CompanyNameLegacy = Get("COMPANY_NAME_LEGACY");
+
+        public static readonly string CompanyNameShort;
+
+        public static readonly string Copyright = Get("COPYRIGHT");
+
+        public static readonly string ExtensionBackup = Get("EXTENSION_BACKUP");
+
+        public static readonly string ExtensionSearch = Get("EXTENSION_SEARCH");
+
+        public static readonly string ExtensionUpdate = Get("EXTENSION_UPDATE");
+
+        public static readonly string HelpPath = Get("HELP_PATH");
+
+        public static readonly string LegacyProduct = Get("LEGACY_PRODUCT");
+
+        public static readonly string PerfAlertMailDefaultLanguage = Get("PERF_ALERT_MAIL_DEFAULT_LANGUAGE");
+
+        public static readonly string ProductBrand;
+
+        public static readonly string ProductVersion70 = Get("PRODUCT_VERSION_7_0");
+
+        public static readonly string ProductVersion70Short = Get("PRODUCT_VERSION_7_0_SHORT");
+
+        public static readonly string ProductVersion712 = Get("PRODUCT_VERSION_7_1_2");
+
+        public static readonly string ProductVersion712Short = Get("PRODUCT_VERSION_7_1_2_SHORT");
+
+        public static readonly string ProductVersion80 = Get("PRODUCT_VERSION_8_0");
+
+        public static readonly string ProductVersion81 = Get("PRODUCT_VERSION_8_1");
+
+        public static readonly string ProductVersion82 = Get("PRODUCT_VERSION_8_2");
+
+        public static readonly string ProductVersion82Short = Get("PRODUCT_VERSION_8_2_SHORT");
+
+        public static readonly string ProductVersion821 = Get("PRODUCT_VERSION_8_2_1");
+
+        public static readonly string ProductVersionPost82;
+
+        public static readonly string Trademarks = Get("TRADEMARKS");
+
+        public static readonly string XcUpdatesUrl;
+
+        public static readonly string CfuUrl;
+
+        public static readonly string VmTools;
+
+        public static readonly string XenHost;
+
+        public static readonly string YumRepoBaseBin;
+
+        public static readonly string YumRepoBaseSource;
+
+        public static readonly string YumRepoEarlyAccessBin;
+
+        public static readonly string YumRepoEarlyAccessSource;
+
+        public static readonly string YumRepoNormalBin;
+
+        public static readonly string YumRepoNormalSource;
+
 
         /// <summary>
         /// Returns null if no match is found.
@@ -79,7 +137,7 @@ namespace XenAdmin.Core
         {
             var result = Branding.GetString(s);
 #if DEBUG
-			Debug.Assert(result != null, $"{s} doesn't exist in Branding");
+            Debug.Assert(result != null, $"{s} doesn't exist in Branding");
 #endif
             return result;
         }

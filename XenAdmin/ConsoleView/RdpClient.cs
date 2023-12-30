@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -99,6 +97,11 @@ namespace XenAdmin.ConsoleView
             rdpControl.Resize += resizeHandler;
         }
 
+        private bool _connecting;
+        private bool _authWarningVisible;
+
+        public bool IsAttemptingConnection => _connecting || _authWarningVisible; 
+
         private void RDPConfigure(Size currentConsoleSize)
         {
             rdpControl.BeginInit();
@@ -106,7 +109,7 @@ namespace XenAdmin.ConsoleView
             rdpControl.Dock = DockStyle.None;
             rdpControl.Anchor = AnchorStyles.None;
             rdpControl.Size = currentConsoleSize;
-            RDPAddOnDisconnected();
+            AddRDPEventHandlers();
             rdpControl.Enter += RdpEnter;
             rdpControl.Leave += rdpClient_Leave;
             rdpControl.GotFocus += rdpClient_GotFocus;
@@ -125,15 +128,28 @@ namespace XenAdmin.ConsoleView
             }
         }
 
-        private void RDPAddOnDisconnected()
+        private void AddRDPEventHandlers()
         {
             if (rdpControl == null)
                 return;
 
-            if (rdpClient9 == null)
-                rdpClient6.OnDisconnected += rdpClient_OnDisconnected;
-            else
-                rdpClient9.OnDisconnected += rdpClient_OnDisconnected;
+            var rdpClient = (IRdpClient)rdpClient9 ?? rdpClient6;
+            if (rdpClient == null)
+            {
+                return;
+            }
+
+            rdpClient.OnDisconnected += (_, e) =>
+            {
+                Program.AssertOnEventThread();
+                OnDisconnected?.Invoke(this, EventArgs.Empty);
+            };
+            rdpClient.OnConnected += (_, e) => _connecting = false;
+            rdpClient.OnConnecting += (_, e) => _connecting = true;
+            rdpClient.OnDisconnected += (_, e) => _connecting = _authWarningVisible = false;
+            rdpClient.OnAuthenticationWarningDisplayed += (_, e) => _authWarningVisible = true;
+            rdpClient.OnAuthenticationWarningDismissed += (_, e) => _authWarningVisible = false;
+
         }
 
         private void RDPSetSettings()
@@ -163,26 +179,43 @@ namespace XenAdmin.ConsoleView
             }
         }
 
-        public void RDPConnect(string rdpIP, int w, int h)
+        public void RDPConnect(string rdpIP, int width, int height)
         {
             if (rdpControl == null)
                 return;
 
-            if (rdpClient9 == null)
+            var rdpClientName = rdpClient9 == null ? "RDPClient6" : "RDPClient9";
+            var rdpClient = (IRdpClient) rdpClient9 ?? rdpClient6;
+
+            Log.Debug($"Connecting {rdpClientName} using server '{rdpIP}', width '{width}' and height '{height}'");
+
+            if (rdpClient == null)
             {
-                Log.Debug($"Connecting RDPClient6 using server '{rdpIP}', width '{w}' and height '{h}'");
-                rdpClient6.Server = rdpIP;
-                rdpClient6.DesktopWidth = w;
-                rdpClient6.DesktopHeight = h;
-                rdpClient6.Connect();
+                Log.Warn("RDPConnect called with an uninitialized RDP client. Aborting connection attempt.");
+                return;
             }
-            else
+
+            rdpClient.Server = rdpIP;
+            rdpClient.DesktopWidth = width;
+            rdpClient.DesktopHeight = height;
+            try
             {
-                Log.Debug($"Connecting RDPClient9 using server '{rdpIP}', width '{w}' and height '{h}'");
-                rdpClient9.Server = rdpIP;
-                rdpClient9.DesktopWidth = w;
-                rdpClient9.DesktopHeight = h;
-                rdpClient9.Connect();
+                rdpClient.Connect();
+            }
+            catch (COMException comException)
+            {
+                // The Connect method returns E_FAIL if it is called while the control is already connected or in the connecting state.
+                // see https://learn.microsoft.com/en-us/windows/win32/termserv/imstscax-connect#remarks for more information.
+                // The HRESULT value is taken from https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/705fb797-2175-4a90-b5a3-3918024b10b8
+                var eFailHResultValue = Convert.ToInt32("0x80004005", 16);
+                if (comException.ErrorCode == eFailHResultValue)
+                {
+                    Log.Warn("Attempted connection while RDP client was connected or connected already.");
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
@@ -223,16 +256,6 @@ namespace XenAdmin.ConsoleView
         private int DesktopWidth
         {
             get { return rdpControl == null ? 0 : (rdpClient9 == null ? rdpClient6.DesktopWidth : rdpClient9.DesktopWidth); }
-        }
-
-        private static readonly List<System.Windows.Forms.Timer> RdpCleanupTimers = new List<System.Windows.Forms.Timer>();
-        void rdpClient_OnDisconnected(object sender, AxMSTSCLib.IMsTscAxEvents_OnDisconnectedEvent e)
-        {
-            Program.AssertOnEventThread();
-
-            if (OnDisconnected != null)
-                OnDisconnected(this, null);
-
         }
 
         //refresh to draw focus border in correct position after display is updated
@@ -357,6 +380,7 @@ namespace XenAdmin.ConsoleView
             }
             catch
             {
+                // ignored
             }
 
             try
@@ -365,6 +389,7 @@ namespace XenAdmin.ConsoleView
             }
             catch
             {
+                // ignored
             }
         }
 
@@ -375,44 +400,57 @@ namespace XenAdmin.ConsoleView
         }
 
         private bool disposed;
-        public void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if(!disposed)
+            if (!disposed && disposing)
             {
-                if(disposing)
+                if (rdpControl != null)
                 {
-                    if (rdpControl != null)
+                    // We need to dispose the rdp control. However, doing it immediately (in the control's own
+                    // OnDisconnected event) will cause a horrible crash. Instead, start a timer that will
+                    // call the dispose method on the GUI thread at the next available opportunity. CA-12902
+                    // Do not use too small an interval as the accuracy of System.Windows.Forms.Timer is 55ms.
+
+                    int disposalAttempts = 5;
+                    Timer timer = new Timer {Interval = 100};
+
+                    timer.Tick += (sender, e) =>
                     {
-                        // We need to dispose the rdp control. However, doing it immediately (in the control's own
-                        // OnDisconnected event) will cause a horrible crash. Instead, start a timer that will
-                        // call the dispose method on the GUI thread at the next available opportunity. CA-12902
-                        Timer t = new Timer();
-                        t.Tick += delegate
-                                      {
-                                          try
-                                          {
-                                              Log.Debug("RdpClient Dispose(): rdpControl.Dispose() in delegate");
-                                              rdpControl.Dispose();
-                                          }
-                                          catch (Exception)
-                                          {
-                                              // We often get NullReferenceException here
-                                          }
-                                          t.Stop();
-                                          RdpCleanupTimers.Remove(t);
-                                          Log.Debug("RdpClient Dispose(): Timer stopped and removed in delegate");
-                                      };
-                        t.Interval = 1;
-                        RdpCleanupTimers.Add(t);
-                        Log.DebugFormat("RdpClient Dispose(): Start timer (timers count {0})", RdpCleanupTimers.Count);
-                        t.Start();
-                    }
-                    else
-                        Log.Debug("RdpClient Dispose(): rdpControl == null");
+                        if (rdpControl != null)
+                        {
+                            try
+                            {
+                                rdpControl.Dispose();
+                                Log.Debug("Disposed of rdpControl in timer's tick.");
+                            }
+                            catch (Exception ex)
+                            {
+                                if (disposalAttempts > 0)
+                                {
+                                    disposalAttempts--;
+                                    Log.Debug($"Failed to dispose of rdpControl. Retrying ({disposalAttempts} left).");
+                                    return;
+                                }
+
+                                Log.Debug("Failed to dispose of rdpControl. Quitting.", ex);
+                            }
+                        }
+
+                        rdpControl = null;
+                        disposed = true;
+
+                        if (sender is Timer t)
+                        {
+                            t.Stop();
+                            t.Dispose();
+                            Log.Debug("Stopped and disposed of the timer.");
+                        }
+                    };
+
+                    timer.Start();
                 }
-                rdpControl = null;
-                Log.Debug("RdpClient Dispose(): disposed = true");
-                disposed = true;
+                else
+                    Log.Debug("RdpControl is null");
             }
         }
 
@@ -420,7 +458,7 @@ namespace XenAdmin.ConsoleView
         {
         }
 
-        public void Unpause()
+        public void UnPause()
         {
         }
 

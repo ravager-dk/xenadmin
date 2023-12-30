@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -61,22 +60,22 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actions = new List<AsyncAction>();
-            foreach (SR sr in selection.AsXenObjects<SR>(CanExecute))
+            foreach (SR sr in selection.AsXenObjects<SR>(CanRun))
             {
-                actions.Add(new SrAction(SrActionKind.Detach, sr));
+                actions.Add(new DetachSrAction(sr));
             }
             RunMultipleActions(actions, Messages.ACTION_SRS_DETACHING, Messages.ACTION_SRS_DETACHING, Messages.ACTION_SRS_DETACH_SUCCESSFUL, true);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanExecute);
+            return selection.AllItemsAre<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanRun);
         }
 
-        private static bool CanExecute(SR sr)
+        private static bool CanRun(SR sr)
         {
             return sr != null && !sr.IsDetached() && !sr.HasRunningVMs() && !HelpersGUI.GetActionInProgress(sr);
         }
@@ -95,17 +94,17 @@ namespace XenAdmin.Commands
                 ? Messages.MESSAGEBOX_DETACH_SR_CONTINUE_TITLE
                 : Messages.MESSAGEBOX_DETACH_SRS_CONTINUE_TITLE;
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
-            return new CommandErrorDialog(Messages.ERROR_DIALOG_DETACH_SR_TITLE, Messages.ERROR_DIALOG_DETACH_SR_TEXT, cantExecuteReasons);
+            return new CommandErrorDialog(Messages.ERROR_DIALOG_DETACH_SR_TITLE, Messages.ERROR_DIALOG_DETACH_SR_TEXT, cantRunReasons);
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             SR sr = item as SR;
             if (sr == null)
             {
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
             }
             if (sr.IsDetached())
             {
@@ -119,7 +118,7 @@ namespace XenAdmin.Commands
             {
                 return Messages.SR_ACTION_IN_PROGRESS;
             }
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
     }
 }

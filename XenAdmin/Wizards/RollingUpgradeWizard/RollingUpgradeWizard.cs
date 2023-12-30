@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using XenAdmin.Actions;
@@ -38,12 +36,13 @@ using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using System.Windows.Forms;
+using XenAdmin.Diagnostics.Problems;
 using XenAdmin.Wizards.PatchingWizard;
 using XenAPI;
 
 namespace XenAdmin.Wizards.RollingUpgradeWizard
 {
-    public partial class RollingUpgradeWizard : UpdateUpgradeWizard
+    public partial class RollingUpgradeWizard : XenWizardBase
     {
         private readonly RollingUpgradeUpgradePage RollingUpgradeUpgradePage;
         private readonly RollingUpgradeWizardSelectPool RollingUpgradeWizardSelectPool;
@@ -74,16 +73,12 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
         protected override void FinishWizard()
         {
-            var brokenSRs = RollingUpgradeWizardSelectPool.SelectedMasters
-                .Any(master => master != null && master.Connection.Cache.SRs.Any(sr => sr.IsBroken(true)));
+            var brokenSRs = RollingUpgradeWizardSelectPool.SelectedCoordinators
+                .Any(coordinator => coordinator != null && coordinator.Connection.Cache.SRs.Any(sr => sr.IsBroken()));
             if(brokenSRs)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning,
-                        Messages.BROKEN_SRS_AFTER_UPGRADE)))
-                {
+                using (var dlg = new WarningDialog(Messages.BROKEN_SRS_AFTER_UPGRADE))
                     dlg.ShowDialog(Program.MainWindow);
-                }
             }
             base.FinishWizard();
         }
@@ -94,14 +89,14 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
             if (prevPageType == typeof(RollingUpgradeWizardSelectPool))
             {
-                var selectedMasters = RollingUpgradeWizardSelectPool.SelectedMasters;
-                RollingUpgradeWizardPrecheckPage.SelectedMasters = selectedMasters;
-                RollingUpgradeExtrasPage.SelectedMasters = selectedMasters;
+                var selectedCoordinators = RollingUpgradeWizardSelectPool.SelectedCoordinators;
+                RollingUpgradeWizardPrecheckPage.SelectedCoordinators = selectedCoordinators;
+                RollingUpgradeExtrasPage.SelectedCoordinators = selectedCoordinators;
 
                 var selectedPools = new List<Pool>();
-                foreach (var master in selectedMasters)
+                foreach (var coordinator in selectedCoordinators)
                 {
-                    var pool = Helpers.GetPoolOfOne(master.Connection);
+                    var pool = Helpers.GetPoolOfOne(coordinator.Connection);
                     if (pool != null && !selectedPools.Contains(pool))
                         selectedPools.Add(pool);
                 }
@@ -118,7 +113,9 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
                     RollingUpgradeUpgradePage.InstallMethodConfig = RollingUpgradeWizardUpgradeModePage.InstallMethodConfig;
             }
             else if (prevPageType == typeof(RollingUpgradeWizardPrecheckPage))
+            {
                 RollingUpgradeUpgradePage.PrecheckProblemsActuallyResolved = RollingUpgradeWizardPrecheckPage.PrecheckProblemsActuallyResolved;
+            }
             else if (prevPageType == typeof(RollingUpgradeExtrasPage))
             {
                 var applyUpdatesToNewVersion = RollingUpgradeExtrasPage.ApplyUpdatesToNewVersion;
@@ -140,7 +137,7 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
         private void RevertResolvedPreChecks()
         {
-            var subActions = GetUnwindChangesActions(RollingUpgradeWizardPrecheckPage.PrecheckProblemsActuallyResolved);
+            var subActions = Problem.GetUnwindChangesActions(RollingUpgradeWizardPrecheckPage.PrecheckProblemsActuallyResolved);
             if (subActions.Count > 0)
             {
                 using (MultipleAction multipleAction = new MultipleAction(xenConnection, Messages.REVERT_WIZARD_CHANGES,
@@ -167,9 +164,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
         private void ShowCanBeResumedInfo()
         {
-            using (var dialog = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Information,
-                                                                Messages.ROLLING_UPGRADE_CAN_RESUME_UPGRADE,
-                                                                Messages.ROLLING_POOL_UPGRADE)))
+            using (var dialog = new InformationDialog(Messages.ROLLING_UPGRADE_CAN_RESUME_UPGRADE)
+                {WindowTitle = Messages.ROLLING_POOL_UPGRADE})
             {
                 dialog.ShowDialog(Program.MainWindow);
             }

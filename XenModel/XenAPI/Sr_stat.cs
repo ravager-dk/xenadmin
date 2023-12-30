@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -41,6 +41,7 @@ namespace XenAPI
 {
     /// <summary>
     /// A set of high-level properties associated with an SR.
+    /// First published in XenServer 7.6.
     /// </summary>
     public partial class Sr_stat : XenObject<Sr_stat>
     {
@@ -79,54 +80,21 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new Sr_stat from a Proxy_Sr_stat.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public Sr_stat(Proxy_Sr_stat proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given Sr_stat.
         /// </summary>
-        public override void UpdateFrom(Sr_stat update)
+        public override void UpdateFrom(Sr_stat record)
         {
-            uuid = update.uuid;
-            name_label = update.name_label;
-            name_description = update.name_description;
-            free_space = update.free_space;
-            total_space = update.total_space;
-            clustered = update.clustered;
-            health = update.health;
-        }
-
-        internal void UpdateFrom(Proxy_Sr_stat proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            name_label = proxy.name_label == null ? null : proxy.name_label;
-            name_description = proxy.name_description == null ? null : proxy.name_description;
-            free_space = proxy.free_space == null ? 0 : long.Parse(proxy.free_space);
-            total_space = proxy.total_space == null ? 0 : long.Parse(proxy.total_space);
-            clustered = (bool)proxy.clustered;
-            health = proxy.health == null ? (sr_health) 0 : (sr_health)Helper.EnumParseDefault(typeof(sr_health), (string)proxy.health);
-        }
-
-        public Proxy_Sr_stat ToProxy()
-        {
-            Proxy_Sr_stat result_ = new Proxy_Sr_stat();
-            result_.uuid = uuid;
-            result_.name_label = name_label ?? "";
-            result_.name_description = name_description ?? "";
-            result_.free_space = free_space.ToString();
-            result_.total_space = total_space.ToString();
-            result_.clustered = clustered;
-            result_.health = sr_health_helper.ToString(health);
-            return result_;
+            uuid = record.uuid;
+            name_label = record.name_label;
+            name_description = record.name_description;
+            free_space = record.free_space;
+            total_space = record.total_space;
+            clustered = record.clustered;
+            health = record.health;
         }
 
         /// <summary>
@@ -160,22 +128,13 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._name_label, other._name_label) &&
-                Helper.AreEqual2(this._name_description, other._name_description) &&
-                Helper.AreEqual2(this._free_space, other._free_space) &&
-                Helper.AreEqual2(this._total_space, other._total_space) &&
-                Helper.AreEqual2(this._clustered, other._clustered) &&
-                Helper.AreEqual2(this._health, other._health);
-        }
-
-        internal static List<Sr_stat> ProxyArrayToObjectList(Proxy_Sr_stat[] input)
-        {
-            var result = new List<Sr_stat>();
-            foreach (var item in input)
-                result.Add(new Sr_stat(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_name_label, other._name_label) &&
+                Helper.AreEqual2(_name_description, other._name_description) &&
+                Helper.AreEqual2(_free_space, other._free_space) &&
+                Helper.AreEqual2(_total_space, other._total_space) &&
+                Helper.AreEqual2(_clustered, other._clustered) &&
+                Helper.AreEqual2(_health, other._health);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, Sr_stat server)
@@ -190,9 +149,9 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// Uuid that uniquely identifies this SR, if one is available.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual string uuid
         {
@@ -210,7 +169,6 @@ namespace XenAPI
 
         /// <summary>
         /// Short, human-readable label for the SR.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual string name_label
         {
@@ -228,7 +186,6 @@ namespace XenAPI
 
         /// <summary>
         /// Longer, human-readable description of the SR. Descriptions are generally only displayed by clients when the user is examining SRs in detail.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual string name_description
         {
@@ -246,7 +203,6 @@ namespace XenAPI
 
         /// <summary>
         /// Number of bytes free on the backing storage (in bytes)
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual long free_space
         {
@@ -264,7 +220,6 @@ namespace XenAPI
 
         /// <summary>
         /// Total physical size of the backing storage (in bytes)
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual long total_space
         {
@@ -282,7 +237,6 @@ namespace XenAPI
 
         /// <summary>
         /// Indicates whether the SR uses clustered local storage.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual bool clustered
         {
@@ -300,7 +254,6 @@ namespace XenAPI
 
         /// <summary>
         /// The health status of the SR.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         [JsonConverter(typeof(sr_healthConverter))]
         public virtual sr_health health

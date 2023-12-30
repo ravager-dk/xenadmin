@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -76,48 +76,19 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new Vdi_nbd_server_info from a Proxy_Vdi_nbd_server_info.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public Vdi_nbd_server_info(Proxy_Vdi_nbd_server_info proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given Vdi_nbd_server_info.
         /// </summary>
-        public override void UpdateFrom(Vdi_nbd_server_info update)
+        public override void UpdateFrom(Vdi_nbd_server_info record)
         {
-            exportname = update.exportname;
-            address = update.address;
-            port = update.port;
-            cert = update.cert;
-            subject = update.subject;
-        }
-
-        internal void UpdateFrom(Proxy_Vdi_nbd_server_info proxy)
-        {
-            exportname = proxy.exportname == null ? null : proxy.exportname;
-            address = proxy.address == null ? null : proxy.address;
-            port = proxy.port == null ? 0 : long.Parse(proxy.port);
-            cert = proxy.cert == null ? null : proxy.cert;
-            subject = proxy.subject == null ? null : proxy.subject;
-        }
-
-        public Proxy_Vdi_nbd_server_info ToProxy()
-        {
-            Proxy_Vdi_nbd_server_info result_ = new Proxy_Vdi_nbd_server_info();
-            result_.exportname = exportname ?? "";
-            result_.address = address ?? "";
-            result_.port = port.ToString();
-            result_.cert = cert ?? "";
-            result_.subject = subject ?? "";
-            return result_;
+            exportname = record.exportname;
+            address = record.address;
+            port = record.port;
+            cert = record.cert;
+            subject = record.subject;
         }
 
         /// <summary>
@@ -147,20 +118,11 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._exportname, other._exportname) &&
-                Helper.AreEqual2(this._address, other._address) &&
-                Helper.AreEqual2(this._port, other._port) &&
-                Helper.AreEqual2(this._cert, other._cert) &&
-                Helper.AreEqual2(this._subject, other._subject);
-        }
-
-        internal static List<Vdi_nbd_server_info> ProxyArrayToObjectList(Proxy_Vdi_nbd_server_info[] input)
-        {
-            var result = new List<Vdi_nbd_server_info>();
-            foreach (var item in input)
-                result.Add(new Vdi_nbd_server_info(item));
-
-            return result;
+            return Helper.AreEqual2(_exportname, other._exportname) &&
+                Helper.AreEqual2(_address, other._address) &&
+                Helper.AreEqual2(_port, other._port) &&
+                Helper.AreEqual2(_cert, other._cert) &&
+                Helper.AreEqual2(_subject, other._subject);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, Vdi_nbd_server_info server)
@@ -175,6 +137,7 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// The exportname to request over NBD. This holds details including an authentication token, so it must be protected appropriately. Clients should regard the exportname as an opaque string or token.
         /// </summary>

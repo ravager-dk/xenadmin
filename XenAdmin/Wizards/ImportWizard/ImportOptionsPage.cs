@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,6 +35,7 @@ using System.IO;
 using System.Linq;
 using XenAdmin.Controls;
 using XenAdmin.Controls.Common;
+using XenAdmin.Core;
 using XenCenterLib;
 using XenAdmin.Mappings;
 using XenAPI;
@@ -57,6 +57,9 @@ namespace XenAdmin.Wizards.ImportWizard
 		public ImportOptionsPage()
 		{
 			InitializeComponent();
+            m_labelIntro.Text = string.Format(m_labelIntro.Text, BrandManager.ProductBrand);
+            m_labelDontRunOSFixups.Text = string.Format(m_labelDontRunOSFixups.Text, BrandManager.ProductBrand);
+            m_labelRunOSFixups.Text = string.Format(m_labelRunOSFixups.Text, BrandManager.ProductBrand);
             m_radioButtonDontRunOSFixups.Checked = true;
             PBD_CollectionChangedWithInvoke = Program.ProgramInvokeHandler(PBD_CollectionChanged);
             m_ctrlError.HideError();
@@ -266,8 +269,8 @@ namespace XenAdmin.Wizards.ImportWizard
 
         private int FindSrItem(SR sr)
         {
-            var existing = m_comboBoxISOLibraries.Items.OfType<ToStringWrapper<SR>>().Where(wrapper => sr.Equals(wrapper.item)).ToList();
-            return existing.Count > 0 ? m_comboBoxISOLibraries.Items.IndexOf(existing.First()) : -1;
+            var existing = m_comboBoxISOLibraries.Items.OfType<ToStringWrapper<SR>>().FirstOrDefault(wrapper => sr.Equals(wrapper.item));
+            return existing == null ? -1 : m_comboBoxISOLibraries.Items.IndexOf(existing);
         }
 
         private int AddReplaceSrItem(SR sr)

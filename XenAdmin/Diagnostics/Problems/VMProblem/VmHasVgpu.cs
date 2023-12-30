@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,9 +38,6 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
         public VmHasVgpu(Check check, VM vm)
             : base(check, vm) { }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.UPDATES_WIZARD_VM_HAS_VGPU, ServerName, VM.Name()); }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_VM_HAS_VGPU, ServerName, VM.Name());
     }
 }

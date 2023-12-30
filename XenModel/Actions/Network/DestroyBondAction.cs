@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,11 +30,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Net;
 using XenAPI;
 using XenAdmin.Core;
-
 using XenAdmin.Network;
+
 
 namespace XenAdmin.Actions
 {
@@ -49,31 +48,21 @@ namespace XenAdmin.Actions
         private readonly List<Bond> Bonds = new List<Bond>();
 
         /// <summary>
-        /// The masters of all the bonds in Bonds.
+        /// The interfaces of all the bonds in Bonds.
         /// </summary>
-        private readonly List<PIF> Masters = new List<PIF>();
+        private readonly List<PIF> Interfaces = new List<PIF>();
 
         /// <summary>
-        /// Masters that held secondary management interfaces.  These are discovered when bringing masters down.
-        /// </summary>
-        private readonly List<PIF> Secondaries = new List<PIF>();
-
-        /// <summary>
-        /// All slaves under each bond in Bonds.  These will be plugged at the end, in order to
+        /// All members under each bond in Bonds.  These will be plugged at the end, in order to
         /// get metrics like the carrier flag, if they haven't already been brought up as a
         /// management interface.
         /// </summary>
-        private readonly List<PIF> Slaves = new List<PIF>();
+        private readonly List<PIF> Members = new List<PIF>();
 
         /// <summary>
-        /// The first slave (ordered by name) under each master.
+        /// The first member (ordered by name) under each interface.
         /// </summary>
-        private readonly Dictionary<PIF, PIF> FirstSlaves = new Dictionary<PIF, PIF>();
-
-        /// <summary>
-        /// A dictionary of copies of the equivalent entries in FirstSlaves, but with the IP details that we're carrying across.
-        /// </summary>
-        private readonly Dictionary<PIF, PIF> NewFirstSlaves = new Dictionary<PIF, PIF>();
+        private readonly Dictionary<PIF, PIF> FirstMembers = new Dictionary<PIF, PIF>();
 
         /// <summary>
         /// The network that we're either going to destroy or rename.
@@ -85,10 +74,6 @@ namespace XenAdmin.Actions
         /// </summary>
         private readonly string Name;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bond"></param>
         public DestroyBondAction(Bond bond)
             : base(bond.Connection, string.Format(Messages.ACTION_DESTROY_BOND_TITLE, bond.Name()),
                    string.Format(Messages.ACTION_DESTROY_BOND_DESCRIPTION, bond.Name()))
@@ -118,110 +103,136 @@ namespace XenAdmin.Actions
 
                     b.Locked = true;
 
-                    PIF master = Connection.Resolve(b.master);
-                    if (master != null)
+                    PIF bondInterface = Connection.Resolve(b.master);
+                    if (bondInterface != null)
                     {
-                        Masters.Add(master);
-                        master.Locked = true;
+                        Interfaces.Add(bondInterface);
+                        bondInterface.Locked = true;
 
-                        List<PIF> slaves = Connection.ResolveAll(b.slaves);
-                        NetworkingHelper.Sort(slaves);
-                        foreach (PIF pif in slaves)
+                        List<PIF> members = Connection.ResolveAll(b.slaves);
+                        NetworkingHelper.Sort(members);
+                        foreach (PIF pif in members)
                         {
-                            Slaves.Add(pif);
+                            Members.Add(pif);
                             pif.Locked = true;
                         }
 
-                        FirstSlaves[master] = Connection.Resolve(b.primary_slave);
+                        FirstMembers[bondInterface] = Connection.Resolve(b.primary_slave);
 
-                        if (!FirstSlaves.ContainsKey(master) && slaves.Count != 0)
-                            FirstSlaves[master] = slaves[0];
+                        if (!FirstMembers.ContainsKey(bondInterface) && members.Count != 0)
+                            FirstMembers[bondInterface] = members[0];
                     }
 
                     AppliesTo.Add(host.opaque_ref);
                 }
             }
 
-            PIF master_master = Connection.Resolve(bond.master);
-            if (master_master != null)
+            PIF coordinator_bond_interface = Connection.Resolve(bond.master);
+            if (coordinator_bond_interface != null)
             {
-                Network = Connection.Resolve(master_master.network);
+                Network = Connection.Resolve(coordinator_bond_interface.network);
                 Network.Locked = true;
             }
         }
 
         protected override void Run()
         {
+            PercentComplete = 0;
             Connection.ExpectDisruption = true;
-            List<VIF> unplugged_vifs = new List<VIF>();
-            string old_network_name = Network == null ? "" : Network.Name();
-            Exception e = null;
 
-            BestEffort(ref e, ReconfigureManagementInterfaces);
+            int incr = Interfaces.Count > 0 ? 50 / Interfaces.Count : 0;
 
-            if (e != null)
-                throw e;
+            try
+            {
+                foreach (PIF bondInterface in Interfaces)
+                {
+                    NetworkingActionHelpers.MoveManagementInterfaceName(this, bondInterface, FirstMembers[bondInterface]);
+                    PercentComplete += incr;
+                }
+            }
+            catch (WebException we)
+            {
+                //ignore keep-alive failure since disruption is expected
+                if (we.Status != WebExceptionStatus.KeepAliveFailure)
+                    throw;
+            }
 
             PercentComplete = 50;
 
-            int inc = 40 / Bonds.Count;
+            var caughtExceptions = new List<Exception>();
 
-            int lo = PercentComplete;
+            int inc = Bonds.Count > 0 ? 40 / Bonds.Count : 0;
+
             foreach (Bond bond in Bonds)
             {
                 Bond bond1 = bond;
-                int lo1 = lo;
-                BestEffort(ref e, delegate() { RelatedTask = Bond.async_destroy(Session, bond1.opaque_ref);});
-                PollToCompletion(lo1, lo1 + inc);
-
-                lo += inc;
+                try
+                {
+                    RelatedTask = Bond.async_destroy(Session, bond1.opaque_ref);
+                }
+                catch (Exception exn)
+                {
+                    if (Connection != null && Connection.ExpectDisruption &&
+                        exn is WebException webEx && webEx.Status == WebExceptionStatus.KeepAliveFailure)
+                    {
+                        //ignore
+                    }
+                    else
+                    {
+                        log.Error($"Failed to destroy bond {bond1.opaque_ref}", exn);
+                        caughtExceptions.Add(exn);
+                    }
+                }
+                PollToCompletion(PercentComplete, PercentComplete + inc);
             }
+
+            PercentComplete = 90;
 
             if (Network != null)
             {
-                // Destroy the old network
-                log.DebugFormat("Destroying network {0} ({1})...", old_network_name, Network.uuid);
-                BestEffort(ref e, delegate()
+                string oldNetworkName = Network.Name();
+
+                log.DebugFormat("Destroying network {0} ({1})...", oldNetworkName, Network.uuid);
+
+                try
+                {
+                    XenAPI.Network.destroy(Session, Network.opaque_ref);
+                    log.DebugFormat("Network {0} ({1}) destroyed.", oldNetworkName, Network.uuid);
+                }
+                catch (Exception exn)
+                {
+                    if (Connection != null && Connection.ExpectDisruption &&
+                        exn is WebException webEx && webEx.Status == WebExceptionStatus.KeepAliveFailure)
                     {
-                        XenAPI.Network.destroy(Session, Network.opaque_ref);
-                        log.DebugFormat("Network {0} ({1}) destroyed.", old_network_name, Network.uuid);
-                    });
+                        //ignore
+                    }
+                    else
+                    {
+                        log.Error($"Failed to destroy bond {Network.opaque_ref}", exn);
+                        caughtExceptions.Add(exn);
+                    }
+                }
             }
 
-            if (e != null)
-                throw e;
+            if (caughtExceptions.Count > 0)
+                throw caughtExceptions[0];
 
             Description = string.Format(Messages.ACTION_DESTROY_BOND_DONE, Name);
-        }
-
-        private void ReconfigureManagementInterfaces()
-        {
-            int progress = 0;
-            int inc = 50 / Masters.Count;
-
-            foreach (PIF master in Masters)
-            {
-                progress += inc;
-                NetworkingActionHelpers.MoveManagementInterfaceName(this, master, FirstSlaves[master]);
-            }
         }
 
         private void UnlockAll()
         {
             foreach (Bond bond in Bonds)
-            {
                 bond.Locked = false;
-            }
 
-            foreach (PIF master in Masters)
-            {
-                master.Locked = false;
-            }
+            foreach (PIF bondInterface in Interfaces)
+                bondInterface.Locked = false;
+
+            foreach (PIF pif in Members)
+                pif.Locked = false;
 
             if (Network != null)
-            {
                 Network.Locked = false;
-            }
         }
 
         

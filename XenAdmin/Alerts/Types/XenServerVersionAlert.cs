@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,10 +30,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Core;
 using XenAdmin.Network;
-using XenAdmin.Actions;
 using XenAPI;
 
 
@@ -42,60 +39,36 @@ namespace XenAdmin.Alerts
 {
     public class XenServerVersionAlert : XenServerUpdateAlert
     {
-        public XenServerVersion Version;
+        public const string LAST_SEEN_SERVER_VERSION_KEY = "XenCenter.LastSeenServerVersion";
+
+        public readonly XenServerVersion Version;
 
         public XenServerVersionAlert(XenServerVersion version)
         {
             Version = version;
-            RequiredXenCenterVersion = Updates.GetRequiredXenCenterVersion(Version);
+            RequiredClientVersion = Updates.GetRequiredClientVersion(Version);
             _timestamp = version.TimeStamp;
         }
 
-        public override string WebPageLabel
-        {
-            get { return Version.Url; }
-        }
+        public override string WebPageLabel => Version.Url;
 
-        public override string Name
-        {
-            get { return Version.Name; }
-        }
+        public override string Name => Version.Name;
 
-        public override string Title
-        {
-            get { return string.Format(Messages.DOWLOAD_LATEST_XS_TITLE, Version.Name); }
-        }
+        public override string Title => string.Format(Messages.DOWLOAD_LATEST_XS_TITLE, Version.Name);
 
-        public override string Description
-        {
-            get { return string.Format(Messages.DOWNLOAD_LATEST_XS_BODY, Version.Name); }
-        }
+        public override string Description => string.Format(Messages.DOWNLOAD_LATEST_XS_BODY,
+            Version.Name, BrandManager.ProductBrand);
 
-        public override string FixLinkText
-        {
-            get
-            {
-                return Messages.ALERT_NEW_VERSION_DOWNLOAD;
-            }
-        }
+        public override string FixLinkText => Messages.ALERT_NEW_VERSION_DOWNLOAD;
 
-        public override AlertPriority Priority
-        {
-            get { return AlertPriority.Priority5; }
-        }
+        public override AlertPriority Priority => AlertPriority.Priority5;
 
         public override Action FixLinkAction
         {
             get { return () => Program.OpenURL(Version.Url); }
         }
 
-        public override string HelpID
-        {
-            get
-            {
-                return "XenServerUpdateAlert";
-            }
-        }
+        public override string HelpID => "XenServerUpdateAlert";
 
         protected override bool IsDismissed(IXenConnection connection)
         {
@@ -105,21 +78,36 @@ namespace XenAdmin.Alerts
 
             Dictionary<string, string> other_config = pool.other_config;
 
-            if (other_config.ContainsKey(Updates.LAST_SEEN_SERVER_VERSION_KEY))
+            if (other_config.ContainsKey(LAST_SEEN_SERVER_VERSION_KEY))
             {
-                List<string> current = new List<string>(other_config[Updates.LAST_SEEN_SERVER_VERSION_KEY].Split(','));
+                List<string> current = new List<string>(other_config[LAST_SEEN_SERVER_VERSION_KEY].Split(','));
                 if (current.Contains(Version.Version.ToString()))
                     return true;
             }
             return false;
         }
 
+        protected override void Dismiss(Dictionary<string, string> otherConfig)
+        {
+            if (otherConfig.ContainsKey(LAST_SEEN_SERVER_VERSION_KEY))
+            {
+                List<string> current = new List<string>(otherConfig[LAST_SEEN_SERVER_VERSION_KEY].Split(','));
+                if (current.Contains(Version.Version.ToString()))
+                    return;
+                current.Add(Version.Version.ToString());
+                otherConfig[LAST_SEEN_SERVER_VERSION_KEY] = string.Join(",", current.ToArray());
+            }
+            else
+            {
+                otherConfig.Add(LAST_SEEN_SERVER_VERSION_KEY, Version.Version.ToString());
+            }
+        }
+
         public override bool Equals(Alert other)
         {
-            if (other is XenServerVersionAlert)
-            {
-                return Version.Version.ToString() == ((XenServerVersionAlert)other).Version.Version.ToString();
-            }
+            if (other is XenServerVersionAlert versionAlert)
+                return Version.Version.ToString() == versionAlert.Version.Version.ToString();
+
             return base.Equals(other);
         }
     }

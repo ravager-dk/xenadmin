@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAPI;
 using System.Windows.Forms;
-using XenAdmin.Dialogs.WarningDialogs;
 using XenAdmin.Actions;
-using System.Collections.ObjectModel;
+using XenAdmin.Dialogs;
+using XenAdmin.Wizards.BugToolWizard;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -64,19 +61,25 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             Host host = selection[0].HostAncestor;
 
-            DialogResult result = new RemoveCrashDumpsWarningDialog(host).ShowDialog(Parent);
-
-            if (result == DialogResult.OK)
+            using (var dialog = new WarningDialog(string.Format(Messages.REMOVE_CRASHDUMP_WARNING, host.Name().Ellipsise(30)),
+                new ThreeButtonDialog.TBDButton(Messages.SERVER_STATUS_REPORT, DialogResult.Ignore, ThreeButtonDialog.ButtonType.CANCEL, true),
+                new ThreeButtonDialog.TBDButton(Messages.REMOVE_FILES, DialogResult.OK, ThreeButtonDialog.ButtonType.ACCEPT),
+                ThreeButtonDialog.ButtonCancel))
             {
-                new DestroyHostCrashDumpAction(host).RunAsync();
+                var result = dialog.ShowDialog(Parent);
+
+                if (result == DialogResult.OK)
+                    new DestroyHostCrashDumpAction(host).RunAsync();
+                else if (result == DialogResult.Ignore)
+                    new BugToolWizard(host).Show();
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {
@@ -86,20 +89,8 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REMOVE_HOST_CRASHDUMPS;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_REMOVE_HOST_CRASHDUMPS;
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REMOVE_HOST_CRASHDUMPS_CONTEXT_MENU;
-            }
-        }
+        public override string ContextMenuText => Messages.MAINWINDOW_REMOVE_HOST_CRASHDUMPS_CONTEXT_MENU;
     }
 }

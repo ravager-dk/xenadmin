@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -72,13 +71,13 @@ namespace XenAdmin.Diagnostics.Hotfixing
             var patch = host.Connection.Cache.Find_By_Uuid<Pool_patch>(UUID);
             if (patch == null)
             {
-                var master = Helpers.GetMaster(host.Connection);
+                var coordinator = Helpers.GetCoordinator(host.Connection);
                 var filePath = Path.Combine(Program.AssemblyDir, String.Format("{0}.{1}", Filename, BrandManager.ExtensionUpdate));
-                var action = new UploadPatchAction(master.Connection, filePath, false, false);
-                action.RunExternal(session);
+                var action = new UploadPatchAction(coordinator.Connection, filePath, false, false);
+                action.RunSync(session);
                 patch = action.Patch;
             }
-            new ApplyPatchAction(patch, host).RunExternal(session);
+            new ApplyPatchAction(patch, host).RunSync(session);
         }
 
         private void UploadAndApplyUpdate(Host host, Session session)
@@ -86,13 +85,13 @@ namespace XenAdmin.Diagnostics.Hotfixing
             var update = host.Connection.Cache.Find_By_Uuid<Pool_update>(UUID);
             if (update == null)
             {
-                var master = Helpers.GetMaster(host.Connection);
-                var filePath = Path.Combine(Program.AssemblyDir, string.Format("{0}.{1}", Filename, InvisibleMessages.ISO_UPDATE));
-                var action = new UploadSupplementalPackAction(master.Connection, new List<Host> { master }, filePath, false);
-                action.RunExternal(session);
+                var coordinator = Helpers.GetCoordinator(host.Connection);
+                var filePath = Path.Combine(Program.AssemblyDir, $"{Filename}.iso");
+                var action = new UploadSupplementalPackAction(coordinator.Connection, new List<Host> { coordinator }, filePath, false);
+                action.RunSync(session);
                 update = action.PoolUpdate;
             }
-            new ApplyUpdateAction(update, host, false).RunExternal(session);
+            new ApplyUpdateAction(update, host, false).RunSync(session);
         }
         
         public override bool ShouldBeAppliedTo(Host host)

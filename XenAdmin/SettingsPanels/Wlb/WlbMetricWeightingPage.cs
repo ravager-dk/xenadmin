@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,17 +29,11 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Wlb;
 using XenAPI;
-
 
 
 namespace XenAdmin.SettingsPanels
@@ -87,23 +80,20 @@ namespace XenAdmin.SettingsPanels
         private void InitializeControls()
         {
             _loading = true;
-            trackbarCPUPriority.Value = GetSafeTrackbarValue(trackbarCPUPriority, _poolConfiguration.VmCpuUtilizationWeightHigh / TRACKBAR_INTERVAL);
-            trackbarMemoryPriority.Value = GetSafeTrackbarValue(trackbarMemoryPriority, _poolConfiguration.VmMemoryWeightHigh / TRACKBAR_INTERVAL);
-            trackbarNetReadPriority.Value = GetSafeTrackbarValue(trackbarNetReadPriority, _poolConfiguration.VmNetworkReadWeightHigh / TRACKBAR_INTERVAL);
-            trackbarNetWritePriority.Value = GetSafeTrackbarValue(trackbarNetWritePriority, _poolConfiguration.VmNetworkWriteWeightHigh / TRACKBAR_INTERVAL);
-            trackbarDiskReadPriority.Value = GetSafeTrackbarValue(trackbarDiskReadPriority, _poolConfiguration.VmDiskReadWeightHigh / TRACKBAR_INTERVAL);
-            trackbarDiskWritePriority.Value = GetSafeTrackbarValue(trackbarDiskWritePriority, _poolConfiguration.VmDiskWriteWeightHigh / TRACKBAR_INTERVAL);
-            // CA-194940:
-            // Host disk read/write threshold and weight settings work since Dundee.
-            // For previous XenServer, hide the host disk read/write settings.
-            if (!Helpers.DundeeOrGreater(_connection))
+
+            try
             {
-                trackbarDiskReadPriority.Visible = false;
-                trackbarDiskWritePriority.Visible = false;
-                label10.Visible = false;
-                label11.Visible = false;
+                trackbarCPUPriority.Value = GetSafeTrackbarValue(trackbarCPUPriority, _poolConfiguration.VmCpuUtilizationWeightHigh / TRACKBAR_INTERVAL);
+                trackbarMemoryPriority.Value = GetSafeTrackbarValue(trackbarMemoryPriority, _poolConfiguration.VmMemoryWeightHigh / TRACKBAR_INTERVAL);
+                trackbarNetReadPriority.Value = GetSafeTrackbarValue(trackbarNetReadPriority, _poolConfiguration.VmNetworkReadWeightHigh / TRACKBAR_INTERVAL);
+                trackbarNetWritePriority.Value = GetSafeTrackbarValue(trackbarNetWritePriority, _poolConfiguration.VmNetworkWriteWeightHigh / TRACKBAR_INTERVAL);
+                trackbarDiskReadPriority.Value = GetSafeTrackbarValue(trackbarDiskReadPriority, _poolConfiguration.VmDiskReadWeightHigh / TRACKBAR_INTERVAL);
+                trackbarDiskWritePriority.Value = GetSafeTrackbarValue(trackbarDiskWritePriority, _poolConfiguration.VmDiskWriteWeightHigh / TRACKBAR_INTERVAL);
             }
-            _loading = false; ;
+            finally
+            {
+                _loading = false;
+            }
         }
 
         private void trackbarValueChanged(object sender, EventArgs e)
@@ -153,6 +143,9 @@ namespace XenAdmin.SettingsPanels
             throw new NotImplementedException();
         }
 
+        public void HideLocalValidationMessages()
+        { }
+
         public void Cleanup()
         {
             throw new NotImplementedException();
@@ -164,10 +157,9 @@ namespace XenAdmin.SettingsPanels
 
         #region IVerticalTab Members
 
-
         public string SubText => Messages.WLB_METRIC_WEIGHTING_SUBTEXT;
 
-        public Image Image => Properties.Resources._000_weighting_h32bit_16;
+        public Image Image => Images.StaticImages._000_weighting_h32bit_16;
 
         #endregion
 

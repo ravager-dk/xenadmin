@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,34 +28,30 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using XenAdmin.Core;
-using XenAdmin.Network;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class DisableHAAction : PureAsyncAction
+    public class DisableHAAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public DisableHAAction(Pool pool)
             : base(pool.Connection, string.Format(Messages.DISABLING_HA_ON, Helpers.GetName(pool).Ellipsise(50)), Messages.DISABLING_HA, false)
         {
-            this.Pool = pool;
+            Pool = pool;
+            ApiMethodsToRoleCheck.Add("pool.async_disable_ha");
         }
 
         protected override void Run()
         {
             log.Debug("Disabling HA for pool " + Pool.Name());
-            RelatedTask = XenAPI.Pool.async_disable_ha(this.Session);
+            RelatedTask = Pool.async_disable_ha(Session);
             PollToCompletion();
             log.Debug("Success disabling HA on pool " + Pool.Name());
-            this.Description = Messages.COMPLETED;
+            Description = Messages.COMPLETED;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,11 +30,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
-using XenAdmin.Network;
 using XenAdmin.Core;
-using System.Collections;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Globalization;
@@ -290,24 +286,20 @@ namespace XenAdmin.Alerts
         public static PerfmonDefinition[] GetPerfmonDefinitions(IXenObject xo)
         {
             if (!(xo is VM) && !(xo is Host) && !(xo is SR))
-                return new PerfmonDefinition[0];
+                return Array.Empty<PerfmonDefinition>();
 
-            Dictionary<string, string> other_config = Helpers.GetOtherConfig(xo);
+            var other_config = Helpers.GetOtherConfig(xo);
             if (other_config == null)
-                return new PerfmonDefinition[0];
+                return Array.Empty<PerfmonDefinition>();
 
             if (!other_config.ContainsKey(PERFMON_KEY_NAME))
-                return new PerfmonDefinition[0];
+                return Array.Empty<PerfmonDefinition>();
 
-            string perfmonConfigXML = other_config[PERFMON_KEY_NAME];
+            var perfmonConfigXML = other_config[PERFMON_KEY_NAME];
             if (perfmonConfigXML == null)
-                return new PerfmonDefinition[0];
+                return Array.Empty<PerfmonDefinition>();
 
-            perfmonConfigXML.Trim();
-            if (String.IsNullOrEmpty(perfmonConfigXML))
-                return new PerfmonDefinition[0];
-
-            return GetPerfmonDefinitions(perfmonConfigXML);
+            return string.IsNullOrWhiteSpace(perfmonConfigXML) ? Array.Empty<PerfmonDefinition>() : GetPerfmonDefinitions(perfmonConfigXML);
         }
 
         /// <summary>

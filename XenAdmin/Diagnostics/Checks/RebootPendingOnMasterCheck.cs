@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,13 +36,13 @@ using XenAPI;
 
 namespace XenAdmin.Diagnostics.Checks
 {
-    class RestartHostOrToolstackPendingOnMasterCheck : HostPostLivenessCheck
+    class RestartHostOrToolstackPendingOnCoordinatorCheck : HostPostLivenessCheck
     {
         public string UpdateUuid { get; private set; }
         private readonly Pool pool;
 
-        public RestartHostOrToolstackPendingOnMasterCheck(Pool pool, string updateUuid)
-            : base(Helpers.GetMaster(pool.Connection))
+        public RestartHostOrToolstackPendingOnCoordinatorCheck(Pool pool, string updateUuid)
+            : base(Helpers.GetCoordinator(pool.Connection))
         {
             this.pool = pool;
             this.UpdateUuid = updateUuid;
@@ -66,7 +65,7 @@ namespace XenAdmin.Diagnostics.Checks
                     if (string.IsNullOrEmpty(UpdateUuid) || //automated mode, any update
                         (update != null && string.Equals(update.uuid, UpdateUuid, System.StringComparison.InvariantCultureIgnoreCase))) //normal mode the given update
                     {
-                        return new MasterIsPendingRestartHostProblem(this, pool);
+                        return new CoordinatorIsPendingRestartHostProblem(this, pool);
                     }
                 }
             }
@@ -75,25 +74,25 @@ namespace XenAdmin.Diagnostics.Checks
                 if (bootTime == 0.0 || agentStart == 0.0)
                     return null; //fine
 
-                var hostRestartRequiredPatches = Host.AppliedPatches().Where(p => p.after_apply_guidance.Contains(after_apply_guidance.restartHost) && ((double)Util.ToUnixTime(p.AppliedOn(Host)) > agentStart));
+                var hostRestartRequiredPatches = Host.AppliedPatches().Where(p => p.after_apply_guidance.Contains(after_apply_guidance.restartHost) && Util.ToUnixTime(p.AppliedOn(Host)) > agentStart);
 
                 foreach (Pool_patch patch in hostRestartRequiredPatches)
                 {
                     if (string.IsNullOrEmpty(UpdateUuid) //automated mode, any update
                             || string.Equals(patch.uuid, UpdateUuid, System.StringComparison.InvariantCultureIgnoreCase)) //normal mode the given update
                     {
-                        return new MasterIsPendingRestartHostProblem(this, pool);
+                        return new CoordinatorIsPendingRestartHostProblem(this, pool);
                     }
                 }
             }
 
             //check toolstack restart
-            var toolstackRestartRequiredPatches = Host.AppliedPatches().Where(p => p.after_apply_guidance.Contains(after_apply_guidance.restartXAPI) && ((double)Util.ToUnixTime(p.AppliedOn(Host)) > agentStart));
+            var toolstackRestartRequiredPatches = Host.AppliedPatches().Where(p => p.after_apply_guidance.Contains(after_apply_guidance.restartXAPI) && Util.ToUnixTime(p.AppliedOn(Host)) > agentStart);
             foreach (Pool_patch patch in toolstackRestartRequiredPatches)
             {
                 if (string.IsNullOrEmpty(UpdateUuid)) //automated mode
                 {
-                    return new MasterIsPendingRestartToolstackProblem(this, pool);
+                    return new CoordinatorIsPendingRestartToolstackProblem(this, pool);
                 }
 
                 if (!elyOrGreater) //normal mode pre-Ely
@@ -102,14 +101,14 @@ namespace XenAdmin.Diagnostics.Checks
                         return null; //fine
 
                     if (string.Equals(patch.uuid, UpdateUuid, System.StringComparison.InvariantCultureIgnoreCase))
-                        return new MasterIsPendingRestartToolstackProblem(this, pool);
+                        return new CoordinatorIsPendingRestartToolstackProblem(this, pool);
                 }
                 else //normal mode Ely+
                 {
                     var poolUpdate = Host.Connection.Resolve(patch.pool_update);
                     if (poolUpdate != null && string.Equals(UpdateUuid, poolUpdate.uuid, System.StringComparison.InvariantCultureIgnoreCase))
                     {
-                        return new MasterIsPendingRestartToolstackProblem(this, pool);
+                        return new CoordinatorIsPendingRestartToolstackProblem(this, pool);
                     }
                 }
             }

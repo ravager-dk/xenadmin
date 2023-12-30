@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -122,7 +121,8 @@ namespace XenAdmin.Controls
 
         private void _contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-            DefaultItem = e.ClickedItem;
+            if (e.ClickedItem is ToolStripMenuItem)
+                DefaultItem = e.ClickedItem;
         }
 
         protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates cellState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
@@ -219,7 +219,7 @@ namespace XenAdmin.Controls
                 graphics.SmoothingMode = mode;
             }
 
-            var img = Properties.Resources.expanded_triangle;
+            var img = Images.StaticImages.expanded_triangle;
             graphics.DrawImage(img,
                 cellBounds.Right - cellStyle.Padding.Right - img.Width - (SPLITTER_FROM_RIGHT - img.Width) / 2,
                 cellBounds.Top + (CELL_HEIGHT - img.Height) / 2);

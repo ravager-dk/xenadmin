@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,23 +29,16 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 namespace XenAdmin.Controls
 {
     /// <summary>
     /// A System.Windows.Forms.ToolStrip with the option of click-through
-    /// (see http://blogs.msdn.com/rickbrew/archive/2006/01/09/511003.aspx)
+    /// (see https://learn.microsoft.com/en-us/archive/blogs/rickbrew/how-to-enable-click-through-for-net-2-0-toolstrip-and-menustrip)
     /// </summary>
     public class ToolStripEx : ToolStrip
     {
-        private bool clickThrough = false;
-
         /// <summary>
         /// Gets or sets whether the ToolStripEx honors item clicks when its containing form does
         /// not have input focus.
@@ -54,22 +46,13 @@ namespace XenAdmin.Controls
         /// <remarks>
         /// Default value is false, which is the same behavior provided by the base ToolStrip class.
         /// </remarks>
-        public bool ClickThrough
-        {
-            get
-            {
-                return this.clickThrough;
-            }
-            set
-            {
-                this.clickThrough = value;
-            }
-        }
+        public bool ClickThrough { get; set; }
 
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
-            if (this.clickThrough &&
+
+            if (ClickThrough &&
                 m.Msg == NativeConstants.WM_MOUSEACTIVATE &&
                 m.Result == (IntPtr)NativeConstants.MA_ACTIVATEANDEAT)
             {

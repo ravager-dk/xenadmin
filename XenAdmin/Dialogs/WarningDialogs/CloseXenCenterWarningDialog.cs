@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -44,10 +43,16 @@ namespace XenAdmin.Dialogs.WarningDialogs
 {
     public partial class CloseXenCenterWarningDialog : XenDialogBase
     {
-        public CloseXenCenterWarningDialog(IXenConnection connection = null)
+        public CloseXenCenterWarningDialog(bool fromUpdate = false, IXenConnection connection = null)
             :base(connection)
         {
             InitializeComponent();
+
+            label1.Text = string.Format(label1.Text, BrandManager.BrandConsole);
+            label2.Text = string.Format(label2.Text, BrandManager.BrandConsole);
+            label3.Text = string.Format(label3.Text, BrandManager.BrandConsole);
+            label3.Visible = fromUpdate;
+            ExitButton.Text = string.Format(ExitButton.Text, BrandManager.BrandConsole);
 
             if (connection != null)
             {
@@ -58,6 +63,12 @@ namespace XenAdmin.Dialogs.WarningDialogs
 
             ConnectionsManager.History.CollectionChanged += History_CollectionChanged;
             BuildList();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Text = BrandManager.BrandConsole;
         }
 
         internal override string HelpName => connection == null ? Name : "DisconnectServerWarningDialog";
@@ -171,12 +182,12 @@ namespace XenAdmin.Dialogs.WarningDialogs
 
             if (row.Expanded)
             {
-                row.Cells[columnExpander.Index].Value = Properties.Resources.contracted_triangle;
+                row.Cells[columnExpander.Index].Value = Images.StaticImages.contracted_triangle;
                 row.Cells[columnMessage.Index].Value = row.Action.GetTitle();
             }
             else
             {
-                row.Cells[columnExpander.Index].Value = Properties.Resources.expanded_triangle;
+                row.Cells[columnExpander.Index].Value = Images.StaticImages.expanded_triangle;
                 row.Cells[columnMessage.Index].Value = row.Action.GetDetails();
             }
             row.Expanded = !row.Expanded;
@@ -257,7 +268,7 @@ namespace XenAdmin.Dialogs.WarningDialogs
             private DataGridViewTextBoxCell locationCell = new DataGridViewTextBoxCell();
             private DataGridViewTextBoxCell dateCell = new DataGridViewTextBoxCell();
 
-            public ActionBase Action { get; private set; }
+            public ActionBase Action { get; }
             public bool Expanded { get; set; }
 
             public DataGridViewActionRow(ActionBase action)
@@ -273,12 +284,12 @@ namespace XenAdmin.Dialogs.WarningDialogs
 
                 if (Expanded)
                 {
-                    expanderCell.Value = Properties.Resources.expanded_triangle;
+                    expanderCell.Value = Images.StaticImages.expanded_triangle;
                     messageCell.Value = Action.GetDetails();
                 }
                 else
                 {
-                    expanderCell.Value = Properties.Resources.contracted_triangle;
+                    expanderCell.Value = Images.StaticImages.contracted_triangle;
                     messageCell.Value = Action.GetTitle();
                 }
                 locationCell.Value = Action.GetLocation();

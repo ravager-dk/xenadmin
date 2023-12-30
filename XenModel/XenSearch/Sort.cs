@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Xml;
 using XenCenterLib;
 using XenAdmin.CustomFields;
@@ -45,7 +42,7 @@ namespace XenAdmin.XenSearch
         private readonly string column;
         private readonly bool ascending;
 
-        private readonly PropertyAccessor property;
+        private readonly Func<IXenObject, IComparable> property;
 
         public string Column
         {
@@ -64,7 +61,7 @@ namespace XenAdmin.XenSearch
             this.property = CalcProperty();
         }
 
-        private PropertyAccessor CalcProperty()
+        private Func<IXenObject, IComparable> CalcProperty()
         {
             if (column.StartsWith(CustomFieldsManager.CUSTOM_FIELD))
             {

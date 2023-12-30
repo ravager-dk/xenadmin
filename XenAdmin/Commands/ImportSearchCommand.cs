@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,11 +30,8 @@
 
 using System;
 using System.Windows.Forms;
-using XenAdmin.Actions;
-using XenAPI;
 using System.IO;
 using XenAdmin.Dialogs;
-using System.Drawing;
 using XenAdmin.Core;
 
 
@@ -71,11 +67,11 @@ namespace XenAdmin.Commands
             _filenameSpecified = true;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             if (_filenameSpecified)
             {
-                Execute(_filename);
+                Run(_filename);
             }
             else
             {
@@ -96,7 +92,7 @@ namespace XenAdmin.Commands
                     dialog.CheckPathExists = false;
 
                     if (dialog.ShowDialog(Parent) == DialogResult.OK)
-                        Execute(dialog.FileName);
+                        Run(dialog.FileName);
                 }
                 finally
                 {
@@ -105,7 +101,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        private void Execute(string filename)
+        private void Run(string filename)
         {
             log.InfoFormat("Importing search from '{0}'", filename);
 
@@ -117,11 +113,8 @@ namespace XenAdmin.Commands
             {
                 log.ErrorFormat("Failed to import search from '{0}'", filename);
 
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Error,
-                        String.Format(Messages.UNABLE_TO_IMPORT_SEARCH, filename, BrandManager.ExtensionSearch),
-                        Messages.XENCENTER)))
+                using (var dlg = new ErrorDialog(String.Format(Messages.UNABLE_TO_IMPORT_SEARCH,
+                    BrandManager.BrandConsole, filename, BrandManager.ExtensionSearch)))
                 {
                     dlg.ShowDialog(Parent);
                 }

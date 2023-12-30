@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using XenAdmin.Core;
 using XenAdmin.Plugins;
 
 
@@ -40,48 +40,19 @@ namespace XenAdmin.Dialogs.OptionsPages
 {
     internal partial class PluginOptionsPage : UserControl, IOptionsPage
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         private PluginManager _pluginManager;
-        public PluginManager PluginManager
-        {
-            set
-            {
-                _pluginManager = value;
-
-                if (_pluginManager.Plugins.Count > 0)
-                {
-                    label2.Visible = m_gridPlugins.Visible = label3.Visible = m_gridFeatures.Visible = true;
-                    LoadPluginList();
-                }
-                else
-                {
-                    label2.Visible = m_gridPlugins.Visible = label3.Visible = m_gridFeatures.Visible = false;
-                    labelNoPlugins.Visible = true;
-                }
-                Refresh();
-            }
-        }
 
         public PluginOptionsPage()
         {
             InitializeComponent();
             m_tlpScanning.Visible = false;
             labelNoPlugins.Visible = false;
-            this.linkLabel1.Visible = !XenAdmin.Core.HiddenFeatures.LinkLabelHidden;
+            labelIntro.Text = string.Format(labelIntro.Text, BrandManager.BrandConsole);
+            linkLabel1.Text = string.Format(linkLabel1.Text, BrandManager.BrandConsole);
+            linkLabel1.Visible = !HiddenFeatures.LinkLabelHidden;
         }
 
-        public static void Log()
-        {
-            log.InfoFormat("=== DisabledPlugins: {0}",
-                Properties.Settings.Default.DisabledPlugins.Length == 0
-                    ? "<None>"
-                    : string.Join(",", Properties.Settings.Default.DisabledPlugins));
-        }
-
-        #region Private methods
-
-        private void LoadPluginList()
+        public void Build()
         {
             if (_pluginManager.Plugins.Count > 0)
             {
@@ -118,7 +89,13 @@ namespace XenAdmin.Dialogs.OptionsPages
             Refresh();
         }
 
-        #endregion
+        public void SetPluginManager(PluginManager pluginManager, bool rebuild)
+        {
+            _pluginManager = pluginManager;
+            Enabled = pluginManager.Enabled;
+            if (rebuild)
+                Build();
+        }
 
         #region Control event handlers
 
@@ -131,7 +108,7 @@ namespace XenAdmin.Dialogs.OptionsPages
 
             _pluginManager.ReloadPlugins();
             m_tlpScanning.Visible = false;
-            LoadPluginList();
+            Build();
             refreshButton.Enabled = true;
             Refresh();
         }
@@ -251,23 +228,33 @@ namespace XenAdmin.Dialogs.OptionsPages
 
         #region Implementation of IVerticalTab
 
-        public override string Text { get { return Messages.PLUGINS; } }
+        public override string Text => Messages.PLUGINS;
 
-        public string SubText
-        {
-            get
-            {
-                return _pluginManager.EnabledPluginsCount == 1
-                           ? Messages.PLUGIN_ENABLED_COUNT_ONE
-                           : string.Format(Messages.PLUGIN_ENABLED_COUNT, _pluginManager.EnabledPluginsCount);
-            }
-        }
+        public string SubText =>
+            _pluginManager.EnabledPluginsCount == 1
+                ? Messages.PLUGIN_ENABLED_COUNT_ONE
+                : string.Format(Messages.PLUGIN_ENABLED_COUNT, _pluginManager.EnabledPluginsCount);
 
-        public Image Image { get { return Properties.Resources._000_Module_h32bit_16; } }
+        public Image Image => Images.StaticImages._000_Module_h32bit_16;
 
         #endregion
 
         #region Implementation of IOptionsPage
+
+        public bool IsValidToSave(out Control control, out string invalidReason)
+        {
+            control = null;
+            invalidReason = null;
+            return true;
+        }
+
+        public void ShowValidationMessages(Control control, string message)
+        {
+        }
+
+        public void HideValidationMessages()
+        {
+        }
 
         public void Save()
         {

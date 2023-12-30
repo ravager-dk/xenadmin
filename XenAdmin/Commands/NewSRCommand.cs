@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAdmin.Wizards;
-using XenAdmin.Properties;
 using System.Drawing;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -66,30 +61,30 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             MainWindowCommandInterface.ShowPerConnectionWizard(selection[0].Connection, new NewSRWizard(selection[0].Connection));
         }
 
-        private static bool CanExecuteOnHost(Host host)
+        private static bool CanRunOnHost(Host host)
         {
             return host != null && host.Connection.IsConnected && !HelpersGUI.HasActiveHostAction(host);
         }
 
-        private static bool CanExecuteOnPool(Pool pool)
+        private static bool CanRunOnPool(Pool pool)
         {
             return pool != null && pool.Connection.IsConnected;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.HostAncestor != null)
             {
-                return CanExecuteOnHost(selection.HostAncestor);
+                return CanRunOnHost(selection.HostAncestor);
             }
             else if (selection.PoolAncestor != null)
             {
-                return CanExecuteOnPool(selection.PoolAncestor);
+                return CanRunOnPool(selection.PoolAncestor);
             }
             return false;
         }

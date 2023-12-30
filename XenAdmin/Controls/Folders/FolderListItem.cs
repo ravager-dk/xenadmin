@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,13 +31,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Model;
-using XenAPI;
 
 
 namespace XenAdmin.Controls
@@ -54,53 +51,53 @@ namespace XenAdmin.Controls
         public enum AllowSearch { None, AllButLast, All };
         private AllowSearch allowSearch;
 
-        private string path;
         private List<FLIControl> controls;
         public Control Parent;
-        private int maxWidth = 0;
         private bool hasChangeButton;
         private LinkLabel changeLabel;
         private Padding itemBorder;
 
+        /// <summary>
+        /// Color.Transparent on most platforms; SystemColors.Window when ClearType is enabled.
+        /// This is to work around an issue in TextRenderer.DrawText which causes text written to a double-buffer
+        /// using ClearType to anti-alias onto black rather than onto the background colour.  In this case,
+        /// we use Window, because by luck those labels are always on top of that colour on Vista and XP.
+        /// We indicate that we're writing to a buffer (rather than the screen) by setting Graphics.TextContrast
+        /// to 5 (the default is 4). This hack was needed because there's no easy way to add info to
+        /// a Graphics object. (CA-22938).
+        /// </summary>
+        private static readonly Color TransparentUsually;
+
+        static FolderListItem()
+        {
+            try
+            {
+                if (SystemInformation.FontSmoothingType == 2) // ClearType
+                    TransparentUsually = SystemColors.Window;
+            }
+            catch (NotSupportedException)
+            {
+                // This is an old platform without FontSmoothingType support.
+                TransparentUsually = Color.Transparent;
+            }
+        }
+
         public FolderListItem(string path, AllowSearch allowSearch, bool changeButton)
         {
-            this.path = path;
+            Path = path;
             this.controls = new List<FLIControl>();
             this.allowSearch = allowSearch;
             this.hasChangeButton = changeButton;
             this.itemBorder = new Padding(0);
         }
 
-        public string Path
-        {
-            get { return path; }
-        }
+        public string Path { get; private set; }
 
-        private Color foreColor = SystemColors.ControlText;
-        public Color ForeColor
-        {
-            get { return foreColor; }
-            set { foreColor = value; }
-        }
+        public Color ForeColor { get; set; } = SystemColors.ControlText;
 
-        private Font Font
-        {
-            get { return Program.DefaultFont; }
-        }
+        private static Font Font => Program.DefaultFont;
 
-        private Font UnderlineFont
-        {
-            get
-            {
-                return new Font(Font, FontStyle.Underline);
-            }
-        }
-
-        public int MaxWidth
-        {
-            get { return maxWidth; }
-            set { maxWidth = value; }
-        }
+        public int MaxWidth { get; set; }
 
         public void DrawSelf(Graphics g, Rectangle bounds, bool selected)
         {
@@ -110,23 +107,22 @@ namespace XenAdmin.Controls
             Point p = new Point(bounds.Left + itemBorder.Left, bounds.Top + itemBorder.Top);
             Size sz;
 
-            if (path == "")
+            var backColor = g.TextContrast == 5 ? TransparentUsually : Color.Transparent;
+
+            if (Path == "")
             {
-                Drawing.DrawText(g, Messages.NONE, Font, p, ForeColor,
-                    g.TextContrast == 5 ? Program.TransparentUsually : Color.Transparent);
+                Drawing.DrawText(g, Messages.NONE, Font, p, ForeColor, backColor);
                 sz = Drawing.MeasureText(Messages.NONE, Font);
                 p.X += sz.Width;
             }
             else
             {
                 p.X += 3;  // this is necessary to compensate for TextFormatFlags.NoPadding below: all the other rows have padding
-                String[] pathParts = Folders.PointToPath(path);
-                int trunc1, trunc2;
-                CalcSizeAndTrunc(g, bounds.Width - itemBorder.Horizontal, out trunc1, out trunc2);
+                String[] pathParts = Folders.PointToPath(Path);
+                CalcSizeAndTrunc(g, bounds.Width - itemBorder.Horizontal, out var trunc1, out var trunc2);
                 if (trunc1 > 0)
                 {
-                    Drawing.DrawText(g, Messages.ELLIPSIS, Font, p, ForeColor,
-                        g.TextContrast == 5 ? Program.TransparentUsually : Color.Transparent, TextFormatFlags.NoPadding);
+                    Drawing.DrawText(g, Messages.ELLIPSIS, Font, p, ForeColor, backColor, TextFormatFlags.NoPadding);
                     sz = Drawing.MeasureText(g, Messages.ELLIPSIS, Font, bigSize, TextFormatFlags.NoPadding);
                     p.X += sz.Width + INNER_PADDING;
                 }
@@ -134,8 +130,8 @@ namespace XenAdmin.Controls
                 {
                     if (i > 0)
                     {
-                        g.DrawImage(Properties.Resources.folder_separator, p + new Size(0, IMAGE_OFFSET));
-                        p.X += Properties.Resources.folder_separator.Width + INNER_PADDING;
+                        g.DrawImage(Images.StaticImages.folder_separator, p + new Size(0, IMAGE_OFFSET));
+                        p.X += Images.StaticImages.folder_separator.Width + INNER_PADDING;
                     }
 
                     string s = pathParts[i];
@@ -145,8 +141,7 @@ namespace XenAdmin.Controls
                     bool doSearch = (allowSearch == AllowSearch.All ||
                         (allowSearch == AllowSearch.AllButLast && i != pathParts.Length - 1));
 
-                    Drawing.DrawText(g, s, Font, p, doSearch ? Color.Blue : ForeColor,
-                        g.TextContrast == 5 ? Program.TransparentUsually : Color.Transparent, TextFormatFlags.NoPadding);
+                    Drawing.DrawText(g, s, Font, p, doSearch ? Color.Blue : ForeColor, backColor, TextFormatFlags.NoPadding);
                     sz = Drawing.MeasureText(g, s, Font, bigSize, TextFormatFlags.NoPadding);
                     if (doSearch)
                         controls.Add(new FLIControl(Folders.PathToPoint(pathParts, i + 1),
@@ -177,8 +172,8 @@ namespace XenAdmin.Controls
         {
             get
             {
-                int t1, t2;
-                return CalcSizeAndTrunc(int.MaxValue, out t1, out t2);
+                using (var g = Parent.CreateGraphics())
+                    return CalcSizeAndTrunc(g, int.MaxValue, out _, out _);
             }
         }
 
@@ -193,7 +188,7 @@ namespace XenAdmin.Controls
 
             Size theSize = new Size(0, 0);
 
-            String[] pathParts = Folders.PointToPath(path);
+            String[] pathParts = Folders.PointToPath(Path);
             if (pathParts == null)
             {
                 theSize = Drawing.MeasureText(g, Messages.NONE, Font);
@@ -204,7 +199,7 @@ namespace XenAdmin.Controls
                 for (int i = 0; i < pathParts.Length; ++i)
                 {
                     if (i > 0)
-                        theSize.Width += Properties.Resources.folder_separator.Width + INNER_PADDING;
+                        theSize.Width += Images.StaticImages.folder_separator.Width + INNER_PADDING;
                     string s = pathParts[i];
                     Size sz = Drawing.MeasureText(g, s, Font, bigSize, TextFormatFlags.NoPadding);
                     theSize.Width += sz.Width + INNER_PADDING;
@@ -215,9 +210,12 @@ namespace XenAdmin.Controls
             if (hasChangeButton)
             {
                 theSize.Width += RIGHT_PADDING;
-                Size size2 = Drawing.MeasureText(g, Messages.CHANGE, UnderlineFont, bigSize, TextFormatFlags.NoPadding);
-                theSize.Width += size2.Width;
-                theSize.Height = Math.Max(theSize.Height, size2.Height);
+                using (var underlineFont = new Font(Font, FontStyle.Underline))
+                {
+                    Size size2 = Drawing.MeasureText(g, Messages.CHANGE, underlineFont, bigSize, TextFormatFlags.NoPadding);
+                    theSize.Width += size2.Width;
+                    theSize.Height = Math.Max(theSize.Height, size2.Height);
+                }
             }
             else
             {
@@ -242,13 +240,13 @@ namespace XenAdmin.Controls
                     if (trunc1 == 0)
                         theSize.Width += Drawing.MeasureText(g, Messages.ELLIPSIS, Font, bigSize, TextFormatFlags.NoPadding).Width;
                     else
-                        theSize.Width -= Properties.Resources.folder_separator.Width + 2 * INNER_PADDING;
+                        theSize.Width -= Images.StaticImages.folder_separator.Width + 2 * INNER_PADDING;
                     theSize.Width -= Drawing.MeasureText(g, pathParts[trunc1], Font, bigSize, TextFormatFlags.NoPadding).Width;
                 }
 
                 // It may still be that the text is too long, if the last component is very long.
                 // In that case we need to ellipsise the final component.
-                // (We just remove one character at a time: binary chop is overkill for normal folder lengths).
+                // (We just remove one character at a time: binary chop is excessive for normal folder lengths).
                 if (theSize.Width > w)
                 {
                     String s = pathParts[trunc1];
@@ -264,14 +262,6 @@ namespace XenAdmin.Controls
             }
 
             return theSize;
-        }
-
-        private Size CalcSizeAndTrunc(int width, out int trunc1, out int trunc2)
-        {
-            Graphics g = this.Parent.CreateGraphics();
-            Size sz = CalcSizeAndTrunc(g, width, out trunc1, out trunc2);
-            g.Dispose();
-            return sz;
         }
 
         private FLIControl OnControl(Point point)
@@ -328,7 +318,7 @@ namespace XenAdmin.Controls
 
         private void LaunchFolderChangeDlg()
         {
-            using (var dialog = new FolderChangeDialog(path))
+            using (var dialog = new FolderChangeDialog(Path))
                 if (dialog.ShowDialog(Program.MainWindow) == DialogResult.OK)
                 {
                     if (!dialog.FolderChanged)
@@ -336,7 +326,7 @@ namespace XenAdmin.Controls
 
                     Folder selectedFolder = dialog.CurrentFolder;
 
-                    path = selectedFolder == null
+                    Path = selectedFolder == null
                         ? string.Empty
                         : Folders.AppendPath(selectedFolder.Path, selectedFolder.ToString());
 

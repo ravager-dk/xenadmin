@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -54,24 +53,6 @@ namespace XenAPI
         public bool IsFloppyDrive()
         {
             return false;
-        }
-
-        public VBD FindVMCDROM(VM vm)
-        {
-            if (vm == null)
-                return null;
-
-            List<VBD> vbds = vm.Connection.ResolveAll(vm.VBDs).FindAll(vbd => vbd.IsCDROM());
-
-            if (vbds.Count > 0)
-            {
-                vbds.Sort();
-                return vbds[0];
-            }
-            else
-            {
-                return null;
-            }
         }
 
         public bool GetIsOwner()

@@ -1,6 +1,7 @@
 /* Original work Copyright (c) Citrix Systems, Inc.
  * Modified work Copyright XCP-ng project 
  * All rights reserved. 
+ * Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,7 +38,7 @@ namespace XenAdmin.Actions.VMActions
 {
     public abstract class VMPauseAction : PureAsyncAction
     {
-        protected VMPauseAction(VM vm,string title)
+        protected VMPauseAction(VM vm, string title)
             : base(vm.Connection, title)
         {
             //this.Description = Messages.ACTION_PREPARING;
@@ -68,5 +69,14 @@ namespace XenAdmin.Actions.VMActions
             this.Description = "VM paused";
         }
     }
+};
 
-}
+namespace XenAdmin
+{
+    public enum SshConsole
+    {
+        None = 0,
+        Putty = 1,
+        OpenSSH = 2
+    }
+};

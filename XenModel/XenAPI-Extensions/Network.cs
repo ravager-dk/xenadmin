@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin;
 using XenAdmin.Core;
 
@@ -54,7 +54,7 @@ namespace XenAPI
         public override string Name()
         {
             // Return the name_label, if its been changed by the user, or Network n where n is the
-            // device number otherwise.  Take the device from the pool master by default, or from
+            // device number otherwise.  Take the device from the pool coordinator by default, or from
             // the first one we find otherwise.  If it's not attached anywhere, then give up and
             // return the name_label, which will be in the default form.
 
@@ -67,25 +67,21 @@ namespace XenAPI
                 return name_label;
             }
 
-            Pool pool = Helpers.GetPoolOfOne(Connection);
+            var pool = Helpers.GetPoolOfOne(Connection);
             if (pool == null)
                 return name_label;
 
-            string master_ref = pool.master.opaque_ref;
+            var coordinator_ref = pool.master.opaque_ref;
 
-            foreach (PIF pif in Connection.ResolveAll(PIFs))
-            {
-                if (pif.host.opaque_ref == master_ref)
-                {
-                    return PIFName(pif);
-                }
-            }
+            var pifs = Connection.ResolveAll(PIFs); 
+            var pif = pifs.FirstOrDefault(p => p.host.opaque_ref == coordinator_ref); 
+            if (pif != null)
+                return PIFName(pif); 
 
-            foreach (PIF pif in Connection.ResolveAll(PIFs))
-            {
-                return PIFName(pif);
-            }
-
+            pif = pifs.FirstOrDefault(); 
+            if (pif != null) 
+                return PIFName(pif); 
+            
             return name_label;
         }
 
@@ -143,7 +139,7 @@ namespace XenAPI
                 if (showHiddenVMs)
                     return true;
 
-                if (IsSlave())
+                if (IsMember())
                     return false;
 
                 return !IsHidden();
@@ -188,25 +184,25 @@ namespace XenAPI
             return ans;
         }
 
-        public bool IsSlave()
+        public bool IsMember()
         {
             if (Connection == null)
                 return false;
             foreach (PIF pif in Connection.ResolveAll(PIFs))
             {
-                if (pif.IsBondSlave())
+                if (pif.IsBondMember())
                     return true;
             }
             return false;
         }
 
-        public bool IsInUseBondSlave()
+        public bool IsInUseBondMember()
         {
             if (Connection == null)
                 return false;
             foreach (PIF pif in Connection.ResolveAll(PIFs))
             {
-                if (pif.IsInUseBondSlave())
+                if (pif.IsInUseBondMember())
                     return true;
             }
             return false;

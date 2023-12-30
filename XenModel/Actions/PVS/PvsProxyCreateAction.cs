@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -58,7 +57,7 @@ namespace XenAdmin.Actions
         {
             Description = Messages.ENABLING;
             RelatedTask = PVS_proxy.async_create(Session, site.opaque_ref, vif.opaque_ref);         
-            PollToCompletion(0, 100);
+            PollToCompletion();
             Description = Messages.ENABLED;
         }
     }

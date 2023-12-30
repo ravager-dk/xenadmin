@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -50,15 +49,9 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             this.srDeviceConfigList = srDeviceConfigList;
         }
 
-        private bool EmptySRDeviceConfigList
-        {
-            get { return srDeviceConfigList == null || srDeviceConfigList.Count == 0; }
-        }
+        private bool EmptySRDeviceConfigList => srDeviceConfigList == null || srDeviceConfigList.Count == 0;
 
-        public override string Title
-        {
-            get { return Check.Description; }
-        }
+        public override string Title => Check.Description;
 
         public override string Description
         {
@@ -90,8 +83,8 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             if (EmptySRDeviceConfigList)
                 return null;
 
-            Host master = pool.Connection.Resolve(pool.master);
-            if (master == null)
+            Host coordinator = pool.Connection.Resolve(pool.master);
+            if (coordinator == null)
                 return null;
 
             List<AsyncAction> subActions = new List<AsyncAction>();
@@ -109,11 +102,12 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             if (subActions.Count == 0)
                 return null;
 
-            return subActions.Count == 1
-                       ? subActions[0]
-                       : new ParallelAction(pool.Connection, Messages.ACTION_MULTIPLE_DR_TASK_CREATE_TITLE,
-                                            Messages.ACTION_MULTIPLE_DR_TASK_CREATE_START,
-                                            Messages.ACTION_MULTIPLE_DR_TASK_CREATE_END, subActions);
+            if (subActions.Count == 1)
+                return subActions[0];
+
+            return new ParallelAction(Messages.ACTION_MULTIPLE_DR_TASK_CREATE_TITLE,
+                Messages.ACTION_MULTIPLE_DR_TASK_CREATE_START,
+                Messages.ACTION_MULTIPLE_DR_TASK_CREATE_END, subActions, pool.Connection);
         }
     }
 

@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,18 +33,17 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using XenCenterLib;
 using XenAdmin;
 using XenAdmin.Core;
-using XenAdmin.Network;
 using System.Diagnostics;
+using System.Web.Script.Serialization;
 
 
 namespace XenAPI
 {
     public partial class Host : IComparable<Host>, IEquatable<Host>
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType);
 
         public enum Edition
         {
@@ -144,6 +142,7 @@ namespace XenAPI
                 case Edition.Standard:
                     return "standard";
                 default:
+                    // CP-43000: For some hosts "trial" works, too. However, "express" is valid from Naples onwards
                     return Helpers.NaplesOrGreater(this) ? "express" : "free";
             }
         }
@@ -176,22 +175,45 @@ namespace XenAPI
 
         public override string Description()
         {
-            if (name_description == "Default install of XenServer" || name_description == "Default install") // i18n: CA-30372, CA-207273
-                return string.Format(Messages.DEFAULT_INSTALL_OF_XENSERVER, software_version.ContainsKey("product_brand") ? software_version["product_brand"] : Messages.XENSERVER);
-            else if (name_description == null)
-                return "";
-            else
-                return name_description;
+            // i18n: CA-30372, CA-207273
+            if (name_description == "Default install of XenServer" || name_description == "Default install")
+                return string.Format(Messages.DEFAULT_INSTALL_OF_XENSERVER,
+                    software_version.ContainsKey("product_brand")
+                        ? software_version["product_brand"]
+                        : BrandManager.ProductBrand);
+            
+            return name_description ?? "";
         }
 
         /// <summary>
         /// The expiry date of this host's license in UTC.
+        /// Defaults to 2030-01-01 if not found.
         /// </summary>
         public virtual DateTime LicenseExpiryUTC()
         {
-            if (license_params != null && license_params.ContainsKey("expiry"))
-                return TimeUtil.ParseISO8601DateTime(license_params["expiry"]);
+            if (license_params != null && license_params.ContainsKey("expiry") &&
+                Util.TryParseIso8601DateTime(license_params["expiry"], out var result))
+                return result;
             return new DateTime(2030, 1, 1);
+        }
+
+        /// <summary>
+        /// The CSS expiry date of this host's license.
+        /// The time component is always set to midnight.
+        /// Returns null if the value doesn't exist.
+        /// </summary>
+        public virtual DateTime? LicenseCssExpiry()
+        {
+            if(license_params != null &&
+                license_params.TryGetValue("css_expiry", out var cssExpiryValue) && 
+                !string.IsNullOrEmpty(cssExpiryValue) &&
+                Util.TryParseNonIso8601DateTime(cssExpiryValue, out var result))
+            {
+                // css_expiry is not a datetime object
+                return result.Date;
+            }
+
+            return null;
         }
 
         public static bool RestrictRBAC(Host h)
@@ -291,7 +313,7 @@ namespace XenAPI
 
         public virtual bool IsFreeLicense()
         {
-            return edition == "free" || edition == "express";
+            return edition == "free" || edition == "express" || edition == "trial";
         }
 
         public virtual bool IsExpired()
@@ -301,9 +323,59 @@ namespace XenAPI
             return true;
         }
 
+        /// <summary>
+        /// True if host qualifies for showing an upselling message based on its license and version.
+        /// <br />
+        /// Used to decide whether or not to show the upselling message from trial or express edition.
+        /// <br />
+        /// See CP-43000 for more info.
+        /// </summary>
+        public virtual bool CanShowTrialEditionUpsell()
+        {
+            return Helpers.NileOrGreater(this) && IsFreeLicense() && !IsInPreviewRelease();
+        }
+
+        /// <summary>
+        /// Return true if the is_preview_release value in host.software_version is present and set to true.
+        /// </summary>
+        public virtual bool IsInPreviewRelease()
+        {
+            return software_version.TryGetValue("is_preview_release", out var isPreviewReleaseString) &&
+                   bool.TryParse(isPreviewReleaseString, out var isPreviewRelease) && isPreviewRelease;
+        }
+
+        /// <summary>
+        /// Returns true if the CSS license has expired, regardless of what edition is shown.
+        /// <br />
+        /// Do not rely on this method for enforcing restrictions as the user can circumvent this method
+        /// by updating the system date.
+        /// </summary>
+        public virtual bool CssLicenseHasExpired()
+        {
+            var cssExpiry = LicenseCssExpiry();
+
+            if (cssExpiry.HasValue)
+            {
+                // User can circumvent this by changing system date
+                return DateTime.UtcNow < cssExpiry;
+            }
+
+            return false;
+        }
+
         public static bool RestrictHA(Host h)
         {
             return !BoolKey(h.license_params, "enable_xha");
+        }
+
+        public static bool RestrictPoolSecretRotation(Host h)
+        {
+            return BoolKeyPreferTrue(h.license_params, "restrict_pool_secret_rotation");
+        }
+
+        public static bool RestrictCertificateVerification(Host h)
+        {
+            return BoolKeyPreferTrue(h.license_params, "restrict_certificate_verification");
         }
 
         public static bool RestrictAlerts(Host h)
@@ -403,9 +475,7 @@ namespace XenAPI
         /// </summary>
         public static bool RestrictSslLegacySwitch(Host h)
         {
-            return Helpers.DundeeOrGreater(h)
-                    ? BoolKey(h.license_params, "restrict_ssl_legacy_switch")
-                    : BoolKeyPreferTrue(h.license_params, "restrict_ssl_legacy_switch");
+            return BoolKey(h.license_params, "restrict_ssl_legacy_switch");
         }
 
         public static bool RestrictLivePatching(Host h)
@@ -450,6 +520,11 @@ namespace XenAPI
             return BoolKeyPreferTrue(h.license_params, "restrict_corosync");
         }
 
+        public static bool RestrictVtpm(Host h)
+        {
+            return BoolKeyPreferTrue(h.license_params, "restrict_vtpm");
+        }
+
         #region Experimental Features
 
         //public static bool CorosyncDisabled(Host h)
@@ -472,32 +547,12 @@ namespace XenAPI
             return FeatureDisabled(h, "guefi-secureboot");
         }
 
-        public static bool UefiBootExperimental(Host h)
-        {
-            return FeatureExperimental(h, "guefi");
-        }
-
-        public static bool UefiSecureBootExperimental(Host h)
-        {
-            return FeatureExperimental(h, "guefi-secureboot");
-        }
-
         public static bool FeatureDisabled(Host h, string featureName)
         {
             foreach (var feature in h.Connection.ResolveAll(h.features))
             {
                 if (feature.name_label.Equals(featureName, StringComparison.OrdinalIgnoreCase))
                     return !feature.enabled;
-            }
-            return false;
-        }
-
-        public static bool FeatureExperimental(Host h, string featureName)
-        {
-            foreach (var feature in h.Connection.ResolveAll(h.features))
-            {
-                if (feature.name_label.Equals(featureName, StringComparison.OrdinalIgnoreCase))
-                    return feature.enabled && feature.experimental;
             }
             return false;
         }
@@ -552,13 +607,13 @@ namespace XenAPI
         public override int CompareTo(Host other)
         {
             // CA-20865 Sort in the following order:
-            // * Masters first
-            // * Then connected slaves
+            // * Coordinators first
+            // * Then connected supporters
             // * Then disconnected servers
             // Within each group, in NaturalCompare order
 
-            bool thisConnected = (Connection.IsConnected && Helpers.GetMaster(Connection) != null);
-            bool otherConnected = (other.Connection.IsConnected && Helpers.GetMaster(other.Connection) != null);
+            bool thisConnected = (Connection.IsConnected && Helpers.GetCoordinator(Connection) != null);
+            bool otherConnected = (other.Connection.IsConnected && Helpers.GetCoordinator(other.Connection) != null);
 
             if (thisConnected && !otherConnected)
                 return -1;
@@ -566,26 +621,26 @@ namespace XenAPI
                 return 1;
             else if (thisConnected)
             {
-                bool thisIsMaster = IsMaster();
-                bool otherIsMaster = other.IsMaster();
+                bool thisIsCoordinator = IsCoordinator();
+                bool otherIsCoordinator = other.IsCoordinator();
 
-                if (thisIsMaster && !otherIsMaster)
+                if (thisIsCoordinator && !otherIsCoordinator)
                     return -1;
-                else if (!thisIsMaster && otherIsMaster)
+                else if (!thisIsCoordinator && otherIsCoordinator)
                     return 1;
             }
 
             return base.CompareTo(other);
         }
 
-        public virtual bool IsMaster()
+        public virtual bool IsCoordinator()
         {
             Pool pool = Helpers.GetPoolOfOne(Connection);
             if (pool == null)
                 return false;
 
-            Host master = Connection.Resolve<Host>(pool.master);
-            return master != null && master.uuid == this.uuid;
+            Host coordinator = Connection.Resolve<Host>(pool.master);
+            return coordinator != null && coordinator.uuid == this.uuid;
         }
 
         /// <summary>
@@ -596,19 +651,14 @@ namespace XenAPI
             return Get(software_version, "product_version");
         }
 
-        private string MarketingVersion(string field)
-        {
-            string s = Get(software_version, field);
-            return string.IsNullOrEmpty(s) ? ProductVersion() : s;
-        }
-
         /// <summary>
         /// Return this host's marketing version number (e.g. 5.6 Feature Pack 1),
         /// or ProductVersion (which can still be null) if it can't be found, including pre-Cowley hosts.
         /// </summary>
         public string ProductVersionText()
         {
-            return MarketingVersion("product_version_text");
+            string s = Get(software_version, "product_version_text");
+            return string.IsNullOrEmpty(s) ? ProductVersion() : s;
         }
 
         /// <summary>
@@ -617,7 +667,8 @@ namespace XenAPI
         /// </summary>
         public string ProductVersionTextShort()
         {
-            return MarketingVersion("product_version_text_short");
+            string s = Get(software_version, "product_version_text_short");
+            return string.IsNullOrEmpty(s) ? ProductVersion() : s;
         }
 
         /// <summary>
@@ -627,6 +678,11 @@ namespace XenAPI
         public virtual string PlatformVersion()
         {
             return Get(software_version, "platform_version");
+        }
+
+        public string GetXapiVersion()
+        {
+            return Get(software_version, "xapi_build") ?? Get(software_version, "xapi");
         }
 
         /// <summary>
@@ -700,26 +756,6 @@ namespace XenAPI
             logging = SetDictionaryKey(logging, "syslog_destination", value);
         }
 
-        public static bool IsFullyPatched(Host host,IEnumerable<IXenConnection> connections)
-        {
-            List<Pool_patch> patches = Pool_patch.GetAllThatApply(host,connections);
-
-            List<Pool_patch> appliedPatches
-                = host.AppliedPatches();
-
-            if (appliedPatches.Count == patches.Count)
-                return true;
-
-            foreach (Pool_patch patch in patches)
-            {
-                Pool_patch patch1 = patch;
-                if (!appliedPatches.Exists(otherPatch => string.Equals(patch1.uuid, otherPatch.uuid, StringComparison.OrdinalIgnoreCase)))
-                    return false;
-            }
-
-            return true;
-        }
-
         public virtual List<Pool_patch> AppliedPatches()
         {
             List<Pool_patch> patches = new List<Pool_patch>();
@@ -745,11 +781,6 @@ namespace XenAPI
             }
 
             return updates;
-        }
-
-        public string XAPI_version()
-        {
-            return Get(software_version, "xapi");
         }
 
         public bool LinuxPackPresent()
@@ -865,7 +896,7 @@ namespace XenAPI
         {
             var vms = from XenRef<VM> vmref in resident_VMs
                       let vm = Connection.Resolve(vmref)
-                      where vm != null && vm.is_a_real_vm() && !vm.IsHVM()
+                      where vm != null && vm.IsRealVm() && !vm.IsHVM()
                       select vmref;
 
             return vms.ToList();
@@ -875,7 +906,7 @@ namespace XenAPI
         {
             var vms = from XenRef<VM> vmref in resident_VMs
                       let vm = Connection.Resolve(vmref)
-                      where vm != null && vm.is_a_real_vm() && vm.IsHVM()
+                      where vm != null && vm.IsRealVm() && vm.IsHVM()
                       select vmref;
 
             return vms.ToList();
@@ -886,7 +917,7 @@ namespace XenAPI
         {
             var vms = from XenRef<VM> vmref in resident_VMs
                       let vm = Connection.Resolve(vmref)
-                      where vm != null && vm.is_a_real_vm()
+                      where vm != null && vm.IsRealVm()
                       select vmref;
 
             return vms.ToList();
@@ -1056,15 +1087,6 @@ namespace XenAPI
             return vms.FirstOrDefault(vm => vm.is_control_domain && vm.domid == 0);
         }
 
-        public bool HasManyControlDomains()
-        {
-            if (Connection == null)
-                return false;
-
-            var vms = Connection.ResolveAll(resident_VMs);
-            return vms.FindAll(v => v.is_control_domain).Count > 1;
-        }
-
         public IEnumerable<VM> OtherControlDomains()
         {
             if (Connection == null)
@@ -1150,7 +1172,7 @@ namespace XenAPI
             foreach (VM vm in Connection.ResolveAll(resident_VMs))
             {
                 if (!vm.is_control_domain)
-                    ans += vm.has_ballooning() ? vm.memory_dynamic_min : vm.memory_static_max;
+                    ans += vm.SupportsBallooning() ? vm.memory_dynamic_min : vm.memory_static_max;
             }
             return ans;
         }
@@ -1165,7 +1187,7 @@ namespace XenAPI
             foreach (VM vm in Connection.ResolveAll(resident_VMs))
             {
                 if (!vm.is_control_domain)
-                    ans += vm.has_ballooning() ? vm.memory_dynamic_max : vm.memory_static_max;
+                    ans += vm.SupportsBallooning() ? vm.memory_dynamic_max : vm.memory_static_max;
             }
             return ans;
         }
@@ -1224,7 +1246,6 @@ namespace XenAPI
             VM vm = ControlDomainZero();
             return vm != null ? vm.memory_static_max - vm.memory_static_min : 0;
         }
-
 
         /// <summary>
         /// Friendly string showing memory usage on the host
@@ -1295,40 +1316,54 @@ namespace XenAPI
             bool allPBDsReady = false;
             int timeout = 120;
             log.DebugFormat("Waiting for PBDs on host {0} to become plugged", Name());
-            
-            do
+
+            while (timeout > 0)
             {
-                if (this.enabled)  // if the Host is not yet enabled, pbd.currently_attached may not be accurate: see CA-66496.
+                if (enabled) // if the Host is not yet enabled, pbd.currently_attached may not be accurate: see CA-66496.
                 {
                     allPBDsReady = true;
-                    foreach (PBD pbd in Connection.ResolveAll(PBDs))
+                    foreach (var pbdRef in PBDs)
                     {
-                        if (!pbd.currently_attached)
+                        var pbd = Connection.Resolve(pbdRef);
+
+                        if (pbd == null || pbd.currently_attached)
+                            continue;
+
+                        if (Helpers.StockholmOrGreater(this)) //CA-350406
                         {
-                            allPBDsReady = false;
-                            break;
+                            var sr = Connection.Resolve(pbd.SR);
+                            if (sr != null && sr.is_tools_sr)
+                                continue;
                         }
+
+                        allPBDsReady = false;
+                        break;
                     }
                 }
 
-                if (!allPBDsReady)
-                {
-                    Thread.Sleep(1000);
-                    timeout--;
-                }
-            } while (!allPBDsReady && timeout > 0);
+                if (allPBDsReady)
+                    return;
 
-            if (allPBDsReady)
-                return;
+                Thread.Sleep(1000);
+                timeout--;
+            }
 
-            foreach (var pbd in Connection.ResolveAll(PBDs))
+            foreach (var pbdRef in PBDs)
             {
-                if (pbd.currently_attached)
+                var pbd = Connection.Resolve(pbdRef);
+                if (pbd == null || pbd.currently_attached)
                     continue;
+
+                if (Helpers.StockholmOrGreater(this))
+                {
+                    var sr = Connection.Resolve(pbd.SR);
+                    if (sr != null && sr.is_tools_sr)
+                        continue;
+                }
 
                 Session session = Connection.DuplicateSession();
 
-                // If we still havent plugged, then try and plug it - this will probably
+                // If we still haven't plugged, then try and plug it - this will probably
                 // fail, but at least we'll get a better error message.
 
                 try
@@ -1407,14 +1442,6 @@ namespace XenAPI
         }
 
         /// <summary>
-        /// Is the host allowed to install hotfixes or are they restricted?
-        /// </summary>
-        public virtual bool CanApplyHotfixes()
-        {
-            return !Helpers.FeatureForbidden(Connection, RestrictHotfixApply);
-        }
-
-        /// <summary>
         /// Grace is either upgrade or regular
         /// </summary>
         public virtual bool InGrace()
@@ -1458,6 +1485,11 @@ namespace XenAPI
         public bool StandardFeaturesEnabled()
         {
             return GetEdition(edition) == Edition.Standard;
+        }
+
+        public bool FreeFeaturesEnabled()
+        {
+            return GetEdition(edition) == Edition.Free;
         }
 
         public bool EligibleForSupport()
@@ -1582,13 +1614,35 @@ namespace XenAPI
                    !Helpers.FeatureForbidden(Connection, RestrictIntegratedGpuPassthrough);
         }
 
+        public static bool TryGetUpgradeVersion(Host host, Dictionary<string, string> installMethodConfig,
+            out string platformVersion, out string productVersion)
+        {
+            platformVersion = productVersion = null;
+            
+            try
+            {
+                var result = call_plugin(host.Connection.Session, host.opaque_ref,
+                    "prepare_host_upgrade.py", "getVersion", installMethodConfig);
+                var serializer = new JavaScriptSerializer();
+                var version = (Dictionary<string, object>)serializer.DeserializeObject(result);
+                platformVersion = version.ContainsKey("platform-version") ? (string)version["platform-version"] : null;
+                productVersion = version.ContainsKey("product-version") ? (string)version["product-version"] : null;
+                return platformVersion != null || productVersion != null;
+            }
+            catch (Exception exception)
+            {
+                log.WarnFormat("Plugin call prepare_host_upgrade.getVersion on {0} failed with {1}", host.Name(), exception.Message);
+                return false;
+            }
+        }
+
         #region IEquatable<Host> Members
 
         /// <summary>
         /// Indicates whether the current object is equal to the specified object. This calls the implementation from XenObject.
         /// This implementation is required for ToStringWrapper.
         /// </summary>
-        public bool Equals(Host other)
+        public virtual bool Equals(Host other)
         {
             return base.Equals(other);
         }

@@ -19,7 +19,7 @@ namespace XenOvf {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Messages {
@@ -79,29 +79,11 @@ namespace XenOvf {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to compress {0}..
-        /// </summary>
-        public static string COMPRESS_FAILED {
-            get {
-                return ResourceManager.GetString("COMPRESS_FAILED", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Compression method {0} is not supported..
         /// </summary>
         public static string COMPRESS_INVALID_METHOD {
             get {
                 return ResourceManager.GetString("COMPRESS_INVALID_METHOD", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to convert OVF to OVA..
-        /// </summary>
-        public static string CONVERSION_FAILED {
-            get {
-                return ResourceManager.GetString("CONVERSION_FAILED", resourceCulture);
             }
         }
         
@@ -156,15 +138,6 @@ namespace XenOvf {
         public static string EULA_RB_REJECT {
             get {
                 return ResourceManager.GetString("EULA_RB_REJECT", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [Citrix] OVF EULA.
-        /// </summary>
-        public static string EULA_TITLE {
-            get {
-                return ResourceManager.GetString("EULA_TITLE", resourceCulture);
             }
         }
         
@@ -277,7 +250,7 @@ namespace XenOvf {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Created by [XenCenter] Disk Image Import.
+        ///   Looks up a localized string similar to Created by Disk Image Import.
         /// </summary>
         public static string OVF_CREATED {
             get {

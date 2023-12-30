@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,13 +30,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Controls.CheckableDataGridView;
 using XenAdmin.Controls.SummaryPanel;
-using XenAdmin.Dialogs;
-using XenAPI;
 
 namespace XenAdmin.Dialogs
 {
@@ -46,7 +41,7 @@ namespace XenAdmin.Dialogs
         LicenseManagerController Controller { set; }
         void DrawRowsInGrid(List<CheckableDataGridViewRow> itemsToShow);
         void DrawSelectedRowsAsChecked(List<CheckableDataGridViewRow> rows);
-        void DrawSummaryForHighlightedRow(CheckableDataGridViewRow row, SummaryTextComponent component, Action runOnUrlClick);
+        void DrawSummaryForHighlightedRow(CheckableDataGridViewRow row, SummaryTextComponent component, Action runOnLicenseUrlClick, Action runOnSupportUrlClick);
         void DrawHighlightedRow(CheckableDataGridViewRow row);
         void DrawRowStatusIcon(int rowIndex, LicenseDataGridViewRow.Status rowStatus);
         void DrawAssignButtonAsDisabled(bool isDisabled);

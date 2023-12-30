@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,7 @@
  */
 
 using XenAdmin.Network;
-using XenAdmin.Wizards;
+using XenAdmin.Wizards.BugToolWizard;
 using XenAPI;
 
 namespace XenAdmin.Commands
@@ -50,7 +49,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             if (selection != null && selection.AllItemsAre<IXenObject>(x => x is Host || x is Pool))
                 MainWindowCommandInterface.ShowForm(typeof(BugToolWizard), selection.AsXenObjects<IXenObject>().ToArray());
@@ -58,7 +57,7 @@ namespace XenAdmin.Commands
                 MainWindowCommandInterface.ShowForm(typeof(BugToolWizard));
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             foreach (IXenConnection xenConnection in ConnectionsManager.XenConnectionsCopy)
             {

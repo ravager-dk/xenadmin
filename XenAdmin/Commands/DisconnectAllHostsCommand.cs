@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Network;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -56,7 +51,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             foreach (IXenConnection connection in MainWindowCommandInterface.GetXenConnectionsCopy())
             {
@@ -64,13 +59,13 @@ namespace XenAdmin.Commands
                 {
                     MainWindowCommandInterface.Invoke(delegate
                     {
-                        new DisconnectCommand(MainWindowCommandInterface, connection, true).Execute();
+                        new DisconnectCommand(MainWindowCommandInterface, connection, true).Run();
                     });
                 }
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             foreach (IXenConnection xc in MainWindowCommandInterface.GetXenConnectionsCopy())
             {

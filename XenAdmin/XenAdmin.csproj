@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="17.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,9 +9,9 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XenAdmin</RootNamespace>
-    <AssemblyName>XenCenterMain</AssemblyName>
+    <AssemblyName>[XenCenter]</AssemblyName>
     <ApplicationIcon>..\Branding\Images\AppIcon.ico</ApplicationIcon>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -59,12 +59,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DiscUtils, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="DiscUtils, Version=0.11.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DiscUtils.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net, Version=2.0.15.0, Culture=neutral, PublicKeyToken=d247b8b0ac7959e9, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ReportViewer.WinForms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -93,16 +91,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Actions\GUIActions\ConfigYumRepoAction.cs" />
     <Compile Include="Actions\GUIActions\ExportResourceReportAction.cs" />
-    <Compile Include="Actions\GUIActions\DeleteAllAlertsAction.cs" />
+    <Compile Include="Actions\GUIActions\DismissAlertsAction.cs" />
     <Compile Include="Actions\GUIActions\ExternalPluginAction.cs" />
     <Compile Include="Actions\GUIActions\RestoreDismissedUpdatesAction.cs" />
     <Compile Include="Actions\GUIActions\MeddlingAction.cs" />
     <Compile Include="Actions\GUIActions\SaveDataSourceStateAction.cs" />
     <Compile Include="Actions\GUIActions\SearchAction.cs" />
     <Compile Include="Alerts\NewVersionPriorityAlertComparer.cs" />
+    <Compile Include="Alerts\Types\CssExpiryAlert.cs" />
+    <Compile Include="Alerts\Types\FailedLoginAttemptAlert.cs" />
+    <Compile Include="Alerts\Types\CertificateAlert.cs" />
     <Compile Include="Alerts\Types\AlarmMessageAlert.cs" />
+    <Compile Include="Alerts\Types\OutOfSyncWithCdnAlert.cs" />
     <Compile Include="Alerts\Types\HotfixEligibilityAlert.cs" />
+    <Compile Include="Alerts\Types\LeafCoalesceAlert.cs" />
+    <Compile Include="Alerts\Types\PolicyAlert.cs" />
     <Compile Include="Alerts\Types\XenServerUpdateAlert.cs" />
     <Compile Include="Alerts\Types\DuplicateIqnAlert.cs" />
     <Compile Include="Alerts\Types\MissingIqnAlert.cs" />
@@ -110,12 +118,25 @@
     <Compile Include="Alerts\Types\MessageAlert.cs" />
     <Compile Include="Alerts\Types\XenServerPatchAlert.cs" />
     <Compile Include="Alerts\Types\XenServerVersionAlert.cs" />
-    <Compile Include="Commands\CallHomeCommand.cs" />
+    <Compile Include="Commands\PoolUpdatesCommand.cs" />
+    <Compile Include="Commands\VtpmCommand.cs" />
+    <Compile Include="Controls\ClientIdControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ClientIdControl.Designer.cs">
+      <DependentUpon>ClientIdControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SmartScrollTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Commands\ChangeControlDomainMemoryCommand.cs" />
+    <Compile Include="Commands\DockerContainerCommand.cs" />
     <Compile Include="Commands\Controls\PoolRemoveServerToolStripMenuItem.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Commands\CrossPoolCopyVMCommand.cs" />
+    <Compile Include="Commands\EnableTlsVerificationCommand.cs" />
+    <Compile Include="Commands\RotatePoolSecretCommand.cs" />
+    <Compile Include="Commands\CertificateCommand.cs" />
     <Compile Include="Commands\LaunchConversionManagerCommand.cs" />
     <Compile Include="Commands\CrossPoolMoveVMCommand.cs" />
     <Compile Include="Commands\DisableChangedBlockTrackingCommand.cs" />
@@ -141,7 +162,6 @@
     <Compile Include="Controls\AffinityPicker.Designer.cs">
       <DependentUpon>AffinityPicker.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Ballooning\BallooningColors.cs" />
     <Compile Include="Controls\Ballooning\MemorySpinner.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -186,6 +206,9 @@
     <Compile Include="Controls\DiskSpinner.Designer.cs">
       <DependentUpon>DiskSpinner.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\StatusStripEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\TreeViews\FolderChangeDialogTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -227,24 +250,38 @@
     <Compile Include="Controls\UpsellPage.designer.cs">
       <DependentUpon>UpsellPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\HealthCheck.cs" />
     <Compile Include="Core\HiddenFeatures.cs" />
     <Compile Include="Core\Metadata.cs" />
+    <Compile Include="Core\RepoDescriptor.cs" />
     <Compile Include="Diagnostics\Checks\AssertCanEvacuateCheck.cs" />
     <Compile Include="Diagnostics\Checks\AssertCanEvacuateUpgradeCheck.cs" />
     <Compile Include="Diagnostics\Checks\CfuAvailabilityCheck.cs" />
     <Compile Include="Diagnostics\Checks\AutomatedUpdatesLicenseCheck.cs" />
     <Compile Include="Diagnostics\Checks\DiskSpaceForBatchUpdatesCheck.cs" />
-    <Compile Include="Diagnostics\Checks\HostCheck.cs" />
+    <Compile Include="Diagnostics\Checks\HealthCheckServiceCheck.cs" />
+    <Compile Include="Diagnostics\Checks\PoolContainerManagementCheck.cs" />
+    <Compile Include="Diagnostics\Checks\PoolHasDeprecatedSrsCheck.cs" />
+    <Compile Include="Diagnostics\Checks\UpgradeRequiresEua.cs" />
+    <Compile Include="Diagnostics\Checks\PowerOniLoCheck.cs" />
+    <Compile Include="Diagnostics\Checks\PoolLegacySslCheck.cs" />
     <Compile Include="Diagnostics\Checks\PrepareToUpgradeCheck.cs" />
+    <Compile Include="Diagnostics\Checks\CertificateKeyLengthCheck.cs" />
     <Compile Include="Diagnostics\Checks\PVGuestsCheck.cs" />
     <Compile Include="Diagnostics\Checks\RebootPendingOnMasterCheck.cs" />
     <Compile Include="Diagnostics\Checks\HostNeedsRebootCheck.cs" />
+    <Compile Include="Diagnostics\Checks\OutOfSyncWithCdnCheck.cs" />
     <Compile Include="Diagnostics\Checks\SafeToUpgradeCheck.cs" />
-    <Compile Include="Diagnostics\Checks\HostHasUnsupportedStorageLinkSRCheck.cs" />
     <Compile Include="Diagnostics\Checks\ServerSelectionCheck.cs" />
-    <Compile Include="Diagnostics\Checks\XenCenterVersionCheck.cs" />
+    <Compile Include="Diagnostics\Checks\VSwitchControllerCheck.cs" />
+    <Compile Include="Diagnostics\Checks\ClientVersionCheck.cs" />
     <Compile Include="Diagnostics\Checks\HostMemoryPostUpgradeCheck.cs" />
+    <Compile Include="Diagnostics\Problems\HostProblem\BrokenSR.cs" />
+    <Compile Include="Diagnostics\Problems\HostProblem\CertificateKeyLengthProblem.cs" />
+    <Compile Include="Diagnostics\Problems\HostProblem\PowerOniLoProblem.cs" />
+    <Compile Include="Diagnostics\Problems\PoolProblem\ContainerManagementProblem.cs" />
+    <Compile Include="Diagnostics\Problems\PoolProblem\HealthCheckServiceProblem.cs" />
+    <Compile Include="Diagnostics\Problems\PoolProblem\LegacySslProblem.cs" />
+    <Compile Include="Diagnostics\Problems\PoolProblem\PoolHasFCoESrWarning.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\PoolHasPVGuestWarningUrl.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\HostMemoryPostUpgradeWarning.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\HostPrepareToUpgradeProblem.cs" />
@@ -255,15 +292,21 @@
     <Compile Include="Diagnostics\Problems\HostProblem\HostNotSafeToUpgradeWarning.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\HostOutOfSpaceProblem.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\ConflictingUpdatePresent.cs" />
-    <Compile Include="Diagnostics\Problems\Information.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\CPUIncompatibilityProblem.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\NotLicensedForAutomatedUpdatesWarning.cs" />
+    <Compile Include="Diagnostics\Problems\PoolProblem\CdnOutOfSyncProblem.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\ServerSelectionProblem.cs" />
-    <Compile Include="Diagnostics\Problems\ProblemWithInformationUrl.cs" />
-    <Compile Include="Diagnostics\Problems\SRProblem\UnsupportedStorageLinkSrIsPresentProblem.cs" />
+    <Compile Include="Diagnostics\Problems\PoolProblem\VSwitchControllerProblem.cs" />
+    <Compile Include="Diagnostics\Problems\UtilityProblem\EuaNotFoundProblem.cs" />
+    <Compile Include="Diagnostics\Problems\UtilityProblem\EuaNotAcceptedProblem.cs" />
     <Compile Include="Diagnostics\Problems\UtilityProblem\CfuNotAvailableProblem.cs" />
     <Compile Include="Diagnostics\Problems\VMProblem\InvalidVCPUConfiguration.cs" />
-    <Compile Include="Diagnostics\Problems\WarningWithMoreInfo.cs" />
+    <Compile Include="Dialogs\AcceptEuaDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\AcceptEuaDialog.Designer.cs">
+      <DependentUpon>AcceptEuaDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\AddVGPUDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -276,7 +319,19 @@
     <Compile Include="Dialogs\AttachUsbDialog.Designer.cs">
       <DependentUpon>AttachUsbDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Diagnostics\Problems\XenCenterVersionProblem.cs" />
+    <Compile Include="Diagnostics\Problems\ClientVersionProblem.cs" />
+    <Compile Include="Dialogs\ClientIdDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ClientIdDialog.Designer.cs">
+      <DependentUpon>ClientIdDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\ServerUpdates\ConfigUpdatesDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ServerUpdates\ConfigUpdatesDialog.Designer.cs">
+      <DependentUpon>ConfigUpdatesDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\ConversionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -295,11 +350,44 @@
     <Compile Include="Dialogs\EnablePvsReadCachingDialog.Designer.cs">
       <DependentUpon>EnablePvsReadCachingDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\InstallCertificateDialog.Designer.cs">
+      <DependentUpon>InstallCertificateDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\ServerUpdates\ConfigLcmUpdatesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ServerUpdates\ConfigLcmUpdatesPage.Designer.cs">
+      <DependentUpon>ConfigLcmUpdatesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\ServerUpdates\ConfigCdnUpdatesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialogs\ServerUpdates\ConfigCdnUpdatesPage.Designer.cs">
+      <DependentUpon>ConfigCdnUpdatesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\VtpmManagementPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialogs\VtpmManagementPage.Designer.cs">
+      <DependentUpon>VtpmManagementPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\VtpmManagementDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dialogs\VtpmManagementDialog.Designer.cs">
+      <DependentUpon>VtpmManagementDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\OptionsPages\ConfirmationOptionsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Dialogs\OptionsPages\ConfirmationOptionsPage.Designer.cs">
       <DependentUpon>ConfirmationOptionsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\OptionsPages\ExternalToolsOptionsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Dialogs\OptionsPages\ExternalToolsOptionsPage.Designer.cs">
+      <DependentUpon>ExternalToolsOptionsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\OvfValidationDialog.cs">
       <SubType>Form</SubType>
@@ -331,26 +419,7 @@
     <Compile Include="Dialogs\ControlDomainMemoryDialog.Designer.cs">
       <DependentUpon>ControlDomainMemoryDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckOverviewLauncher.cs" />
     <Compile Include="Dialogs\ExportVMDialog.cs">
-    </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckOverviewDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckOverviewDialog.Designer.cs">
-      <DependentUpon>HealthCheckOverviewDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckPolicyStatementDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckPolicyStatementDialog.Designer.cs">
-      <DependentUpon>HealthCheckPolicyStatementDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckSettingsDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\HealthCheck\HealthCheckSettingsDialog.designer.cs">
-      <DependentUpon>HealthCheckSettingsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\OptionsPages\SaveAndRestoreOptionsPage.cs">
       <SubType>UserControl</SubType>
@@ -376,12 +445,6 @@
     <Compile Include="Dialogs\RoleSelectionDialog.Designer.cs">
       <DependentUpon>RoleSelectionDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\RevertDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\RevertDialog.Designer.cs">
-      <DependentUpon>RevertDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\ScreenShotDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -394,12 +457,6 @@
     <Compile Include="Dialogs\UpsellDialog.designer.cs">
       <DependentUpon>UpsellDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\UsbUsageDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\UsbUsageDialog.Designer.cs">
-      <DependentUpon>UsbUsageDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\BallooningDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -411,6 +468,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RDP\IRdpClient.cs" />
     <Compile Include="SettingsPanels\ClusteringEditPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -429,11 +487,33 @@
     <Compile Include="SettingsPanels\NetworkOptionsEditPage.Designer.cs">
       <DependentUpon>NetworkOptionsEditPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="SettingsPanels\NRPEEditPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SettingsPanels\NRPEEditPage.Designer.cs">
+      <DependentUpon>NRPEEditPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsPanels\NRPEEditPage.CheckGroup.cs">
+      <DependentUpon>NRPEEditPage.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SettingsPanels\PoolAdvancedEditPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SettingsPanels\PoolAdvancedEditPage.Designer.cs">
+      <DependentUpon>PoolAdvancedEditPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="SettingsPanels\SecurityEditPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="SettingsPanels\SecurityEditPage.Designer.cs">
       <DependentUpon>SecurityEditPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsPanels\SrReadCachingEditPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SettingsPanels\SrReadCachingEditPage.Designer.cs">
+      <DependentUpon>SrReadCachingEditPage.cs</DependentUpon>
     </Compile>
     <Compile Include="SettingsPanels\USBEditPage.cs">
       <SubType>UserControl</SubType>
@@ -478,13 +558,22 @@
       <DependentUpon>WlbThresholdsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Plugins\Features\ParentMenuItemFeature.cs" />
-    <Compile Include="SettingsUpdate.cs" />
+    <Compile Include="SplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SplashScreen.Designer.cs">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SplashScreenContext.cs" />
     <Compile Include="TabPages\BaseTabPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="TabPages\BaseTabPage.Designer.cs">
       <DependentUpon>BaseTabPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="TabPages\CdnUpdates\CdnExpandableRow.cs" />
+    <Compile Include="TabPages\CdnUpdates\CdnExtensions.cs" />
+    <Compile Include="TabPages\CdnUpdates\CdnExpandableTextAndImageCell.cs" />
     <Compile Include="TabPages\DockerDetailsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -496,6 +585,12 @@
     </Compile>
     <Compile Include="TabPages\HomePage.Designer.cs">
       <DependentUpon>HomePage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TabPages\ManageCdnUpdatesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabPages\ManageCdnUpdatesPage.Designer.cs">
+      <DependentUpon>ManageCdnUpdatesPage.cs</DependentUpon>
     </Compile>
     <Compile Include="TabPages\NotificationsBasePage.cs">
       <SubType>UserControl</SubType>
@@ -596,9 +691,6 @@
     <Compile Include="SettingsPanels\PerfmonAlertOptionsPage.Designer.cs">
       <DependentUpon>PerfmonAlertOptionsPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\BlueBorderPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\CustomDataGraph\ArchiveMaintainer.cs">
     </Compile>
     <Compile Include="Controls\CustomDataGraph\DataArchive.cs" />
@@ -639,15 +731,9 @@
     <Compile Include="Core\History.cs" />
     <Compile Include="Core\Registry.cs" />
     <Compile Include="Core\Updates.cs" />
-    <Compile Include="Diagnostics\Checks\HAOffCheck.cs" />
+    <Compile Include="Diagnostics\Checks\HaWlbOffCheck.cs" />
     <Compile Include="Diagnostics\Problems\VMProblem\CannotMigrateVM.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\HAEnabledProblem.cs" />
-    <Compile Include="Dialogs\AllowUpdatesDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\AllowUpdatesDialog.Designer.cs">
-      <DependentUpon>AllowUpdatesDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\BondProperties.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -666,12 +752,6 @@
     <Compile Include="Dialogs\EditVmHaPrioritiesDialog.Designer.cs">
       <DependentUpon>EditVmHaPrioritiesDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\HostRequiresRebootDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\HostRequiresRebootDialog.Designer.cs">
-      <DependentUpon>HostRequiresRebootDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\NetworkingPropertiesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -689,12 +769,6 @@
     </Compile>
     <Compile Include="Dialogs\Network\UnknownCertificateDialog.Designer.cs">
       <DependentUpon>UnknownCertificateDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\PasswordsRequestDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\PasswordsRequestDialog.Designer.cs">
-      <DependentUpon>PasswordsRequestDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\VmSnapshotDialog.cs">
       <SubType>Form</SubType>
@@ -719,7 +793,6 @@
     </Compile>
     <Compile Include="Images.cs" />
     <Compile Include="Network\SSL.cs" />
-    <Compile Include="PasswordsRequest.cs" />
     <Compile Include="Plugins\PluginDescriptor.cs" />
     <Compile Include="Plugins\PluginManager.cs" />
     <Compile Include="RDP\AxMSTSCLib.cs">
@@ -756,6 +829,15 @@
       <DependentUpon>UsbPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Diagnostics\Problems\PoolProblem\PoolHasGFS2SRProblem.cs" />
+    <Compile Include="VNC\GraphicsUtils.cs" />
+    <Compile Include="VNC\IVNCGraphicsClient.cs" />
+    <Compile Include="VNC\KeyMap.cs" />
+    <Compile Include="VNC\KeyMap.Designer.cs">
+      <DependentUpon>KeyMap.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VNC\MyStream.cs" />
+    <Compile Include="VNC\VNCException.cs" />
+    <Compile Include="VNC\VNCStream.cs" />
     <Compile Include="Wizards\BallooningWizard.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -773,6 +855,21 @@
     </Compile>
     <Compile Include="Wizards\BallooningWizard_Pages\MemorySettings.Designer.cs">
       <DependentUpon>MemorySettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dialogs\InstallCertificateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Wizards\BugToolWizard\StatusReportRows\ClientSideStatusReportRow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Wizards\BugToolWizard\StatusReportRows\SingleHostStatusReportRow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Wizards\BugToolWizard\StatusReportRows\ZipStatusReportRow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Wizards\BugToolWizard\StatusReportRows\StatusReportRow.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Wizards\ConversionWizard\ConversionWizard.cs">
       <SubType>Form</SubType>
@@ -828,6 +925,7 @@
     <Compile Include="Wizards\ImportWizard\ImportBootOptionPage.Designer.cs">
       <DependentUpon>ImportBootOptionPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Wizards\PatchingWizard\PlanActions\ApplyCdnUpdatesPlanAction.cs" />
     <Compile Include="Wizards\WizardHelpers.cs" />
     <Compile Include="Wizards\ImportWizard\HardwareCompatibilityFilter.cs" />
     <Compile Include="Wizards\NewSRWizard_Pages\ChooseSrProvisioningPage.cs">
@@ -847,12 +945,6 @@
     </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CIFSFrontend.Designer.cs">
       <DependentUpon>CIFSFrontend.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CSLG.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CSLG.Designer.cs">
-      <DependentUpon>CSLG.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\Frontends\LVMoFCoE.cs">
       <SubType>UserControl</SubType>
@@ -947,23 +1039,11 @@
     <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CIFS_ISO.Designer.cs">
       <DependentUpon>CIFS_ISO.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\EqualLogic.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\EqualLogic.Designer.cs">
-      <DependentUpon>EqualLogic.cs</DependentUpon>
-    </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\Frontends\LVMoISCSI.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\Frontends\LVMoISCSI.Designer.cs">
       <DependentUpon>LVMoISCSI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\NetApp.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\NetApp.Designer.cs">
-      <DependentUpon>NetApp.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\Frontends\NFS_ISO.cs">
       <SubType>UserControl</SubType>
@@ -1051,7 +1131,7 @@
     <Compile Include="TabPages\HAPage.Designer.cs">
       <DependentUpon>HAPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Alerts\Types\XenCenterUpdateAlert.cs" />
+    <Compile Include="Alerts\Types\ClientUpdateAlert.cs" />
     <Compile Include="Wizards\PatchingWizard\AutomatedUpdatesBasePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -1076,7 +1156,7 @@
     <Compile Include="Wizards\PatchingWizard\PlanActions\PatchPrecheckOnHostPlanAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\DownloadPatchPlanAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\RestartHostPlanAction.cs" />
-    <Compile Include="Wizards\PatchingWizard\PlanActions\UploadPatchToMasterPlanAction.cs" />
+    <Compile Include="Wizards\PatchingWizard\PlanActions\UploadPatchToCoordinatorPlanAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\XenServerPatchMapping.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\RemoveUpdateFilesFromMaster.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\RemoveUpdateFile.cs" />
@@ -1090,9 +1170,6 @@
     </Compile>
     <Compile Include="Wizards\RollingUpgradeWizard\RollingUpgradeUpgradePage.Designer.cs">
       <DependentUpon>RollingUpgradeUpgradePage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\UpdateUpgradeWizard.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Diagnostics\Checks\PoolHasGFS2SR.cs" />
     <Compile Include="Wizards\BootModesControl.cs">
@@ -1138,12 +1215,6 @@
     <Compile Include="Dialogs\AddServerDialog.Designer.cs">
       <DependentUpon>AddServerDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\CustomFieldsDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\CustomFieldsDialog.Designer.cs">
-      <DependentUpon>CustomFieldsDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\NewCustomFieldDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1156,17 +1227,17 @@
     <Compile Include="Controls\Common\PasswordFailure.Designer.cs">
       <DependentUpon>PasswordFailure.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\RestoreSession\SetMasterPasswordDialog.cs">
+    <Compile Include="Dialogs\RestoreSession\SetMainPasswordDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialogs\RestoreSession\SetMasterPasswordDialog.Designer.cs">
-      <DependentUpon>SetMasterPasswordDialog.cs</DependentUpon>
+    <Compile Include="Dialogs\RestoreSession\SetMainPasswordDialog.Designer.cs">
+      <DependentUpon>SetMainPasswordDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\RestoreSession\EnterMasterPasswordDialog.cs">
+    <Compile Include="Dialogs\RestoreSession\EnterMainPasswordDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialogs\RestoreSession\EnterMasterPasswordDialog.Designer.cs">
-      <DependentUpon>EnterMasterPasswordDialog.cs</DependentUpon>
+    <Compile Include="Dialogs\RestoreSession\EnterMainPasswordDialog.Designer.cs">
+      <DependentUpon>EnterMainPasswordDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\RestoreSession\SaveAndRestoreDialog.cs">
       <SubType>Form</SubType>
@@ -1174,11 +1245,11 @@
     <Compile Include="Dialogs\RestoreSession\SaveAndRestoreDialog.Designer.cs">
       <DependentUpon>SaveAndRestoreDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\RestoreSession\ChangeMasterPasswordDialog.cs">
+    <Compile Include="Dialogs\RestoreSession\ChangeMainPasswordDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Dialogs\RestoreSession\ChangeMasterPasswordDialog.Designer.cs">
-      <DependentUpon>ChangeMasterPasswordDialog.cs</DependentUpon>
+    <Compile Include="Dialogs\RestoreSession\ChangeMainPasswordDialog.Designer.cs">
+      <DependentUpon>ChangeMainPasswordDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\ThreeButtonDialog.cs">
       <SubType>Form</SubType>
@@ -1285,12 +1356,6 @@
     <Compile Include="Dialogs\DialogWithProgress.Designer.cs">
       <DependentUpon>DialogWithProgress.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\IscsiChoicesDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\IscsiChoicesDialog.Designer.cs">
-      <DependentUpon>IscsiChoicesDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\ActionProgressDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1309,29 +1374,11 @@
     <Compile Include="Dialogs\SelectHostDialog.Designer.cs">
       <DependentUpon>SelectHostDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\UserDeviceDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\UserDeviceDialog.Designer.cs">
-      <DependentUpon>UserDeviceDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\WarningDialogs\CloseXenCenterWarningDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dialogs\WarningDialogs\CloseXenCenterWarningDialog.Designer.cs">
       <DependentUpon>CloseXenCenterWarningDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\LicenseWarningDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\LicenseWarningDialog.Designer.cs">
-      <DependentUpon>LicenseWarningDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\RemoveCrashDumpsWarningDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\RemoveCrashDumpsWarningDialog.Designer.cs">
-      <DependentUpon>RemoveCrashDumpsWarningDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="TabPages\HistoryPage.cs">
       <SubType>UserControl</SubType>
@@ -1388,23 +1435,11 @@
     <Compile Include="Dialogs\EvacuateHostDialog.Designer.cs">
       <DependentUpon>EvacuateHostDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\WarningDialogs\VcpuWarningDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\VcpuWarningDialog.Designer.cs">
-      <DependentUpon>VcpuWarningDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\DuplicateTemplateNameDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dialogs\DuplicateTemplateNameDialog.Designer.cs">
       <DependentUpon>DuplicateTemplateNameDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\InstallToolsWarningDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\WarningDialogs\InstallToolsWarningDialog.Designer.cs">
-      <DependentUpon>InstallToolsWarningDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\RepairSRDialog.cs">
       <SubType>Form</SubType>
@@ -1422,11 +1457,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SettingsPanels\BootDevice.cs" />
-    <Compile Include="SettingsPanels\CPUMemoryEditPage.cs">
+    <Compile Include="SettingsPanels\CpuMemoryEditPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SettingsPanels\CPUMemoryEditPage.Designer.cs">
-      <DependentUpon>CPUMemoryEditPage.cs</DependentUpon>
+    <Compile Include="SettingsPanels\CpuMemoryEditPage.Designer.cs">
+      <DependentUpon>CpuMemoryEditPage.cs</DependentUpon>
     </Compile>
     <Compile Include="SettingsPanels\GeneralEditPage.cs">
       <SubType>UserControl</SubType>
@@ -1454,22 +1489,22 @@
       <DependentUpon>VMAdvancedEditPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\WizardProgressEventArgs.cs" />
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolPageDestination.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolPageDestination.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolPageDestination.Designer.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolPageDestination.Designer.cs">
       <DependentUpon>BugToolPageDestination.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolPageRetrieveData.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolPageRetrieveData.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolPageRetrieveData.Designer.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolPageRetrieveData.Designer.cs">
       <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolPageSelectCapabilities.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolPageSelectCapabilities.Designer.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.Designer.cs">
       <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\HAWizard.cs">
@@ -1478,7 +1513,6 @@
     <Compile Include="Wizards\HAWizard.Designer.cs">
       <DependentUpon>HAWizard.cs</DependentUpon>
     </Compile>
-    <Compile Include="Diagnostics\Problems\SRProblem\BrokenSR.cs" />
     <Compile Include="Diagnostics\Checks\Check.cs" />
     <Compile Include="Diagnostics\Checks\HostLivenessCheck.cs" />
     <Compile Include="Diagnostics\Checks\PatchPrecheckCheck.cs" />
@@ -1495,16 +1529,16 @@
     <Compile Include="Diagnostics\Problems\HostProblem\NotEnoughMem.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\PrecheckFailed.cs" />
     <Compile Include="Diagnostics\Problems\Problem.cs" />
-    <Compile Include="Wizards\BugToolWizardFiles\GenericSelectHostsPage.cs">
+    <Compile Include="Wizards\BugToolWizard\GenericSelectHostsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\GenericSelectHostsPage.Designer.cs">
+    <Compile Include="Wizards\BugToolWizard\GenericSelectHostsPage.Designer.cs">
       <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolWizard.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolWizard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Wizards\BugToolWizardFiles\BugToolWizard.Designer.cs">
+    <Compile Include="Wizards\BugToolWizard\BugToolWizard.Designer.cs">
       <DependentUpon>BugToolWizard.cs</DependentUpon>
     </Compile>
     <Compile Include="ConsoleView\VNCGraphicsClient.cs">
@@ -1640,6 +1674,15 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Controls\ClientIdControl.ja.resx">
+      <DependentUpon>ClientIdControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ClientIdControl.resx">
+      <DependentUpon>ClientIdControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ClientIdControl.zh-CN.resx">
+      <DependentUpon>ClientIdControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\DiskSpinner.ja.resx">
       <DependentUpon>DiskSpinner.cs</DependentUpon>
     </EmbeddedResource>
@@ -1668,6 +1711,16 @@
     <EmbeddedResource Include="Controls\XenSearch\QueryPanel.zh-CN.resx">
       <DependentUpon>QueryPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\AcceptEuaDialog.ja.resx">
+      <DependentUpon>AcceptEuaDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\AcceptEuaDialog.resx">
+      <DependentUpon>AcceptEuaDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\AcceptEuaDialog.zh-CN.resx">
+      <DependentUpon>AcceptEuaDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\AddVGPUDialog.ja.resx">
       <DependentUpon>AddVGPUDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -1685,6 +1738,24 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\AttachUsbDialog.zh-CN.resx">
       <DependentUpon>AttachUsbDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ClientIdDialog.ja.resx">
+      <DependentUpon>ClientIdDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ClientIdDialog.resx">
+      <DependentUpon>ClientIdDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ClientIdDialog.zh-CN.resx">
+      <DependentUpon>ClientIdDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigUpdatesDialog.ja.resx">
+      <DependentUpon>ConfigUpdatesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigUpdatesDialog.resx">
+      <DependentUpon>ConfigUpdatesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigUpdatesDialog.zh-CN.resx">
+      <DependentUpon>ConfigUpdatesDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\ConversionDialog.ja.resx">
       <DependentUpon>ConversionDialog.cs</DependentUpon>
@@ -1836,6 +1907,55 @@
       <SubType>Designer</SubType>
       <DependentUpon>AdPasswordPrompt.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\InstallCertificateDialog.ja.resx">
+      <DependentUpon>InstallCertificateDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\InstallCertificateDialog.resx">
+      <DependentUpon>InstallCertificateDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\InstallCertificateDialog.zh-CN.resx">
+      <DependentUpon>InstallCertificateDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigLcmUpdatesPage.ja.resx">
+      <DependentUpon>ConfigLcmUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigLcmUpdatesPage.resx">
+      <DependentUpon>ConfigLcmUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigLcmUpdatesPage.zh-CN.resx">
+      <DependentUpon>ConfigLcmUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigCdnUpdatesPage.ja.resx">
+      <DependentUpon>ConfigCdnUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigCdnUpdatesPage.resx">
+      <DependentUpon>ConfigCdnUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\ServerUpdates\ConfigCdnUpdatesPage.zh-CN.resx">
+      <DependentUpon>ConfigCdnUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\VtpmManagementPage.ja.resx">
+      <DependentUpon>VtpmManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\VtpmManagementPage.resx">
+      <DependentUpon>VtpmManagementPage.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\VtpmManagementPage.zh-CN.resx">
+      <DependentUpon>VtpmManagementPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\VtpmManagementDialog.ja.resx">
+      <DependentUpon>VtpmManagementDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\VtpmManagementDialog.resx">
+      <DependentUpon>VtpmManagementDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\VtpmManagementDialog.zh-CN.resx">
+      <DependentUpon>VtpmManagementDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionsPages\ConfirmationOptionsPage.ja.resx">
       <DependentUpon>ConfirmationOptionsPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -1845,6 +1965,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionsPages\ConfirmationOptionsPage.zh-CN.resx">
       <DependentUpon>ConfirmationOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\OptionsPages\ExternalToolsOptionsPage.ja.resx">
+      <DependentUpon>ExternalToolsOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\OptionsPages\ExternalToolsOptionsPage.resx">
+      <DependentUpon>ExternalToolsOptionsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dialogs\OptionsPages\ExternalToolsOptionsPage.zh-CN.resx">
+      <DependentUpon>ExternalToolsOptionsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OvfValidationDialog.ja.resx">
       <DependentUpon>OvfValidationDialog.cs</DependentUpon>
@@ -1885,33 +2014,6 @@
       <DependentUpon>PvsSiteDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckOverviewDialog.ja.resx">
-      <DependentUpon>HealthCheckOverviewDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckOverviewDialog.resx">
-      <DependentUpon>HealthCheckOverviewDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckOverviewDialog.zh-CN.resx">
-      <DependentUpon>HealthCheckOverviewDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckPolicyStatementDialog.ja.resx">
-      <DependentUpon>HealthCheckPolicyStatementDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckPolicyStatementDialog.resx">
-      <DependentUpon>HealthCheckPolicyStatementDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckPolicyStatementDialog.zh-CN.resx">
-      <DependentUpon>HealthCheckPolicyStatementDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckSettingsDialog.ja.resx">
-      <DependentUpon>HealthCheckSettingsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckSettingsDialog.resx">
-      <DependentUpon>HealthCheckSettingsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HealthCheck\HealthCheckSettingsDialog.zh-CN.resx">
-      <DependentUpon>HealthCheckSettingsDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionsPages\SaveAndRestoreOptionsPage.ja.resx">
       <DependentUpon>SaveAndRestoreOptionsPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -1924,15 +2026,6 @@
     <EmbeddedResource Include="Dialogs\ReconnectAsDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ReconnectAsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UsbUsageDialog.ja.resx">
-      <DependentUpon>UsbUsageDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UsbUsageDialog.resx">
-      <DependentUpon>UsbUsageDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UsbUsageDialog.zh-CN.resx">
-      <DependentUpon>UsbUsageDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\VMDialogs\MoveVMDialog.resx">
       <DependentUpon>MoveVMDialog.cs</DependentUpon>
@@ -1969,10 +2062,6 @@
     <EmbeddedResource Include="Dialogs\PropertiesDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>PropertiesDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RevertDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>RevertDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\ResolvingSubjectsDialog.resx">
       <SubType>Designer</SubType>
@@ -2031,13 +2120,13 @@
     <EmbeddedResource Include="SettingsPanels\ClusteringEditPage.zh-CN.resx">
       <DependentUpon>ClusteringEditPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\HostPowerONPages\HostPowerONEditPage.resx">
+    <EmbeddedResource Include="SettingsPanels\HostPowerONEditPage.resx">
       <SubType>Designer</SubType>
       <DependentUpon>HostPowerONEditPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\HostPowerONPages\PoolPowerONEditPage.resx">
+    <EmbeddedResource Include="SettingsPanels\NRPEEditPage.resx">
+      <DependentUpon>NRPEEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
-      <DependentUpon>PoolPowerONEditPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\PerfmonAlertOptionsPage.resx">
       <SubType>Designer</SubType>
@@ -2051,10 +2140,6 @@
       <SubType>Designer</SubType>
       <DependentUpon>GraphList.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\AllowUpdatesDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>AllowUpdatesDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\BondProperties.resx">
       <DependentUpon>BondProperties.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2067,10 +2152,6 @@
       <SubType>Designer</SubType>
       <DependentUpon>EditVmHaPrioritiesDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HostRequiresRebootDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>HostRequiresRebootDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\NetworkingPropertiesPage.resx">
       <SubType>Designer</SubType>
       <DependentUpon>NetworkingPropertiesPage.cs</DependentUpon>
@@ -2082,10 +2163,6 @@
     <EmbeddedResource Include="Dialogs\Network\UnknownCertificateDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>UnknownCertificateDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PasswordsRequestDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>PasswordsRequestDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\VmSnapshotDialog.resx">
       <SubType>Designer</SubType>
@@ -2125,6 +2202,15 @@
     <EmbeddedResource Include="SettingsPanels\NetworkOptionsEditPage.zh-CN.resx">
       <DependentUpon>NetworkOptionsEditPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPanels\PoolAdvancedEditPage.ja.resx">
+      <DependentUpon>PoolAdvancedEditPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPanels\PoolAdvancedEditPage.resx">
+      <DependentUpon>PoolAdvancedEditPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPanels\PoolAdvancedEditPage.zh-CN.resx">
+      <DependentUpon>PoolAdvancedEditPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\SecurityEditPage.ja.resx">
       <DependentUpon>SecurityEditPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -2133,6 +2219,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\SecurityEditPage.zh-CN.resx">
       <DependentUpon>SecurityEditPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPanels\SrReadCachingEditPage.resx">
+      <DependentUpon>SrReadCachingEditPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPanels\SrReadCachingEditPage.ja.resx">
+      <DependentUpon>SrReadCachingEditPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsPanels\SrReadCachingEditPage.zh-CN.resx">
+      <DependentUpon>SrReadCachingEditPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\USBEditPage.ja.resx">
       <DependentUpon>USBEditPage.cs</DependentUpon>
@@ -2188,6 +2283,15 @@
       <SubType>Designer</SubType>
       <DependentUpon>WlbThresholdsPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SplashScreen.ja.resx">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplashScreen.resx">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplashScreen.zh-CN.resx">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TabPages\AdPage.resx">
       <DependentUpon>AdPage.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2225,6 +2329,15 @@
     <EmbeddedResource Include="TabPages\HomePage.zh-CN.resx">
       <DependentUpon>HomePage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="TabPages\ManageCdnUpdatesPage.ja.resx">
+      <DependentUpon>ManageCdnUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TabPages\ManageCdnUpdatesPage.resx">
+      <DependentUpon>ManageCdnUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TabPages\ManageCdnUpdatesPage.zh-CN.resx">
+      <DependentUpon>ManageCdnUpdatesPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TabPages\PvsPage.ja.resx">
       <DependentUpon>PvsPage.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2260,6 +2373,9 @@
     <EmbeddedResource Include="TabPages\PhysicalStoragePage.resx">
       <SubType>Designer</SubType>
       <DependentUpon>PhysicalStoragePage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VNC\KeyMap.resx">
+      <DependentUpon>KeyMap.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\BallooningWizard.resx">
       <SubType>Designer</SubType>
@@ -2453,21 +2569,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>CIFS_ISO.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CSLG.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>CSLG.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\EqualLogic.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>EqualLogic.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\LVMoISCSI.resx">
       <SubType>Designer</SubType>
       <DependentUpon>LVMoISCSI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\NetApp.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>NetApp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\NFS_ISO.resx">
       <SubType>Designer</SubType>
@@ -2583,10 +2687,6 @@
       <DependentUpon>AttachDiskDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\CustomFieldsDialog.resx">
-      <DependentUpon>CustomFieldsDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\CopyVMDialog.resx">
       <DependentUpon>CopyVMDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -2599,9 +2699,9 @@
       <DependentUpon>NewCustomFieldDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\EnterMasterPasswordDialog.resx">
+    <EmbeddedResource Include="Dialogs\RestoreSession\EnterMainPasswordDialog.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>EnterMasterPasswordDialog.cs</DependentUpon>
+      <DependentUpon>EnterMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Common\PasswordFailure.resx">
       <SubType>Designer</SubType>
@@ -2611,20 +2711,16 @@
       <SubType>Designer</SubType>
       <DependentUpon>SaveAndRestoreDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\ChangeMasterPasswordDialog.resx">
+    <EmbeddedResource Include="Dialogs\RestoreSession\ChangeMainPasswordDialog.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>ChangeMasterPasswordDialog.cs</DependentUpon>
+      <DependentUpon>ChangeMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\SetMasterPasswordDialog.resx">
+    <EmbeddedResource Include="Dialogs\RestoreSession\SetMainPasswordDialog.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>SetMasterPasswordDialog.cs</DependentUpon>
+      <DependentUpon>SetMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\ThreeButtonDialog.resx">
       <DependentUpon>ThreeButtonDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\IscsiChoicesDialog.resx">
-      <DependentUpon>IscsiChoicesDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\ActionProgressDialog.resx">
@@ -2643,21 +2739,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>SelectHostDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UserDeviceDialog.resx">
-      <DependentUpon>UserDeviceDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\WarningDialogs\CloseXenCenterWarningDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>CloseXenCenterWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\LicenseWarningDialog.resx">
-      <DependentUpon>LicenseWarningDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\RemoveCrashDumpsWarningDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>RemoveCrashDumpsWarningDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\HistoryPage.resx">
       <SubType>Designer</SubType>
@@ -2683,17 +2767,9 @@
       <DependentUpon>EvacuateHostDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\VcpuWarningDialog.resx">
-      <DependentUpon>VcpuWarningDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\DuplicateTemplateNameDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DuplicateTemplateNameDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\InstallToolsWarningDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>InstallToolsWarningDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\RepairSRDialog.resx">
       <DependentUpon>RepairSRDialog.cs</DependentUpon>
@@ -2707,8 +2783,8 @@
       <DependentUpon>VMHAEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\CPUMemoryEditPage.resx">
-      <DependentUpon>CPUMemoryEditPage.cs</DependentUpon>
+    <EmbeddedResource Include="SettingsPanels\CpuMemoryEditPage.resx">
+      <DependentUpon>CpuMemoryEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\GeneralEditPage.resx">
@@ -2743,15 +2819,15 @@
       <DependentUpon>PerfmonAlertEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageDestination.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageDestination.resx">
       <SubType>Designer</SubType>
       <DependentUpon>BugToolPageDestination.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageRetrieveData.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageRetrieveData.resx">
       <SubType>Designer</SubType>
       <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageSelectCapabilities.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.resx">
       <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -2759,11 +2835,11 @@
       <DependentUpon>HAWizard.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\GenericSelectHostsPage.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\GenericSelectHostsPage.resx">
       <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolWizard.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolWizard.resx">
       <DependentUpon>BugToolWizard.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -2823,15 +2899,7 @@
       <SubType>Designer</SubType>
       <DependentUpon>ConsolePanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BootModesControl.ja.resx">
-      <DependentUpon>BootModesControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Wizards\BootModesControl.resx">
-      <DependentUpon>BootModesControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BootModesControl.zh-CN.resx">
       <DependentUpon>BootModesControl.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -2873,17 +2941,14 @@
       <DependentUpon>XenWizardBase.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="..\Branding\HomePage.ja.mht">
-      <Link>HomePage.ja.mht</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="..\Branding\HomePage.html">
+      <Link>HomePage.html</Link>
     </None>
-    <None Include="..\Branding\HomePage.mht">
-      <Link>HomePage.mht</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="..\Branding\HomePage.ja.html">
+      <Link>HomePage.ja.html</Link>
     </None>
-    <None Include="..\Branding\HomePage.zh-CN.mht">
-      <Link>HomePage.zh-CN.mht</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="..\Branding\HomePage.zh-CN.html">
+      <Link>HomePage.zh-CN.html</Link>
     </None>
     <None Include="app.config">
       <SubType>Designer</SubType>
@@ -2902,12 +2967,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\Branding\Images\about_box_graphic.png">
+      <Link>Images\about_box_graphic.png</Link>
+    </Content>
     <Content Include="..\Branding\Images\AppIcon.ico" />
     <Compile Include="Actions\GUIActions\MeddlingActionManager.cs" />
     <Compile Include="Alerts\AlertExtensions.cs" />
     <Compile Include="Alerts\Types\LicenseAlert.cs" />
     <Compile Include="Alerts\Types\IqnAlert.cs" />
-    <Compile Include="Commands\ApplyLicenseEditionCommand.cs" />
     <Compile Include="Commands\Controls\AssignVMGroupToolStripMenuItem.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -2916,19 +2983,11 @@
     <Compile Include="Commands\CrossPoolMigrateCommand.cs" />
     <Compile Include="Commands\DestroyHostCommand.cs" />
     <Compile Include="Commands\MigrateVirtualDiskCommand.cs" />
-    <Compile Include="Actions\OVFActions\ApplianceAction.cs" />
-    <Compile Include="Actions\OVFActions\ExportApplianceAction.cs" />
     <Compile Include="Actions\GUIActions\GeneralEditPageAction.cs" />
-    <Compile Include="Actions\GUIActions\SaveCustomFieldsAction.cs" />
-    <Compile Include="Actions\OVFActions\ImportApplianceAction.cs" />
-    <Compile Include="Actions\OVFActions\ImportImageAction.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Commands\Controls\CommandButton.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Commands\DisasterRecoveryCommand.cs" />
-    <Compile Include="Commands\DisconnectWlbServerCommand.cs" />
     <Compile Include="Commands\ExportCommand.cs" />
     <Compile Include="Commands\CreateVMFromTemplateCommand.cs" />
     <Compile Include="Commands\DRConfigureCommand.cs" />
@@ -3093,19 +3152,11 @@
     <Compile Include="Controls\ComboBoxes\NetworkComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\ComboBoxes\NetworkComboBoxItem.cs" />
     <Compile Include="Diagnostics\Problems\VMProblem\VmHasVgpu.cs" />
     <Compile Include="OrganizationalView.cs" />
     <Compile Include="Controls\SrPickerItem.cs" />
     <Compile Include="Controls\SummaryPanel\ISummaryPanelView.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\MissingMultipleFCSRsProblem.cs" />
-    <Compile Include="Diagnostics\Problems\WarningWithInformationUrl.cs" />
-    <Compile Include="Dialogs\ConnectionRefusedDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\ConnectionRefusedDialog.Designer.cs">
-      <DependentUpon>ConnectionRefusedDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\LicenseManager\LicenseCheckableDataGridView\ILicenseCheckableDataGridViewView.cs" />
     <Compile Include="Dialogs\LicenseManager\LicenseCheckableDataGridView\LicenseCheckableDataGridView.cs">
       <SubType>Component</SubType>
@@ -3209,11 +3260,8 @@
     <Compile Include="Diagnostics\Checks\DR\RunningVmApplianceCheck.cs" />
     <Compile Include="Diagnostics\Checks\DR\RunningVmCheck.cs" />
     <Compile Include="Diagnostics\Checks\HostHasHotfixCheck.cs" />
-    <Compile Include="Diagnostics\Checks\PoolCheck.cs" />
     <Compile Include="Diagnostics\Checks\DR\ExistingVmCheck.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\HostDoesNotHaveHotfix.cs" />
-    <Compile Include="Diagnostics\Problems\PoolProblem\DrHAEnabledProblem.cs" />
-    <Compile Include="Diagnostics\Problems\PoolProblem\MissingSRWarning.cs" />
     <Compile Include="Diagnostics\Problems\VmApplianceProblem\ExistingVmApplianceProblem.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\WLBEnabledProblem.cs" />
     <Compile Include="Diagnostics\Problems\VmApplianceProblem\ExistingVmApplianceWarning.cs" />
@@ -3254,7 +3302,6 @@
     <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\HaOnVerifier.cs" />
     <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\LicenseSelectionVerifier.cs" />
     <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\NotLiveVerifier.cs" />
-    <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\OlderServerVerifier.cs" />
     <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\SelectionVerifierFactory.cs" />
     <Compile Include="Dialogs\LicenseManager\SummaryPanelDecorators\LicenseManagerSummaryComponent.cs" />
     <Compile Include="Dialogs\LicenseManager\LicenseStatus.cs" />
@@ -3313,8 +3360,6 @@
     <Compile Include="ConsoleView\RdpClient.cs">
     </Compile>
     <Compile Include="PowerManagment.cs" />
-    <Compile Include="ServerDBs\XenAdminSimulatorWebProxy.cs" />
-    <Compile Include="ServerDBs\XenAdminSimulatorWebStream.cs" />
     <Compile Include="SettingsPanels\GpuEditPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -3323,7 +3368,6 @@
     </Compile>
     <Compile Include="Core\ActionBaseExtensions.cs" />
     <Compile Include="TabPages\GeneralTabLicenseStatusStringifier.cs" />
-    <Compile Include="Utils\TemporaryDisablerForControls.cs" />
     <Compile Include="WinformsXenAdminConfigProvider.cs" />
     <Compile Include="Actions\GUIActions\Wlb\ExportReportAction.cs" />
     <Compile Include="Actions\GUIActions\Wlb\WlbOptimizePoolAction.cs" />
@@ -3453,7 +3497,6 @@
     <Compile Include="Commands\DisconnectHostsAndPoolsCommand.cs" />
     <Compile Include="Commands\DisconnectPoolCommand.cs">
     </Compile>
-    <Compile Include="Commands\CopyTemplateCommand.cs" />
     <Compile Include="Commands\DragDropCommand.cs" />
     <Compile Include="Commands\DragDropAddHostToPoolCommand.cs" />
     <Compile Include="Commands\DragDropMigrateVMCommand.cs" />
@@ -3525,7 +3568,6 @@
     </Compile>
     <Compile Include="Commands\ResumeVMCommand.cs" />
     <Compile Include="Commands\RevertToSnapshotCommand.cs" />
-    <Compile Include="Commands\SaveSessionCommand.cs" />
     <Compile Include="Commands\SelectedItem.cs" />
     <Compile Include="Commands\SelectedItemCollection.cs" />
     <Compile Include="Commands\SelectionBroadcaster.cs" />
@@ -3550,7 +3592,7 @@
     </Compile>
     <Compile Include="Commands\SuspendVMCommand.cs" />
     <Compile Include="Commands\TakeSnapshotCommand.cs" />
-    <Compile Include="Commands\ViewWorkloadReportsCommand.cs">
+    <Compile Include="Commands\WlbCommand.cs">
     </Compile>
     <Compile Include="Commands\VirtualDiskCommand.cs" />
     <Compile Include="Commands\VMOperationHomeServerCommand.cs" />
@@ -3730,12 +3772,6 @@
     <Compile Include="Dialogs\ScheduledSnapshots\ScheduledSnapshotsDialog.Designer.cs">
       <DependentUpon>ScheduledSnapshotsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\Wlb\ConfirmDeconfigureWLBDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\Wlb\DisableWLBDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Dialogs\Wlb\WlbConfigurationDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -3747,9 +3783,6 @@
     </Compile>
     <Compile Include="Dialogs\Wlb\WlbCredentialsDialog.Designer.cs">
       <DependentUpon>WlbCredentialsDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\Wlb\WlbDeleteReportSubscriptionDialog.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Dialogs\Wlb\WlbReportCustomFilter.cs">
       <SubType>Form</SubType>
@@ -3763,10 +3796,8 @@
     <Compile Include="Dialogs\Wlb\WlbReportSubscriptionDialog.designer.cs">
       <DependentUpon>WlbReportSubscriptionDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\CrossPoolMigrateWizard\Filters\WlbEnabledFilter.cs" />
     <Compile Include="Wizards\ExportWizard\ApplianceChecks\ApplianceExistsCheck.cs" />
-    <Compile Include="Wizards\GenericPages\NoTargetServerPoolItem.cs" />
-    <Compile Include="Wizards\CrossPoolMigrateWizard\Filters\CrossPoolMigrateCanMigrateFilter.cs" />
+    <Compile Include="Wizards\CrossPoolMigrateWizard\Filters\CrossPoolMigrateFilter.cs" />
     <Compile Include="Wizards\CrossPoolMigrateWizard\CrossPoolMigrateDestinationPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -3968,24 +3999,6 @@
       <DependentUpon>LVMoHBASummary.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\SrWizardType.cs" />
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\FilerDetails.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\FilerDetails.Designer.cs">
-      <DependentUpon>FilerDetails.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CslgSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CslgSettings.Designer.cs">
-      <DependentUpon>CslgSettings.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CslgLocation.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\NewSRWizard_Pages\Frontends\CslgLocation.Designer.cs">
-      <DependentUpon>CslgLocation.cs</DependentUpon>
-    </Compile>
     <Compile Include="Wizards\NewSRWizard_Pages\NewSrWizardNamePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -4067,12 +4080,6 @@
     <Compile Include="Wizards\ImportWizard\ImageVMConfigPage.Designer.cs">
       <DependentUpon>ImageVMConfigPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\GenericPages\TvmIpPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\GenericPages\TvmIpPage.Designer.cs">
-      <DependentUpon>TvmIpPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="Wizards\RollingUpgradeWizard\RollingUpgradeExtrasPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -4127,7 +4134,6 @@
     <Compile Include="Diagnostics\Problems\HostProblem\HostProblem.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\WrongServerVersion.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\PoolProblem.cs" />
-    <Compile Include="Diagnostics\Problems\SRProblem\SRProblem.cs" />
     <Compile Include="Diagnostics\Problems\VMProblem\VMProblem.cs" />
     <Compile Include="Dialogs\AssignLicenseDialog.cs">
       <SubType>Form</SubType>
@@ -4166,20 +4172,16 @@
     <Compile Include="Commands\SelectionManager.cs" />
     <Compile Include="Commands\Command.cs">
     </Compile>
-    <Compile Include="Network\AddServerTask.cs" />
     <Compile Include="Plugins\UI\TabPageCredentialsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Plugins\UI\TabPageCredentialsDialog.Designer.cs">
       <DependentUpon>TabPageCredentialsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="SettingsPanels\HostPowerONPages\PoolPowerONEditPage.cs">
+    <Compile Include="SettingsPanels\HostPowerONEditPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SettingsPanels\HostPowerONPages\HostPowerONEditPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SettingsPanels\HostPowerONPages\HostPowerONEditPage.Designer.cs">
+    <Compile Include="SettingsPanels\HostPowerONEditPage.Designer.cs">
       <DependentUpon>HostPowerONEditPage.cs</DependentUpon>
     </Compile>
     <Compile Include="SettingsPanels\Wlb\WlbHostExclusionPage.cs">
@@ -4212,8 +4214,6 @@
     <Compile Include="TabPages\WlbPage.Designer.cs">
       <DependentUpon>WlbPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="TestResources\TestResource.cs" />
-    <Compile Include="TestResources\XenSearchQueryTest.cs" />
     <Compile Include="UpdateManager.cs" />
     <Compile Include="UpdateManager.DelayCalculator.cs">
       <SubType>Code</SubType>
@@ -4262,7 +4262,6 @@
       <DependentUpon>PatchingWizard_FirstPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\PatchingWizard\PlanActions\ApplyPatchPlanAction.cs" />
-    <Compile Include="Wizards\PatchingWizard\PlanActions\BringBabiesBackAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PatchingWizard.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -4299,7 +4298,6 @@
     <Compile Include="Wizards\PatchingWizard\PatchingWizard_SelectServers.Designer.cs">
       <DependentUpon>PatchingWizard_SelectServers.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wizards\PatchingWizard\PlanActions\EvacuateHostPlanAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\PlanAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\PlanActionWithSession.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\RebootPlanAction.cs" />
@@ -4307,16 +4305,12 @@
     <Compile Include="Wizards\PatchingWizard\PlanActions\RestartAgentPlanAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\UnwindProblemsAction.cs" />
     <Compile Include="Wizards\PatchingWizard\PlanActions\VMsPlanAction.cs" />
-    <Compile Include="Wlb\WlbPoolConfiguration.cs" />
-    <Compile Include="Wlb\WlbReportInfo.cs" />
-    <Compile Include="Wlb\WlbReportSubscription.cs" />
-    <Compile Include="Wlb\WlbReports\WorkloadReports.cs">
+    <Compile Include="Dialogs\Wlb\WorkloadReports.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Wlb\WlbReports\WorkloadReports.Designer.cs">
+    <Compile Include="Dialogs\Wlb\WorkloadReports.Designer.cs">
       <DependentUpon>WorkloadReports.cs</DependentUpon>
     </Compile>
-    <Compile Include="Wlb\WlbScheduledTask.cs" />
     <Compile Include="XenSearch\Columns.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -4331,9 +4325,6 @@
     <None Include="Images\ascending_triangle.png" />
     <None Include="Images\contracted_triangle.png" />
     <None Include="Images\expanded_triangle.png" />
-    <None Include="..\Branding\Images\about_box_graphic_423x79.png">
-      <Link>Images\about_box_graphic_423x79.png</Link>
-    </None>
     <None Include="Images\000_ToolBar_USB_Icon_up.png" />
     <None Include="Images\000_SwitcherBackground.png" />
     <None Include="Images\000_ToolBar_Pref_Icon_dis.png" />
@@ -4428,6 +4419,16 @@
     <None Include="Images\000_error_h32bit_32.png" />
     <None Include="Images\000_AddIPAddress_h32bit_16.png" />
     <None Include="Images\000_ConfigureIPAddresses_h32bit_16.png" />
+    <None Include="Images\000_Abort_gray_h32bit_16.png" />
+    <Content Include="..\Branding\Images\splash.png">
+      <Link>Images\splash.png</Link>
+    </Content>
+    <Content Include="..\Branding\Images\xcm.png">
+      <Link>Images\xcm.png</Link>
+    </Content>
+    <Content Include="..\Branding\Images\xcm_32x32.png">
+      <Link>Images\xcm_32x32.png</Link>
+    </Content>
     <Content Include="Images\000_AddSite_h32bit_16.png" />
     <Content Include="Images\000_FilterDates_h32bit_16.png" />
     <Content Include="Images\000_FilterServer_h32bit_16.png" />
@@ -4501,15 +4502,8 @@
     <None Include="Images\000_Tick_h32bit_16.png" />
     <None Include="Images\001_CreateVM_h32bit_16.png" />
     <None Include="Images\000_Tick_h32bit_24.png" />
-    <None Include="..\Branding\Images\000_XenCenterAlerts_h32bit_24.png">
-      <Link>Images\000_XenCenterAlerts_h32bit_24.png</Link>
-    </None>
     <None Include="Images\000_WarningAlert_h32bit_32.png" />
     <None Include="Images\112_LeftArrowLong_Blue_24x24_72.png" />
-    <None Include="Images\WLB.png" />
-    <None Include="..\Branding\Images\XS.png">
-      <Link>Images\XS.png</Link>
-    </None>
     <None Include="Images\112_RightArrowLong_Blue_24x24_72.png" />
     <None Include="Images\000_VirtualAppliance_h32bit_16.png" />
     <None Include="Images\000_UpgradePool_h32bit_32.png" />
@@ -4525,12 +4519,10 @@
     <None Include="Images\alert4_16.png" />
     <None Include="Images\alert5_16.png" />
     <None Include="Images\alert6_16.png" />
-    <Content Include="..\Branding\Images\alerts_32.png">
-      <Link>Images\alerts_32.png</Link>
-    </Content>
     <Content Include="Images\000_Sites_h32bit_16.png" />
     <None Include="Images\000_TCP-IPGroup_h32bit_16.png" />
     <None Include="Images\015_Download_h32bit_16.png" />
+    <None Include="Images\000_Tick_yellow_h32bit_16.png" />
     <Content Include="Images\000_UserAndGroup_h32bit_16.png" />
     <Content Include="Images\000_User_h32bit_32.png" />
     <Content Include="Images\asterisk.png" />
@@ -4553,6 +4545,8 @@
     <None Include="Images\detach_24.png" />
     <None Include="Images\DC_16.png" />
     <Content Include="Images\export_32.png" />
+    <None Include="Images\gooroom_16x.png" />
+    <None Include="Images\rocky_16x.png" />
     <Content Include="Images\help_16_hover.png" />
     <Content Include="Images\help_24.png" />
     <Content Include="Images\help_24_hover.png" />
@@ -4587,12 +4581,17 @@
     <None Include="Images\linx_16x.png" />
     <None Include="Images\yinhekylin_16x.png" />
     <None Include="Images\pool_32.png" />
+    <None Include="Images\pool_unpatched.png" />
+    <None Include="Images\livepatch_16.png" />
     <Content Include="Images\queued.png" />
     <Content Include="Images\Refresh16.png" />
     <None Include="Images\saved_searches_16.png" />
     <None Include="Images\server_up_16.png" />
     <None Include="Images\saved_searches_24.png" />
     <None Include="Images\RunningDC_16.png" />
+    <None Include="Images\rightArrowLong_Blue_16.png" />
+    <None Include="Images\rpm_package.png" />
+    <Content Include="Images\save_to_disk.png" />
     <Content Include="Images\scilinux_16x.png" />
     <None Include="Images\server_32.png" />
     <None Include="Images\server_up_32.png" />
@@ -4674,15 +4673,13 @@
     <Content Include="Images\tools_uptodate_16x.png" />
     <None Include="Images\tree_plus.png" />
     <None Include="Images\tree_minus.png" />
+    <None Include="Images\tpm.png" />
     <Content Include="Images\tshadowdown.png" />
     <Content Include="Images\tshadowdownleft.png" />
     <Content Include="Images\tshadowdownright.png" />
     <Content Include="Images\tshadowright.png" />
     <Content Include="Images\tshadowtopright.png" />
     <Content Include="Images\ubuntu_16x.png" />
-    <Content Include="..\Branding\Images\upsell_16.png">
-      <Link>Images\upsell_16.png</Link>
-    </Content>
     <Content Include="Images\usagebar_0.png" />
     <Content Include="Images\usagebar_1.png" />
     <Content Include="Images\usagebar_10.png" />
@@ -4900,6 +4897,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\DeprecationBanner.resx">
       <DependentUpon>DeprecationBanner.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\DeprecationBanner.zh-CN.resx">
       <DependentUpon>DeprecationBanner.cs</DependentUpon>
@@ -5041,21 +5039,12 @@
     <EmbeddedResource Include="Controls\XenSearch\SearchOutput.zh-CN.resx">
       <DependentUpon>SearchOutput.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\ConnectionRefusedDialog.ja.resx">
-      <DependentUpon>ConnectionRefusedDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\ConnectionRefusedDialog.resx">
-      <DependentUpon>ConnectionRefusedDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\ConnectionRefusedDialog.zh-CN.resx">
-      <DependentUpon>ConnectionRefusedDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\GraphDetailsDialog.ja.resx">
       <DependentUpon>GraphDetailsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\GraphDetailsDialog.resx">
       <DependentUpon>GraphDetailsDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\CustomDataGraph\GraphList.ja.resx">
       <DependentUpon>GraphList.cs</DependentUpon>
@@ -5244,12 +5233,6 @@
     <EmbeddedResource Include="TabPages\AlertSummaryPage.zh-CN.resx">
       <DependentUpon>AlertSummaryPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\AllowUpdatesDialog.ja.resx">
-      <DependentUpon>AllowUpdatesDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\AllowUpdatesDialog.zh-CN.resx">
-      <DependentUpon>AllowUpdatesDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\AssignLicenseDialog.ja.resx">
       <DependentUpon>AssignLicenseDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -5297,12 +5280,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\CopyVMDialog.zh-CN.resx">
       <DependentUpon>CopyVMDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\CustomFieldsDialog.ja.resx">
-      <DependentUpon>CustomFieldsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\CustomFieldsDialog.zh-CN.resx">
-      <DependentUpon>CustomFieldsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\DateFilterDialog.ja.resx">
       <DependentUpon>DateFilterDialog.cs</DependentUpon>
@@ -5362,23 +5339,11 @@
     <EmbeddedResource Include="Dialogs\GraphDetailsDialog.zh-CN.resx">
       <DependentUpon>GraphDetailsDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HostRequiresRebootDialog.ja.resx">
-      <DependentUpon>HostRequiresRebootDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\HostRequiresRebootDialog.zh-CN.resx">
-      <DependentUpon>HostRequiresRebootDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\InputPromptDialog.ja.resx">
       <DependentUpon>InputPromptDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\InputPromptDialog.zh-CN.resx">
       <DependentUpon>InputPromptDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\IscsiChoicesDialog.ja.resx">
-      <DependentUpon>IscsiChoicesDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\IscsiChoicesDialog.zh-CN.resx">
-      <DependentUpon>IscsiChoicesDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\IscsiDeviceConfigDialog.ja.resx">
       <DependentUpon>IscsiDeviceConfigDialog.cs</DependentUpon>
@@ -5531,12 +5496,6 @@
     <EmbeddedResource Include="Dialogs\OptionsPages\UpdatesOptionsPage.zh-CN.resx">
       <DependentUpon>UpdatesOptionsPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PasswordsRequestDialog.ja.resx">
-      <DependentUpon>PasswordsRequestDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PasswordsRequestDialog.zh-CN.resx">
-      <DependentUpon>PasswordsRequestDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\PropertiesDialog.ja.resx">
       <DependentUpon>PropertiesDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -5561,18 +5520,18 @@
     <EmbeddedResource Include="Dialogs\ResolvingSubjectsDialog.zh-CN.resx">
       <DependentUpon>ResolvingSubjectsDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\ChangeMasterPasswordDialog.ja.resx">
-      <DependentUpon>ChangeMasterPasswordDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Dialogs\RestoreSession\ChangeMainPasswordDialog.ja.resx">
+      <DependentUpon>ChangeMainPasswordDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\ChangeMasterPasswordDialog.zh-CN.resx">
-      <DependentUpon>ChangeMasterPasswordDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Dialogs\RestoreSession\ChangeMainPasswordDialog.zh-CN.resx">
+      <DependentUpon>ChangeMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\EnterMasterPasswordDialog.ja.resx">
-      <DependentUpon>EnterMasterPasswordDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Dialogs\RestoreSession\EnterMainPasswordDialog.ja.resx">
+      <DependentUpon>EnterMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\EnterMasterPasswordDialog.zh-CN.resx">
-      <DependentUpon>EnterMasterPasswordDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Dialogs\RestoreSession\EnterMainPasswordDialog.zh-CN.resx">
+      <DependentUpon>EnterMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Common\PasswordFailure.ja.resx">
       <DependentUpon>PasswordFailure.cs</DependentUpon>
@@ -5586,17 +5545,11 @@
     <EmbeddedResource Include="Dialogs\RestoreSession\SaveAndRestoreDialog.zh-CN.resx">
       <DependentUpon>SaveAndRestoreDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\SetMasterPasswordDialog.ja.resx">
-      <DependentUpon>SetMasterPasswordDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Dialogs\RestoreSession\SetMainPasswordDialog.ja.resx">
+      <DependentUpon>SetMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RestoreSession\SetMasterPasswordDialog.zh-CN.resx">
-      <DependentUpon>SetMasterPasswordDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RevertDialog.ja.resx">
-      <DependentUpon>RevertDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\RevertDialog.zh-CN.resx">
-      <DependentUpon>RevertDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Dialogs\RestoreSession\SetMainPasswordDialog.zh-CN.resx">
+      <DependentUpon>SetMainPasswordDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\RoleElevationDialog.ja.resx">
       <DependentUpon>RoleElevationDialog.cs</DependentUpon>
@@ -5630,15 +5583,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\UpsellDialog.ja.resx">
       <DependentUpon>UpsellDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\UpsellDialog.zh-CN.resx">
       <DependentUpon>UpsellDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UserDeviceDialog.ja.resx">
-      <DependentUpon>UserDeviceDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UserDeviceDialog.zh-CN.resx">
-      <DependentUpon>UserDeviceDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\VerticallyTabbedDialog.ja.resx">
       <DependentUpon>VerticallyTabbedDialog.cs</DependentUpon>
@@ -5721,50 +5670,8 @@
     <EmbeddedResource Include="Dialogs\WarningDialogs\LVMoHBAWarningDialog.resx">
       <DependentUpon>LVMoHBAWarningDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\InstallToolsWarningDialog.ja.resx">
-      <DependentUpon>InstallToolsWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\InstallToolsWarningDialog.zh-CN.resx">
-      <DependentUpon>InstallToolsWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\LicenseWarningDialog.ja.resx">
-      <DependentUpon>LicenseWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\LicenseWarningDialog.zh-CN.resx">
-      <DependentUpon>LicenseWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\WarningDialogs\LVMoHBAWarningDialog.zh-CN.resx">
       <DependentUpon>LVMoHBAWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\RemoveCrashDumpsWarningDialog.ja.resx">
-      <DependentUpon>RemoveCrashDumpsWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\RemoveCrashDumpsWarningDialog.zh-CN.resx">
-      <DependentUpon>RemoveCrashDumpsWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\VcpuWarningDialog.ja.resx">
-      <DependentUpon>VcpuWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\WarningDialogs\VcpuWarningDialog.zh-CN.resx">
-      <DependentUpon>VcpuWarningDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\ConfirmDeconfigureWLBDialog.ja.resx">
-      <DependentUpon>ConfirmDeconfigureWLBDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\ConfirmDeconfigureWLBDialog.resx">
-      <DependentUpon>ConfirmDeconfigureWLBDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\ConfirmDeconfigureWLBDialog.zh-CN.resx">
-      <DependentUpon>ConfirmDeconfigureWLBDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\DisableWLBDialog.ja.resx">
-      <DependentUpon>DisableWLBDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\DisableWLBDialog.resx">
-      <DependentUpon>DisableWLBDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\DisableWLBDialog.zh-CN.resx">
-      <DependentUpon>DisableWLBDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\Wlb\WlbConfigurationDialog.ja.resx">
       <DependentUpon>WlbConfigurationDialog.cs</DependentUpon>
@@ -5783,15 +5690,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\Wlb\WlbCredentialsDialog.zh-CN.resx">
       <DependentUpon>WlbCredentialsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\WlbDeleteReportSubscriptionDialog.ja.resx">
-      <DependentUpon>WlbDeleteReportSubscriptionDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\WlbDeleteReportSubscriptionDialog.resx">
-      <DependentUpon>WlbDeleteReportSubscriptionDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\Wlb\WlbDeleteReportSubscriptionDialog.zh-CN.resx">
-      <DependentUpon>WlbDeleteReportSubscriptionDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\Wlb\WlbEditScheduledTask.ja.resx">
       <DependentUpon>WlbEditScheduledTask.cs</DependentUpon>
@@ -5861,12 +5759,12 @@
     <EmbeddedResource Include="SettingsPanels\BootOptionsEditPage.zh-CN.resx">
       <DependentUpon>BootOptionsEditPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\CPUMemoryEditPage.ja.resx">
-      <DependentUpon>CPUMemoryEditPage.cs</DependentUpon>
+    <EmbeddedResource Include="SettingsPanels\CpuMemoryEditPage.ja.resx">
+      <DependentUpon>CpuMemoryEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\CPUMemoryEditPage.zh-CN.resx">
-      <DependentUpon>CPUMemoryEditPage.cs</DependentUpon>
+    <EmbeddedResource Include="SettingsPanels\CpuMemoryEditPage.zh-CN.resx">
+      <DependentUpon>CpuMemoryEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\CustomFieldsDisplayPage.ja.resx">
@@ -5908,17 +5806,11 @@
     <EmbeddedResource Include="SettingsPanels\HostMultipathPage.zh-CN.resx">
       <DependentUpon>HostMultipathPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\HostPowerONPages\HostPowerONEditPage.ja.resx">
+    <EmbeddedResource Include="SettingsPanels\HostPowerONEditPage.ja.resx">
       <DependentUpon>HostPowerONEditPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\HostPowerONPages\HostPowerONEditPage.zh-CN.resx">
+    <EmbeddedResource Include="SettingsPanels\HostPowerONEditPage.zh-CN.resx">
       <DependentUpon>HostPowerONEditPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\HostPowerONPages\PoolPowerONEditPage.ja.resx">
-      <DependentUpon>PoolPowerONEditPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SettingsPanels\HostPowerONPages\PoolPowerONEditPage.zh-CN.resx">
-      <DependentUpon>PoolPowerONEditPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\LogDestinationEditPage.ja.resx">
       <DependentUpon>LogDestinationEditPage.cs</DependentUpon>
@@ -5946,6 +5838,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\PoolGpuEditPage.resx">
       <DependentUpon>PoolGpuEditPage.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsPanels\PoolGpuEditPage.zh-CN.resx">
       <DependentUpon>PoolGpuEditPage.cs</DependentUpon>
@@ -6111,9 +6004,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\UpsellTabPage.ja.resx">
       <DependentUpon>UpsellTabPage.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\UpsellTabPage.zh-CN.resx">
       <DependentUpon>UpsellTabPage.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\VMStoragePage.ja.resx">
       <DependentUpon>VMStoragePage.cs</DependentUpon>
@@ -6126,9 +6021,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\WlbPage.zh-CN.resx">
       <DependentUpon>WlbPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TestResources\api-version.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\BallooningWizard.ja.resx">
       <DependentUpon>BallooningWizard.cs</DependentUpon>
@@ -6148,28 +6040,28 @@
     <EmbeddedResource Include="Wizards\BallooningWizard_Pages\MemorySettings.zh-CN.resx">
       <DependentUpon>MemorySettings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageDestination.ja.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageDestination.ja.resx">
       <DependentUpon>BugToolPageDestination.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageDestination.zh-CN.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageDestination.zh-CN.resx">
       <DependentUpon>BugToolPageDestination.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageRetrieveData.ja.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageRetrieveData.ja.resx">
       <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageRetrieveData.zh-CN.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageRetrieveData.zh-CN.resx">
       <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageSelectCapabilities.ja.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.ja.resx">
       <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolPageSelectCapabilities.zh-CN.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.zh-CN.resx">
       <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolWizard.ja.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolWizard.ja.resx">
       <DependentUpon>BugToolWizard.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\BugToolWizard.zh-CN.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolWizard.zh-CN.resx">
       <DependentUpon>BugToolWizard.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\CrossPoolMigrateWizard\CrossPoolMigrateFinishPage.ja.resx">
@@ -6281,10 +6173,10 @@
     <EmbeddedResource Include="Wizards\ExportWizard\ExportSelectVMsPage.zh-CN.resx">
       <DependentUpon>ExportSelectVMsPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\GenericSelectHostsPage.ja.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\GenericSelectHostsPage.ja.resx">
       <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizardFiles\GenericSelectHostsPage.zh-CN.resx">
+    <EmbeddedResource Include="Wizards\BugToolWizard\GenericSelectHostsPage.zh-CN.resx">
       <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\GenericPages\LunPerVdiMappingPage.ja.resx">
@@ -6310,9 +6202,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\GenericPages\RBACWarningPage.zh-CN.resx">
       <DependentUpon>RBACWarningPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\GenericPages\TvmIpPage.zh-CN.resx">
-      <DependentUpon>TvmIpPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\HAWizard.ja.resx">
       <DependentUpon>HAWizard.cs</DependentUpon>
@@ -6512,51 +6401,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\ChooseSrTypePage.ja.resx">
       <DependentUpon>ChooseSrTypePage.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\ChooseSrTypePage.resx">
       <DependentUpon>ChooseSrTypePage.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\ChooseSrTypePage.zh-CN.resx">
       <DependentUpon>ChooseSrTypePage.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CIFS_ISO.ja.resx">
       <DependentUpon>CIFS_ISO.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CIFS_ISO.zh-CN.resx">
       <DependentUpon>CIFS_ISO.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\FilerDetails.ja.resx">
-      <DependentUpon>FilerDetails.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\FilerDetails.resx">
-      <DependentUpon>FilerDetails.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\FilerDetails.zh-CN.resx">
-      <DependentUpon>FilerDetails.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CslgSettings.ja.resx">
-      <DependentUpon>CslgSettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CslgSettings.resx">
-      <DependentUpon>CslgSettings.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CslgSettings.zh-CN.resx">
-      <DependentUpon>CslgSettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CSLG.ja.resx">
-      <DependentUpon>CSLG.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CSLG.zh-CN.resx">
-      <DependentUpon>CSLG.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\EqualLogic.ja.resx">
-      <DependentUpon>EqualLogic.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\EqualLogic.zh-CN.resx">
-      <DependentUpon>EqualLogic.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\LVMoHBA.ja.resx">
       <DependentUpon>LVMoHBA.cs</DependentUpon>
@@ -6579,27 +6438,11 @@
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\LVMoISCSI.zh-CN.resx">
       <DependentUpon>LVMoISCSI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\NetApp.ja.resx">
-      <DependentUpon>NetApp.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\NetApp.zh-CN.resx">
-      <DependentUpon>NetApp.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\NFS_ISO.ja.resx">
       <DependentUpon>NFS_ISO.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\NFS_ISO.zh-CN.resx">
       <DependentUpon>NFS_ISO.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CslgLocation.ja.resx">
-      <DependentUpon>CslgLocation.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CslgLocation.resx">
-      <DependentUpon>CslgLocation.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\CslgLocation.zh-CN.resx">
-      <DependentUpon>CslgLocation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewSRWizard_Pages\Frontends\VHDoNFS.ja.resx">
       <DependentUpon>VHDoNFS.cs</DependentUpon>
@@ -6801,13 +6644,6 @@
     <EmbeddedResource Include="Wizards\ImportWizard\ImageVMConfigPage.resx">
       <DependentUpon>ImageVMConfigPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\GenericPages\TvmIpPage.ja.resx">
-      <DependentUpon>TvmIpPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\GenericPages\TvmIpPage.resx">
-      <DependentUpon>TvmIpPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Wizards\NewVMWizard\Page_Template.zh-CN.resx">
       <DependentUpon>Page_Template.cs</DependentUpon>
     </EmbeddedResource>
@@ -6907,31 +6743,18 @@
     <EmbeddedResource Include="Wizards\XenWizardBase.zh-CN.resx">
       <DependentUpon>XenWizardBase.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wlb\WlbReports\WorkloadReports.ja.resx">
+    <EmbeddedResource Include="Dialogs\Wlb\WorkloadReports.ja.resx">
       <DependentUpon>WorkloadReports.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wlb\WlbReports\WorkloadReports.resx">
+    <EmbeddedResource Include="Dialogs\Wlb\WorkloadReports.resx">
       <DependentUpon>WorkloadReports.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wlb\WlbReports\WorkloadReports.zh-CN.resx">
+    <EmbeddedResource Include="Dialogs\Wlb\WorkloadReports.zh-CN.resx">
       <DependentUpon>WorkloadReports.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Images\VMTemplate_h32bit_32.png" />
-    <Content Include="Images\xcm.png" />
-    <Content Include="Images\xcm_32x32.png" />
-    <Content Include="TestResources\credits.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="TestResources\console.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestResources\interesting-development.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestResources\interesting-production.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestResources\interesting-xenapp.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="..\Branding\Images\wizard_background.png">
@@ -6950,10 +6773,6 @@
       <Project>{9861DFA1-B41F-432D-A43F-226257DEBBB9}</Project>
       <Name>XenCenterLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\XenCenterVNC\XenCenterVNC.csproj">
-      <Project>{BD345C89-E8F4-4767-9BE0-1F0EAB7FA927}</Project>
-      <Name>XenCenterVNC</Name>
-    </ProjectReference>
     <ProjectReference Include="..\XenModel\XenModel.csproj">
       <Project>{B306FC59-4441-4A5F-9F54-D3F68D4EE38D}</Project>
       <Name>XenModel</Name>
@@ -6961,10 +6780,6 @@
     <ProjectReference Include="..\XenOvfApi\XenOvfApi.csproj">
       <Project>{2D78AC6C-B867-484A-A447-3C6FC8B8EAF7}</Project>
       <Name>XenOvfApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\XenOvfTransport\XenOvfTransport.csproj">
-      <Project>{9F7E6285-5CBF-41B4-8CB9-AB06DFF90DC0}</Project>
-      <Name>XenOvfTransport</Name>
     </ProjectReference>
     <ProjectReference Include="..\xe\Xe.csproj">
       <Project>{727e885d-14be-40f0-9d0b-3853d44d3984}</Project>
@@ -7003,6 +6818,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -7012,11 +6828,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent Condition=" '$(Configuration)' == 'Release' ">mt.exe -verbose -manifest "$(ProjectDir)app.manifest" -outputresource:"$(TargetDir)$(TargetFileName)";#1</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)\ReportViewer\resource_report.rdlc" "$(TargetDir)"
-
-REM copy "$(ProjectDir)\..\packages\putty.exe" "$(TargetDir)"</PostBuildEvent>
+    <PostBuildEvent>copy "$(ProjectDir)\ReportViewer\resource_report.rdlc" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

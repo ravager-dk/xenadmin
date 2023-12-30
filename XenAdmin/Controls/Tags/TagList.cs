@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,8 +34,6 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Dialogs;
-using XenAdmin.Model;
-using XenAPI;
 
 
 namespace XenAdmin.Controls
@@ -55,8 +52,8 @@ namespace XenAdmin.Controls
             tagsLabel = new Label();
             tagsLabel.Width = width;
 
-            icon.Image = Properties.Resources._000_Tag_h32bit_16;
-            icon.Size = Properties.Resources._000_Tag_h32bit_16.Size;
+            icon.Image = Images.StaticImages._000_Tag_h32bit_16;
+            icon.Size = Images.StaticImages._000_Tag_h32bit_16.Size;
 
             linkDialogLabel.Text = Messages.NEW_TAG_LINK;
             linkDialogLabel.TabStop = true;

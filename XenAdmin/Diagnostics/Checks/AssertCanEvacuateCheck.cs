@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -93,7 +92,7 @@ namespace XenAdmin.Diagnostics.Checks
                     VMsWithProblems.Add(residentVM.opaque_ref);
                 }
 
-                if (restrictMigration && residentVM.is_a_real_vm() && !VMsWithProblems.Contains(residentVM.opaque_ref))
+                if (restrictMigration && residentVM.IsRealVm() && !VMsWithProblems.Contains(residentVM.opaque_ref))
                 {
                     problems.Add(new CannotMigrateVM(this, residentVM, CannotMigrateVM.CannotMigrateVMReason.LicenseRestriction));
                     VMsWithProblems.Add(residentVM.opaque_ref);
@@ -236,16 +235,16 @@ namespace XenAdmin.Diagnostics.Checks
         private static CannotMigrateVM.CannotMigrateVMReason GetMoreSpecificReasonForCannotMigrateVm(VM vm, CannotMigrateVM.CannotMigrateVMReason reason)
         {
             var gm = vm.Connection.Resolve(vm.guest_metrics);
-            var status = vm.GetVirtualisationStatus();
+            var status = vm.GetVirtualizationStatus(out _);
 
-            if (Helpers.DundeeOrGreater(vm.Connection) && vm.IsWindows())
+            if (vm.IsWindows())
             {
                 if (gm != null && !gm.PV_drivers_detected)
                 {
                     reason = CannotMigrateVM.CannotMigrateVMReason.CannotMigrateVmNoTools;
                 }
             }
-            else if (status == 0 || status.HasFlag(XenAPI.VM.VirtualisationStatus.PV_DRIVERS_OUT_OF_DATE))
+            else if (status == VM.VirtualizationStatus.NotInstalled || status.HasFlag(VM.VirtualizationStatus.PvDriversOutOfDate))
             {
                 reason = CannotMigrateVM.CannotMigrateVMReason.CannotMigrateVmNoTools;
             }
@@ -259,16 +258,11 @@ namespace XenAdmin.Diagnostics.Checks
         protected override Problem RunHostCheck()
         {
             Pool pool = Helpers.GetPool(Host.Connection);
-            if (pool != null)
-            {
-                if (pool.ha_enabled)
-                    return new HAEnabledWarning(this, pool, Host);
 
-                if (Helpers.WlbEnabled(pool.Connection))
-                    return new WLBEnabledWarning(this, pool, Host);
-            }
-
-            return null;
+            if (pool == null || (!pool.ha_enabled && !pool.wlb_enabled))
+                return null;
+            
+            return new HaWlbEnabledWarning(this, pool, Host);
         }
 
         public override List<Problem> RunAllChecks()
@@ -280,9 +274,6 @@ namespace XenAdmin.Diagnostics.Checks
                 return CheckHost();
         }
 
-        public override string Description
-        {
-            get { return Messages.ASSERT_CAN_EVACUATE_CHECK_DESCRIPTION; }
-        }
+        public override string Description => Messages.ASSERT_CAN_EVACUATE_CHECK_DESCRIPTION;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,12 +32,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using XenAdmin.Core;
-using XenAdmin.Model;
 
 namespace XenAPI
 {
     public partial class Pool : IComparable<Pool>, IEquatable<Pool>
     {
+        private const string ROLLING_UPGRADE_IN_PROGRESS = "rolling_upgrade_in_progress";
+        private const string FORBID_RPU_FOR_HCI = "hci-forbid-rpu";
+        private const string FAULT_TOLERANCE_LIMIT_FOR_HCI = "hci-limit-fault-tolerance";
+        private const string FORBID_UPDATE_AUTO_RESTARTS = "hci-forbid-update-auto-restart";
+        public const string HEALTH_CHECK_ENROLLMENT = "Enrollment";
+
+        public const string MAIL_DESTINATION_KEY_NAME = "mail-destination";
+        public const string SMTP_MAILHUB_KEY_NAME = "ssmtp-mailhub";
+        public const string MAIL_LANGUAGE_KEY_NAME = "mail-language";
+
         public override string ToString()
         {
             return Name();
@@ -57,8 +65,8 @@ namespace XenAPI
             if (Connection == null)
                 return string.Empty;
 
-            Host master = Connection.Resolve(this.master);
-            return master == null ? "" : master.Name();
+            Host coordinator = Connection.Resolve(this.master);
+            return coordinator == null ? "" : coordinator.Name();
         }
 
         internal override string LocationString()
@@ -84,12 +92,12 @@ namespace XenAPI
             return result;
         }
 
-        public bool IsMasterUpgraded()
+        public bool IsCoordinatorUpgraded()
         {
-            Host master = Helpers.GetMaster(this);
+            Host coordinator = Helpers.GetCoordinator(this);
             foreach (var host in this.Connection.Cache.Hosts)
             {
-                if (host.LongProductVersion() != master.LongProductVersion())
+                if (host.LongProductVersion() != coordinator.LongProductVersion())
                     return true;
             }
             return false;
@@ -107,11 +115,6 @@ namespace XenAPI
         {
             return Connection != null && (name_label != "" || Connection.Cache.HostCount > 1);
         }
-
-        private const string ROLLING_UPGRADE_IN_PROGRESS = "rolling_upgrade_in_progress";
-        private const string FORBID_RPU_FOR_HCI = "hci-forbid-rpu";
-        private const string FAULT_TOLERANCE_LIMIT_FOR_HCI = "hci-limit-fault-tolerance";
-        private const string FORBID_UPDATE_AUTO_RESTARTS = "hci-forbid-update-auto-restart";
 
         public bool RollingUpgrade()
         {
@@ -194,11 +197,11 @@ namespace XenAPI
 
         public List<XenAPI.Host> HostsToUpgrade()
         {
-            //First one to upgrade has to be the master
-            var master = Helpers.GetMaster(Connection);
+            //First one to upgrade has to be the coordinator
+            var coordinator = Helpers.GetCoordinator(Connection);
 
-            List<XenAPI.Host> result = IsMasterUpgraded()
-                ? Connection.Cache.Hosts.Where(host => host.LongProductVersion() != master.LongProductVersion()).ToList()
+            List<XenAPI.Host> result = IsCoordinatorUpgraded()
+                ? Connection.Cache.Hosts.Where(host => host.LongProductVersion() != coordinator.LongProductVersion()).ToList()
                 : Connection.Cache.Hosts.ToList();
             result.Sort();
 
@@ -207,11 +210,11 @@ namespace XenAPI
 
         public bool IsPoolFullyUpgraded()
         {
-            Host master = Helpers.GetMaster(this);
+            Host coordinator = Helpers.GetCoordinator(this);
 
             foreach (var host in this.Connection.Cache.Hosts)
             {
-                if (host.LongProductVersion() != master.LongProductVersion())
+                if (host.LongProductVersion() != coordinator.LongProductVersion())
                     return false;
             }
             return true;
@@ -224,7 +227,7 @@ namespace XenAPI
             {
                 if (hostWithSmallerVersion == null)
                     hostWithSmallerVersion = host;
-                else if (Helpers.productVersionCompare(hostWithSmallerVersion.ProductVersion(), host.ProductVersion()) > 0)
+                else if (Helpers.ProductVersionCompare(hostWithSmallerVersion.ProductVersion(), host.ProductVersion()) > 0)
                     hostWithSmallerVersion = host;
             }
             return hostWithSmallerVersion;
@@ -255,9 +258,20 @@ namespace XenAPI
 
         #region Health Check settings
 
-        public HealthCheckSettings HealthCheckSettings()
+        public enum HealthCheckStatus
         {
-            return new HealthCheckSettings(health_check_config);
+            Disabled, Enabled, Undefined
+        }
+
+        public HealthCheckStatus GetHealthCheckStatus()
+        {
+            if (health_check_config == null || !health_check_config.ContainsKey(HEALTH_CHECK_ENROLLMENT))
+                return HealthCheckStatus.Undefined;
+
+            if (health_check_config[HEALTH_CHECK_ENROLLMENT] == "true")
+                return HealthCheckStatus.Enabled;
+
+            return HealthCheckStatus.Disabled;
         }
 
         #endregion

@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -72,6 +71,7 @@ namespace XenAdmin
             ImageList16.Images.Add("000_HostUnpatched_h32bit_16.png", XenAdmin.Properties.Resources._000_HostUnpatched_h32bit_16);
             ImageList16.Images.Add("server_up_16.png", XenAdmin.Properties.Resources.server_up_16);
             ImageList16.Images.Add("000_ServerErrorFile_h32bit_16.png", XenAdmin.Properties.Resources._000_ServerErrorFile_h32bit_16);
+            ImageList16.Images.Add("000_Server_h32bit_16-w-alert.png", Properties.Resources._000_Server_h32bit_16_w_alert);
 
             ImageList16.Images.Add("000_StartVM_h32bit_16.png", XenAdmin.Properties.Resources._000_StartVM_h32bit_16);
             ImageList16.Images.Add("000_VMDisabled_h32bit_16.png", XenAdmin.Properties.Resources._000_VMDisabled_h32bit_16);
@@ -95,9 +95,8 @@ namespace XenAdmin
 
             ImageList16.Images.Add("000_PoolConnected_h32bit_16.png", XenAdmin.Properties.Resources._000_PoolConnected_h32bit_16);
             ImageList16.Images.Add("pool_up_16.png", XenAdmin.Properties.Resources.pool_up_16);
-
+            ImageList16.Images.Add("pool_unpatched.png", Properties.Resources.pool_unpatched);
             ImageList16.Images.Add("000_Pool_h32bit_16-w-alert.png", Properties.Resources._000_Pool_h32bit_16_w_alert);
-            ImageList16.Images.Add("000_Server_h32bit_16-w-alert.png", Properties.Resources._000_Server_h32bit_16_w_alert);
 
             ImageList16.Images.Add("000_Storage_h32bit_16.png", XenAdmin.Properties.Resources._000_Storage_h32bit_16);
             ImageList16.Images.Add("000_StorageBroken_h32bit_16.png", XenAdmin.Properties.Resources._000_StorageBroken_h32bit_16);
@@ -135,6 +134,8 @@ namespace XenAdmin
 
             ImageList16.Images.Add("centos_16x.png", Properties.Resources.centos_16x);
             ImageList16.Images.Add("debian_16x.png", Properties.Resources.debian_16x);
+            ImageList16.Images.Add("gooroom_16x.png", Properties.Resources.gooroom_16x);
+            ImageList16.Images.Add("rocky_16x.png", Properties.Resources.rocky_16x);
             ImageList16.Images.Add("linx_16x.png", Properties.Resources.linx_16x);
             ImageList16.Images.Add("oracle_16x.png", Properties.Resources.oracle_16x);
             ImageList16.Images.Add("redhat_16x.png", Properties.Resources.redhat_16x);
@@ -182,6 +183,8 @@ namespace XenAdmin
             ImageList16.Images.Add("RunningDC_16.png", Properties.Resources.RunningDC_16);
             ImageList16.Images.Add("StoppedDC_16.png", Properties.Resources.StoppedDC_16);
             ImageList16.Images.Add("PausedDC_16.png", Properties.Resources.PausedDC_16);
+
+            ImageList16.Images.Add("usb_16.png", Properties.Resources.usb_16);
 
             #region Status Icons
             ImageList16.Images.Add("000_Tick_h32bit_16", Properties.Resources._000_Tick_h32bit_16); //Ok
@@ -354,7 +357,7 @@ namespace XenAdmin
             if (pool != null)
                 return GetIconFor(pool);
 
-            Host host = Helpers.GetMaster(connection);
+            Host host = Helpers.GetCoordinator(connection);
             if (host != null)
                 return GetIconFor(host);
 
@@ -463,44 +466,53 @@ namespace XenAdmin
 
         public static Icons GetIconFor(Host host)
         {
+            Host_metrics metrics = host.Connection.Resolve(host.metrics);
 
-            Host_metrics metrics = host.Connection.Resolve<Host_metrics>(host.metrics);
-            bool host_is_live = metrics != null && metrics.live;
-
-            if (host_is_live)
+            if (metrics != null && metrics.live)
             {
                 if (host.IsExpired())
-                {
                     return Icons.ServerUnlicensed;
-                }
+
                 if (host.HasCrashDumps())
-                {
                     return Icons.HostHasCrashDumps;
-                }
-                if (host.current_operations.ContainsValue(host_allowed_operations.evacuate)
-                    || !host.enabled)
-                {
+
+                if (host.current_operations.ContainsValue(host_allowed_operations.evacuate) || !host.enabled)
                     return Icons.HostEvacuate;
-                }
-                else if (Helpers.IsOlderThanMaster(host))
+
+                if (Helpers.IsOlderThanCoordinator(host))
+                    return Icons.HostOlderThanCoordinator;
+
+                if (Helpers.CloudOrGreater(host))
                 {
-                    return Icons.HostOlderThanMaster;
+                    if (host.Connection.Cache.Hosts.Select(h => h.latest_synced_updates_applied).Distinct().Count() > 1 &&
+                        host.latest_synced_updates_applied != latest_synced_updates_applied_state.yes)
+                        return Icons.HostUnpatched;
                 }
                 else
                 {
-                    return Icons.HostConnected;
+                    var cache = host.Connection.Cache;
+                    var allHostCount = host.Connection.Cache.HostCount;
+
+                    foreach (var u in cache.Pool_updates)
+                    {
+                        var appliedHosts = u.AppliedOnHosts();
+
+                        if (appliedHosts.Count > 0 && appliedHosts.Count != allHostCount &&
+                            u.EnforceHomogeneity() && !appliedHosts.Contains(host))
+                            return Icons.HostUnpatched;
+                    }
                 }
+
+                return Icons.HostConnected;
             }
-            else
-            {
-                // XenAdmin.XenSearch.Group puts a fake host in the treeview for disconnected
-                // XenConnections. So here we give the yellow 'connection in progress' icon which formerly
-                // applied only to XenConnections.
-                if (host.Connection.InProgress && !host.Connection.IsConnected)
-                    return Icons.HostConnecting;
-                else
-                    return Icons.HostDisconnected;
-            }
+
+            // XenAdmin.XenSearch.Group puts a fake host in the treeview for disconnected
+            // XenConnections. So here we give the yellow 'connection in progress' icon which formerly
+            // applied only to XenConnections.
+            if (host.Connection.InProgress && !host.Connection.IsConnected)
+                return Icons.HostConnecting;
+            
+            return Icons.HostDisconnected;
         }
 
         public static Icons GetIconFor(Pool pool)
@@ -509,9 +521,30 @@ namespace XenAdmin
                 return Icons.HostDisconnected;
             if (pool.Connection.Cache.Hosts.Any(h => h.IsExpired()))
                 return Icons.PoolUnlicensed;
-            if (pool.IsPoolFullyUpgraded())
-                return Icons.PoolConnected;
-            return Icons.PoolNotFullyUpgraded;
+
+            if (!pool.IsPoolFullyUpgraded())
+                return Icons.PoolNotFullyUpgraded;
+
+            if (Helpers.CloudOrGreater(pool.Connection))
+            {
+                if (pool.Connection.Cache.Hosts.Select(h => h.latest_synced_updates_applied).Distinct().Count() > 1)
+                    return Icons.PoolUnPatched;
+            }
+            else
+            {
+                var cache = pool.Connection.Cache;
+                var allHostCount = pool.Connection.Cache.HostCount;
+
+                foreach (var u in cache.Pool_updates)
+                {
+                    var appliedHosts = u.AppliedOnHosts();
+
+                    if (appliedHosts.Count > 0 && appliedHosts.Count != allHostCount && u.EnforceHomogeneity())
+                        return Icons.PoolUnPatched;
+                }
+            }
+
+            return Icons.PoolConnected;
         }
 
         public static Icons GetIconFor(XenAPI.Network network)
@@ -934,6 +967,14 @@ namespace XenAdmin
             public static Image ConversionManager = Properties.Resources.xcm;
             public static Image ConversionManager_32 = Properties.Resources.xcm_32x32;
             public static Image queued = Properties.Resources.queued;
-        }
+public      public static Bitmap asianux_16x = Properties.Resources.asianux_16x;
+            public static Bitmap gooroom_16x = Properties.Resources.gooroom_16x;
+            public static Bitmap rocky_16x = Properties.Resources.rocky_16x;
+            public static Bitmap linx_16x = Properties.Resources.linx_16x;
+            public static Bitmap turbo_16x = Properties.Resources.turbo_16x;
+            public static Bitmap usb_16 = Properties.Resources.usb_16;
+            public static Bitmap yinhekylin_16x = Properties.Resources.yinhekylin_16x;
+            public static Bitmap rightArrowLong_Blue_16 = Properties.Resources.rightArrowLong_Blue_16;
+            public static Bitmap rpm_package = Properties.Resources.rpm_package;        }
     }
 }

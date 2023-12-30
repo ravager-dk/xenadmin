@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,11 +30,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-
 using XenAdmin.Core;
 using XenAdmin.Wlb;
-using XenAdmin.Network;
 using XenAPI;
 
 

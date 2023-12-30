@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,18 +31,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
-using XenAPI;
-using XenAdmin.Dialogs;
 using System.Threading;
-using XenAdmin.Controls.DataGridViewEx;
-using XenAdmin.Core;
+using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Commands;
+using XenAdmin.Controls.DataGridViewEx;
+using XenAdmin.Core;
+using XenAdmin.Dialogs;
 using XenAdmin.Network;
-using XenAdmin.Properties;
+using XenAPI;
 using XenCenterLib;
 
 namespace XenAdmin.TabPages
@@ -57,11 +54,12 @@ namespace XenAdmin.TabPages
         /// ever set once.
         /// </summary>
         private Pool pool;
-        private Host master;
+        private Host coordinator;
         private IXenConnection _connection;
 
         private Thread _loggedInStatusUpdater;
         private bool _updateInProgress;
+        private readonly object _statusUpdaterLock = new object();
 
         private string _storedDomain;
         private string _storedUsername;
@@ -114,7 +112,7 @@ namespace XenAdmin.TabPages
 
         /// <summary>
         /// This method is used when the cache was not populated by the time we set the XenObject. It sets the appropriate event handlers,
-        /// references to the master and the pool, and populates the tab with the correct configuration. It de-registers
+        /// references to the coordinator and the pool, and populates the tab with the correct configuration. It de-registers
         /// itself when successful.
         /// </summary>
         /// <param name="sender"></param>
@@ -131,14 +129,14 @@ namespace XenAdmin.TabPages
             Program.Invoke(this, checkAdType);
         }
 
-        private void RefreshMaster()
+        private void RefreshCoordinator()
         {
-            if (master != null)
-                master.PropertyChanged -= master_PropertyChanged;
+            if (coordinator != null)
+                coordinator.PropertyChanged -= coordinator_PropertyChanged;
 
-            master = Helpers.GetMaster(_connection);
-            if (master != null)
-                master.PropertyChanged += master_PropertyChanged;
+            coordinator = Helpers.GetCoordinator(_connection);
+            if (coordinator != null)
+                coordinator.PropertyChanged += coordinator_PropertyChanged;
         }
 
         /// <summary>
@@ -149,8 +147,8 @@ namespace XenAdmin.TabPages
             if (pool != null)
                 pool.PropertyChanged -= pool_PropertyChanged;
 
-            if (master != null)
-                master.PropertyChanged -= master_PropertyChanged;
+            if (coordinator != null)
+                coordinator.PropertyChanged -= coordinator_PropertyChanged;
 
             if (_connection != null)
             {
@@ -197,11 +195,11 @@ namespace XenAdmin.TabPages
 
         /// <summary>
         /// We need to update the configuration if the authentication method changes, and also various labels display the name of the
-        /// master and should also be updated if that changes.
+        /// coordinator and should also be updated if that changes.
         /// </summary>
         /// <param name="sender1"></param>
         /// <param name="e"></param>
-        void master_PropertyChanged(object sender1, PropertyChangedEventArgs e)
+        void coordinator_PropertyChanged(object sender1, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "external_auth_type" || e.PropertyName == "name_label")
                 Program.Invoke(this, checkAdType);
@@ -209,7 +207,7 @@ namespace XenAdmin.TabPages
 
         /// <summary>
         /// Various labels display the name of the pool and should also be updated if that changes.
-        /// Additionally if the pool master changes we need to update our event handles.
+        /// Additionally if the pool coordinator changes we need to update our event handles.
         /// There is a sanity check in the checkAdType() method in case this event is stuck in a queue.
         /// </summary>
         void pool_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -252,36 +250,36 @@ namespace XenAdmin.TabPages
         private void checkAdType()
         {
             Program.AssertOnEventThread();
-            //refresh the master in case the cache is slow
-            RefreshMaster();
+            //refresh the coordinator in case the cache is slow
+            RefreshCoordinator();
 
-            if (master == null)
+            if (coordinator == null)
             {
-                log.WarnFormat("Could not resolve pool master for connection '{0}'; disabling.", Helpers.GetName(_connection));
-                OnMasterUnavailable();
+                log.WarnFormat("Could not resolve pool coordinator for connection '{0}'; disabling.", Helpers.GetName(_connection));
+                OnCoordinatorUnavailable();
                 return;
             }
 
             var action = (from ActionBase act in ConnectionsManager.History
-                let async = act as AsyncAction
-                where async != null && !async.IsCompleted && !async.Cancelled && async.Connection == _connection
-                      && (async is EnableAdAction || async is DisableAdAction)
-                select async).FirstOrDefault();
+                          let async = act as AsyncAction
+                          where async != null && !async.IsCompleted && !async.Cancelled && async.Connection == _connection
+                                && (async is EnableAdAction || async is DisableAdAction)
+                          select async).FirstOrDefault();
 
             if (action != null)
             {
                 OnAdConfiguring();
             }
-            else if (master.external_auth_type == Auth.AUTH_TYPE_NONE) // AD is not yet configured
+            else if (coordinator.external_auth_type == Auth.AUTH_TYPE_NONE) // AD is not yet configured
             {
                 OnAdDisabled();
             }
             else // AD is already configured
             {
-                if (master.external_auth_type != Auth.AUTH_TYPE_AD)
+                if (coordinator.external_auth_type != Auth.AUTH_TYPE_AD)
                 {
-                    log.WarnFormat("Unrecognised value '{0}' for external_auth_type on pool master '{1}' for pool '{2}'; assuming AD enabled on pool.",
-                        master.external_auth_type, Helpers.GetName(master), Helpers.GetName(_connection));
+                    log.WarnFormat("Unrecognised value '{0}' for external_auth_type on pool coordinator '{1}' for pool '{2}'; assuming AD enabled on pool.",
+                        coordinator.external_auth_type, Helpers.GetName(coordinator), Helpers.GetName(_connection));
                 }
 
                 OnAdEnabled();
@@ -299,14 +297,14 @@ namespace XenAdmin.TabPages
             {
                 Program.AssertOnEventThread();
 
-                Host master = Helpers.GetMaster(_connection);
-                if (master == null)
+                Host coordinator = Helpers.GetCoordinator(_connection);
+                if (coordinator == null)
                 {
-                    log.WarnFormat("Could not resolve pool master for connection '{0}'; disabling.", Helpers.GetName(_connection));
+                    log.WarnFormat("Could not resolve pool coordinator for connection '{0}'; disabling.", Helpers.GetName(_connection));
                     return Messages.UNKNOWN;
                 }
 
-                return master.external_auth_service_name;
+                return coordinator.external_auth_service_name;
             }
         }
 
@@ -346,14 +344,14 @@ namespace XenAdmin.TabPages
                 Helpers.GetName(_connection).Ellipsise(70));
         }
 
-        private void OnMasterUnavailable()
+        private void OnCoordinatorUnavailable()
         {
             Program.AssertOnEventThread();
 
             flowLayoutPanel1.Enabled = false;
             SetSubjectListEnable(false);
             buttonJoinLeave.Enabled = false;
-            labelBlurb.Text = Messages.AD_MASTER_UNAVAILABLE_BLURB;
+            labelBlurb.Text = Messages.AD_COORDINATOR_UNAVAILABLE_BLURB;
         }
 
         private void RepopulateListBox()
@@ -405,7 +403,7 @@ namespace XenAdmin.TabPages
 
                 GridViewSubjectList.Rows.Clear();
 
-                var rows = new List<DataGridViewRow> {new AdSubjectRow(null)}; //local root account
+                var rows = new List<DataGridViewRow> { new AdSubjectRow(null) }; //local root account
 
                 foreach (Subject subject in _connection.Cache.Subjects) //all other subjects in the pool
                 {
@@ -443,7 +441,7 @@ namespace XenAdmin.TabPages
 
         private void subject_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != "roles")
+            if (e.PropertyName != "roles" && e.PropertyName != "other_config")
                 return;
 
             var subject = sender as Subject;
@@ -456,9 +454,9 @@ namespace XenAdmin.TabPages
                     return;
 
                 var found = (from DataGridViewRow row in GridViewSubjectList.Rows
-                    let adRow = row as AdSubjectRow
-                    where adRow != null && adRow.subject != null && adRow.subject.opaque_ref == subject.opaque_ref
-                    select adRow).FirstOrDefault();
+                             let adRow = row as AdSubjectRow
+                             where adRow != null && adRow.subject != null && adRow.subject.opaque_ref == subject.opaque_ref
+                             select adRow).FirstOrDefault();
 
                 try
                 {
@@ -478,7 +476,6 @@ namespace XenAdmin.TabPages
         }
 
 
-        private object statusUpdaterLock = new object();
         /// <summary>
         /// Background thread called periodically to update subjects logged in status.
         /// </summary>
@@ -518,9 +515,9 @@ namespace XenAdmin.TabPages
                             EnableButtons();
                         });
                     }
-                    lock (statusUpdaterLock)
+                    lock (_statusUpdaterLock)
                     {
-                        Monitor.Wait(statusUpdaterLock, 5000);
+                        Monitor.Wait(_statusUpdaterLock, 5000);
                     }
                 }
                 catch (Exception e)
@@ -644,8 +641,8 @@ namespace XenAdmin.TabPages
                 if (subj != null)
                     subject = subj;
 
-                _cellExpander.Value = expanded ? Resources.expanded_triangle : Resources.contracted_triangle;
-                _cellGroupOrUser.Value = IsLocalRootRow || !subject.IsGroup ? Resources._000_User_h32bit_16 : Resources._000_UserAndGroup_h32bit_16;
+                _cellExpander.Value = expanded ? Images.StaticImages.expanded_triangle : Images.StaticImages.contracted_triangle;
+                _cellGroupOrUser.Value = IsLocalRootRow || !subject.IsGroup ? Images.StaticImages._000_User_h32bit_16 : Images.StaticImages._000_UserAndGroup_h32bit_16;
                 _cellSubjectInfo.Value = expanded ? expandedSubjectInfo : contractedSubjectInfo;
                 _cellRoles.Value = expanded ? expandedRoles : contractedRoles;
                 _cellLoggedIn.Value = IsLocalRootRow || subject.IsGroup || statusLost
@@ -689,7 +686,6 @@ namespace XenAdmin.TabPages
 
         private void buttonJoinLeave_Click(object sender, EventArgs e)
         {
-            Program.AssertOnEventThread();
             if (buttonJoinLeave.Text == Messages.AD_JOIN_DOMAIN)
             {
                 // We're enabling AD            
@@ -697,7 +693,7 @@ namespace XenAdmin.TabPages
                 // so the user won't have to retype it for future join attempts
 
                 using (var joinPrompt = new AdPasswordPrompt(true)
-                    {Domain = _storedDomain, Username = _storedUsername})
+                { Domain = _storedDomain, Username = _storedUsername })
                 {
                     var result = joinPrompt.ShowDialog(this);
                     _storedDomain = joinPrompt.Domain;
@@ -725,10 +721,10 @@ namespace XenAdmin.TabPages
                                 Helpers.GetName(_connection).Ellipsise(50).EscapeAmpersands(), Domain.Ellipsise(30));
 
                     DialogResult r;
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(null, msg, Messages.AD_FEATURE_NAME),
+                    using (var dlg = new NoIconDialog(msg,
                         ThreeButtonDialog.ButtonYes,
-                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                    { WindowTitle = Messages.AD_FEATURE_NAME })
                     {
                         r = dlg.ShowDialog(this);
                     }
@@ -745,10 +741,10 @@ namespace XenAdmin.TabPages
                                 Helpers.GetName(_connection).Ellipsise(50), Domain.Ellipsise(30));
 
                     DialogResult r;
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, msg, Messages.ACTIVE_DIRECTORY_TAB_TITLE),
+                    using (var dlg = new WarningDialog(msg,
                         ThreeButtonDialog.ButtonYes,
-                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                    { WindowTitle = Messages.ACTIVE_DIRECTORY_TAB_TITLE })
                     {
                         r = dlg.ShowDialog(this);
                     }
@@ -759,15 +755,15 @@ namespace XenAdmin.TabPages
                         return;
                 }
 
-                Host master = Helpers.GetMaster(_connection);
-                if (master == null)
+                Host coordinator = Helpers.GetCoordinator(_connection);
+                if (coordinator == null)
                 {
                     // Really shouldn't happen unless we have been very slow with the cache
-                    log.Error("Could not retrieve master when trying to look up domain..");
+                    log.Error("Could not retrieve coordinator when trying to look up domain..");
                     throw new Exception(Messages.CONNECTION_IO_EXCEPTION);
                 }
 
-                using (var passPrompt = new AdPasswordPrompt(false, master.external_auth_service_name))
+                using (var passPrompt = new AdPasswordPrompt(false, coordinator.external_auth_service_name))
                 {
                     var result = passPrompt.ShowDialog(this);
                     if (result == DialogResult.Cancel)
@@ -777,7 +773,7 @@ namespace XenAdmin.TabPages
                     if (result != DialogResult.Ignore)
                     {
                         creds.Add(DisableAdAction.KEY_USER, passPrompt.Username);
-                        creds.Add(DisableAdAction.KEY_PASSWORD, passPrompt.Password);
+                        creds.Add(DisableAdAction.KEY_PASS, passPrompt.Password);
                     }
 
                     new DisableAdAction(_connection, creds).RunAsync();
@@ -787,7 +783,6 @@ namespace XenAdmin.TabPages
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            Program.AssertOnEventThread();
             if (!buttonAdd.Enabled)
                 return;
 
@@ -797,36 +792,52 @@ namespace XenAdmin.TabPages
 
         private void ButtonRemove_Click(object sender, EventArgs e)
         {
-            Program.AssertOnEventThread();
-            
             // Double check, this method is called from a context menu as well and the state could have changed under it
             if (!ButtonRemove.Enabled)
                 return;
 
-            List<Subject> subjectsToRemove = new List<Subject>();
-            foreach (AdSubjectRow r in GridViewSubjectList.SelectedRows)
-                subjectsToRemove.Add(r.subject);
+            var subjectsToRemove = GridViewSubjectList.SelectedRows.Cast<AdSubjectRow>().Select(r => r.subject).ToList();
+            if (subjectsToRemove.Count < 1)
+                return;
 
             var removeMessage = subjectsToRemove.Count == 1
-                ? string.Format(Messages.QUESTION_REMOVE_AD_USER_ONE, subjectsToRemove[0].DisplayName ?? subjectsToRemove[0].SubjectName)
-                : string.Format(Messages.QUESTION_REMOVE_AD_USER_MANY, subjectsToRemove.Count);
+                ? string.Format(Messages.AD_REMOVE_USER_ONE, subjectsToRemove[0].DisplayName ?? subjectsToRemove[0].SubjectName)
+                : string.Format(Messages.AD_REMOVE_USER_MANY, subjectsToRemove.Count);
 
-            DialogResult questionDialog;
-            using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(
-                                    null,
-                                    removeMessage,
-                                    Messages.AD_FEATURE_NAME),
-                                ThreeButtonDialog.ButtonYes,
-                                new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+            string adminMessage = null;
+            var conn = subjectsToRemove.FirstOrDefault(s => s.Connection != null)?.Connection;
+
+            if (conn != null && Helpers.StockholmOrGreater(conn) && !conn.Cache.Hosts.Any(Host.RestrictPoolSecretRotation))
             {
-                questionDialog = dlg.ShowDialog(this);
+                var poolAdminsToRemove = (from Subject s in subjectsToRemove
+                                          let roles = s.Connection.ResolveAll(s.roles)
+                                          where roles.Any(r => r.name_label == Role.MR_ROLE_POOL_ADMIN)
+                                          select s).ToList();
+
+                if (subjectsToRemove.Count == poolAdminsToRemove.Count)
+                    adminMessage = poolAdminsToRemove.Count == 1
+                        ? Messages.QUESTION_ADMIN_EXIT_PROCEDURE_ONE
+                        : Messages.QUESTION_ADMIN_EXIT_PROCEDURE_MANY;
+                else if (poolAdminsToRemove.Count > 0)
+                    adminMessage = poolAdminsToRemove.Count == 1
+                        ? Messages.QUESTION_ADMIN_EXIT_PROCEDURE_ONE_OF_MANY
+                        : string.Format(Messages.QUESTION_ADMIN_EXIT_PROCEDURE_SOME_OF_MANY, poolAdminsToRemove.Count);
+
+                if (!string.IsNullOrEmpty(adminMessage))
+                    removeMessage = string.Format("{0}\n\n{1} {2}", removeMessage, adminMessage, Messages.QUESTION_ADMIN_EXIT_PROCEDURE_ADVISORY);
             }
 
-            //CA-64818: DialogResult can be No if the No button has been hit
-            //or Cancel if the dialog has been closed from the control box
-            if (questionDialog != DialogResult.Yes)
-                return;
+            using (var dlg = new WarningDialog(removeMessage,
+                                ThreeButtonDialog.ButtonYes,
+                                new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+            { WindowTitle = Messages.AD_FEATURE_NAME })
+            {
+                //CA-64818: DialogResult can be No if the No button has been hit
+                //or Cancel if the dialog has been closed from the control box
+
+                if (dlg.ShowDialog(this) != DialogResult.Yes)
+                    return;
+            }
 
             // Warn if user is revoking his currently-in-use credentials
             Session session = _connection.Session;
@@ -845,17 +856,14 @@ namespace XenAdmin.TabPages
                         {
                             subjectName = subjectName.Ellipsise(256);
                         }
-                        string msg = string.Format(entry.IsGroup ? Messages.AD_CONFIRM_SUICIDE_GROUP : Messages.AD_CONFIRM_SUICIDE,
+                        string msg = string.Format(entry.IsGroup ? Messages.AD_CONFIRM_LOGOUT_CURRENT_USER_GROUP : Messages.AD_CONFIRM_LOGOUT_CURRENT_USER,
                                     subjectName, Helpers.GetName(_connection).Ellipsise(50));
 
                         DialogResult r;
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(
-                                SystemIcons.Warning,
-                                msg,
-                                Messages.AD_FEATURE_NAME),
+                        using (var dlg = new WarningDialog(msg,
                             ThreeButtonDialog.ButtonYes,
-                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                        { WindowTitle = Messages.AD_FEATURE_NAME })
                         {
                             r = dlg.ShowDialog(this);
                         }
@@ -1026,51 +1034,96 @@ namespace XenAdmin.TabPages
             }
         }
 
+        private static string GetFormattedSubjectList(List<Subject> selectedSubjects)
+        {
+            var listOfSubjects = string.Join(", ",
+                selectedSubjects.Select(sub => sub.DisplayName ?? sub.SubjectName ?? sub.subject_identifier).ToList()
+            );
+            return listOfSubjects;
+        }
+
         private void ButtonChangeRoles_Click(object sender, EventArgs e)
         {
-            Program.AssertOnEventThread();
             if (Helpers.FeatureForbidden(_connection, Host.RestrictRBAC))
             {
-                // Show upsell dialog
-                using (var dlg = new UpsellDialog(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_RBAC : Messages.UPSELL_BLURB_RBAC + Messages.UPSELL_BLURB_TRIAL,
-                    InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL))
-                    dlg.ShowDialog(this);
+                UpsellDialog.ShowUpsellDialog(string.Format(Messages.UPSELL_BLURB_RBAC, BrandManager.ProductBrand), this);
                 return;
-
             }
-
 
             // Double check, this method is called from a context menu as well and the state could have changed under it
             if (!ButtonChangeRoles.Enabled)
                 return;
 
-            List<Subject> selectedSubjects = new List<Subject>();
-            foreach (DataGridViewRow r in GridViewSubjectList.SelectedRows)
-            {
-                AdSubjectRow selectedRow = (AdSubjectRow)r;
-                // Should not be here, you can't change the root man!
-                if (selectedRow.IsLocalRootRow)
-                    continue;
-                selectedSubjects.Add(selectedRow.subject);
-            }
+            var selectedRows = GridViewSubjectList.SelectedRows.Cast<AdSubjectRow>().ToList();
+            var selectedSubjects = selectedRows.Where(r => !r.IsLocalRootRow).Select(r => r.subject).ToList();
+            var loggedInSelectedSubjects = selectedRows.Where(r => !r.IsLocalRootRow && r.LoggedIn).Select(r => r.subject).ToList();
 
-            using (var dialog = new RoleSelectionDialog(_connection, selectedSubjects.ToArray()))
-                dialog.ShowDialog(this);
+            using (var dialog = new RoleSelectionDialog(_connection, selectedSubjects))
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    var selectedRoles = dialog.SelectedRoles.OrderBy(x => x).ToList();
+                    var subjectsToLogout = new List<Subject>();
+                    var logSelfOut = false;
+
+                    foreach (var subject in loggedInSelectedSubjects)
+                    {
+                        var subjectRoles = subject.roles.Select(_connection.Resolve).OrderBy(x => x).ToList();
+
+                        if (!selectedRoles.SequenceEqual(subjectRoles))
+                            subjectsToLogout.Add(subject);
+
+                        if (subject.opaque_ref == _connection.Session.SessionSubject)
+                            logSelfOut = true;
+                    }
+
+                    if (subjectsToLogout.Count > 0 && !ConfirmLogout(logSelfOut, true, subjectsToLogout))
+                        return;
+
+                    var actions = new List<AsyncAction>();
+                    var successfulSubjects = new List<Subject>();
+
+                    foreach (var subject in selectedSubjects)
+                    {
+                        var action = new AddRemoveRolesAction(_connection, subject, dialog.SelectedRoles);
+                        action.Completed += actionBase =>
+                        {
+                            if (!actionBase.IsCancelled && actionBase.Exception == null)
+                                successfulSubjects.Add(subject);
+                        };
+                        actions.Add(action);
+                    }
+
+                    var format = selectedSubjects.Count > 1 ? Messages.AD_ADDING_REMOVING_ROLES_ON_MULTIPLE : Messages.AD_ADDING_REMOVING_ROLES_ON;
+                    var actionTitle = string.Format(format, GetFormattedSubjectList(selectedSubjects));
+
+                    var updateRolesAction = new MultipleAction(_connection, actionTitle, Messages.IN_PROGRESS, Messages.COMPLETED, actions, true, true);
+                    updateRolesAction.Completed += actionBase => Program.Invoke(this, () =>
+                    {
+                        if (actionBase.IsCancelled)
+                            return;
+
+                        var successfulSubjectsToLogOut = successfulSubjects.Where(subjectsToLogout.Contains).ToList();
+                        if (successfulSubjectsToLogOut.Count <= 0)
+                            return;
+
+                        LogoutSubjects(_connection.Session, successfulSubjectsToLogOut);
+                    });
+                    updateRolesAction.RunAsync();
+                }
         }
 
         private void ButtonLogout_Click(object sender, EventArgs e)
         {
-            Program.AssertOnEventThread();
             // Double check, this method is called from a context menu as well and the state could have changed under it
             if (!ButtonLogout.Enabled)
                 return;
 
-            Session session = _connection.Session;
+            var session = _connection.Session;
             if (session == null)
                 return;
 
             var subjectsToLogout = new List<Subject>();
-            bool logSelfOut = false;
+            var logSelfOut = false;
 
             foreach (AdSubjectRow r in GridViewSubjectList.SelectedRows)
             {
@@ -1083,70 +1136,135 @@ namespace XenAdmin.TabPages
                     logSelfOut = true;
             }
 
-            bool suicide = false;
+            if (subjectsToLogout.Count <= 0 || !ConfirmLogout(logSelfOut, false, subjectsToLogout))
+                return;
+
+            LogoutSubjects(session, subjectsToLogout);
+        }
+
+        private void LogoutSubjects(Session session, List<Subject> subjectsToLogout)
+        {
+            // We go through the list and disconnect each user session, doing our own last if necessary
+
+            var currentSubject = subjectsToLogout.FirstOrDefault(subject => subject.subject_identifier == session.UserSid);
+            var otherSubjects = subjectsToLogout.Where(subject => subject.subject_identifier != session.UserSid).ToList();
+
+            if (otherSubjects.Count == 0 && currentSubject != null)
+            {
+               LogOutCurrentSubject(currentSubject);
+                return;
+            }
+
+            var actions = otherSubjects.Select(NewLogOutSubjectAction).ToList();
+            var format = otherSubjects.Count > 1 ? Messages.TERMINATING_USER_SESSION_MULTIPLE : Messages.TERMINATING_USER_SESSION;
+            var actionTitle = string.Format(format, GetFormattedSubjectList(otherSubjects));
+
+            var logoutAction = new MultipleAction(_connection, actionTitle, Messages.IN_PROGRESS, Messages.COMPLETED, actions, true, true);
+            logoutAction.Completed += actionBase => Program.Invoke(this, () =>
+            {
+                if (!(actionBase is MultipleAction ma) || actionBase.IsCancelled)
+                    return;
+
+                if (currentSubject != null)
+                {
+                    //passing in elevated credentials avoids multiple prompts
+                    LogOutCurrentSubject(currentSubject, new AsyncAction.SudoElevationResult(ma.sudoUsername, ma.sudoPassword, null));
+                }
+                else
+                {
+                    // signal the background thread to update the logged in status
+                    lock (_statusUpdaterLock)
+                        Monitor.Pulse(_statusUpdaterLock);
+                }
+            });
+            logoutAction.RunAsync();
+        }
+
+        private void LogOutCurrentSubject(Subject currentSubject, AsyncAction.SudoElevationResult sudoElevation = null)
+        {
+            var action = NewLogOutSubjectAction(currentSubject);
+            action.Completed += actionBase => Program.Invoke(this, () =>
+            {
+                if (actionBase.IsCancelled)
+                    return;
+
+                //Session.logout_subject_identifier logs out all sessions except the current one,
+                //so if an elevated session was not needed, the current session will not have been
+                //logged out, hence we need to disconnect explicitly.
+                new DisconnectCommand(Program.MainWindow, _connection, false).Run();
+            });
+            action.RunAsync(sudoElevation);
+        }
+
+        private AsyncAction NewLogOutSubjectAction(Subject subject)
+        {
+            return new DelegatedAsyncAction(_connection,
+                string.Format(Messages.TERMINATING_USER_SESSION, subject.DisplayName ?? subject.SubjectName),
+                Messages.IN_PROGRESS, Messages.COMPLETED,
+                s => Session.logout_subject_identifier(s, subject.subject_identifier),
+                "session.logout_subject_identifier");
+        }
+
+        private bool ConfirmLogout(bool logSelfOut, bool isRoleChange, List<Subject> subjectsToLogout)
+        {
+            var logoutCurrentSubject = false;
+
             if (logSelfOut)
             {
-                var warnMsg = string.Format(subjectsToLogout.Count > 1 ? Messages.AD_LOGOUT_SUICIDE_MANY : Messages.AD_LOGOUT_SUICIDE_ONE,
-                    Helpers.GetName(_connection).Ellipsise(50));
+                var format =
+                    isRoleChange
+                        ? subjectsToLogout.Count > 1
+                            ? Messages.AD_LOGOUT_CURRENT_USER_MANY_ROLE_CHANGE
+                            : Messages.AD_LOGOUT_CURRENT_USER_ONE_ROLE_CHANGE
+                        : subjectsToLogout.Count > 1
+                            ? Messages.AD_LOGOUT_CURRENT_USER_MANY
+                            : Messages.AD_LOGOUT_CURRENT_USER_ONE;
 
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, warnMsg, Messages.AD_FEATURE_NAME),
-                    ThreeButtonDialog.ButtonYes,
-                    new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                var warnMsg = string.Format(format, Helpers.GetName(_connection).Ellipsise(50));
+
+                using (var dlg = new WarningDialog(warnMsg,
+                        ThreeButtonDialog.ButtonYes,
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                { WindowTitle = Messages.AD_FEATURE_NAME })
                 {
                     //CA-64818: DialogResult can be No if the No button has been hit
                     //or Cancel if the dialog has been closed from the control box
                     if (dlg.ShowDialog(this) != DialogResult.Yes)
-                        return;
+                        return false;
 
-                    suicide = true;
+                    logoutCurrentSubject = true;
                 }
+
+                if (!DisconnectCommand.ConfirmCancelRunningActions(Program.MainWindow, this, _connection, true))
+                    return false;
             }
 
-            var logoutMessage = subjectsToLogout.Count == 1
-                ? string.Format(Messages.QUESTION_LOGOUT_AD_USER_ONE, subjectsToLogout[0].DisplayName ?? subjectsToLogout[0].SubjectName)
-                : string.Format(Messages.QUESTION_LOGOUT_AD_USER_MANY, subjectsToLogout.Count);
-
-            if (!suicide)//CA-68645
+            if (!logoutCurrentSubject) //CA-68645
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, logoutMessage, Messages.AD_FEATURE_NAME),
-                    ThreeButtonDialog.ButtonYes,
-                    new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                var logoutMessage =
+                    isRoleChange
+                        ? subjectsToLogout.Count == 1
+                            ? string.Format(Messages.AD_LOGOUT_USER_ONE_ROLE_CHANGE,
+                                subjectsToLogout[0].DisplayName ?? subjectsToLogout[0].SubjectName)
+                            : string.Format(Messages.AD_LOGOUT_USER_MANY_ROLE_CHANGE, subjectsToLogout.Count)
+                        : subjectsToLogout.Count == 1
+                            ? string.Format(Messages.AD_LOGOUT_USER_ONE,
+                                subjectsToLogout[0].DisplayName ?? subjectsToLogout[0].SubjectName)
+                            : string.Format(Messages.AD_LOGOUT_USER_MANY, subjectsToLogout.Count);
+
+                using (var dlg = new WarningDialog(logoutMessage,
+                        ThreeButtonDialog.ButtonYes,
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                { WindowTitle = Messages.AD_FEATURE_NAME })
                 {
                     //CA-64818: DialogResult can be No if the No button has been hit
                     //or Cancel if the dialog has been closed from the control box
                     if (dlg.ShowDialog(this) != DialogResult.Yes)
-                        return;
+                        return false;
                 }
             }
 
-            // Then we go through the list and disconnect each user session, doing our own last if necessary
-            foreach (AdSubjectRow r in GridViewSubjectList.SelectedRows)
-            {
-                if (r.IsLocalRootRow || !r.LoggedIn)
-                    continue;
-
-                if (session.UserSid == r.subject.subject_identifier)
-                    continue;
-
-                new DelegatedAsyncAction(_connection,
-                    string.Format(Messages.TERMINATING_USER_SESSION, r.subject.DisplayName ?? r.subject.SubjectName),
-                    Messages.IN_PROGRESS, Messages.COMPLETED,
-                    s => Session.logout_subject_identifier(s, r.subject.subject_identifier),
-                    "session.logout_subject_identifier").RunAsync();
-            }
-
-            if (suicide)
-            {
-                new DisconnectCommand(Program.MainWindow, _connection, true).Execute();
-            }
-            else
-            {
-                // signal the background thread to update the logged in status
-                lock (statusUpdaterLock)
-                    Monitor.Pulse(statusUpdaterLock);
-            }
+            return true;
         }
     }
 }

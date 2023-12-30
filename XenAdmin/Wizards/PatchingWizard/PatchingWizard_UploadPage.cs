@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,6 +31,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using XenAdmin.Actions.Updates;
 using XenAdmin.Core;
 using XenAPI;
 using XenAdmin.Alerts;
@@ -49,7 +49,7 @@ namespace XenAdmin.Wizards.PatchingWizard
         }
 
         #region Accessors
-        public readonly List<HostUpdateMapping> PatchMappings = new List<HostUpdateMapping>();
+        public List<HostUpdateMapping> PatchMappings { get; } = new List<HostUpdateMapping>();
 
         public UpdateType SelectedUpdateType { private get; set; }
         public string SelectedPatchFilePath { get; set; }
@@ -120,14 +120,9 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         #region XenTabPage overrides
 
-        public override string Text { get { return Messages.PATCHINGWIZARD_UPLOADPAGE_TEXT; } }
+        public override string Text => Messages.PATCHINGWIZARD_UPLOADPAGE_TEXT;
 
-        public override string PageTitle
-        {
-            get { return Messages.PATCHINGWIZARD_UPLOADPAGE_TITLE_ONLY_UPLOAD; }
-        }
-
-        public override string HelpID { get { return "UploadPatch"; } }
+        public override string PageTitle => Messages.PATCHINGWIZARD_UPLOADPAGE_TITLE_ONLY_UPLOAD;
 
         public override bool EnableNext()
         {
@@ -141,13 +136,15 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         public override bool EnablePrevious()
         {
-            return _thisPageIsCompleted;
+            return ThisPageIsCompleted;
         }
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
         {
             if (direction == PageLoadedDirection.Back)
-                _thisPageIsCompleted = false;
+                ThisPageIsCompleted = false;
+            else
+                TokenManager.InvalidateToken(XenAdminConfigManager.Provider);
         }
 
         #endregion
@@ -155,7 +152,7 @@ namespace XenAdmin.Wizards.PatchingWizard
        
         protected override string BlurbText()
         {
-            return Messages.PATCHINGWIZARD_SINGLEUPLOAD_TITLE;
+            return string.Format(Messages.PATCHINGWIZARD_SINGLEUPLOAD_TITLE, BrandManager.BrandConsole);
         }
 
         protected override string SuccessMessageOnCompletion(bool multiplePools)
@@ -212,35 +209,35 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         protected override List<HostPlan> GenerateHostPlans(Pool pool, out List<Host> applicableHosts)
         {
-            var master = Helpers.GetMaster(pool);
+            var coordinator = Helpers.GetCoordinator(pool);
             var planActions = new List<PlanAction>();
 
-            var alertPatch = SelectedUpdateAlert == null ? null : SelectedUpdateAlert.Patch;
+            var alertPatch = SelectedUpdateAlert?.Patch;
 
             bool download = alertPatch != null && PatchFromDisk.Key == null &&
                             (!AllDownloadedPatches.ContainsKey(alertPatch) || !File.Exists(AllDownloadedPatches[alertPatch]));
 
             if (download)
-                planActions.Add(new DownloadPatchPlanAction(master.Connection, alertPatch, AllDownloadedPatches, PatchFromDisk));
+                planActions.Add(new DownloadPatchPlanAction(coordinator.Connection, alertPatch, AllDownloadedPatches, PatchFromDisk));
 
             var skipDiskSpaceCheck = SelectedUpdateType != UpdateType.Legacy ||
-                                     Helpers.ElyOrGreater(master.Connection); //this is superfluous; just added for completeness
+                                     Helpers.ElyOrGreater(coordinator.Connection); //this is superfluous; just added for completeness
 
             if (alertPatch != null)
             {
-                planActions.Add(new UploadPatchToMasterPlanAction(this, master.Connection, alertPatch,
+                planActions.Add(new UploadPatchToCoordinatorPlanAction(this, coordinator.Connection, alertPatch,
                     PatchMappings, AllDownloadedPatches, PatchFromDisk, skipDiskSpaceCheck));
 
             }
             else if (!string.IsNullOrEmpty(SelectedPatchFilePath))
             {
-                var servers = SelectedServers.Where(s => s.Connection == master.Connection).ToList();
-                planActions.Add(new UploadPatchToMasterPlanAction(this, master.Connection, servers, SelectedPatchFilePath,
+                var servers = SelectedServers.Where(s => s.Connection == coordinator.Connection).ToList();
+                planActions.Add(new UploadPatchToCoordinatorPlanAction(this, coordinator.Connection, servers, SelectedPatchFilePath,
                     SelectedUpdateType, PatchMappings, skipDiskSpaceCheck));
             }
 
-            var hostPlan = new HostPlan(master, null, planActions, null);
-            applicableHosts = new List<Host> {master};
+            var hostPlan = new HostPlan(coordinator, null, planActions, null);
+            applicableHosts = new List<Host> {coordinator};
             return new List<HostPlan> {hostPlan};
         }
 

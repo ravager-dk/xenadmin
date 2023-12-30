@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
 using XenAPI;
 
 
@@ -40,10 +36,7 @@ namespace XenAdmin.Controls.CustomDataGraph
 {
     public class DataRange
     {
-        public static DataRange UnitRange
-        {
-            get { return new DataRange(1, 0, 1); }
-        }
+        public static DataRange UnitRange => new DataRange(1, 0, 1);
 
         public double Max;
         public double Min;
@@ -74,10 +67,7 @@ namespace XenAdmin.Controls.CustomDataGraph
             ScaleMode = scaleMode;
         }
 
-        public double Delta
-        {
-            get { return Max - Min; }
-        }
+        public double Delta => Max - Min;
 
         private double ConstrainedValue(double value)
         {
@@ -93,22 +83,27 @@ namespace XenAdmin.Controls.CustomDataGraph
 
             switch (Units)
             {
+                case Unit.Unknown:
+                    return Messages.GRAPHS_NO_DATA;
                 case Unit.Bytes:
                     return Util.MemorySizeStringVariousUnits(constrVal);
                 case Unit.BytesPerSecond:
                     return Util.DataRateString(constrVal);
                 case Unit.Percentage:
-                    return string.Format("{0}%", constrVal);
+                    return $"{constrVal}%";
                 case Unit.NanoSeconds:
                     return Util.NanoSecondsString(constrVal);
                 case Unit.CountsPerSecond:
                     return Util.CountsPerSecondString(constrVal);
+                case Unit.SecondsPerSecond:
+                    return Util.SecondsPerSecondString(constrVal);
                 case Unit.MilliWatt:
                     return Util.MilliWattString(constrVal);
                 case Unit.Centigrade:
-                    return string.Format("{0}\u2103", constrVal.ToString("0"));
+                    return $"{constrVal:0}\u2103";
                 case Unit.MegaHertz:
                     return Util.MegaHertzString(constrVal);
+                case Unit.None://fall through
                 default:
                     return constrVal.ToString();
             }
@@ -125,6 +120,8 @@ namespace XenAdmin.Controls.CustomDataGraph
 
                 switch (Units)
                 {
+                    case Unit.Unknown:
+                        return Messages.GRAPHS_NO_DATA;
                     case Unit.Bytes:
                         Util.MemorySizeValueVariousUnits(Max, out unit);
                         return unit;
@@ -138,6 +135,8 @@ namespace XenAdmin.Controls.CustomDataGraph
                         return unit;
                     case Unit.CountsPerSecond:
                         return Messages.COUNTS_PER_SEC_UNIT;
+                    case Unit.SecondsPerSecond:
+                        return UnitStrings.SEC_PER_SEC_UNIT;
                     case Unit.Centigrade:
                         return "\u2103";
                     case Unit.MilliWatt:
@@ -146,8 +145,9 @@ namespace XenAdmin.Controls.CustomDataGraph
                     case Unit.MegaHertz:
                         Util.MegaHertzValue(Max, out unit);
                         return unit;
+                    case Unit.None://fall through
                     default:
-                        return "";
+                        return String.Empty;
                 }
             }
         }
@@ -158,30 +158,26 @@ namespace XenAdmin.Controls.CustomDataGraph
         public virtual string GetRelativeString(double value)
         {
             double constrVal = ConstrainedValue(value);
-            string unit;
 
             switch (Units)
             {
+                case Unit.Unknown:
+                    return string.Empty;
                 case Unit.Bytes:
-                    return Util.MemorySizeValueVariousUnits(constrVal, out unit);
+                    return Util.MemorySizeValueVariousUnits(constrVal, out _);
                 case Unit.BytesPerSecond:
-                    return Util.DataRateValue(constrVal, out unit);
+                    return Util.DataRateValue(constrVal, out _);
                 case Unit.NanoSeconds:
-                    return Util.NanoSecondsValue(constrVal, out unit);
+                    return Util.NanoSecondsValue(constrVal, out _);
                 case Unit.MilliWatt:
-                    return Util.MilliWattValue(constrVal, out unit);
+                    return Util.MilliWattValue(constrVal, out _);
                 case Unit.MegaHertz:
-                    return Util.MegaHertzValue(constrVal, out unit);
+                    return Util.MegaHertzValue(constrVal, out _);
                 case Unit.CountsPerSecond://fall through
+                case Unit.SecondsPerSecond://fall through
                 default:
                     return constrVal.ToString();
             }
-        }
-
-        public void Shift(double delta)
-        {
-            Max += delta;
-            Min += delta;
         }
 
         internal void UpdateAll(IXenObject xo)
@@ -204,6 +200,7 @@ namespace XenAdmin.Controls.CustomDataGraph
                 case Unit.Percentage:
                 case Unit.NanoSeconds:
                 case Unit.CountsPerSecond:
+                case Unit.SecondsPerSecond:
                 case Unit.MilliWatt:
                 case Unit.Centigrade:
                 case Unit.MegaHertz:
@@ -260,5 +257,18 @@ namespace XenAdmin.Controls.CustomDataGraph
 
     public enum RangeScaleMode { Fixed, Auto, Delegate }
 
-    public enum Unit { None, Percentage, BytesPerSecond, Bytes, NanoSeconds, CountsPerSecond, MilliWatt, Centigrade, MegaHertz }
+    public enum Unit
+    {
+        None,
+        Percentage,
+        BytesPerSecond,
+        Bytes,
+        NanoSeconds,
+        CountsPerSecond,
+        SecondsPerSecond,
+        MilliWatt,
+        Centigrade,
+        MegaHertz,
+        Unknown
+    }
 }

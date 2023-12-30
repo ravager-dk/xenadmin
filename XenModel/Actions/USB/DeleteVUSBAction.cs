@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,31 +28,35 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class DeleteVUSBAction : PureAsyncAction
+    public class DeleteVUSBAction : AsyncAction
     {
-        private VUSB _vusb;
+        private readonly VUSB _vusb;
 
-        public DeleteVUSBAction(VUSB vusb, VM vm) : 
-            base(vusb.Connection, String.Format(Messages.ACTION_VUSB_DELETING, vusb.Name(), vm.Name()))
+        public DeleteVUSBAction(VUSB vusb, VM vm)
+            : base(vusb.Connection, string.Format(Messages.ACTION_VUSB_DELETING, vusb.Name(), vm.Name()))
         {
             _vusb = vusb;
+
+            if (_vusb != null && _vusb.currently_attached)
+            {
+                ApiMethodsToRoleCheck.AddRange(
+                    "VBD.get_allowed_operations",
+                    "VBD.async_unplug");
+            }
+
+            ApiMethodsToRoleCheck.Add("VUSB.async_destroy");
         }
 
         protected override void Run()
         {
             try
             {
-                if ((_vusb.currently_attached) &&
-                    XenAPI.VUSB.get_allowed_operations(Session, _vusb.opaque_ref).Contains(XenAPI.vusb_operations.unplug))
+                if (_vusb.currently_attached &&
+                    VUSB.get_allowed_operations(Session, _vusb.opaque_ref).Contains(vusb_operations.unplug))
                 {
                     RelatedTask = VUSB.async_unplug(Session, _vusb.opaque_ref);
                     PollToCompletion(0, 50);

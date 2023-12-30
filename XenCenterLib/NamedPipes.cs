@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,9 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -238,29 +237,82 @@ namespace XenCenterLib
         private static extern bool CloseHandle(IntPtr hObject);
 
         private const string STOP_LISTENING_MSG = "stop-listening-on-pipe";
+        private const uint PIPE_CALL_TIMEOUT = 30 * 1000; //30sec
 
         public class Pipe
         {
             private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-            public readonly IntPtr Handle;
-            public EventHandler<PipeReadEventArgs> Read;
+            private readonly IntPtr Handle;
             private Thread pipeThread;
             private readonly string pipePath;
             private volatile bool run;
 
-            /// <exception cref="Win32Exception">If creating the pipe failed for any reason.</exception>
+            public event Action<string> Read;
+
             public Pipe(string path)
             {
-                this.pipePath = path;
+                pipePath = path;
                 Handle = CreateNamedPipe(pipePath, PIPE_ACCESS_DUPLEX,
                     PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
                     PIPE_UNLIMITED_INSTANCES, 512, 512, NMPWAIT_WAIT_FOREVER, IntPtr.Zero);
+
                 if (Handle.ToInt32() == INVALID_HANDLE_VALUE)
+                    log.Error($"Creating named pipe {path} failed.", new Win32Exception());
+                else
+                    log.Info($"Successfully created named pipe '{path}'.");
+            }
+
+            public static bool ExistsPipe(string pipePath)
+            {
+                log.Debug($"Checking {pipePath} exists");
+
+                // CA-382850: We iterate manually in order to catch ArgumentExceptions
+                // when listing files. Pipes can be created with invalid characters in 
+                // their names. This throws exception when those files are accessed.
+                // Other processes might create these pipes and inadvertently prevent
+                // XenCenter from starting
+
+                var e = Directory.EnumerateFiles(@"\\.\pipe\");
+                using (var enumerator = e.GetEnumerator())
                 {
-                    // Throw last win32 exception
-                    throw new Win32Exception();
+                    while (true)
+                    {
+                        try
+                        {
+                            if (!enumerator.MoveNext())
+                            {
+                                break;
+                            }
+
+                            if (enumerator.Current != null && enumerator.Current.Contains(pipePath))
+                            {
+                                return true;
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            // ignore, the pipe's name contains invalid characters
+                        }
+                    }
                 }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Send a message to the pipe with the given path. May block for up to PIPE_CALL_TIMEOUT milliseconds.
+            /// </summary>
+            public static void SendMessageToPipe(string pipePath, string message)
+            {
+                byte[] msg = Encoding.Unicode.GetBytes(message);
+                byte[] rcv = Array.Empty<byte>();
+                var success = CallNamedPipe(pipePath, msg, (uint)msg.Length, rcv, (uint)rcv.Length, out _, PIPE_CALL_TIMEOUT);
+
+                if (success)
+                    log.Debug($"Message successfully forwarded to {pipePath})");
+                else
+                    log.Error($"Failed to forward message to {pipePath} with native error code {new Win32Exception().NativeErrorCode}");
             }
 
             /// <summary>
@@ -272,28 +324,17 @@ namespace XenCenterLib
                 if (pipeThread == null)
                 {
                     run = true;
-                    pipeThread = new Thread((ThreadStart)BackgroundPipeThread);
-                    pipeThread.Name = "Named pipe thread";
-                    pipeThread.IsBackground = true;
+                    pipeThread = new Thread(BackgroundPipeThread) { Name = "Named pipe thread", IsBackground = true };
                     pipeThread.Start();
                 }
             }
 
             /// <summary>
-            /// May block for up to 30 seconds.
+            /// Stops reading from this pipe. May block for up to PIPE_CALL_TIMEOUT milliseconds.
             /// </summary>
-            public void Disconnect()
+            public void EndRead()
             {
-                // Now connect to our own NamedPipe and sent a disconnect message
-                if (pipeThread != null)
-                {
-                    byte[] msg = Encoding.UTF8.GetBytes(STOP_LISTENING_MSG);
-                    byte[] rcv = new byte[0];
-                    UInt32 bytesRead;
-                    UInt32 timeout = 30 * 1000;
-
-                    CallNamedPipe(pipePath, msg, (UInt32)msg.Length, rcv, (UInt32)rcv.Length, out bytesRead, timeout);
-                }
+                SendMessageToPipe(pipePath, STOP_LISTENING_MSG);
             }
 
             private void BackgroundPipeThread()
@@ -307,22 +348,15 @@ namespace XenCenterLib
                         {
                             Win32Exception exn = new Win32Exception();
                             if (exn.NativeErrorCode == ERROR_PIPE_CONNECTED)
-                            {
-                                // This is OK. It simply means a remote process has connected to the
-                                // named pipe since we did the CreateNamedPipe.
-                            }
+                                log.Debug("A remote process has already connected to the named pipe since we called CreateNamedPipe.");
                             else
-                            {
                                 throw new Win32Exception("ConnectNamedPipe failed", exn);
-                            }
                         }
 
                         ProcessPipeMessage();
 
                         if (!DisconnectNamedPipe(Handle))
-                        {
                             throw new Win32Exception("DisconnectNamedPipe failed", new Win32Exception());
-                        }
                     }
                     catch (Exception exn)
                     {
@@ -355,11 +389,10 @@ namespace XenCenterLib
                         // Peek at the pipe to see how much data is available
                         // Read the data and append it to the buffer
                         // If we get ERROR_MORE_DATA, repeat
-                        UInt32 bytesRead, bytesAvailable, bytesLeft;
 
                         // First peek into the pipe to see how much data is waiting.
-                        byte[] peekBuf = new byte[0];
-                        if (!PeekNamedPipe(Handle, peekBuf, (UInt32)peekBuf.Length, out bytesRead, out bytesAvailable, out bytesLeft))
+                        byte[] peekBuf = Array.Empty<byte>();
+                        if (!PeekNamedPipe(Handle, peekBuf, (uint)peekBuf.Length, out var bytesRead, out var bytesAvailable, out var bytesLeft))
                         {
                             throw new Win32Exception(
                                 string.Format("PeekNamedPipe failed. bytesRead={0} bytesAvailable={1} bytesLeft={2}",
@@ -375,7 +408,7 @@ namespace XenCenterLib
 
                         // Now allocate a buffer of the correct size and read in the message.
                         byte[] readBuf = new byte[bytesAvailable];
-                        if (!ReadFile(Handle, readBuf, (UInt32)readBuf.Length, out bytesRead, ref overlapped))
+                        if (!ReadFile(Handle, readBuf, (uint)readBuf.Length, out bytesRead, ref overlapped))
                         {
                             Win32Exception exn = new Win32Exception();
                             if (exn.NativeErrorCode == ERROR_MORE_DATA)
@@ -387,37 +420,27 @@ namespace XenCenterLib
                                 ms.Write(readBuf, 0, (int)bytesRead);
                                 continue;
                             }
-                            else
-                            {
-                                throw new Win32Exception(
-                                    string.Format("ReadFile failed. readBuf.Length={0} bytesRead={1}",
-                                    readBuf.Length, bytesRead), exn);
-                            }
+
+                            throw new Win32Exception($"ReadFile failed. readBuf.Length={readBuf.Length} bytesRead={bytesRead}", exn);
                         }
-                        else
-                        {
-                            ms.Write(readBuf, 0, (int)bytesRead);
-                            break;
-                        }
+
+                        ms.Write(readBuf, 0, (int)bytesRead);
+                        break;
                     }
                     readMessage = ms.ToArray();
                 }
 
                 // Now perform a zero-byte write. This causes the CallNamedPipe call to
                 // return successfully in the splash screen.
-                UInt32 bytesWritten;
-                byte[] toWrite = new byte[0];
-                if (!WriteFile(Handle, toWrite, (UInt32)toWrite.Length, out bytesWritten, ref overlapped))
+                byte[] toWrite = Array.Empty<byte>();
+                if (!WriteFile(Handle, toWrite, (uint)toWrite.Length, out var bytesWritten, ref overlapped))
                 {
-                    throw new Win32Exception(
-                        string.Format("WriteFile failed. toWrite.Length={0} bytesWritten={1}",
-                        toWrite.Length, bytesWritten),
-                        new Win32Exception());
+                    throw new Win32Exception($"WriteFile failed. toWrite.Length={toWrite.Length} bytesWritten={bytesWritten}", new Win32Exception());
                 }
 
-                PipeReadEventArgs e = new PipeReadEventArgs(readMessage);
+                var message = Encoding.Unicode.GetString(readMessage);
 
-                if (e.Message == STOP_LISTENING_MSG)
+                if (message == STOP_LISTENING_MSG)
                 {
                     log.Debug("NamedPipe thread was told to stop listening");
                     run = false;
@@ -425,20 +448,7 @@ namespace XenCenterLib
                 }
 
                 // Now inform any listeners of the received data.
-                if (Read != null)
-                {
-                    Read(null, e);
-                }
-            }
-        }
-
-        public class PipeReadEventArgs : EventArgs
-        {
-            public readonly string Message;
-
-            public PipeReadEventArgs(byte[] bytes)
-            {
-                Message = Encoding.Unicode.GetString(bytes);
+                Read?.Invoke(message);
             }
         }
     }

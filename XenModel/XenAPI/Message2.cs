@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,6 +34,29 @@ namespace XenAPI
     {
         public enum MessageType
         {
+            UPDATES_FEATURE_EXPIRED,
+            UPDATES_FEATURE_EXPIRING_WARNING,
+            UPDATES_FEATURE_EXPIRING_MAJOR,
+            UPDATES_FEATURE_EXPIRING_CRITICAL,
+            LEAF_COALESCE_START_MESSAGE,
+            LEAF_COALESCE_COMPLETED,
+            LEAF_COALESCE_FAILED,
+            POST_ATTACH_SCAN_FAILED,
+            PERIODIC_UPDATE_SYNC_FAILED,
+            TLS_VERIFICATION_EMERGENCY_DISABLED,
+            FAILED_LOGIN_ATTEMPTS,
+            HOST_INTERNAL_CERTIFICATE_EXPIRING_07,
+            HOST_INTERNAL_CERTIFICATE_EXPIRING_14,
+            HOST_INTERNAL_CERTIFICATE_EXPIRING_30,
+            POOL_CA_CERTIFICATE_EXPIRING_07,
+            POOL_CA_CERTIFICATE_EXPIRING_14,
+            POOL_CA_CERTIFICATE_EXPIRING_30,
+            HOST_SERVER_CERTIFICATE_EXPIRING_07,
+            HOST_SERVER_CERTIFICATE_EXPIRING_14,
+            HOST_SERVER_CERTIFICATE_EXPIRING_30,
+            POOL_CA_CERTIFICATE_EXPIRED,
+            HOST_INTERNAL_CERTIFICATE_EXPIRED,
+            HOST_SERVER_CERTIFICATE_EXPIRED,
             CLUSTER_HOST_FENCING,
             CLUSTER_HOST_ENABLE_FAILED,
             POOL_CPU_FEATURES_UP,
@@ -91,8 +113,14 @@ namespace XenAPI
             VM_SECURE_BOOT_FAILED,
             VM_CLONED,
             VM_CRASHED,
+            VM_UNPAUSED,
+            VM_PAUSED,
             VM_RESUMED,
             VM_SUSPENDED,
+            VM_CHECKPOINTED,
+            VM_SNAPSHOT_REVERTED,
+            VM_SNAPSHOTTED,
+            VM_MIGRATED,
             VM_REBOOTED,
             VM_SHUTDOWN,
             VM_STARTED,
@@ -121,6 +149,52 @@ namespace XenAPI
             {
                 switch (this.name)
                 {
+                    case "UPDATES_FEATURE_EXPIRED":
+                        return MessageType.UPDATES_FEATURE_EXPIRED;
+                    case "UPDATES_FEATURE_EXPIRING_WARNING":
+                        return MessageType.UPDATES_FEATURE_EXPIRING_WARNING;
+                    case "UPDATES_FEATURE_EXPIRING_MAJOR":
+                        return MessageType.UPDATES_FEATURE_EXPIRING_MAJOR;
+                    case "UPDATES_FEATURE_EXPIRING_CRITICAL":
+                        return MessageType.UPDATES_FEATURE_EXPIRING_CRITICAL;
+                    case "LEAF_COALESCE_START_MESSAGE":
+                        return MessageType.LEAF_COALESCE_START_MESSAGE;
+                    case "LEAF_COALESCE_COMPLETED":
+                        return MessageType.LEAF_COALESCE_COMPLETED;
+                    case "LEAF_COALESCE_FAILED":
+                        return MessageType.LEAF_COALESCE_FAILED;
+                    case "POST_ATTACH_SCAN_FAILED":
+                        return MessageType.POST_ATTACH_SCAN_FAILED;
+                    case "PERIODIC_UPDATE_SYNC_FAILED":
+                        return MessageType.PERIODIC_UPDATE_SYNC_FAILED;
+                    case "TLS_VERIFICATION_EMERGENCY_DISABLED":
+                        return MessageType.TLS_VERIFICATION_EMERGENCY_DISABLED;
+                    case "FAILED_LOGIN_ATTEMPTS":
+                        return MessageType.FAILED_LOGIN_ATTEMPTS;
+                    case "HOST_INTERNAL_CERTIFICATE_EXPIRING_07":
+                        return MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRING_07;
+                    case "HOST_INTERNAL_CERTIFICATE_EXPIRING_14":
+                        return MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRING_14;
+                    case "HOST_INTERNAL_CERTIFICATE_EXPIRING_30":
+                        return MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRING_30;
+                    case "POOL_CA_CERTIFICATE_EXPIRING_07":
+                        return MessageType.POOL_CA_CERTIFICATE_EXPIRING_07;
+                    case "POOL_CA_CERTIFICATE_EXPIRING_14":
+                        return MessageType.POOL_CA_CERTIFICATE_EXPIRING_14;
+                    case "POOL_CA_CERTIFICATE_EXPIRING_30":
+                        return MessageType.POOL_CA_CERTIFICATE_EXPIRING_30;
+                    case "HOST_SERVER_CERTIFICATE_EXPIRING_07":
+                        return MessageType.HOST_SERVER_CERTIFICATE_EXPIRING_07;
+                    case "HOST_SERVER_CERTIFICATE_EXPIRING_14":
+                        return MessageType.HOST_SERVER_CERTIFICATE_EXPIRING_14;
+                    case "HOST_SERVER_CERTIFICATE_EXPIRING_30":
+                        return MessageType.HOST_SERVER_CERTIFICATE_EXPIRING_30;
+                    case "POOL_CA_CERTIFICATE_EXPIRED":
+                        return MessageType.POOL_CA_CERTIFICATE_EXPIRED;
+                    case "HOST_INTERNAL_CERTIFICATE_EXPIRED":
+                        return MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRED;
+                    case "HOST_SERVER_CERTIFICATE_EXPIRED":
+                        return MessageType.HOST_SERVER_CERTIFICATE_EXPIRED;
                     case "CLUSTER_HOST_FENCING":
                         return MessageType.CLUSTER_HOST_FENCING;
                     case "CLUSTER_HOST_ENABLE_FAILED":
@@ -233,10 +307,22 @@ namespace XenAPI
                         return MessageType.VM_CLONED;
                     case "VM_CRASHED":
                         return MessageType.VM_CRASHED;
+                    case "VM_UNPAUSED":
+                        return MessageType.VM_UNPAUSED;
+                    case "VM_PAUSED":
+                        return MessageType.VM_PAUSED;
                     case "VM_RESUMED":
                         return MessageType.VM_RESUMED;
                     case "VM_SUSPENDED":
                         return MessageType.VM_SUSPENDED;
+                    case "VM_CHECKPOINTED":
+                        return MessageType.VM_CHECKPOINTED;
+                    case "VM_SNAPSHOT_REVERTED":
+                        return MessageType.VM_SNAPSHOT_REVERTED;
+                    case "VM_SNAPSHOTTED":
+                        return MessageType.VM_SNAPSHOTTED;
+                    case "VM_MIGRATED":
+                        return MessageType.VM_MIGRATED;
                     case "VM_REBOOTED":
                         return MessageType.VM_REBOOTED;
                     case "VM_SHUTDOWN":

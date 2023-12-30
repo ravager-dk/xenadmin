@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -72,6 +71,8 @@ namespace XenAdmin.TabPages
 
         public override string HelpID => "TabPagePvs";
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IXenConnection Connection
         {
             get
@@ -101,7 +102,7 @@ namespace XenAdmin.TabPages
             if (XenAdminConfigManager.Provider.ObjectIsHidden(vm.opaque_ref))
                 return false;
 
-            return vm.is_a_real_vm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs) && !vm.IsBeingCreated;
+            return vm.IsRealVm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs) && !vm.IsBeingCreated;
         }
 
         private static bool VmIsJustAdded(VM vm)
@@ -138,7 +139,7 @@ namespace XenAdmin.TabPages
                 foreach (var vm in Connection.Cache.VMs)
                 {
                     // Add all real VMs and templates that begin with __gui__ (because this may be a new VM)
-                    var addVm = vm.is_a_real_vm() || VmIsJustAdded(vm) || vm.IsBeingCreated;
+                    var addVm = vm.IsRealVm() || VmIsJustAdded(vm) || vm.IsBeingCreated;
 
                     if (!addVm)
                         continue;
@@ -231,17 +232,17 @@ namespace XenAdmin.TabPages
         {
             vm.PropertyChanged -= VmPropertyChanged;
             vm.PropertyChanged += VmPropertyChanged;
-            if (pvsProxy != null)
-            {
-                pvsProxy.PropertyChanged -= PvsProxyPropertyChanged;
-                pvsProxy.PropertyChanged += PvsProxyPropertyChanged;
-                PVS_site pvsSite = pvsProxy == null ? null : Connection.Resolve(pvsProxy.site);
-                if (pvsSite != null)
-                {
-                    pvsSite.PropertyChanged -= PvsSitePropertyChanged;
-                    pvsSite.PropertyChanged += PvsSitePropertyChanged;
-                }
-            }
+
+            if (pvsProxy == null)
+                return;
+            pvsProxy.PropertyChanged -= PvsProxyPropertyChanged;
+            pvsProxy.PropertyChanged += PvsProxyPropertyChanged;
+
+            var pvsSite = Connection.Resolve(pvsProxy.site);
+            if (pvsSite == null)
+                return;
+            pvsSite.PropertyChanged -= PvsSitePropertyChanged;
+            pvsSite.PropertyChanged += PvsSitePropertyChanged;
         }
 
         private void UnregisterVmEventHandlers()

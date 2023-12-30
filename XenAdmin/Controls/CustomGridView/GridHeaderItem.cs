@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -41,8 +38,8 @@ namespace XenAdmin.Controls.CustomGridView
     {
         public const int ResizeGutter = 3;   // the space between the columns within which we resize the columns rather than dragging them
 
-        private static readonly Image AscendingTriangle = Properties.Resources.ascending_triangle;
-        private static readonly Image DescendingTriangle = Properties.Resources.descending_triangle;
+        private static readonly Image AscendingTriangle = Images.StaticImages.ascending_triangle;
+        private static readonly Image DescendingTriangle = Images.StaticImages.descending_triangle;
 
         private static readonly Font SortFont = new Font(Program.DefaultFont.FontFamily, 7.0f);
         private static readonly Pen LinePen = Pens.LightSteelBlue;

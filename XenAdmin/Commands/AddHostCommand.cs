@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -70,10 +69,10 @@ namespace XenAdmin.Commands
         public AddHostCommand(IMainWindow mainWindow, Control parent)
             : base(mainWindow)
         {
-            SetParent(parent);
+            Parent = parent;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             _dialog = new AddServerDialog(null, false);
             _dialog.CachePopulated += dialog_CachePopulated;
@@ -91,29 +90,10 @@ namespace XenAdmin.Commands
             MainWindowCommandInterface.TrySelectNewObjectInTree(conn, true, true, true);
         }
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return Images.StaticImages._000_AddApplicationServer_h32bit_16;
-            }
-        }
+        public override Image MenuImage => Images.StaticImages._000_AddApplicationServer_h32bit_16;
 
-        public override Image ToolBarImage
-        {
-            get
-            {
-                
-                return Images.StaticImages._000_AddApplicationServer_h32bit_24;
-            }
-        }
+        public override Image ToolBarImage => Images.StaticImages._000_AddApplicationServer_h32bit_24;
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_ADD_HOST;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_ADD_HOST;
     }
 }

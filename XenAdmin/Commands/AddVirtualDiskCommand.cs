@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Dialogs;
-using System.Windows.Forms;
-using System.Collections.ObjectModel;
-using System.Drawing;
+
 
 namespace XenAdmin.Commands
 {
@@ -68,49 +63,40 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            VM vm = selection[0].XenObject as VM;
-
-            if (vm != null)
+            if (selection[0].XenObject is VM vm)
             {
                 if (vm.VBDs.Count < vm.MaxVBDsAllowed())
                 {
-                    new NewDiskDialog(vm.Connection, vm).ShowPerXenObject(vm, Program.MainWindow);
+                    new NewDiskDialog(vm.Connection, vm, vm.Home()).ShowPerXenObject(vm, Program.MainWindow);
                 }
                 else
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Error,
-                            FriendlyErrorNames.VBDS_MAX_ALLOWED,
-                            Messages.DISK_ADD)))
+                    using (var dlg = new ErrorDialog(FriendlyErrorNames.VBDS_MAX_ALLOWED)
+                        {WindowTitle = Messages.DISK_ADD})
                     {
                         dlg.ShowDialog(Program.MainWindow);
                     }
                 }
             }
-            else
+            else if (selection[0].XenObject is SR sr)
             {
-                SR sr = (SR)selection[0].XenObject;
                 MainWindowCommandInterface.ShowPerConnectionWizard(sr.Connection, new NewDiskDialog(sr.Connection, sr));
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {
-                VM vm = selection[0].XenObject as VM;
-                SR sr = selection[0].XenObject as SR;
-
-                if (vm != null)
-                {
+                if (selection[0].XenObject is VM vm)
                     return !vm.is_a_snapshot && !vm.Locked;
-                }
 
-                return sr != null && !sr.Locked;
+                if (selection[0].XenObject is SR sr)
+                    return !sr.Locked;
             }
+
             return false;
         }
     }

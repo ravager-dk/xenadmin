@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,25 +31,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using XenAdmin.Core;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class InstallSupplementalPackAction: PureAsyncAction
+    public class InstallSupplementalPackAction: AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private Dictionary<Host, VDI> suppPackVdis;
+        private readonly Dictionary<Host, VDI> suppPackVdis;
 
         public InstallSupplementalPackAction(Dictionary<Host, VDI> suppPackVdis, bool suppressHistory)
-            : base(null, 
-            suppPackVdis.Count > 1
-                ? string.Format(Messages.UPDATES_WIZARD_APPLYING_UPDATE_MULTIPLE_HOSTS, suppPackVdis.Count) 
-                : string.Format(Messages.UPDATES_WIZARD_APPLYING_UPDATE, suppPackVdis.First().Value, suppPackVdis.First().Key), 
-            suppressHistory)
+            : base(null, "", suppressHistory)
         {
             this.suppPackVdis = suppPackVdis;
+
+            Title = suppPackVdis.Count == 1
+                ? string.Format(Messages.UPDATES_WIZARD_APPLYING_UPDATE, suppPackVdis.First().Value, suppPackVdis.First().Key)
+                : string.Format(Messages.UPDATES_WIZARD_APPLYING_UPDATE_MULTIPLE_HOSTS, suppPackVdis.Count);
+
+            ApiMethodsToRoleCheck.Add("host.call_plugin");
         }
 
         protected override void Run()
@@ -72,15 +74,15 @@ namespace XenAdmin.Actions
 
             try
             {
-                Description = String.Format(Messages.APPLYING_PATCH, vdi.Name(), host.Name());
+                Description = string.Format(Messages.APPLYING_PATCH, vdi.Name(), host.Name());
                 Host.call_plugin(session, host.opaque_ref, "install-supp-pack", "install", new Dictionary<string, string> { { "vdi", vdi.uuid } });
-                Description = String.Format(Messages.PATCH_APPLIED, vdi.Name(), host.Name());
+                Description = string.Format(Messages.PATCH_APPLIED, vdi.Name(), host.Name());
             }
             catch (Failure failure)
             {
                 log.ErrorFormat("Plugin call install-supp-pack.install({0}) on {1} failed with {2}", vdi.uuid, host.Name(), failure.Message);
                 log.ErrorFormat("Supplemental pack installation error description: {0}", string.Join(";", failure.ErrorDescription));
-                throw new SupplementalPackInstallFailedException(string.Format(Messages.SUPP_PACK_INSTALL_FAILED, vdi.Name(), host.Name()), failure);
+                throw new SupplementalPackInstallFailedException(string.Format(Messages.SUPP_PACK_INSTALL_FAILED, vdi.Name(), host.Name(), BrandManager.ProductBrand), failure);
             }
             finally
             {

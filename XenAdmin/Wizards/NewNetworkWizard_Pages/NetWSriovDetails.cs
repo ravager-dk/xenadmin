@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,9 @@
  */
 
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Controls;
+using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAPI;
 using XenAdmin.Network;
@@ -68,10 +67,7 @@ namespace XenAdmin.Wizards.NewNetworkWizard_Pages
             if (direction == PageLoadedDirection.Back)
                 return;
 
-            using (var dlg = new ThreeButtonDialog(
-                new ThreeButtonDialog.Details(
-                    SystemIcons.Warning,
-                    Messages.SRIOV_NETWORK_CREATE_WARNING),
+            using (var dlg = new WarningDialog(string.Format(Messages.SRIOV_NETWORK_CREATE_WARNING, BrandManager.BrandConsole),
                 new ThreeButtonDialog.TBDButton(Messages.SRIOV_NETWORK_CREATE, DialogResult.OK),
                 ThreeButtonDialog.ButtonCancel))
             {
@@ -100,15 +96,9 @@ namespace XenAdmin.Wizards.NewNetworkWizard_Pages
             OnPageUpdated();
         }
 
-        public PIF SelectedHostNic
-        {
-            get { return (PIF)comboBoxNicList.SelectedItem; }
-        }
+        public PIF SelectedHostNic => (PIF)comboBoxNicList.SelectedItem;
 
-        public bool isAutomaticAddNicToVM
-        {
-            get { return cbxAutomatic.Checked; }
-        }
+        public bool AddNicToVmsAutomatically => cbxAutomatic.Checked;
 
         private void comboBoxNicList_SelectedIndexChanged(object sender, EventArgs e)
         {

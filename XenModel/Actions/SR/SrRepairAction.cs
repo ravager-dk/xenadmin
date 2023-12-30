@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using XenAdmin.Network;
@@ -56,10 +54,8 @@ namespace XenAdmin.Actions
         public SrRepairAction(IXenConnection connection, SR sr,bool isSharedAction)
             : base(connection, isSharedAction ? string.Format(Messages.ACTION_SR_SHARING, sr.NameWithoutHost()) : string.Format(Messages.ACTION_SR_REPAIRING, sr.NameWithoutHost()))
         {
-            if (sr == null)
-                throw new ArgumentNullException("sr");
             this.isSharedAction = isSharedAction;
-            this.SR = sr;
+            SR = sr;
 
             #region RBAC Dependencies
             ApiMethodsToRoleCheck.Add("pbd.plug");
@@ -74,12 +70,12 @@ namespace XenAdmin.Actions
         {
             log.DebugFormat("Repairing SR='{0}'", SR.Name());
 
-            //CA-176935, CA-173497 - we need to run Plug for the master first - creating a new list of hosts where the master is always first
+            //CA-176935, CA-173497 - we need to run Plug for the coordinator first - creating a new list of hosts where the coordinator is always first
             var allHosts = new List<Host>();
             
-            var master = Helpers.GetMaster(Connection);
-            if (master != null)
-                allHosts.Add(master);
+            var coordinator = Helpers.GetCoordinator(Connection);
+            if (coordinator != null)
+                allHosts.Add(coordinator);
             
             foreach (var host in Connection.Cache.Hosts)
                 if (!allHosts.Contains(host))

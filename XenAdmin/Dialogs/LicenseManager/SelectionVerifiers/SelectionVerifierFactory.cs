@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -40,8 +39,7 @@ namespace XenAdmin.Dialogs.LicenseManagerSelectionVerifiers
         {
             CanUseLicenseServer,
             HaOn,
-            NotLive,
-            OldServer
+            NotLive
         }
 
         public abstract LicenseSelectionVerifier Verifier(Option option, List<LicenseDataGridViewRow> rows);
@@ -64,8 +62,6 @@ namespace XenAdmin.Dialogs.LicenseManagerSelectionVerifiers
                 return new HaOnVerifier(rows);
             if (option == Option.NotLive)
                 return new NotLiveVerifier(rows);
-            if (option == Option.OldServer)
-                return new OlderServerVerifier(rows);
 
             throw new ArgumentException("No valid option was provided");
         }

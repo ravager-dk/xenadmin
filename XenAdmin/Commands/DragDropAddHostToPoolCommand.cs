@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Controls;
 using XenAPI;
 using XenAdmin.Core;
-using System.Collections.ObjectModel;
 using System.Windows.Forms;
 
 namespace XenAdmin.Commands
@@ -47,14 +43,14 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecuteCore()
+        protected override bool CanRunCore()
         {
             Pool targetPool = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Pool>();
             
             if (targetPool != null)
             {
                 AddHostToPoolCommand cmd = new AddHostToPoolCommand(MainWindowCommandInterface, GetDraggedItemsAsXenObjects<Host>(), targetPool, true);
-                return cmd.CanExecute();
+                return cmd.CanRun();
             }
             return false;
         }
@@ -63,24 +59,21 @@ namespace XenAdmin.Commands
         {
             get
             {
-                if (CanExecute())
-                {
-                    Pool targetPool = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Pool>();
-                    List<Host> draggedHosts = GetDraggedItemsAsXenObjects<Host>();
+                Pool targetPool = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Pool>();
+                List<Host> draggedHosts = GetDraggedItemsAsXenObjects<Host>();
 
-                    if (draggedHosts.Count > 0)
+                if (draggedHosts.Count > 0)
+                {
+                    foreach (Host draggedHost in draggedHosts)
                     {
-                        foreach (Host draggedHost in draggedHosts)
+                        PoolJoinRules.Reason reason = PoolJoinRules.CanJoinPool(draggedHost.Connection, targetPool.Connection, true, true, draggedHosts.Count);
+                        if (reason != PoolJoinRules.Reason.Allowed)
                         {
-                            PoolJoinRules.Reason reason = PoolJoinRules.CanJoinPool(draggedHost.Connection, targetPool.Connection, true, true, true, draggedHosts.Count);
-                            if (reason != PoolJoinRules.Reason.Allowed)
-                            {
-                                string reasonString = PoolJoinRules.ReasonMessage(reason);
-                                if (draggedHosts.Count == 1)
-                                    return reasonString;
-                                else
-                                    return string.Format("{0}: {1}", draggedHost, reasonString);
-                            }
+                            string reasonString = PoolJoinRules.ReasonMessage(reason);
+                            if (draggedHosts.Count == 1)
+                                return reasonString;
+                            else
+                                return string.Format("{0}: {1}", draggedHost, reasonString);
                         }
                     }
                 }
@@ -89,18 +82,12 @@ namespace XenAdmin.Commands
             }
         }
 
-        public override VirtualTreeNode HighlightNode
-        {
-            get
-            {
-                return CanExecute() ? GetTargetNodeAncestor<Pool>() : null;
-            }
-        }
+        public override VirtualTreeNode HighlightNode => GetTargetNodeAncestor<Pool>();
 
-        protected override void ExecuteCore()
+        protected override void RunCore()
         {
             Pool targetPool = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Pool>();
-            new AddHostToPoolCommand(MainWindowCommandInterface, GetDraggedItemsAsXenObjects<Host>(), targetPool, true).Execute();
+            new AddHostToPoolCommand(MainWindowCommandInterface, GetDraggedItemsAsXenObjects<Host>(), targetPool, true).Run();
         }
     }
 }

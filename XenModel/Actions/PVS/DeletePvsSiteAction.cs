@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Linq;
 using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class DeletePvsSiteAction : PureAsyncAction
+    public class DeletePvsSiteAction : AsyncAction
     {
         private readonly PVS_site pvsSite;
 
@@ -43,8 +41,8 @@ namespace XenAdmin.Actions
             : base(pvsSite.Connection, string.Format(Messages.ACTION_DELETE_PVS_SITE_TITLE, pvsSite.Name().Ellipsise(50)),
                     Messages.ACTION_DELETE_PVS_SITE_DESCRIPTION, false)
         {
-            System.Diagnostics.Trace.Assert(pvsSite != null);
             this.pvsSite = pvsSite;
+            ApiMethodsToRoleCheck.AddRange("PVS_server.async_forget", "PVS_site.async_forget");
         }
         
         protected override void Run()
@@ -67,8 +65,7 @@ namespace XenAdmin.Actions
 
             RelatedTask = PVS_site.async_forget(Session, pvsSite.opaque_ref);
             PollToCompletion();
-            Description = Messages.ACTION_DELETE_PVS_SITE_DONE;
-            PercentComplete = 100;
+            Tick(100, Messages.ACTION_DELETE_PVS_SITE_DONE);
         }
     }
 }

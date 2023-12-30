@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using XenAdmin.Diagnostics.Checks;
 using XenAPI;
 using XenAdmin.Actions;
 using XenAdmin.Dialogs;
-using System.Drawing;
 using System.Diagnostics;
 
 
@@ -47,7 +45,7 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
         private readonly Pool_update update;
 
         public HostOutOfSpaceProblem(Check check, Host host, Pool_patch patch, DiskSpaceRequirements diskSpaceReq)
-            : base(check,  host)
+            : base(check, host)
         {
             this.patch = patch;
             this.diskSpaceReq = diskSpaceReq;
@@ -83,13 +81,13 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
 
                 switch (diskSpaceReq.Operation)
                 {
-                    case DiskSpaceRequirements.OperationTypes.install :
+                    case DiskSpaceRequirements.OperationTypes.install:
                         return string.Format(Messages.NOT_ENOUGH_SPACE_MESSAGE_INSTALL, ServerName, name);
-                    
-                    case DiskSpaceRequirements.OperationTypes.upload :
+
+                    case DiskSpaceRequirements.OperationTypes.upload:
                         return string.Format(Messages.NOT_ENOUGH_SPACE_MESSAGE_UPLOAD, ServerName, name);
-                    
-                    case DiskSpaceRequirements.OperationTypes.automatedUpdates :
+
+                    case DiskSpaceRequirements.OperationTypes.automatedUpdates:
                         return string.Format(Messages.NOT_ENOUGH_SPACE_MESSAGE_AUTO_UPDATE, ServerName);
 
                     case DiskSpaceRequirements.OperationTypes.automatedUpdatesUploadOne:
@@ -109,17 +107,13 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
 
             if (patch != null && diskSpaceReq.CanCleanup)
             {
-                Program.Invoke(Program.MainWindow, delegate()
+                Program.Invoke(Program.MainWindow, delegate ()
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Warning,
-                            diskSpaceReq.GetSpaceRequirementsMessage()),
-                        new ThreeButtonDialog.TBDButton(Messages.YES, DialogResult.Yes, ThreeButtonDialog.ButtonType.ACCEPT, true),
+                    using (var dlg = new WarningDialog(diskSpaceReq.GetSpaceRequirementsMessage(),
+                        new ThreeButtonDialog.TBDButton(Messages.YES, DialogResult.Yes, selected: true),
                         ThreeButtonDialog.ButtonNo))
                     {
-                        DialogResult r = dlg.ShowDialog();
-                        if (r == DialogResult.Yes)
+                        if (dlg.ShowDialog() == DialogResult.Yes)
                         {
                             action = new CleanupDiskSpaceAction(this.Server, patch, true);
                         }
@@ -127,33 +121,21 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
                 });
             }
             else
-            { 
-                Program.Invoke(Program.MainWindow, delegate()
+            {
+                Program.Invoke(Program.MainWindow, delegate ()
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, diskSpaceReq.GetSpaceRequirementsMessage())))
-                    {
+                    using (var dlg = new WarningDialog(diskSpaceReq.GetSpaceRequirementsMessage()))
                         dlg.ShowDialog();
-                    }
                 });
             }
             cancelled = action == null;
-            
+
             return action;
         }
 
-        public override string HelpMessage
-        {
-            get { return diskSpaceReq.GetMessageForActionLink(); }
-        }
+        public override string HelpMessage => diskSpaceReq.GetMessageForActionLink();
 
-        public override bool IsFixable
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool IsFixable => false;
 
         public override bool Equals(object obj)
         {

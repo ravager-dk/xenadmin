@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System.Drawing;
 using XenAdmin.Actions;
 using XenAdmin.Diagnostics.Checks;
 using XenAdmin.Dialogs;
@@ -43,18 +41,12 @@ namespace XenAdmin.Diagnostics.Problems.UtilityProblem
         {
         }
 
-        public override string Description
-        {
-            get { return Messages.UPGRADEWIZARD_PROBLEM_CFU_STATUS; }
-        }
+        public override string Description => Messages.UPGRADEWIZARD_PROBLEM_CFU_STATUS;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
-            using (var dlg = new ThreeButtonDialog(
-                new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.UPDATE_SERVER_NOT_REACHABLE)))
-            {
+            using (var dlg = new WarningDialog(Messages.UPDATE_SERVER_NOT_REACHABLE))
                 dlg.ShowDialog();
-            }
 
             cancelled = true;
             return null;
@@ -62,14 +54,8 @@ namespace XenAdmin.Diagnostics.Problems.UtilityProblem
 
         public override string HelpMessage => Messages.MORE_INFO;
 
-        public sealed override string Title
-        {
-            get { return string.Empty; }
-        }
+        public sealed override string Title => string.Empty;
 
-        public override bool IsFixable
-        {
-            get { return false; }
-        }
+        public override bool IsFixable => false;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using XenAdmin.Commands;
+using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAPI;
 
@@ -49,7 +48,6 @@ namespace XenAdmin.Dialogs
         /// </summary>
         public AssignLicenseDialog(IEnumerable<IXenObject> xos, String firstHost, String firstPort, Host.Edition firstEdition)
         {
-            Util.ThrowIfEnumerableParameterNullOrEmpty(xos, "XenObjects");
             this.xos = new List<IXenObject>(xos);
             this.currentEdition = firstEdition;
             InitializeComponent();
@@ -106,15 +104,15 @@ namespace XenAdmin.Dialogs
                 perSocketRadioButton.Visible = false;
                 xenDesktopEnterpriseRadioButton.Visible = false;
                 enterprisePerSocketRadioButton.Checked = true;
-                enterprisePerSocketRadioButton.Text = String.Format(Messages.LICENSE_EDITION_ENTERPRISE_PERSOCKET, 
-                    xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets()))); 
-                enterprisePerUserRadioButton.Text = Messages.LICENSE_EDITION_ENTERPRISE_PERUSER;
-                desktopPlusRadioButton.Text = Messages.LICENSE_EDITION_DESKTOP_PLUS;
-                desktopRadioButton.Text = Messages.LICENSE_EDITION_DESKTOP;
+                enterprisePerSocketRadioButton.Text = string.Format(Messages.LICENSE_EDITION_ENTERPRISE_PERSOCKET, 
+                    BrandManager.ProductBrand, xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets()))); 
+                enterprisePerUserRadioButton.Text = string.Format(Messages.LICENSE_EDITION_ENTERPRISE_PERUSER, BrandManager.ProductBrand);
+                desktopPlusRadioButton.Text = string.Format(Messages.LICENSE_EDITION_DESKTOP_PLUS, BrandManager.CompanyNameLegacy);
+                desktopRadioButton.Text = string.Format(Messages.LICENSE_EDITION_DESKTOP, BrandManager.CompanyNameLegacy);
                 desktopCloudRadioButton.Visible = true;
-                desktopCloudRadioButton.Text = Messages.LICENSE_EDITION_DESKTOP_CLOUD;
-                standardPerSocketRadioButton.Text = String.Format(Messages.LICENSE_EDITION_STANDARD_PERSOCKET,
-                    xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets())));
+                desktopCloudRadioButton.Text = string.Format(Messages.LICENSE_EDITION_DESKTOP_CLOUD, BrandManager.CompanyNameLegacy);
+                standardPerSocketRadioButton.Text = string.Format(Messages.LICENSE_EDITION_STANDARD_PERSOCKET,
+                    BrandManager.ProductBrand, xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets())));
             }
             else
             {
@@ -122,14 +120,15 @@ namespace XenAdmin.Dialogs
                 xenDesktopEnterpriseRadioButton.Visible = false;
                 enterprisePerSocketRadioButton.Checked = true;
                 enterprisePerSocketRadioButton.Text = string.Format(Messages.LICENSE_EDITION_ENTERPRISE_PERSOCKET_LEGACY, 
-                    xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets())), BrandManager.LegacyProduct);
-                enterprisePerUserRadioButton.Text = string.Format(Messages.LICENSE_EDITION_ENTERPRISE_PERUSER_LEGACY, BrandManager.LegacyProduct);
+                    BrandManager.ProductBrand, xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets())));
+                enterprisePerUserRadioButton.Text = string.Format(Messages.LICENSE_EDITION_ENTERPRISE_PERUSER_LEGACY, BrandManager.ProductBrand);
                 desktopPlusRadioButton.Text = Messages.LICENSE_EDITION_DESKTOP_PLUS_LEGACY;
                 desktopRadioButton.Text = Messages.LICENSE_EDITION_DESKTOP_LEGACY;
-                desktopCloudRadioButton.Visible = xos.TrueForAll(x => Helpers.JuraOrGreater(x.Connection) || Helpers.HavanaOrGreater(x.Connection));
-                desktopCloudRadioButton.Text = Messages.LICENSE_EDITION_DESKTOP_CLOUD_LEGACY;
+                desktopCloudRadioButton.Visible = xos.TrueForAll(x => Helpers.JuraOrGreater(x.Connection));
+                desktopCloudRadioButton.Text = string.Format(Messages.LICENSE_EDITION_DESKTOP_CLOUD_LEGACY,
+                    BrandManager.CompanyNameLegacy);
                 standardPerSocketRadioButton.Text = string.Format(Messages.LICENSE_EDITION_STANDARD_PERSOCKET_LEGACY,
-                    xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets())), BrandManager.LegacyProduct);
+                    BrandManager.ProductBrand, xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets())));
             }
         }
 
@@ -198,18 +197,16 @@ namespace XenAdmin.Dialogs
 
         private void okButton_Click(object sender, EventArgs e)
         {
+            var action = new ApplyLicenseEditionAction(xos, GetCheckedEdition(), licenseServerNameTextBox.Text, licenseServerPortTextBox.Text);
 
-            ApplyLicenseEditionCommand command = new ApplyLicenseEditionCommand(Program.MainWindow, xos, GetCheckedEdition(), licenseServerNameTextBox.Text, licenseServerPortTextBox.Text, this);
+            using (var actionProgress = new ActionProgressDialog(action, ProgressBarStyle.Marquee))
+                actionProgress.ShowDialog(this);
 
-            command.Succedded += delegate
-                                     {
-                                         Program.Invoke(this, () =>
-                                            {
-                                                DialogResult = DialogResult.OK;
-                                                Close();
-                                            });
-                                     };
-            command.Execute();
+            if (action.Succeeded)
+            {
+                DialogResult = DialogResult.OK;
+                Close();
+            }
         }
 
         private void licenseServerPortTextBox_TextChanged(object sender, EventArgs e)

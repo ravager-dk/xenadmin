@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,28 +42,36 @@ namespace XenCenterLib.Archive
         /// Helper function to extract all contents of this iterating class to a path
         /// </summary>
         /// <param name="pathToExtractTo">The path to extract the archive to</param>
+        /// <param name="cancellingDelegate"></param>
         /// <exception cref="ArgumentNullException">If null path is passed in</exception>
         /// <exception cref="NullReferenceException">If while combining path and current file name a null arises</exception>
-        public void ExtractAllContents( string pathToExtractTo )
+        public void ExtractAllContents(string pathToExtractTo, Action cancellingDelegate = null)
         {
-            if( String.IsNullOrEmpty(pathToExtractTo) )
+            if (string.IsNullOrEmpty(pathToExtractTo))
                 throw new ArgumentNullException();
 
-            while( HasNext() )
+            while (HasNext())
             {
-                //Make the file path from the details in the archive making the path windows friendly
-                string conflatedPath = Path.Combine(pathToExtractTo, CurrentFileName()).Replace('/', Path.DirectorySeparatorChar);
-                
-                //Create directories - empty ones will be made too
-                Directory.CreateDirectory( Path.GetDirectoryName(conflatedPath) );
+                //make the path Windows friendly
+                var fileName = CurrentFileName();
+                var isDirectory = IsDirectory();
+
+                var sanitizedName = fileName.Replace('/', Path.DirectorySeparatorChar);
+                var conflatedPath = Path.Combine(pathToExtractTo, sanitizedName);
+
+                var dir = isDirectory ? conflatedPath : Path.GetDirectoryName(conflatedPath);
+                dir = StringUtility.ToLongWindowsPath(dir, true);
+
+                //Create directory - empty one will be made too
+                Directory.CreateDirectory(dir);
 
                 //If we have a file extract the contents
-                if( !IsDirectory() )
+                if (!isDirectory)
                 {
-                    using (FileStream fs = File.Create(conflatedPath))
-                    {
-                       ExtractCurrentFile(fs); 
-                    }
+                    conflatedPath = StringUtility.ToLongWindowsPath(conflatedPath, false);
+
+                    using (var fs = File.Create(conflatedPath))
+                        ExtractCurrentFile(fs, cancellingDelegate);
                 }
             }
         }
@@ -84,7 +91,7 @@ namespace XenCenterLib.Archive
         }
 
         public abstract bool HasNext();
-        public abstract void ExtractCurrentFile(Stream extractedFileContents);
+        public abstract void ExtractCurrentFile(Stream extractedFileContents, Action cancellingDelegate);
         public abstract string CurrentFileName();
         public abstract long CurrentFileSize();
         public abstract DateTime CurrentFileModificationTime();
@@ -94,12 +101,14 @@ namespace XenCenterLib.Archive
         /// Dispose hook - overload and clean up IO
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing){}
+        protected virtual void Dispose(bool disposing)
+        {
+        }
 
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);   
+            GC.SuppressFinalize(this);
         }
     }
 }

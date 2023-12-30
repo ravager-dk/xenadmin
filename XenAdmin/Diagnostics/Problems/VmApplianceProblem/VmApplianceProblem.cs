@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
@@ -50,18 +45,8 @@ namespace XenAdmin.Diagnostics.Problems.VmApplianceProblem
             _vmAppliance = vmAppliance;
         }
 
-        public VM_appliance VmAppliance
-        {
-            get
-            {
-                return _vmAppliance;
-            }
-        }
+        public VM_appliance VmAppliance => _vmAppliance;
 
-        public sealed override string Title
-        {
-            get { return string.Format(Messages.PROBLEM_VMAPPLIANCEPROBLEM_TITLE, Helpers.GetName(VmAppliance).Ellipsise(30)); }
-        }
-
+        public sealed override string Title => string.Format(Messages.PROBLEM_VMAPPLIANCEPROBLEM_TITLE, Helpers.GetName(VmAppliance).Ellipsise(30));
     }
 }

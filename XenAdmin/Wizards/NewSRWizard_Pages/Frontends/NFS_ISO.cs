@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using XenAdmin.Core;
 using XenAdmin.Controls;
 using XenAdmin.Network;
 using XenAPI;
@@ -103,13 +101,13 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages.Frontends
             this.NfsServerPathComboBox.Items.AddRange(add_srs.ToArray());
 
             //Setting up visibility of the NFS Version controls
-            nfsVersionLabel.Visible = nfsVersionTableLayoutPanel.Visible = Helpers.DundeeOrGreater(Connection);
+            nfsVersionLabel.Visible = nfsVersionTableLayoutPanel.Visible = true;
         }
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {
             if (direction == PageLoadedDirection.Forward)
-                HelpersGUI.FocusFirstControl(Controls);
+                NfsServerPathComboBox.Focus();
         }
 
         #endregion

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -74,45 +74,18 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new SDN_controller from a Proxy_SDN_controller.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public SDN_controller(Proxy_SDN_controller proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given SDN_controller.
         /// </summary>
-        public override void UpdateFrom(SDN_controller update)
+        public override void UpdateFrom(SDN_controller record)
         {
-            uuid = update.uuid;
-            protocol = update.protocol;
-            address = update.address;
-            port = update.port;
-        }
-
-        internal void UpdateFrom(Proxy_SDN_controller proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            protocol = proxy.protocol == null ? (sdn_controller_protocol) 0 : (sdn_controller_protocol)Helper.EnumParseDefault(typeof(sdn_controller_protocol), (string)proxy.protocol);
-            address = proxy.address == null ? null : proxy.address;
-            port = proxy.port == null ? 0 : long.Parse(proxy.port);
-        }
-
-        public Proxy_SDN_controller ToProxy()
-        {
-            Proxy_SDN_controller result_ = new Proxy_SDN_controller();
-            result_.uuid = uuid ?? "";
-            result_.protocol = sdn_controller_protocol_helper.ToString(protocol);
-            result_.address = address ?? "";
-            result_.port = port.ToString();
-            return result_;
+            uuid = record.uuid;
+            protocol = record.protocol;
+            address = record.address;
+            port = record.port;
         }
 
         /// <summary>
@@ -140,19 +113,10 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._protocol, other._protocol) &&
-                Helper.AreEqual2(this._address, other._address) &&
-                Helper.AreEqual2(this._port, other._port);
-        }
-
-        internal static List<SDN_controller> ProxyArrayToObjectList(Proxy_SDN_controller[] input)
-        {
-            var result = new List<SDN_controller>();
-            foreach (var item in input)
-                result.Add(new SDN_controller(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_protocol, other._protocol) &&
+                Helper.AreEqual2(_address, other._address) &&
+                Helper.AreEqual2(_port, other._port);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, SDN_controller server)
@@ -167,6 +131,7 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// Get a record containing the current state of the given SDN_controller.
         /// First published in XenServer 7.2.
@@ -175,10 +140,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static SDN_controller get_record(Session session, string _sdn_controller)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_record(session.opaque_ref, _sdn_controller);
-            else
-                return new SDN_controller(session.XmlRpcProxy.sdn_controller_get_record(session.opaque_ref, _sdn_controller ?? "").parse());
+            return session.JsonRpcClient.sdn_controller_get_record(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -189,10 +151,7 @@ namespace XenAPI
         /// <param name="_uuid">UUID of object to return</param>
         public static XenRef<SDN_controller> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<SDN_controller>.Create(session.XmlRpcProxy.sdn_controller_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.sdn_controller_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -203,10 +162,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static string get_uuid(Session session, string _sdn_controller)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_uuid(session.opaque_ref, _sdn_controller);
-            else
-                return session.XmlRpcProxy.sdn_controller_get_uuid(session.opaque_ref, _sdn_controller ?? "").parse();
+            return session.JsonRpcClient.sdn_controller_get_uuid(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -217,10 +173,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static sdn_controller_protocol get_protocol(Session session, string _sdn_controller)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_protocol(session.opaque_ref, _sdn_controller);
-            else
-                return (sdn_controller_protocol)Helper.EnumParseDefault(typeof(sdn_controller_protocol), (string)session.XmlRpcProxy.sdn_controller_get_protocol(session.opaque_ref, _sdn_controller ?? "").parse());
+            return session.JsonRpcClient.sdn_controller_get_protocol(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -231,10 +184,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static string get_address(Session session, string _sdn_controller)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_address(session.opaque_ref, _sdn_controller);
-            else
-                return session.XmlRpcProxy.sdn_controller_get_address(session.opaque_ref, _sdn_controller ?? "").parse();
+            return session.JsonRpcClient.sdn_controller_get_address(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -245,10 +195,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static long get_port(Session session, string _sdn_controller)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_port(session.opaque_ref, _sdn_controller);
-            else
-                return long.Parse(session.XmlRpcProxy.sdn_controller_get_port(session.opaque_ref, _sdn_controller ?? "").parse());
+            return session.JsonRpcClient.sdn_controller_get_port(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -261,10 +208,7 @@ namespace XenAPI
         /// <param name="_port">TCP port of the controller.</param>
         public static XenRef<SDN_controller> introduce(Session session, sdn_controller_protocol _protocol, string _address, long _port)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_introduce(session.opaque_ref, _protocol, _address, _port);
-            else
-                return XenRef<SDN_controller>.Create(session.XmlRpcProxy.sdn_controller_introduce(session.opaque_ref, sdn_controller_protocol_helper.ToString(_protocol), _address ?? "", _port.ToString()).parse());
+            return session.JsonRpcClient.sdn_controller_introduce(session.opaque_ref, _protocol, _address, _port);
         }
 
         /// <summary>
@@ -277,10 +221,7 @@ namespace XenAPI
         /// <param name="_port">TCP port of the controller.</param>
         public static XenRef<Task> async_introduce(Session session, sdn_controller_protocol _protocol, string _address, long _port)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sdn_controller_introduce(session.opaque_ref, _protocol, _address, _port);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sdn_controller_introduce(session.opaque_ref, sdn_controller_protocol_helper.ToString(_protocol), _address ?? "", _port.ToString()).parse());
+          return session.JsonRpcClient.async_sdn_controller_introduce(session.opaque_ref, _protocol, _address, _port);
         }
 
         /// <summary>
@@ -291,10 +232,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static void forget(Session session, string _sdn_controller)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sdn_controller_forget(session.opaque_ref, _sdn_controller);
-            else
-                session.XmlRpcProxy.sdn_controller_forget(session.opaque_ref, _sdn_controller ?? "").parse();
+            session.JsonRpcClient.sdn_controller_forget(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -305,10 +243,7 @@ namespace XenAPI
         /// <param name="_sdn_controller">The opaque_ref of the given sdn_controller</param>
         public static XenRef<Task> async_forget(Session session, string _sdn_controller)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sdn_controller_forget(session.opaque_ref, _sdn_controller);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sdn_controller_forget(session.opaque_ref, _sdn_controller ?? "").parse());
+          return session.JsonRpcClient.async_sdn_controller_forget(session.opaque_ref, _sdn_controller);
         }
 
         /// <summary>
@@ -318,10 +253,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<SDN_controller>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_all(session.opaque_ref);
-            else
-                return XenRef<SDN_controller>.Create(session.XmlRpcProxy.sdn_controller_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.sdn_controller_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -331,10 +263,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<SDN_controller>, SDN_controller> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sdn_controller_get_all_records(session.opaque_ref);
-            else
-                return XenRef<SDN_controller>.Create<Proxy_SDN_controller>(session.XmlRpcProxy.sdn_controller_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.sdn_controller_get_all_records(session.opaque_ref);
         }
 
         /// <summary>

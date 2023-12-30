@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,6 +29,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using XenAPI;
 using XenAdmin.Actions;
 using XenCenterLib;
@@ -38,17 +38,13 @@ namespace XenAdmin.Controls
 {
     public class CDChanger : ISODropDownBox
     {
-        public CDChanger()
-        {
-            Empty = true;
-        }
+        private VBD cdrom;
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public VBD Drive
         {
-            get
-            {
-                return cdrom;
-            }
+            get => cdrom;
             set
             {
                 if (cdrom != null)
@@ -59,67 +55,9 @@ namespace XenAdmin.Controls
                 if (cdrom != null)
                     cdrom.PropertyChanged += cdrom_PropertyChanged;
 
-                refreshAll();
-            }
-        }
-
-        public VM TheVM
-        {
-            set
-            {
-                if (vm != null)
-                    vm.PropertyChanged -= vm_PropertyChanged;
-
-                vm = value;
-                connection = vm == null ? null : vm.Connection;
-
-                if (vm != null)
-                    vm.PropertyChanged += vm_PropertyChanged;
-            }
-
-            get
-            {
-                return vm;
-            }
-        }
-        
-        protected override void RefreshSRs()
-        {
-            BeginUpdate();
-            try
-            {
-                Items.Clear();
-                base.RefreshSRs();
-            }
-            finally
-            {
-                EndUpdate();
-            }
-        }
-
-        public override void SelectCD()
-        {
-            if (cdrom == null || cdrom.empty || cdrom.VDI == null)
-            {
-                this.SelectedIndex = 0;
-                return;
-            }
-
-            SelectedCD = connection.Resolve(cdrom.VDI);
-            base.SelectCD();
-        }
-
-        public override void refreshAll()
-        {
-            if (!DroppedDown)
-            {
-                RefreshSRs();
-                SelectCD();
-                refreshOnClose = false;
-            }
-            else
-            {
-                refreshOnClose = true;
+                SelectedCD = cdrom == null || cdrom.empty || cdrom.VDI == null
+                    ? null
+                    : connection.Resolve(cdrom.VDI);
             }
         }
 
@@ -154,29 +92,34 @@ namespace XenAdmin.Controls
             ChangeVMISOAction action = new ChangeVMISOAction(connection, vm, vdi, cdrom);
 
             action.Completed += delegate
+            {
+                Program.Invoke(this, () =>
                 {
-                    Program.Invoke(this, delegate()
-                        {
-                            changing = false;
-                            SelectCD();
-                            Enabled = true;
-                        });
-                };
+                    changing = false;
+                    SelectedCD = cdrom == null || cdrom.empty || cdrom.VDI == null
+                        ? null
+                        : connection.Resolve(cdrom.VDI);
+                    Enabled = true;
+                });
+            };
 
             action.RunAsync();
         }
 
         internal override void DeregisterEvents()
         {
-            // Remove VM listeners
-            if (vm != null)
-                vm.PropertyChanged -= vm_PropertyChanged;
-
-            // Remove VBD (cdrom) listeners
             if (cdrom != null)
                 cdrom.PropertyChanged -= cdrom_PropertyChanged;
 
             base.DeregisterEvents();
+        }
+
+        private void cdrom_PropertyChanged(object sender1, PropertyChangedEventArgs e)
+        {
+            if ((e.PropertyName == "empty" || e.PropertyName == "vdi") && !changing)
+            {
+                SelectCD(SelectedCD);
+            }
         }
     }
 }

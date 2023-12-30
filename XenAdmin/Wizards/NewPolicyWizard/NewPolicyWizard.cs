@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using XenAdmin.Actions;
 using XenAdmin.Controls;
 using XenAdmin.Core;
@@ -71,19 +67,14 @@ namespace XenAdmin.Wizards.NewPolicyWizard
             xenTabPageSnapshotFrequency.Connection = pool.Connection;
             
             #region RBAC Warning Page Checks
-            if (Pool.Connection.Session.IsLocalSuperuser || Helpers.GetMaster(Pool.Connection).external_auth_type == Auth.AUTH_TYPE_NONE)
+
+            if (Helpers.ConnectionRequiresRbac(Pool.Connection))
             {
-                //do nothing
-            }
-            else
-            {
-                RBACWarningPage.WizardPermissionCheck check;
-                check = new RBACWarningPage.WizardPermissionCheck(Messages.RBAC_WARNING_VMSS);
-                check.AddApiCheck("VMSS.async_create");
-                check.Blocking = true;
-                xenTabPageRBAC.AddPermissionChecks(xenConnection, check);
+                xenTabPageRBAC.SetPermissionChecks(xenConnection,
+                    new WizardRbacCheck(Messages.RBAC_WARNING_VMSS, "VMSS.async_create") {Blocking = true});
                 AddPage(xenTabPageRBAC, 0);
             }
+
             #endregion
 
             AddPages(xenTabPagePolicy, xenTabPageVMsPage);

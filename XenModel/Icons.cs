@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -40,8 +39,9 @@ namespace XenAdmin
         HostDisconnected,
         HostEvacuate,
         HostUnpatched,
-        HostOlderThanMaster,
+        HostOlderThanCoordinator,
         HostHasCrashDumps,
+        ServerUnlicensed,
 
         VmRunning,
         VmRunningDisabled,
@@ -65,9 +65,8 @@ namespace XenAdmin
 
         PoolConnected,
         PoolNotFullyUpgraded,
-
+        PoolUnPatched,
         PoolUnlicensed,
-        ServerUnlicensed,
 
         Storage,
         StorageBroken,
@@ -108,6 +107,8 @@ namespace XenAdmin
 
         CentOS,
         Debian,
+        Gooroom,
+        Rocky,
         Linx,
         Oracle,
         RHEL,
@@ -170,6 +171,8 @@ namespace XenAdmin
         DCPaused,
 
         #endregion
+
+        Usb16,
 
         #region Status Icons
         Ok,

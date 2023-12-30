@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,102 +28,74 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Properties;
 using XenAdmin.Core;
+using XenAdmin.Dialogs.ServerUpdates;
 
 
 namespace XenAdmin.Dialogs.OptionsPages
 {
     public partial class UpdatesOptionsPage : UserControl, IOptionsPage
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         public UpdatesOptionsPage()
         {
             InitializeComponent();
 
-            build();
-        }
-
-        private void build()
-        {
-            // XenCenter updates
-            AllowXenCenterUpdatesCheckBox.Checked = Properties.Settings.Default.AllowXenCenterUpdates;
-
-            // XenServer updates
-            AllowXenServerPatchesCheckBox.Checked = Properties.Settings.Default.AllowPatchesUpdates;
-            AllowXenServerUpdatesCheckBox.Checked = Properties.Settings.Default.AllowXenServerUpdates;
-        }
-
-        public static void Log()
-        {
-            // XenCenter updates
-            log.Info("=== AllowXenCenterUpdates: " + Properties.Settings.Default.AllowXenCenterUpdates.ToString());
-
-            // XenServer updates
-            log.Info("=== AllowPatchesUpdates: " + Properties.Settings.Default.AllowPatchesUpdates.ToString());
-            log.Info("=== AllowXenServerUpdates: " + Properties.Settings.Default.AllowXenServerUpdates.ToString());
+            labelClientUpdates.Text = string.Format(labelClientUpdates.Text, BrandManager.BrandConsole);
+            _checkBoxClientUpdates.Text = string.Format(_checkBoxClientUpdates.Text, BrandManager.BrandConsole);
+            labelInfoCdn.Text = string.Format(labelInfoCdn.Text, BrandManager.ProductBrand);
         }
 
         #region IOptionsPage Members
 
-        public void Save()
+        public void Build()
         {
-            bool refreshUpdatesTab = IsCheckForUpdatesRequired();
-
-            // XenCenter updates
-            if (AllowXenCenterUpdatesCheckBox.Checked != Properties.Settings.Default.AllowXenCenterUpdates)
-                Properties.Settings.Default.AllowXenCenterUpdates = AllowXenCenterUpdatesCheckBox.Checked;
-
-            // XenServer updates
-            if (AllowXenServerPatchesCheckBox.Checked != Properties.Settings.Default.AllowPatchesUpdates)
-                Properties.Settings.Default.AllowPatchesUpdates = AllowXenServerPatchesCheckBox.Checked;
-            if (AllowXenServerUpdatesCheckBox.Checked != Properties.Settings.Default.AllowXenServerUpdates)
-                Properties.Settings.Default.AllowXenServerUpdates = AllowXenServerUpdatesCheckBox.Checked;
-
-            if(refreshUpdatesTab)
-            {
-                Updates.CheckForUpdates(false, true);
-            }
+            _checkBoxClientUpdates.Checked = Properties.Settings.Default.AllowXenCenterUpdates;
         }
 
-        /// <summary>
-        /// Returns true if at least one box has been changed in Updates Options. Otherwise returns false.
-        /// </summary>
-        /// <returns></returns>
-        private bool IsCheckForUpdatesRequired()
+        public bool IsValidToSave(out Control control, out string invalidReason)
         {
-            return (AllowXenCenterUpdatesCheckBox.Checked != Properties.Settings.Default.AllowXenCenterUpdates) ||
-                   (AllowXenServerPatchesCheckBox.Checked != Properties.Settings.Default.AllowPatchesUpdates) ||
-                   (AllowXenServerUpdatesCheckBox.Checked != Properties.Settings.Default.AllowXenServerUpdates);
+            control = null;
+            invalidReason = string.Empty;
+            return true;
+        }
+
+        public void ShowValidationMessages(Control control, string message)
+        {
+        }
+
+        public void HideValidationMessages()
+        {
+        }
+
+        public void Save()
+        {
+            if (_checkBoxClientUpdates.Checked != Properties.Settings.Default.AllowXenCenterUpdates)
+            {
+                Properties.Settings.Default.AllowXenCenterUpdates = _checkBoxClientUpdates.Checked;
+
+                if (Properties.Settings.Default.AllowXenCenterUpdates)
+                    Updates.CheckForClientUpdates(true);
+            }
         }
 
         #endregion
 
         #region IVerticalTab Members
 
-        public override string Text
-        {
-            get { return Messages.UPDATES; }
-        }
+        public override string Text => string.Format(Messages.UPDATES_OPTIONS_TITLE, BrandManager.BrandConsole);
 
-        public string SubText
-        {
-            get { return Messages.UPDATES_DESC; }
-        }
+        public string SubText => string.Format(Messages.UPDATES_OPTIONS_DESC, BrandManager.BrandConsole);
 
-        public Image Image
-        {
-            get { return Resources._000_Patch_h32bit_16; }
-        }
+        public Image Image => Images.StaticImages._015_Download_h32bit_16;
 
         #endregion
+
+        private void linkLabelConfigUpdates_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            using (var dialog = new ConfigUpdatesDialog())
+                dialog.ShowDialog(this);
+        }
     }
 }

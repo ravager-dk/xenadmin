@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -61,8 +60,17 @@ namespace XenAdmin.Wizards.PatchingWizard
         private AsyncAction resolvePrechecksAction;
         private List<DataGridViewRow> allRows = new List<DataGridViewRow>();
 
+        /// <summary>
+        /// Dictionary that contains checks that whose state we want to preserve across check runs.
+        /// You should only interact with it using the <see cref="GetPermanentCheck"/> method.
+        /// </summary>
+        private readonly Dictionary<string, Check> _permanentChecks = new Dictionary<string, Check>();
+
         private bool _isRecheckQueued;
-        public Dictionary<Pool_update, Dictionary<Host, SR>> SrUploadedUpdates = new Dictionary<Pool_update, Dictionary<Host, SR>>();
+
+        #region Properties
+
+        public Dictionary<Pool_update, Dictionary<Host, SR>> SrUploadedUpdates { get; set; } = new Dictionary<Pool_update, Dictionary<Host, SR>>();
 
         protected List<Pool> SelectedPools
         {
@@ -73,36 +81,30 @@ namespace XenAdmin.Wizards.PatchingWizard
         }
 
         public XenServerPatchAlert UpdateAlert { private get; set; }
-        public WizardMode WizardMode { private get; set; }
+        public WizardMode WizardMode { get; set; }
+        public bool IsNewGeneration { get; set; }
         public bool ApplyUpdatesToNewVersion { protected get; set; }
+
+        public Pool_patch Patch { private get; set; }
+        public Pool_update PoolUpdate { private get; set; }
+
+        public List<Problem> PrecheckProblemsActuallyResolved
+        {
+            get { return ProblemsResolvedPreCheck.Where(p => p.SolutionActionCompleted).ToList(); }
+        }
+
+        #endregion
 
         public PatchingWizard_PrecheckPage()
         {
             InitializeComponent();
         }
 
-        public override string PageTitle
-        {
-            get
-            {
-                return Messages.PATCHINGWIZARD_PRECHECKPAGE_TITLE;
-            }
-        }
+        public override string PageTitle => Messages.PATCHINGWIZARD_PRECHECKPAGE_TITLE;
 
-        public override string Text
-        {
-            get
-            {
-                return Messages.PATCHINGWIZARD_PRECHECKPAGE_TEXT;
-            }
-        }
+        public override string Text => Messages.PATCHINGWIZARD_PRECHECKPAGE_TEXT;
 
-        public override string HelpID
-        {
-            get { return "UpdatePrechecks"; }
-        }
-
-        void Connection_ConnectionStateChanged(IXenConnection conn)
+        private void Connection_ConnectionStateChanged(IXenConnection conn)
         {
             Program.Invoke(this, RefreshRechecks);
         }
@@ -164,23 +166,25 @@ namespace XenAdmin.Wizards.PatchingWizard
             
             if (Patch != null)
                 _worker.RunWorkerAsync(Patch);
-            else
+            else if (PoolUpdate != null)
                 _worker.RunWorkerAsync(PoolUpdate);
+            else
+                _worker.RunWorkerAsync();
         }
 
         private void _worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (!e.Cancelled)
-            {
-                progressBar1.Value = 100;
-                labelProgress.Text = string.Empty;
-                OnPageUpdated();
+            if (e.Cancelled)
+                return;
+            
+            progressBar1.Value = 100;
+            labelProgress.Text = string.Empty;
+            OnPageUpdated();
 
-                if (_isRecheckQueued)
-                {
-                    _isRecheckQueued = false;
-                    RefreshRechecks();
-                }
+            if (_isRecheckQueued)
+            {
+                _isRecheckQueued = false;
+                RefreshRechecks();
             }
         }
 
@@ -196,38 +200,30 @@ namespace XenAdmin.Wizards.PatchingWizard
         {
             try
             {
-                PreCheckHostRow rowHost = e.UserState as PreCheckHostRow;
-                if (rowHost != null)
+                if (e.UserState is PreCheckHostRow rowHost)
                 {
                     allRows.Add(rowHost);
 
                     if (checkBoxViewPrecheckFailuresOnly.Checked && rowHost.Problem != null || !checkBoxViewPrecheckFailuresOnly.Checked)
                         AddRowToGridView(rowHost);
                 }
-                else
+                else if(e.UserState is DataGridViewRow row && !dataGridView1.Rows.Contains(row))
                 {
-                    var row = e.UserState as DataGridViewRow;
-                    if (row != null && !dataGridView1.Rows.Contains(row))
-                    {
-                        allRows.Add(row);
-                        AddRowToGridView(row);
-                    }
+                    allRows.Add(row);
+                    AddRowToGridView(row);
                 }
 
                 progressBar1.Value = e.ProgressPercentage;
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                //ignore
+            }
         }
 
-        private bool IsCheckInProgress
-        {
-            get { return _worker.IsBusy; }
-        }
+        private bool IsCheckInProgress => _worker.IsBusy;
 
-        private bool IsResolveActionInProgress
-        {
-            get { return resolvePrechecksAction != null && !resolvePrechecksAction.IsCompleted; }
-        }
+        private bool IsResolveActionInProgress => resolvePrechecksAction != null && !resolvePrechecksAction.IsCompleted;
 
         private List<PreCheckHostRow> ExecuteCheck(Check check)
         {
@@ -246,10 +242,12 @@ namespace XenAdmin.Wizards.PatchingWizard
                 if (problem is HostNotLive)
                 {
                     // this host is no longer live -> remove all previous problems regarding this host
-                    Problem curProblem = problem;
+                    var curProblem = problem;
                     ProblemsResolvedPreCheck.RemoveAll(p =>
-                        p.Check != null && p.Check.XenObject != null && curProblem.Check != null &&
-                        p.Check.XenObject.Equals(curProblem.Check.XenObject));
+                        p.Check?.XenObjects != null &&
+                        curProblem.Check?.XenObjects != null &&
+                        p.Check.XenObjects.SequenceEqual(curProblem.Check.XenObjects)
+                    );
                 }
 
                 if (ProblemsResolvedPreCheck.Contains(problem))
@@ -280,17 +278,22 @@ namespace XenAdmin.Wizards.PatchingWizard
                                              labelProgress.Text = Messages.PATCHING_WIZARD_RUNNING_PRECHECKS;
                                              OnPageUpdated();
                                          });
-                Pool_patch patch = e.Argument as Pool_patch;
-                Pool_update update = e.Argument as Pool_update;
 
                 LivePatchCodesByHost = new Dictionary<string, livepatch_status>();
 
                 // Note: represent the groups as list so as to enforce the order of checks;
                 // a dictionary that looks sensible from a first look is not guranteed to
                 // keep the order, especially if items are removed (although not the case here)
-                var groups = update != null ? GenerateChecks(update) : GenerateChecks(patch); //patch is expected to be null for RPU
+                List<CheckGroup> groups;
+                
+                if (e.Argument is Pool_update update)
+                    groups = GenerateChecks(update);
+                else if (e.Argument is Pool_patch patch)
+                    groups = GenerateChecks(patch);
+                else
+                    groups = GenerateChecks(); //this is the case for RPU and automated updates from CFU or CDN
 
-                int totalChecks = groups.Sum(c => c.Value == null ? 0 : c.Value.Count);
+                int totalChecks = groups.Sum(c => c.Value?.Count ?? 0);
                 int doneCheckIndex = 0;
 
                 allRows.Clear();
@@ -345,7 +348,7 @@ namespace XenAdmin.Wizards.PatchingWizard
             set;
         }
 
-        protected virtual List<CheckGroup> GenerateCommonChecks(List<Host> applicableServers)
+        private List<CheckGroup> GenerateCommonChecks(List<Host> applicableServers)
         {
             var groups = new List<CheckGroup>();
 
@@ -356,15 +359,16 @@ namespace XenAdmin.Wizards.PatchingWizard
 
             groups.Add(new CheckGroup(Messages.CHECKING_HOST_LIVENESS_STATUS, livenessChecks));
 
-            //HA checks
+            //HA and WLB checks
 
-            var haChecks = new List<Check>();
-            foreach (Host host in SelectedServers)
+            var haWlbChecks = new List<Check>();
+            foreach (Pool pool in SelectedPools)
             {
-                if (Helpers.HostIsMaster(host))
-                    haChecks.Add(new HAOffCheck(host));
+                haWlbChecks.Add(new HaOffCheck(pool));
+                haWlbChecks.Add(new WlbOffCheck(pool));
             }
-            groups.Add(new CheckGroup(Messages.CHECKING_HA_STATUS, haChecks));
+
+            groups.Add(new CheckGroup(Messages.CHECKING_HA_AND_WLB_STATUS, haWlbChecks));
 
             //PBDsPluggedCheck
             var pbdChecks = new List<Check>();
@@ -398,60 +402,82 @@ namespace XenAdmin.Wizards.PatchingWizard
 
                 foreach (Pool pool in SelectedPools)
                 {
-                    //if any host is not licensed for automated updates
-                    bool automatedUpdatesRestricted = pool.Connection.Cache.Hosts.Any(Host.RestrictBatchHotfixApply);
-
-                    var minimalPatches = WizardMode == WizardMode.NewVersion
-                        ? Updates.GetMinimalPatches(UpdateAlert, ApplyUpdatesToNewVersion && !automatedUpdatesRestricted)
-                        : Updates.GetMinimalPatches(pool.Connection);
-
-                    if (minimalPatches == null)
-                        continue;
-
-                    var us = new Dictionary<Host, List<XenServerPatch>>();
-                    var hosts = pool.Connection.Cache.Hosts;
-                    Array.Sort(hosts);
-
-                    foreach (var h in hosts)
+                    if (Helpers.CloudOrGreater(pool.Connection))
                     {
-                        var ps = Updates.GetPatchSequenceForHost(h, minimalPatches);
-                        if (ps != null)
-                            us[h] = ps;
-                    }
+                        if (!Updates.CdnUpdateInfoPerConnection.TryGetValue(pool.Connection, out var poolUpdateInfo))
+                            continue;
 
-                    log.InfoFormat("Minimal patches for {0}: {1}", pool.Name(), string.Join(",", minimalPatches.Select(p => p.Name)));
-
-                    // we check the contains-livepatch property of all the applicable patches to determine if a host will need to be rebooted after patch installation, 
-                    // because the minimal patches might roll-up patches that are not live-patchable
-                    var allPatches = WizardMode == WizardMode.NewVersion
-                        ? Updates.GetAllPatches(UpdateAlert, ApplyUpdatesToNewVersion && !automatedUpdatesRestricted)
-                        : Updates.GetAllPatches(pool.Connection);
-
-                    foreach (Host host in us.Keys)
-                    {
-                        diskChecks.Add(new DiskSpaceForAutomatedUpdatesCheck(host, us));
-
-                        if (us[host] != null && us[host].Count > 0)
+                        foreach (var hostUpdateInfo in poolUpdateInfo.HostsWithUpdates)
                         {
-                            var allApplicablePatches = Updates.GetPatchSequenceForHost(host, allPatches);
-                            var restartHostPatches = allApplicablePatches != null 
-                                ? allApplicablePatches.Where(p => p.after_apply_guidance == after_apply_guidance.restartHost).ToList()
-                                : new List<XenServerPatch>();
+                            var host = pool.Connection.Resolve(new XenRef<Host>(hostUpdateInfo.HostOpaqueRef));
+                            if (host == null)
+                                continue;
 
-                            rebootChecks.Add(new HostNeedsRebootCheck(host, restartHostPatches));
+                            var guidance = hostUpdateInfo.RecommendedGuidance;
 
-                            if (restartHostPatches.Count > 0 && (restartHostPatches.Any(p => !p.ContainsLivepatch) ||
-                                                                 Helpers.FeatureForbidden(host.Connection, Host.RestrictLivePatching) ||
-                                                                 Helpers.GetPoolOfOne(host.Connection)?.live_patching_disabled == true))
+                            if (guidance.Contains(CdnGuidance.RebootHost))
+                                rebootChecks.Add(new HostNeedsRebootCheck(host));
+                            if (guidance.Contains(CdnGuidance.RebootHost) || guidance.Contains(CdnGuidance.EvacuateHost))
                                 evacuateChecks.Add(new AssertCanEvacuateCheck(host));
+                        }
+                    }
+                    else
+                    {
+                        //if any host is not licensed for automated updates
+                        bool automatedUpdatesRestricted = pool.Connection.Cache.Hosts.Any(Host.RestrictBatchHotfixApply);
 
-                            foreach (var p in us[host])
+                        var minimalPatches = WizardMode == WizardMode.NewVersion
+                            ? Updates.GetMinimalPatches(UpdateAlert, ApplyUpdatesToNewVersion && !automatedUpdatesRestricted)
+                            : Updates.GetMinimalPatches(pool.Connection);
+
+                        if (minimalPatches == null)
+                            continue;
+
+                        var us = new Dictionary<Host, List<XenServerPatch>>();
+                        var hosts = pool.Connection.Cache.Hosts;
+                        Array.Sort(hosts);
+
+                        foreach (var h in hosts)
+                        {
+                            var ps = Updates.GetPatchSequenceForHost(h, minimalPatches);
+                            if (ps != null)
+                                us[h] = ps;
+                        }
+
+                        log.InfoFormat("Minimal patches for {0}: {1}", pool.Name(), string.Join(",", minimalPatches.Select(p => p.Name)));
+
+                        // we check the contains-livepatch property of all the applicable patches to determine if a host will need to be rebooted after patch installation, 
+                        // because the minimal patches might roll-up patches that are not live-patchable
+                        var allPatches = WizardMode == WizardMode.NewVersion
+                            ? Updates.GetAllPatches(UpdateAlert, ApplyUpdatesToNewVersion && !automatedUpdatesRestricted)
+                            : Updates.GetAllPatches(pool.Connection);
+
+                        foreach (Host host in us.Keys)
+                        {
+                            diskChecks.Add(new DiskSpaceForAutomatedUpdatesCheck(host, us));
+
+                            if (us[host] != null && us[host].Count > 0)
                             {
-                                var newVersion = Updates.XenServerVersions.FirstOrDefault(v => v.PatchUuid != null && v.PatchUuid.Equals(p.Uuid, StringComparison.OrdinalIgnoreCase)); 
-                                if (newVersion != null && (highestNewVersion == null || newVersion.Version > highestNewVersion.Version))
-                                    highestNewVersion = newVersion;
-                            }
+                                var allApplicablePatches = Updates.GetPatchSequenceForHost(host, allPatches);
+                                var restartHostPatches = allApplicablePatches != null
+                                    ? allApplicablePatches.Where(p => p.after_apply_guidance == after_apply_guidance.restartHost).ToList()
+                                    : new List<XenServerPatch>();
 
+                                rebootChecks.Add(new HostNeedsRebootCheck(host, restartHostPatches));
+
+                                if (restartHostPatches.Count > 0 && (restartHostPatches.Any(p => !p.ContainsLivepatch) ||
+                                                                     Helpers.FeatureForbidden(host.Connection, Host.RestrictLivePatching) ||
+                                                                     Helpers.GetPoolOfOne(host.Connection)?.live_patching_disabled == true))
+                                    evacuateChecks.Add(new AssertCanEvacuateCheck(host));
+
+                                foreach (var p in us[host])
+                                {
+                                    var newVersion = Updates.XenServerVersions.FirstOrDefault(v => v.PatchUuid != null && v.PatchUuid.Equals(p.Uuid, StringComparison.OrdinalIgnoreCase));
+                                    if (newVersion != null && (highestNewVersion == null || newVersion.Version > highestNewVersion.Version))
+                                        highestNewVersion = newVersion;
+                                }
+
+                            }
                         }
                     }
                 }
@@ -463,50 +489,75 @@ namespace XenAdmin.Wizards.PatchingWizard
                     groups.Add(new CheckGroup(Messages.CHECKING_CANEVACUATE_STATUS, evacuateChecks));
             }
 
-            //XenCenter version check
-            if (highestNewVersion != null || UpdateAlert?.NewServerVersion != null)
+            var newServerVersion = highestNewVersion ?? UpdateAlert?.NewServerVersion;
+
+            if (newServerVersion != null)
             {
                 // add XenCenter version check as the first group
                 groups.Insert(0, new CheckGroup(Messages.CHECKING_XENCENTER_VERSION,
-                    new List<Check> { new XenCenterVersionCheck(highestNewVersion ?? UpdateAlert.NewServerVersion) }));
-            }
+                    new List<Check> { new ClientVersionCheck(newServerVersion) }));
 
-            //GFS2 check for version updates
-            if (WizardMode == WizardMode.NewVersion)
-            {
-                var gfs2Checks = new List<Check>();
+                //then all the following checks after the liveness check
 
-                foreach (Pool pool in SelectedPools.Where(p =>
-                    Helpers.KolkataOrGreater(p.Connection) && !Helpers.LimaOrGreater(p.Connection)))
-                {
-                    Host host = pool.Connection.Resolve(pool.master);
-                    gfs2Checks.Add(new PoolHasGFS2SR(host));
-                }
+                //GFS2 check for version updates
+                var gfs2Checks = (from Pool pool in SelectedPools
+                                  let check = new PoolHasGFS2SR(pool.Connection.Resolve(pool.master))
+                                  where check.CanRun()
+                                  select check as Check).ToList();
 
                 if (gfs2Checks.Count > 0)
-                {
-                    groups.Add(new CheckGroup(Messages.CHECKING_CLUSTERING_STATUS, gfs2Checks)); 
-                }
-                
+                    groups.Insert(2, new CheckGroup(Messages.CHECKING_CLUSTERING_STATUS, gfs2Checks));
+
+                //PVGuestsCheck checks
+                var pvChecks = (from Pool pool in SelectedPools
+                                let check = new PVGuestsCheck(pool.Connection.Resolve(pool.master), newServerVersion)
+                                where check.CanRun()
+                                select check as Check).ToList();
+
+                if (pvChecks.Count > 0)
+                    groups.Insert(2, new CheckGroup(Messages.CHECKING_PV_GUESTS, pvChecks));
+
+                //container management check - for each pool
+                var dockerChecks = (from Pool pool in SelectedPools
+                    let check = new PoolContainerManagementCheck(pool.Connection.Resolve(pool.master), newServerVersion)
+                    where check.CanRun()
+                    select check as Check).ToList();
+
+                if (dockerChecks.Count > 0)
+                    groups.Insert(2, new CheckGroup(Messages.CHECKING_CONTAINER_MANAGEMENT_GROUP, dockerChecks));
+
+                //power on mode check - for each host
+                var iloChecks = (from Host host in SelectedServers
+                                 let check = new PowerOniLoCheck(host, newServerVersion)
+                                 where check.CanRun()
+                                 select check as Check).ToList();
+
+                if (iloChecks.Count > 0)
+                    groups.Insert(2, new CheckGroup(Messages.CHECKING_POWER_ON_MODE_GROUP, iloChecks));
+
+                //protocol check - for each pool
+                var sslChecks = (from Pool pool in SelectedPools
+                                 let check = new PoolLegacySslCheck(pool.Connection.Resolve(pool.master), newServerVersion)
+                                 where check.CanRun()
+                                 select check as Check).ToList();
+
+                if (sslChecks.Count > 0)
+                    groups.Insert(2, new CheckGroup(Messages.CHECKING_SECURITY_PROTOCOL_GROUP, sslChecks));
+
+                //vSwitch controller check - for each pool
+                var vSwitchChecks = (from Pool pool in SelectedPools
+                                     let check = new VSwitchControllerCheck(pool.Connection.Resolve(pool.master), newServerVersion)
+                                     where check.CanRun()
+                                     select check as Check).ToList();
+
+                if (vSwitchChecks.Count > 0)
+                    groups.Insert(2, new CheckGroup(Messages.CHECKING_VSWITCH_CONTROLLER_GROUP, vSwitchChecks));
             }
 
-            //PVGuestsCheck checks
-            if (highestNewVersion != null || UpdateAlert?.NewServerVersion != null)
-            {
-                var pvChecks = new List<Check>();
-                foreach (var pool in SelectedPools.Where(p => Helpers.NaplesOrGreater(p.Connection)))
-                {
-                    if (pool.Connection.Resolve(pool.master) != null)
-                        pvChecks.Add(new PVGuestsCheck(pool, false));
-                }
-                if (pvChecks.Count > 0)
-                    groups.Add(new CheckGroup(Messages.CHECKING_PV_GUESTS, pvChecks));
-            }
-            
             return groups;
         }
 
-        protected virtual List<CheckGroup> GenerateChecks(Pool_patch patch)
+        private List<CheckGroup> GenerateChecks(Pool_patch patch)
         {
             List<Host> applicableServers = patch != null ? SelectedServers.Where(h => patch.AppliedOn(h) == DateTime.MaxValue).ToList() : SelectedServers;
 
@@ -554,14 +605,36 @@ namespace XenAdmin.Wizards.PatchingWizard
             //Checking if a reboot is pending on master
             var restartChecks = new List<Check>();
             foreach (var pool in SelectedPools)
-                restartChecks.Add(new RestartHostOrToolstackPendingOnMasterCheck(pool, patch == null ? null : patch.uuid));
+                restartChecks.Add(new RestartHostOrToolstackPendingOnCoordinatorCheck(pool, patch?.uuid));
 
             groups.Add(new CheckGroup(Messages.CHECKING_FOR_PENDING_RESTART, restartChecks));
 
             return groups;
         }
 
-        protected virtual List<CheckGroup> GenerateChecks(Pool_update update)
+        /// <summary>
+        /// Returns a permanent <see cref="Check"/> with the given name and default object if it exists in the <see cref="Dictionary{TKey,TValue}"/> of permanent <see cref="Check"/>s;
+        /// otherwise, adds the default object to the dictionary and returns it.
+        /// <br /><br />
+        /// Use it to fetch <see cref="Check"/> instances that you want to re-use across check runs. This is especially useful when the conditions for the <see cref="Check"/>'s <see cref="Problem"/>s are not stored in the xenObjects, but are a property of the check itself. For instance, if you rely on the use of <see cref="Check.Completed"/>.
+        /// <br /><br />
+        /// If your  <see cref="Check"/> has custom properties, ensure they're considered in the Equals and GetHashCode overrides, and that the same is done for any <see cref="Problem"/>s it returns. By default, only the list of <see cref="IXenObject"/>s associated with the <see cref="Check"/> and <see cref="Problem"/> is checked for updates.
+         /// </summary>
+        /// <param name="name">A unique identifier for the check</param>
+        /// <param name="defaultObject">The default <see cref="Check"/>  to return if the named <see cref="Check"/> is not found in the <see cref="Dictionary{TKey,TValue}"/>.</param>
+        /// <returns></returns>
+        protected Check GetPermanentCheck(string name, Check defaultObject)
+        {
+            if (!_permanentChecks.TryGetValue(name, out var checkValue) || 
+                !checkValue.Equals(defaultObject))
+            {
+                _permanentChecks[name] = defaultObject;
+            }
+
+            return _permanentChecks[name];
+        }
+
+        private List<CheckGroup> GenerateChecks(Pool_update update)
         {
             List<Host> applicableServers = update != null ? SelectedServers.Where(h => !update.AppliedOn(h)).ToList() : SelectedServers;
             var groups = GenerateCommonChecks(applicableServers);
@@ -622,7 +695,31 @@ namespace XenAdmin.Wizards.PatchingWizard
             //Checking if a reboot is pending on master
              var restartChecks = new List<Check>();
             foreach (var pool in SelectedPools)
-                restartChecks.Add(new RestartHostOrToolstackPendingOnMasterCheck(pool, update == null ? null : update.uuid));
+                restartChecks.Add(new RestartHostOrToolstackPendingOnCoordinatorCheck(pool, update?.uuid));
+            groups.Add(new CheckGroup(Messages.CHECKING_FOR_PENDING_RESTART, restartChecks));
+
+            return groups;
+        }
+
+        protected virtual List<CheckGroup> GenerateChecks()
+        {
+            List<Host> applicableServers = SelectedServers;
+
+            var groups = new List<CheckGroup>();
+
+            var outOfSyncChecks = new List<Check>();
+            foreach (var pool in SelectedPools)
+                outOfSyncChecks.Add(new OutOfSyncWithCdnCheck(pool));
+
+            groups.Add(new CheckGroup(Messages.CHECKING_LAST_CDN_SYNC_TILE, outOfSyncChecks));
+
+            groups.AddRange(GenerateCommonChecks(applicableServers));
+
+            //Checking if a reboot is pending on master
+            var restartChecks = new List<Check>();
+            foreach (var pool in SelectedPools)
+                restartChecks.Add(new RestartHostOrToolstackPendingOnCoordinatorCheck(pool, null));
+
             groups.Add(new CheckGroup(Messages.CHECKING_FOR_PENDING_RESTART, restartChecks));
 
             return groups;
@@ -660,8 +757,7 @@ namespace XenAdmin.Wizards.PatchingWizard
 
             foreach (PreCheckGridRow row in dataGridView1.Rows)
             {
-                PreCheckHostRow hostRow = row as PreCheckHostRow;
-                if (hostRow != null && hostRow.IsProblem)
+                if (row is PreCheckHostRow hostRow && hostRow.IsProblem)
                 {
                     problemsFound = true;
 
@@ -686,23 +782,16 @@ namespace XenAdmin.Wizards.PatchingWizard
             return !checkInProgress && !actionInProgress && !problemsFound;
         }
 
-        public Pool_patch Patch { private get; set; }
-        public Pool_update PoolUpdate { private get; set; }
-
-        public List<Problem> PrecheckProblemsActuallyResolved
-        {
-            get { return ProblemsResolvedPreCheck.Where(p => p.SolutionActionCompleted).ToList(); }
-        }
-
         #region Nested classes and enums
 
         private enum PreCheckResult { OK, Info, Warning, Failed }
 
-        private abstract class PreCheckGridRow : XenAdmin.Controls.DataGridViewEx.DataGridViewExRow
+        private abstract class PreCheckGridRow : Controls.DataGridViewEx.DataGridViewExRow
         {
-            protected DataGridViewImageCell _iconCell = new DataGridViewImageCell();
-            protected DataGridViewTextBoxCell _descriptionCell = new DataGridViewTextBoxCell();
-            protected DataGridViewCell _solutionCell = null;
+            protected readonly DataGridViewImageCell _iconCell = new DataGridViewImageCell();
+            protected readonly DataGridViewTextBoxCell _descriptionCell = new DataGridViewTextBoxCell();
+            protected readonly DataGridViewCell _solutionCell;
+
             protected PreCheckGridRow(DataGridViewCell solutionCell)
             {
                 _solutionCell = solutionCell;
@@ -712,13 +801,13 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         private class PreCheckHeaderRow : PreCheckGridRow
         {
-            private string description;
+            private readonly string _description;
 
             public PreCheckHeaderRow(string text)
                 : base(new DataGridViewTextBoxCell())
             {
                 _iconCell.Value = new Bitmap(1, 1);
-                description = text;
+                _description = text;
                 _descriptionCell.Value = text;
                 _descriptionCell.Style.Font = new Font(Program.DefaultFont, FontStyle.Bold);
             }
@@ -742,14 +831,15 @@ namespace XenAdmin.Wizards.PatchingWizard
                         break;
                 }
 
-                _descriptionCell.Value = string.Format("{0} {1}", description, result);
+                _descriptionCell.Value = $"{_description} {result}";
             }
         }
 
         private class PreCheckHostRow : PreCheckGridRow
         {
-            private Problem _problem = null;
-            private Check _check = null;
+            private readonly Problem _problem;
+            private readonly Check _check;
+
             public PreCheckHostRow(Problem problem)
                 : base(new DataGridViewTextBoxCell())
             {
@@ -876,8 +966,7 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            PreCheckHostRow preCheckHostRow = dataGridView1.Rows[e.RowIndex] as PreCheckHostRow;
-            if (preCheckHostRow != null && preCheckHostRow.Enabled && e.ColumnIndex == 2)
+            if (dataGridView1.Rows[e.RowIndex] is PreCheckHostRow preCheckHostRow && preCheckHostRow.Enabled && e.ColumnIndex == 2)
             {
                 ExecuteSolution(preCheckHostRow);
             }
@@ -905,8 +994,7 @@ namespace XenAdmin.Wizards.PatchingWizard
                 // disable all problems 
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
-                    PreCheckHostRow preCheckRow = row as PreCheckHostRow;
-                    if (preCheckRow != null && preCheckRow.Problem != null)
+                    if (row is PreCheckHostRow preCheckRow && preCheckRow.Problem != null)
                     {
                         preCheckRow.Enabled = false;
                     }
@@ -915,15 +1003,14 @@ namespace XenAdmin.Wizards.PatchingWizard
             }
             else
             {
-                if (preCheckHostRow.Problem is WarningWithInformationUrl)
-                    (preCheckHostRow.Problem as WarningWithInformationUrl).LaunchUrlInBrowser();
-                else if (preCheckHostRow.Problem is ProblemWithInformationUrl)
-                    (preCheckHostRow.Problem as ProblemWithInformationUrl).LaunchUrlInBrowser();
+                if (preCheckHostRow.Problem is WarningWithInformationUrl warnUrl)
+                    warnUrl.LaunchUrlInBrowser();
+                else if (preCheckHostRow.Problem is ProblemWithInformationUrl problemUrl)
+                    problemUrl.LaunchUrlInBrowser();
                     
                 else if (!cancelled)
-                    using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Information,
-                                                                        string.Format(Messages.PATCHING_WIZARD_SOLVE_MANUALLY, preCheckHostRow.Problem.Description).Replace("\\n", "\n"),
-                                                                        Messages.PATCHINGWIZARD_PRECHECKPAGE_TEXT)))
+                    using (var dlg = new InformationDialog(string.Format(Messages.PATCHING_WIZARD_SOLVE_MANUALLY, preCheckHostRow.Problem.Description).Replace("\\n", "\n"))
+                        {WindowTitle = Messages.PATCHINGWIZARD_PRECHECKPAGE_TEXT})
                     {
                         dlg.ShowDialog(this);
                     }
@@ -950,14 +1037,15 @@ namespace XenAdmin.Wizards.PatchingWizard
                     }
                 }
             }
-            resolvePrechecksAction = new ParallelAction(Messages.PATCHINGWIZARD_PRECHECKPAGE_RESOLVING_ALL, Messages.PATCHINGWIZARD_PRECHECKPAGE_RESOLVING_ALL, Messages.COMPLETED, actions, true, false);
+
+            resolvePrechecksAction = new ParallelAction(Messages.PATCHINGWIZARD_PRECHECKPAGE_RESOLVING_ALL, Messages.PATCHINGWIZARD_PRECHECKPAGE_RESOLVING_ALL, Messages.COMPLETED, actions,
+                suppressHistory: true, showSubActionsDetails: false);
             StartResolvePrechecksAction();
         }
 
         private void resolvePrecheckAction_Changed(object sender)
         {
-            var action = sender as AsyncAction;
-            if (action == null)
+            if (!(sender is AsyncAction action))
                 return;
 
             Program.Invoke(this, () => UpdateActionProgress(action));
@@ -1005,8 +1093,7 @@ namespace XenAdmin.Wizards.PatchingWizard
 
                 foreach (var row in allRows)
                 {
-                    var hostRow = row as PreCheckHostRow;
-                    if (hostRow != null)
+                    if (row is PreCheckHostRow hostRow)
                     {
                         if (hostRow.Problem != null || !checkBoxViewPrecheckFailuresOnly.Checked)
                         {
@@ -1023,8 +1110,7 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         private void dataGridView1_CellMouseMove(object sender, DataGridViewCellMouseEventArgs e)
         {
-            PreCheckHostRow preCheckHostRow = dataGridView1.Rows[e.RowIndex] as PreCheckHostRow;
-            if (preCheckHostRow != null && preCheckHostRow.Enabled && e.ColumnIndex == 2 && !string.IsNullOrEmpty(preCheckHostRow.Solution))
+            if (dataGridView1.Rows[e.RowIndex] is PreCheckHostRow preCheckHostRow && preCheckHostRow.Enabled && e.ColumnIndex == 2 && !string.IsNullOrEmpty(preCheckHostRow.Solution))
                 Cursor = Cursors.Hand;
             else
                 Cursor = Cursors.Arrow;

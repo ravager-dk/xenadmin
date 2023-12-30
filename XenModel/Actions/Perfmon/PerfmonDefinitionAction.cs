@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Alerts;
 using XenAdmin.Core;
@@ -55,9 +53,9 @@ namespace XenAdmin.Actions
             this.perfmonDefinitions = perfmonDefinitions;
 
             string type = xo.GetType().Name.ToLowerInvariant();
-            ApiMethodsToRoleCheck.Add(type + ".remove_from_other_config", PerfmonDefinition.PERFMON_KEY_NAME);
+            ApiMethodsToRoleCheck.AddWithKey(type + ".remove_from_other_config", PerfmonDefinition.PERFMON_KEY_NAME);
             if (perfmonDefinitions != null && perfmonDefinitions.Count != 0)
-                ApiMethodsToRoleCheck.Add(type + ".add_to_other_config", PerfmonDefinition.PERFMON_KEY_NAME);
+                ApiMethodsToRoleCheck.AddWithKey(type + ".add_to_other_config", PerfmonDefinition.PERFMON_KEY_NAME);
         }
 
         protected override void Run()
@@ -168,10 +166,10 @@ namespace XenAdmin.Actions
                     //immediately. But even if the refresh fails, the change will be
                     //noticed, just a bit later.
 
-                    new ExecutePluginAction(host.Connection, host,
+                    new RunPluginAction(host.Connection, host,
                         XenServerPlugins.PLUGIN_PERFMON_PLUGIN,
                         XenServerPlugins.PLUGIN_PERFMON_FUNCTION_REFRESH,
-                        new Dictionary<string, string>(), true).RunExternal(Session);
+                        new Dictionary<string, string>(), true).RunSync(Session);
                 }
                 catch (Exception e)
                 {
@@ -181,15 +179,15 @@ namespace XenAdmin.Actions
                         // start perfmon and try again
                         try
                         {
-                            new ExecutePluginAction(host.Connection, host,
+                            new RunPluginAction(host.Connection, host,
                                 XenServerPlugins.PLUGIN_PERFMON_PLUGIN,
                                 XenServerPlugins.PLUGIN_PERFMON_FUNCTION_START,
-                                new Dictionary<string, string>(), true).RunExternal(Session);
+                                new Dictionary<string, string>(), true).RunSync(Session);
 
-                            new ExecutePluginAction(host.Connection, host,
+                            new RunPluginAction(host.Connection, host,
                                 XenServerPlugins.PLUGIN_PERFMON_PLUGIN,
                                 XenServerPlugins.PLUGIN_PERFMON_FUNCTION_REFRESH,
-                                new Dictionary<string, string>(), true).RunExternal(Session);
+                                new Dictionary<string, string>(), true).RunSync(Session);
                         }
                         catch (Exception ex)
                         {

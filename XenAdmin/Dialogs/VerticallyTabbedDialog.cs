@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,17 +29,19 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Controls;
+using XenAdmin.Controls.GradientPanel;
 using XenAdmin.Network;
 
 namespace XenAdmin.Dialogs
 {
     public partial class VerticallyTabbedDialog : XenDialogBase
     {
+        private Font titleFont = new Font(DefaultFont.FontFamily, DefaultFont.Size + 1.75f, FontStyle.Bold);
+
         // Void constructor for the designer
         public VerticallyTabbedDialog()
         {
@@ -57,21 +58,13 @@ namespace XenAdmin.Dialogs
         {
             InitializeComponent();
 
-            TabTitle.ForeColor = Program.HeaderGradientForeColor;
-            TabTitle.Font = Program.TabbedDialogHeaderFont;
-            if (!Application.RenderWithVisualStyles)
-                blueBorder.BackColor = SystemColors.Control;
+            TabTitle.ForeColor = HorizontalGradientPanel.TextColor;
+            TabTitle.Font = titleFont;
         }
 
-        public VerticalTabs.IVerticalTab[] Tabs
-        {
-            get { return verticalTabs.Items.Cast<VerticalTabs.IVerticalTab>().ToArray(); }
-        }
+        public VerticalTabs.IVerticalTab[] Tabs => verticalTabs.Items.Cast<VerticalTabs.IVerticalTab>().ToArray();
 
-        public VerticalTabs.IVerticalTab SelectedTab
-        {
-            get { return verticalTabs.SelectedItem as VerticalTabs.IVerticalTab; }
-        }
+        public VerticalTabs.IVerticalTab SelectedTab => verticalTabs.SelectedItem as VerticalTabs.IVerticalTab;
 
         protected void SelectPage(VerticalTabs.IVerticalTab page)
         {
@@ -83,34 +76,27 @@ namespace XenAdmin.Dialogs
 
         private void verticalTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListBox listBox = sender as ListBox;
-            if (sender == null)
-                return;
+            if (sender is ListBox listBox &&
+                listBox.SelectedItem is VerticalTabs.IVerticalTab editPage &&
+                editPage is Control control)
+            {
+                TabImage.Image = editPage.Image;
+                TabTitle.Text = GetTabTitle(editPage);
 
-            VerticalTabs.IVerticalTab editPage = listBox.SelectedItem as VerticalTabs.IVerticalTab;
-            if (editPage == null)
-                return;
+                control.Show();
+                control.BringToFront();
 
-            Control control = editPage as Control;
-            if (control == null)
-                return;
-
-            TabImage.Image = editPage.Image;
-            TabTitle.Text = GetTabTitle(editPage);
-
-            control.Show();
-            control.BringToFront();
-
-            foreach(Control other in ContentPanel.Controls)
-                if (other != control)
+                foreach (Control other in ContentPanel.Controls)
                 {
-                    other.Hide();
+                    if (other != control)
+                        other.Hide();
                 }
+            }
         }
 
         protected virtual string GetTabTitle(VerticalTabs.IVerticalTab verticalTab)
         {
-            return verticalTab != null ? verticalTab.Text : String.Empty;
+            return verticalTab != null ? verticalTab.Text : string.Empty;
         }
 
         /// <summary>
@@ -123,8 +109,7 @@ namespace XenAdmin.Dialogs
             if (!DesignMode)
                 return;
 
-            VerticalTabs.IVerticalTab verticalTab = e.Control as VerticalTabs.IVerticalTab;
-            if (verticalTab == null)
+            if (!(e.Control is VerticalTabs.IVerticalTab verticalTab))
                 return;
 
             foreach (VerticalTabs.IVerticalTab vt in verticalTabs.Items)
@@ -142,8 +127,7 @@ namespace XenAdmin.Dialogs
             if (!DesignMode)
                 return;
 
-            VerticalTabs.IVerticalTab verticalTab = e.Control as VerticalTabs.IVerticalTab;
-            if (verticalTab == null)
+            if (!(e.Control is VerticalTabs.IVerticalTab verticalTab))
                 return;
 
             verticalTabs.Items.Remove(verticalTab);

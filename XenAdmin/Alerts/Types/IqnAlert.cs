@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,7 +34,6 @@ using XenAdmin.Commands;
 
 using XenAPI;
 using XenAdmin.Core;
-using XenAdmin.Dialogs;
 
 
 namespace XenAdmin.Alerts
@@ -62,7 +60,7 @@ namespace XenAdmin.Alerts
         {
             get
             {
-                return () => new IqnPropertiesCommand(Program.MainWindow, Host).Execute();
+                return () => new IqnPropertiesCommand(Program.MainWindow, Host).Run();
             }
         }
     }

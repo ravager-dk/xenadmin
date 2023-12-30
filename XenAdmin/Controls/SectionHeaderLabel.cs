@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -301,7 +299,7 @@ namespace XenAdmin.Controls
                     }
                 case VerticalAlignment.Middle:
                     {
-                        Y = (this.Height - this.Padding.Vertical) / 2;
+                        Y = ((float) this.Height - this.Padding.Vertical) / 2;
                         break;
                     }
                 case VerticalAlignment.Bottom:

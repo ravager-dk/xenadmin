@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,7 +36,7 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class CheckDiskSpaceForPatchUploadAction : PureAsyncAction
+    public class CheckDiskSpaceForPatchUploadAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -48,45 +47,27 @@ namespace XenAdmin.Actions
         /// This constructor is used to check disk space for uploading a single update file
         /// </summary>
         public CheckDiskSpaceForPatchUploadAction(Host host, string path, bool suppressHistory)
-            : this(host, FileName(path), FileSize(path), suppressHistory)
-        { }
-
-        /// <summary>
-        /// This constructor is used to check disk space for uploading a file of given size
-        /// </summary>
-        public CheckDiskSpaceForPatchUploadAction(Host host, string fileName, long size, bool suppressHistory)
             : base(host.Connection, Messages.ACTION_CHECK_DISK_SPACE_TITLE, "", suppressHistory)
         {
-            if (host == null)
-                throw new ArgumentNullException("host");
             Host = host;
-            this.fileName = fileName;
-            fileSize = size;
-        }
-
-        private static long FileSize(string path)
-        {
-            FileInfo fileInfo = new FileInfo(path);
-            return fileInfo.Length;
-        }
-
-        private static string FileName(string path)
-        {
-            FileInfo fileInfo = new FileInfo(path);
-            return fileInfo.Name;
+            var fileInfo = new FileInfo(path);
+            fileName = fileInfo.Name;
+            fileSize = fileInfo.Length;
+            ApiMethodsToRoleCheck.AddRange("host.call_plugin");
         }
 
         protected override void Run()
         {
             SafeToExit = false;
-            Description = String.Format(Messages.ACTION_CHECK_DISK_SPACE_DESCRIPTION, Host.Name());
+            Description = string.Format(Messages.ACTION_CHECK_DISK_SPACE_DESCRIPTION, Host.Name());
+
             if (!IsEnoughDiskSpace())
             {
                 DiskSpaceRequirements diskSpaceRequirements = null;
                 var getDiskSpaceRequirementsAction = new GetDiskSpaceRequirementsAction(Host, fileName, fileSize, true);
                 try
                 {
-                    getDiskSpaceRequirementsAction.RunExternal(Session);
+                    getDiskSpaceRequirementsAction.RunSync(Session);
                     diskSpaceRequirements = getDiskSpaceRequirementsAction.DiskSpaceRequirements;
                 }
                 catch (Failure failure)

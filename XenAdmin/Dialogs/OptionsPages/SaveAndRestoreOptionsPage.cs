@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,134 +29,109 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAdmin.Dialogs.RestoreSession;
-using XenAdmin.Properties;
 
 
 namespace XenAdmin.Dialogs.OptionsPages
 {
     /// <summary>
-    /// The page is used to set whether or not to save server usernames and passwords and whether a master password should be set to protect these passwords
+    /// The page is used to set whether or not to save server usernames and passwords
+    /// and whether a main password should be set to protect these passwords
     /// </summary>
     public partial class SaveAndRestoreOptionsPage : UserControl, IOptionsPage
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private byte[] _mainPassword;
 
-        private byte[] TemporaryMasterPassword;
-        // call save serverlist on OK
+        /// <summary>
+        /// Whether to save the server list on OK
+        /// </summary>
         protected internal bool SaveAllAfter { get; set; }
 
         public SaveAndRestoreOptionsPage() 
         {
             InitializeComponent();
-            // setup all the controls with the current state of the settings
-            FillCurrentSettings();
+            saveStateLabel.Text = string.Format(saveStateLabel.Text, BrandManager.BrandConsole);
         }
 
-        public static void Log()
-        {
-            // SSL Certificates
-            log.Info("=== SaveSession: " + Properties.Settings.Default.SaveSession.ToString());
-            log.Info("=== RequirePass: " + Properties.Settings.Default.RequirePass.ToString());
-        }
-
-        // all prompts for old password should have been made
         private void SaveEverything()
         {
             if (!Registry.AllowCredentialSave)
-            {
                 return;
-            }
+
             if (!saveStateCheckBox.Checked)
             {
-                // save nothing and nobody (personally my two favourite servers anyway...)
                 Properties.Settings.Default.SaveSession = false;
                 Properties.Settings.Default.RequirePass = false;
 
-                Program.MasterPassword = null;
+                Program.MainPassword = null;
             }
-            else if (!requireMasterPasswordCheckBox.Checked)
+            else if (!requireMainPasswordCheckBox.Checked)
             {
-                // we need to save stuff but without a password
                 Properties.Settings.Default.SaveSession = true;
                 Properties.Settings.Default.RequirePass = false;
 
-                Program.MasterPassword = null;
+                Program.MainPassword = null;
             }
             else
             {
-                // password protect stuff
                 Properties.Settings.Default.SaveSession = true;
                 Properties.Settings.Default.RequirePass = true;
 
-                // set password
-                if (Program.MasterPassword != TemporaryMasterPassword) 
-                {
-                    Program.MasterPassword = TemporaryMasterPassword;
-                    new ActionBase(Messages.CHANGED_MASTER_PASSWORD,
-                        Messages.CHANGED_MASTER_PASSWORD_LONG, false, true);
-                }
+                Program.MainPassword = _mainPassword;
             }
+
             if (SaveAllAfter)
                 Settings.SaveServerList();
         }
         
         #region Control event handlers
 
-        private void changeMasterPasswordButton_Click(object sender, EventArgs e)
+        private void changeMainPasswordButton_Click(object sender, EventArgs e)
         {
-            // tell the dialog what to use as the "current" password
-            using (var changePassword = new ChangeMasterPasswordDialog(TemporaryMasterPassword))
+            using (var changePassword = new ChangeMainPasswordDialog(_mainPassword))
             {
                 if (changePassword.ShowDialog(this) == DialogResult.OK)
                 {
-                    // password has been successfully changed
-                    TemporaryMasterPassword = changePassword.NewPassword;
+                    _mainPassword = changePassword.NewPassword;
                 }
             }
         }
 
-        private void requireMasterPasswordCheckBox_Click(object sender, EventArgs e)
+        private void requireMainPasswordCheckBox_Click(object sender, EventArgs e)
         {
-            // requireMasterPasswordCheckBox.Checked was the state before the click
+            // requireCoordinatorPasswordCheckBox.Checked was the state before the click
             // if previously checked, the user is trying to clear it => request authorization
             // if previously unchecked, the user is trying to set a password
 
-            if (requireMasterPasswordCheckBox.Checked)
+            if (requireMainPasswordCheckBox.Checked)
             {
-                using (var enterPassword = new EnterMasterPasswordDialog(TemporaryMasterPassword))
+                using (var enterPassword = new EnterMainPasswordDialog(_mainPassword))
                 {
                     if (enterPassword.ShowDialog(this) == DialogResult.OK)
                     {
-                        TemporaryMasterPassword = null;
-                        requireMasterPasswordCheckBox.Checked = false;
-                        changeMasterPasswordButton.Enabled = false;
+                        _mainPassword = null;
+                        requireMainPasswordCheckBox.Checked = false;
+                        changeMainPasswordButton.Enabled = false;
                     }
                 }
             }
             else
             {
-                System.Diagnostics.Debug.Assert(TemporaryMasterPassword == null, "Master password is set, but not reflected on GUI");
+                System.Diagnostics.Debug.Assert(_mainPassword == null, "Main password is set, but not reflected on GUI");
 
-                if (TemporaryMasterPassword == null)
+                if (_mainPassword == null)
                 {
                     // no previous password existed => set a new one
-                    using (var setPassword = new SetMasterPasswordDialog())
+                    using (var setPassword = new SetMainPasswordDialog())
                     {
                         if (setPassword.ShowDialog(this) == DialogResult.OK)
                         {
-                            TemporaryMasterPassword = setPassword.NewPassword;
-                            requireMasterPasswordCheckBox.Checked = true;
-                            changeMasterPasswordButton.Enabled = true;
+                            _mainPassword = setPassword.NewPassword;
+                            requireMainPasswordCheckBox.Checked = true;
+                            changeMainPasswordButton.Enabled = true;
                         }
                     }
                 }
@@ -165,8 +139,8 @@ namespace XenAdmin.Dialogs.OptionsPages
                 {
                     // a previous password existed (should never get here but just in case)
                     // enable button to facilitate password change
-                    requireMasterPasswordCheckBox.Checked = true;
-                    changeMasterPasswordButton.Enabled = true;
+                    requireMainPasswordCheckBox.Checked = true;
+                    changeMainPasswordButton.Enabled = true;
                 }
             }
         }
@@ -174,36 +148,38 @@ namespace XenAdmin.Dialogs.OptionsPages
         private void saveStateCheckBox_Click(object sender, EventArgs e)
         {
             // need to prevent the user from going to an open terminal and clearing
-            // the save state, then setting the master password to anything they like
+            // the save state, then setting the coordinator password to anything they like
 
             // saveStateCheckBox.Checked was the state before the click
             // if previously checked, the user is trying to clear it => authorization maybe required
-            // (depending on the state of the requireMasterPasswordCheckBox; this should be cleared too if checked)
+            // (depending on the state of the requireCoordinatorPasswordCheckBox; this should be cleared too if checked)
 
-            if (saveStateCheckBox.Checked && requireMasterPasswordCheckBox.Checked)
+            if (saveStateCheckBox.Checked && requireMainPasswordCheckBox.Checked)
             {
-                using (var enterPassword = new EnterMasterPasswordDialog(TemporaryMasterPassword))
+                using (var enterPassword = new EnterMainPasswordDialog(_mainPassword))
                 {
                     if (enterPassword.ShowDialog(this) == DialogResult.OK)
                     {
-                        TemporaryMasterPassword = null;
+                        _mainPassword = null;
                         saveStateCheckBox.Checked = false;
-                        requireMasterPasswordCheckBox.Checked = false;
-                        masterPasswordGroupBox.Enabled = false;
+                        requireMainPasswordCheckBox.Checked = false;
+                        mainPasswordGroupBox.Enabled = false;
                     }
                 }
             }
             else
             {
                 saveStateCheckBox.Checked = !saveStateCheckBox.Checked;
-                masterPasswordGroupBox.Enabled = saveStateCheckBox.Checked;
-                changeMasterPasswordButton.Enabled = requireMasterPasswordCheckBox.Checked;
+                mainPasswordGroupBox.Enabled = saveStateCheckBox.Checked;
+                changeMainPasswordButton.Enabled = requireMainPasswordCheckBox.Checked;
             }
         }
 
         #endregion
 
-        private void FillCurrentSettings()
+        #region IOptionsPage Members
+
+        public void Build()
         {
             bool allowCredSave = Registry.AllowCredentialSave;
             bool saveSession = Properties.Settings.Default.SaveSession;
@@ -212,19 +188,29 @@ namespace XenAdmin.Dialogs.OptionsPages
             saveStateLabel.Enabled = allowCredSave;
             saveStateCheckBox.Enabled = allowCredSave;
             
-            // use the SaveSession variable to denote whether to save passwords or not
             saveStateCheckBox.Checked = saveSession && allowCredSave;
-            masterPasswordGroupBox.Enabled = saveSession && allowCredSave;
+            mainPasswordGroupBox.Enabled = saveSession && allowCredSave;
             
-            // use the RequirePass variable to say if a master password has been set
-            requireMasterPasswordCheckBox.Checked = reqPass && Program.MasterPassword != null && allowCredSave;
-            changeMasterPasswordButton.Enabled = reqPass && Program.MasterPassword != null && allowCredSave;
+            requireMainPasswordCheckBox.Checked = reqPass && Program.MainPassword != null && allowCredSave;
+            changeMainPasswordButton.Enabled = reqPass && Program.MainPassword != null && allowCredSave;
             
-            // the temporary password starts as the MasterPassword
-            TemporaryMasterPassword = Program.MasterPassword;
+            _mainPassword = Program.MainPassword;
         }
 
-        #region IOptionsPage Members
+        public bool IsValidToSave(out Control control, out string invalidReason)
+        {
+            control = null;
+            invalidReason = null;
+            return true;
+        }
+
+        public void ShowValidationMessages(Control control, string message)
+        {
+        }
+
+        public void HideValidationMessages()
+        {
+        }
 
         public void Save()
         {
@@ -235,20 +221,11 @@ namespace XenAdmin.Dialogs.OptionsPages
 
         #region IVerticalTab Members
 
-        public override string Text
-        {
-            get { return Messages.SAVE_AND_RESTORE; }
-        }
+        public override string Text => Messages.SAVE_AND_RESTORE;
 
-        public string SubText
-        {
-            get { return Messages.SAVE_AND_RESTORE_DESC; }
-        }
+        public string SubText => Messages.SAVE_AND_RESTORE_DESC;
 
-        public Image Image
-        {
-            get { return Resources._000_BackupMetadata_h32bit_16; }
-        }
+        public Image Image => Images.StaticImages._000_BackupMetadata_h32bit_16;
 
         #endregion
     }

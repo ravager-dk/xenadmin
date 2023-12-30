@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,10 +29,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Model;
-using XenAPI;
 using XenAdmin.Actions;
 
 namespace XenAdmin.Commands
@@ -66,7 +62,7 @@ namespace XenAdmin.Commands
             _folder = folder;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             string newName = _newName;
             Folders.FixupRelativePath(ref newName);
@@ -91,7 +87,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (!_folder.IsRootFolder)
             {

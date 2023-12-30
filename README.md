@@ -7,8 +7,8 @@ XCP-ng Center
 
 This repository contains the source code for XCP-ng Center.
 
-XCP-ng Center is a Windows-based management tool for XCP-ng and CitrixÂ® XenServerÂ® environments
-which enables users to manage and monitor XCP-ng and CitrixÂ® XenServerÂ® hosts and resource pools,
+XCP-ng Center is a Windows-based management tool for XCP-ng and Citrix® XenServer® environments
+which enables users to manage and monitor XCP-ng and Citrix® XenServer® hosts and resource pools,
 and to deploy, monitor, manage and migrate virtual machines.
 
 XCP-ng Center is written mostly in C#.

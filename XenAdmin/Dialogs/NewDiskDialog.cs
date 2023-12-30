@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -38,7 +37,6 @@ using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
 using XenAdmin.Actions;
-using System.Drawing;
 
 
 namespace XenAdmin.Dialogs
@@ -47,9 +45,9 @@ namespace XenAdmin.Dialogs
     {
         #region Private fields
 
-        private readonly VM TheVM;
-        private VDI DiskTemplate;
-        private readonly IEnumerable<VDI> _VDINamesInUse = new List<VDI>();
+        private readonly VM _vm;
+        private readonly VDI _diskTemplate;
+        private readonly IEnumerable<VDI> _vdiNamesInUse = new List<VDI>();
 
         #endregion
 
@@ -59,18 +57,13 @@ namespace XenAdmin.Dialogs
             : base(connection ?? throw new ArgumentNullException(nameof(connection)))
         {
             InitializeComponent();
-            
-            NameTextBox.Text = GetDefaultVDIName();
-            SrListBox.Connection = connection;
-            SrListBox.Usage = SrPicker.SRPickerType.InstallFromTemplate;
-            SrListBox.SetAffinity(null);
-            SrListBox.selectSRorNone(sr);
-            diskSpinner1.Populate();
-        }
 
-        public NewDiskDialog(IXenConnection connection, VM vm)
-            : this(connection, vm, vm.Home())
-        { }
+            NameTextBox.Text = GetDefaultVDIName();
+            diskSpinner1.Populate();
+            srPicker.Populate(SrPicker.SRPickerType.InstallFromTemplate, connection, null, sr, new[] { NewDisk() });
+            buttonRescan.Enabled = srPicker.CanBeScanned;
+            UpdateErrorsAndButtons();
+        }
 
         public NewDiskDialog(IXenConnection connection, VM vm, Host affinity,
             SrPicker.SRPickerType pickerUsage = SrPicker.SRPickerType.VM, VDI diskTemplate = null,
@@ -79,49 +72,46 @@ namespace XenAdmin.Dialogs
         {
             InitializeComponent();
 
-            TheVM = vm;
-            _VDINamesInUse = vdiNamesInUse ?? new List<VDI>();
-
-            SrListBox.Connection = connection;
-            SrListBox.Usage = pickerUsage;
-            SrListBox.SetAffinity(affinity);
-
-            Pool pool_sr = Helpers.GetPoolOfOne(connection);
-            if (pool_sr != null)
-            {
-                SrListBox.DefaultSR = connection.Resolve(pool_sr.default_SR); //if default sr resolves to null the first sr in the list will be selected
-            }
+            _vm = vm;
+            _vdiNamesInUse = vdiNamesInUse ?? new List<VDI>();
+            diskSpinner1.CanResize = canResize;
 
             if (diskTemplate == null)
             {
                 NameTextBox.Text = GetDefaultVDIName();
-                SrListBox.selectDefaultSROrAny();
                 diskSpinner1.Populate(minSize: minSize);
+                srPicker.Populate(pickerUsage, connection, affinity, null, new[] { NewDisk() });
+                buttonRescan.Enabled = srPicker.CanBeScanned;
+                UpdateErrorsAndButtons();
             }
             else
             {
-                DiskTemplate = diskTemplate;
-                NameTextBox.Text = DiskTemplate.Name();
-                DescriptionTextBox.Text = DiskTemplate.Description();
-                SrListBox.selectSRorDefaultorAny(connection.Resolve(DiskTemplate.SR));
+                _diskTemplate = diskTemplate;
+                NameTextBox.Text = _diskTemplate.Name();
+                DescriptionTextBox.Text = _diskTemplate.Description();
                 Text = Messages.EDIT_DISK;
                 OkButton.Text = Messages.OK;
-                diskSpinner1.Populate(DiskTemplate.virtual_size, minSize);
+                diskSpinner1.Populate(_diskTemplate.virtual_size, minSize);
+                srPicker.Populate(pickerUsage, connection, affinity, connection.Resolve(_diskTemplate.SR), new[] { NewDisk() });
+                buttonRescan.Enabled = srPicker.CanBeScanned;
+                UpdateErrorsAndButtons();
             }
-
-            diskSpinner1.CanResize = canResize;
         }
 
         #endregion
 
+        public VDI Disk { get; private set; }
+
+        public VBD Device { get; private set; }
+
         public bool DontCreateVDI { get; set; }
 
-        internal override string HelpName => DiskTemplate == null ? "NewDiskDialog" : "EditNewDiskDialog";
+        internal override string HelpName => _diskTemplate == null ? "NewDiskDialog" : "EditNewDiskDialog";
 
         private string GetDefaultVDIName()
         {
             List<string> usedNames = new List<string>();
-            foreach (VDI v in connection.Cache.VDIs.Concat(_VDINamesInUse))
+            foreach (VDI v in connection.Cache.VDIs.Concat(_vdiNamesInUse))
             {
                 usedNames.Add(v.Name());
             }
@@ -133,10 +123,24 @@ namespace XenAdmin.Dialogs
             UpdateErrorsAndButtons();
         }
 
+        private void srPicker_CanBeScannedChanged()
+        {
+            buttonRescan.Enabled = srPicker.CanBeScanned;
+            UpdateErrorsAndButtons();
+        }
+
+        private void buttonRescan_Click(object sender, EventArgs e)
+        {
+            srPicker.ScanSRs();
+        }
+
         private void OkButton_Click(object sender, EventArgs e)
         {
-            if (SrListBox.SR == null || NameTextBox.Text == "" || !connection.IsConnected)
+            if (srPicker.SR == null || NameTextBox.Text == "" || !connection.IsConnected)
                 return;
+
+            Disk = NewDisk();
+            Device = NewDevice();
 
             if (DontCreateVDI)
             {
@@ -144,70 +148,39 @@ namespace XenAdmin.Dialogs
                 Close();
                 return;
             }
-            XenAPI.SR sr = SrListBox.SR;
-            if (!sr.shared && TheVM != null && TheVM.HaPriorityIsRestart())
+
+            SR sr = srPicker.SR;
+            var actions = new List<AsyncAction>();
+
+            if (!sr.shared && _vm != null && _vm.HaPriorityIsRestart())
             {
-                DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.NEW_SR_DIALOG_ATTACH_NON_SHARED_DISK_HA, Messages.XENCENTER),
-                                ThreeButtonDialog.ButtonYes,
-                                ThreeButtonDialog.ButtonNo))
+                using (var dlg = new WarningDialog(Messages.NEW_SR_DIALOG_ATTACH_NON_SHARED_DISK_HA,
+                                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
                 {
-                    dialogResult = dlg.ShowDialog(Program.MainWindow);
+                    if (dlg.ShowDialog(this) != DialogResult.Yes)
+                        return;
                 }
-                if (dialogResult != DialogResult.Yes)
-                    return;
-                new HAUnprotectVMAction(TheVM).RunExternal(TheVM.Connection.Session);
+
+                actions.Add(new HAUnprotectVMAction(_vm));
             }
 
-            VDI vdi = NewDisk();
-
-
-            if (TheVM != null)
+            if (_vm != null)
             {
-                var alreadyHasBootableDisk = HasBootableDisk(TheVM);
+                //note that this action alters the Device
+                actions.Add(new CreateDiskAction(Disk, Device, _vm));
 
-                Actions.DelegatedAsyncAction action = new Actions.DelegatedAsyncAction(connection,
-                    string.Format(Messages.ACTION_DISK_ADDING_TITLE, NameTextBox.Text, sr.NameWithoutHost()),
-                    Messages.ACTION_DISK_ADDING, Messages.ACTION_DISK_ADDED,
-                    delegate(XenAPI.Session session)
-                    {
-                        // Get legitimate unused userdevice numbers
-                        string[] uds = XenAPI.VM.get_allowed_VBD_devices(session, TheVM.opaque_ref);
-                        if (uds.Length == 0)
-                        {
-                            throw new Exception(FriendlyErrorNames.VBDS_MAX_ALLOWED);
-                        }
-                        string ud = uds[0];
-                        string vdiref = VDI.create(session, vdi);
-                        XenAPI.VBD vbd = NewDevice();
-                        vbd.VDI = new XenAPI.XenRef<XenAPI.VDI>(vdiref);
-                        vbd.VM = new XenAPI.XenRef<XenAPI.VM>(TheVM);
-
-                        // CA-44959: only make bootable if there aren't other bootable VBDs.
-                        vbd.bootable = ud == "0" && !alreadyHasBootableDisk;
-                        vbd.userdevice = ud;
-
-                        // Now try to plug the VBD.
-                        var plugAction = new VbdSaveAndPlugAction(TheVM, vbd, vdi.Name(), session, false);
-                        plugAction.ShowUserInstruction += PlugAction_ShowUserInstruction;
-                        plugAction.RunAsync();
-                    });
-
-                action.VM = TheVM;
-                using (var dialog = new ActionProgressDialog(action, ProgressBarStyle.Blocks))
-                    dialog.ShowDialog();
-                if (!action.Succeeded)
-                    return;
+                // Now try to plug the VBD.
+                var plugAction = new VbdCreateAndPlugAction(_vm, Device, Disk.Name(), false);
+                plugAction.ShowUserInstruction += PlugAction_ShowUserInstruction;
+                actions.Add(plugAction);
             }
             else
             {
-                CreateDiskAction action = new CreateDiskAction(vdi);
-                using (var dialog = new ActionProgressDialog(action, ProgressBarStyle.Marquee))
-                    dialog.ShowDialog();
-                if (!action.Succeeded)
-                    return;
+                actions.Add(new CreateDiskAction(Disk));
             }
+
+            new MultipleAction(connection, "", "", "", actions, true, true, true).RunAsync();
+
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -218,66 +191,37 @@ namespace XenAdmin.Dialogs
             {
                 if (!Program.RunInAutomatedTestMode)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Information, message)))
-                    {
+                    using (var dlg = new InformationDialog(message))
                         dlg.ShowDialog(Program.MainWindow);
-                    }
                 }
             });
         }
 
-        private static bool HasBootableDisk(VM vm)
+        private VDI NewDisk()
         {
-            var c = vm.Connection;
-            foreach (XenRef<VBD> vbdRef in vm.VBDs)
+            VDI vdi = new VDI
             {
-                var vbd = c.Resolve(vbdRef);
-
-                if (vbd != null && !vbd.IsCDROM() && !vbd.IsFloppyDrive() && vbd.bootable)
-                {
-                    VDI vdi = c.Resolve(vbd.VDI);
-
-                    if (vdi != null)
-                    {
-                        SR sr = c.Resolve(vdi.SR);
-                        if (sr != null && sr.IsToolsSR())
-                        {
-                            continue;
-                        }
-                    }
-
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public VDI NewDisk()
-        {
-            VDI vdi = new VDI();
-            vdi.Connection = connection;
-            vdi.read_only = DiskTemplate != null ? DiskTemplate.read_only : false;
-            vdi.SR = new XenAPI.XenRef<XenAPI.SR>(SrListBox.SR);
-
-            vdi.virtual_size = diskSpinner1.SelectedSize;
-            vdi.name_label = NameTextBox.Text;
-            vdi.name_description = DescriptionTextBox.Text;
-            vdi.sharable = DiskTemplate != null ? DiskTemplate.sharable : false;
-            vdi.type = DiskTemplate != null ? DiskTemplate.type : vdi_type.user;
-            vdi.SetVmHint(TheVM != null ? TheVM.uuid : "");
+                Connection = connection,
+                read_only = _diskTemplate?.read_only ?? false,
+                SR = srPicker.SR == null ? new XenRef<SR>(Helper.NullOpaqueRef) : new XenRef<SR>(srPicker.SR),
+                virtual_size = diskSpinner1.SelectedSize,
+                name_label = NameTextBox.Text,
+                name_description = DescriptionTextBox.Text,
+                sharable = _diskTemplate?.sharable ?? false,
+                type = _diskTemplate?.type ?? vdi_type.user
+            };
+            vdi.SetVmHint(_vm != null ? _vm.uuid : "");
             return vdi;
         }
 
-        public VBD NewDevice()
+        private VBD NewDevice()
         {
-
             VBD vbd = new VBD();
             vbd.Connection = connection;
             vbd.device = "";
             vbd.empty = false;
-            vbd.type = XenAPI.vbd_type.Disk;
-            vbd.mode = XenAPI.vbd_mode.RW;
+            vbd.type = vbd_type.Disk;
+            vbd.mode = vbd_mode.RW;
             vbd.SetIsOwner(true);
             vbd.unpluggable = true;
             return vbd;
@@ -291,6 +235,7 @@ namespace XenAdmin.Dialogs
 
         private void diskSpinner1_SelectedSizeChanged()
         {
+            srPicker.UpdateDisks(NewDisk());
             UpdateErrorsAndButtons();
         }
 
@@ -305,17 +250,32 @@ namespace XenAdmin.Dialogs
                 return;
             }
 
-            SrListBox.DiskSize = diskSpinner1.SelectedSize;
-            SrListBox.UpdateDiskSize();
+            bool allDisabled = true;
+            bool anyScanning = false;
 
-            if (!SrListBox.ValidSelectionExists)//all SRs disabled
+            foreach (SrPickerItem item in srPicker.Items)
+            {
+                if (item == null)
+                    continue;
+                
+                if (item.Enabled)
+                {
+                    allDisabled = false;
+                    break;
+                }
+
+                if (item.Scanning)
+                    anyScanning = true;
+            }
+
+            if (allDisabled)
             {
                 OkButton.Enabled = false;
-                diskSpinner1.SetError(Messages.NO_VALID_DISK_LOCATION);
+                diskSpinner1.SetError(anyScanning ? null : Messages.NO_VALID_DISK_LOCATION);
                 return;
             }
 
-            if (SrListBox.SR == null) //enabled SR exists but the user selects a disabled one
+            if (srPicker.SR == null) //enabled SR exists but the user selects a disabled one
             {
                 OkButton.Enabled = false;
                 diskSpinner1.SetError(null);

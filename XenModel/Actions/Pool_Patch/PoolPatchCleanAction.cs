@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,8 +42,6 @@ namespace XenAdmin.Actions
             : base(pool.Connection, string.Format(Messages.UPDATES_WIZARD_REMOVING_UPDATE, patch.Name(), pool.Name()), suppressHistory)
         {
             this.patch = patch;
-            if (patch == null)
-                throw new ArgumentNullException("patch");
 
             #region RBAC Dependencies
             ApiMethodsToRoleCheck.Add("pool_patch.pool_clean");

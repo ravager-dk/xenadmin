@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,16 +30,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
-using System.Windows;
-using System.Windows.Forms;
 using System.Drawing.Drawing2D;
-using XenAdmin.TabPages;
+using System.Windows.Forms;
 
 namespace XenAdmin.Controls
 {
-    public class CustomListRow
+    public class CustomListRow : IDisposable
     {
         private Color ForeColor_ = SystemColors.ControlText;
         private Color BackColor_ = SystemColors.Control;
@@ -261,18 +257,14 @@ namespace XenAdmin.Controls
 
         public void Dispose()
         {
-            if (ForePen != null)
-                ForePen.Dispose();
-            if (BorderPen != null)
-                BorderPen.Dispose();
-            if (BackBrush != null)
-                BackBrush.Dispose();
-            if (SelectedBackBrush != null)
-                SelectedBackBrush.Dispose();
+            ForePen?.Dispose();
+            BorderPen?.Dispose();
+            BackBrush?.Dispose();
+            SelectedBackBrush?.Dispose();
 
-            foreach (CustomListRow r in Children)
+            foreach (var row in Children)
             {
-                r.Dispose();
+                row.Dispose();
             }
         }
 

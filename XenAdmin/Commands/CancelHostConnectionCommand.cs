@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -55,7 +51,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count > 0)
             {
@@ -71,13 +67,13 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             foreach (SelectedItem item in selection)
             {
                 if (item.Connection != null && !item.Connection.IsConnected && item.Connection.InProgress)
                 {
-                    new DisconnectCommand(MainWindowCommandInterface, item.Connection, false).Execute();
+                    new DisconnectCommand(MainWindowCommandInterface, item.Connection, false).Run();
                 }
             }
         }

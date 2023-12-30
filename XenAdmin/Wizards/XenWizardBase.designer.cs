@@ -120,7 +120,6 @@ namespace XenAdmin.Wizards
             // deprecationBanner
             // 
             resources.ApplyResources(this.deprecationBanner, "deprecationBanner");
-            this.deprecationBanner.BackColor = System.Drawing.Color.LightCoral;
             this.deprecationBanner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.deprecationBanner.Name = "deprecationBanner";
             // 
@@ -183,6 +182,7 @@ namespace XenAdmin.Wizards
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.tableLayoutPanelNavigation);
             this.DoubleBuffered = true;
+            this.Icon = global::XenAdmin.Properties.Resources.AppIcon;
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "XenWizardBase";

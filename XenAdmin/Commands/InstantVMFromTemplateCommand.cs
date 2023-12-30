@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,15 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-
 using XenAdmin.Actions;
-
 using XenAPI;
 using XenAdmin.Actions.VMActions;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -65,7 +59,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
            var createAction= new CreateVMFastAction(selection[0].Connection, selection[0].XenObject as VM);
            createAction.Completed += createAction_Completed;
@@ -74,17 +68,22 @@ namespace XenAdmin.Commands
 
         static void createAction_Completed(ActionBase sender)
         {
-            CreateVMFastAction action = (CreateVMFastAction) sender;
-            var startAction = new VMStartAction(action.Connection.Resolve(new XenRef<VM>(action.Result)), VMOperationCommand.WarningDialogHAInvalidConfig, VMOperationCommand.StartDiagnosisForm);
-            startAction.RunAsync();
+            if (sender is CreateVMFastAction action && action.Succeeded)
+            {
+                var vm = action.Connection.Resolve(new XenRef<VM>(action.Result));
+                
+                if (vm != null)
+                    new VMStartAction(vm, VMOperationCommand.WarningDialogHAInvalidConfig,
+                        VMOperationCommand.StartDiagnosisForm).RunAsync();
+            }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.ContainsOneItemOfType<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanExecute);
+            return selection.ContainsOneItemOfType<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanRun);
         }
 
-        private static bool CanExecute(VM vm)
+        private static bool CanRun(VM vm)
         {
             return vm != null && vm.is_a_template && !vm.Locked && !vm.is_a_snapshot && vm.InstantTemplate();
         }

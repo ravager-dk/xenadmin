@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System.Collections.Generic;
 using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAPI;
-using System.Linq;
 
 namespace XenAdmin.Commands
 {
@@ -55,19 +53,10 @@ namespace XenAdmin.Commands
         {
         }
 
-        public DestroyHostCommand(IMainWindow mainWindow, Host host)
-            : base(mainWindow, host)
-        {
-        }
-
-        public DestroyHostCommand(IMainWindow mainWindow, IEnumerable<Host> hosts)
-            : base(mainWindow, ConvertToSelection<Host>(hosts))
-        {
-        }
-
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actions = new List<AsyncAction>();
+
             foreach (Host host in selection.AsXenObjects<Host>())
             {
                 Pool pool = Helpers.GetPool(host.Connection);
@@ -79,54 +68,45 @@ namespace XenAdmin.Commands
                                Messages.DESTROYING_HOSTS_END_DESC, true);
         }
 
-        private static bool CanExecute(Host host)
+        private static bool CanRun(Host host)
         {
-            if (host == null || host.Connection == null)
-            {
+            if (host?.Connection == null)
                 return false;
-            }
+
             Pool pool = Helpers.GetPool(host.Connection);
-            return pool != null && !Helpers.HostIsMaster(host) && !host.IsLive();
+            return pool != null && !Helpers.HostIsCoordinator(host) && !host.IsLive();
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            if (!selection.AllItemsAre<Host>() || selection.Count > 1)
+            foreach (var selectedItem in selection)
             {
-                return false;
+                if (!(selectedItem.XenObject is Host host) || !CanRun(host))
+                    return false;
             }
-            
-            return CanExecute(selection.AsXenObjects<Host>().First());
+
+            return true;
         }
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.DESTROY_HOST_CONTEXT_MENU_ITEM_TEXT;
-            }
-        }
+        public override string ContextMenuText => Messages.DESTROY_HOST_CONTEXT_MENU_ITEM_TEXT;
 
-        protected override bool ConfirmationRequired
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationRequired => true;
 
         protected override string ConfirmationDialogText
         {
             get
             {
                 SelectedItemCollection selection = GetSelection();
-                if (selection.Count > 0)
+
+                if (selection.Count == 1)
                 {
                     Host host = (Host)selection[0].XenObject;
-                    Pool pool = Helpers.GetPool(host.Connection);
-                    
                     return string.Format(Messages.CONFIRM_DESTROY_HOST, host.Name());
                 }
+                
+                if (selection.Count > 1)
+                    return Messages.CONFIRM_DESTROY_HOST_MANY;
+
                 return null;
             }
         }
@@ -135,24 +115,20 @@ namespace XenAdmin.Commands
         {
             get
             {
-                return Messages.CONFIRM_DESTROY_HOST_TITLE;
+                SelectedItemCollection selection = GetSelection();
+                
+                if (selection.Count == 1)
+                    return Messages.CONFIRM_DESTROY_HOST_TITLE;
+
+                if (selection.Count > 1)
+                    return Messages.CONFIRM_DESTROY_HOST_TITLE_MANY;
+
+                return null;
             }
         }
 
-        protected override string ConfirmationDialogYesButtonLabel
-        {
-            get
-            {
-                return Messages.CONFIRM_DESTROY_HOST_YES_BUTTON_LABEL;
-            }
-        }
+        protected override string ConfirmationDialogYesButtonLabel => Messages.CONFIRM_DESTROY_HOST_YES_BUTTON_LABEL;
 
-        protected override bool ConfirmationDialogNoButtonSelected
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationDialogNoButtonSelected => true;
     }
 }

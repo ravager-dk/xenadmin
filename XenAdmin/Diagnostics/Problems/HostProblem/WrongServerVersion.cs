@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -50,17 +49,8 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
         {
         }
 
-        public override string Description
-        {
-            get 
-            {
-                return string.Format(Messages.UPDATE_FOR_DIFFERENT_XENSERVER_VERSION, ServerName);
-            }
-        }
+        public override string Description => string.Format(Messages.UPDATE_FOR_DIFFERENT_XENSERVER_VERSION, ServerName);
 
-        public override string HelpMessage
-        {
-            get { return string.Empty; }
-        }
+        public override string HelpMessage => string.Empty;
     }
 }

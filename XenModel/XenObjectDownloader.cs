@@ -1,31 +1,31 @@
-/*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Redistribution and use in source and binary forms, 
+ * with or without modification, are permitted provided 
+ * that the following conditions are met: 
  * 
- *   1) Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
+ * *   Redistributions of source code must retain the above 
+ *     copyright notice, this list of conditions and the 
+ *     following disclaimer. 
+ * *   Redistributions in binary form must reproduce the above 
+ *     copyright notice, this list of conditions and the 
+ *     following disclaimer in the documentation and/or other 
+ *     materials provided with the distribution. 
  * 
- *   2) Redistributions in binary form must reproduce the above
- *      copyright notice, this list of conditions and the following
- *      disclaimer in the documentation and/or other materials
- *      provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
+ * SUCH DAMAGE.
  */
 
 
@@ -92,58 +92,34 @@ namespace XenAdmin.Core
         /// </param>
         public static void GetEvents(Session session, LockFreeQueue<ObjectChange> eventQueue, HTTP.FuncBool cancelled, ref string token)
         {
-            Proxy_Event[] proxyEvents = {};
             Event[] events = {};
             try
             {
                 var classes = new [] { "*" }; // classes that we are interested in receiving events from
                 var eventResult = Event.from(session, classes, token, EVENT_FROM_TIMEOUT);
 
-                if (session.JsonRpcClient != null)
-                {
-                    var batch = (EventBatch)eventResult;
-                    events = batch.events;
-                    token = batch.token;
-                }
-                else
-                {
-                    var evts = (Events)eventResult;
-                    proxyEvents = evts.events;
-                    token = evts.token;
-                }
+                var batch = (EventBatch)eventResult;
+                events = batch.events;
+                token = batch.token;
             }
             catch (WebException e)
             {
                 // Catch timeout, and turn it into an EventFromBlockedException so we can recognise it later (CA-33145)
                 if (e.Status == WebExceptionStatus.Timeout)
                     throw new EventFromBlockedException();
-                else
-                    throw;
+
+                throw;
             }
 
             if (cancelled())
                 return;
 
-            //We want to do the marshalling on this background thread so as not to block the gui thread
-            if (session.JsonRpcClient != null)
+            foreach (Event evt in events)
             {
-                foreach (Event evt in events)
-                {
-                    var objectChange = ProcessEvent(evt.class_, evt.operation, evt.opaqueRef, evt.snapshot, false);
+                var objectChange = ProcessEvent(evt.class_, evt.operation, evt.opaqueRef, evt.snapshot, false);
 
-                    if (objectChange != null)
-                        eventQueue.Enqueue(objectChange);
-                }
-            }
-            else
-            {
-                foreach (Proxy_Event proxyEvent in proxyEvents)
-                {
-                    var objectChange = ProcessEvent(proxyEvent.class_, proxyEvent.operation, proxyEvent.opaqueRef, proxyEvent.snapshot, true);
-
-                    if (objectChange != null)
-                        eventQueue.Enqueue(objectChange);
-                }
+                if (objectChange != null)
+                    eventQueue.Enqueue(objectChange);
             }
         }
         
@@ -156,7 +132,6 @@ namespace XenAdmin.Core
             {
                 case "session":
                 case "event":
-                case "vtpm":
                 case "user":
                 case "secret":
                     // We don't track events on these objects

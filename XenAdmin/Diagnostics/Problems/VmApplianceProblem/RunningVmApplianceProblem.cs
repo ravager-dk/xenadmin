@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Actions.VMActions;
@@ -53,18 +51,9 @@ namespace XenAdmin.Diagnostics.Problems.VmApplianceProblem
             this.hardShutdown = hardShutdown;
         }
 
-        public override string Description
-        {
-            get
-            {
-                return String.Format(Messages.DR_WIZARD_PROBLEM_RUNNING_APPLIANCE, Helpers.GetPoolOfOne(VmAppliance.Connection).Name()); 
-            } 
-        }
+        public override string Description => String.Format(Messages.DR_WIZARD_PROBLEM_RUNNING_APPLIANCE, Helpers.GetPoolOfOne(VmAppliance.Connection).Name());
 
-        public override string HelpMessage
-        {
-            get { return Messages.DR_WIZARD_PROBLEM_RUNNING_APPLIANCE_HELPMESSAGE; } 
-        }
+        public override string HelpMessage => Messages.DR_WIZARD_PROBLEM_RUNNING_APPLIANCE_HELPMESSAGE;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
@@ -86,14 +75,14 @@ namespace XenAdmin.Diagnostics.Problems.VmApplianceProblem
 
             //shut down appliance action
             AsyncAction shutDownAction = hardShutdown
-                                             ? (AsyncAction) new HardShutDownApplianceAction(VmAppliance)
+                                             ? (AsyncAction)new HardShutDownApplianceAction(VmAppliance)
                                              : new ShutDownApplianceAction(VmAppliance);
 
             if (!shutdown)
                 return shutDownAction;
 
             //shut down fate-sharing VMs
-            var actions = new List<AsyncAction> {shutDownAction};
+            var actions = new List<AsyncAction> { shutDownAction };
 
             foreach (var vm in fateSharingVms)
             {

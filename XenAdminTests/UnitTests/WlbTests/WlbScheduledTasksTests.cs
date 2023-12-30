@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -47,33 +46,34 @@ namespace XenAdminTests.UnitTests.WlbTests
             Assert.AreEqual(0, tasks.SortedTaskList.Count, "SortedTaskList");
             Assert.AreEqual(0, tasks.VirtualTaskList.Count, "VirtualTaskList");
             Assert.IsNull(tasks.ToDictionary(), "Conversion to dictionary");
-            Assert.IsNull(tasks.GetNextExecutingTask(), "GetNextExecutingTask");
+            Assert.IsNull(tasks.GetNextRunningTask(), "GetNextRunningTask");
         }
 
         [Test]
         public void EmptyConstructorCausesCurrentScheduledPerformanceModeToThrow()
         {
-            WlbScheduledTasks tasks = new WlbScheduledTasks();
-            Assert.That(()=> tasks.GetCurrentScheduledPerformanceMode(), Throws.Exception.With.TypeOf(typeof(IndexOutOfRangeException)));
+            var tasks = new WlbScheduledTasks();
+            Assert.Throws(typeof(IndexOutOfRangeException), () => tasks.GetCurrentScheduledPerformanceMode());
         }
 
         [Test]
         public void EmptyConstructorCausesLastTaskToThrow()
         {
-            WlbScheduledTasks tasks = new WlbScheduledTasks();
-            Assert.That(() => tasks.GetLastExecutingTask(), Throws.Exception.With.TypeOf(typeof(IndexOutOfRangeException)));
+            var tasks = new WlbScheduledTasks();
+            Assert.Throws(typeof(IndexOutOfRangeException), () => tasks.GetLastRunningTask());
         }
 
         [Test]
         public void MethodCallsFromADictionaryConstructedObject()
         {
-            WlbScheduledTasks tasks = new WlbScheduledTasks(new Dictionary<string, string>()
-                                                                {
-                                                                   {"schedTask_dosomething", "now"},
-                                                                   {"schedTask_3", "later"},
-                                                                   {"schedTask_1", "sooner"},
-                                                                   {"domoresomethings", "will not be added"} 
-                                                                });
+            var tasks = new WlbScheduledTasks(new Dictionary<string, string>
+            {
+                {"schedTask_dosomething", "now"},
+                {"schedTask_3", "later"},
+                {"schedTask_1", "sooner"},
+                {"domoresomethings", "will not be added"}
+            });
+
             //Task List Construction
             Assert.AreEqual(3, tasks.TaskList.Count );
             Assert.AreEqual(0, tasks.TaskList["dosomething"].TaskId);
@@ -95,8 +95,8 @@ namespace XenAdminTests.UnitTests.WlbTests
             Assert.AreEqual(0, tasks.VirtualTaskList.Count, "VirtualTaskList");
             
             //Next task
-            WlbScheduledTask nextTask = tasks.GetNextExecutingTask();
-            Assert.IsNull( nextTask, "GetNextExecutingTask");
+            WlbScheduledTask nextTask = tasks.GetNextRunningTask();
+            Assert.IsNull( nextTask, "GetNextRunningTask");
         }
 
         [Test]
@@ -116,10 +116,10 @@ namespace XenAdminTests.UnitTests.WlbTests
             Assert.AreEqual(3, virtualTasksValues[3].TaskId);
 
             //Next Task
-            Assert.IsNull(tasks.GetNextExecutingTask());
+            Assert.IsNull(tasks.GetNextRunningTask());
 
             //Last Task
-            Assert.IsNotNull(tasks.GetLastExecutingTask());
+            Assert.IsNotNull(tasks.GetLastRunningTask());
 
             //Check performance mode fetch from last task
             Assert.AreEqual(WlbPoolPerformanceMode.MaximizeDensity, tasks.GetCurrentScheduledPerformanceMode());
@@ -129,39 +129,40 @@ namespace XenAdminTests.UnitTests.WlbTests
         {
             WlbScheduledTasks tasks = new WlbScheduledTasks();
 
-            Dictionary<string, string > taskParameters = new Dictionary<string, string>()
-                                                             {
-                                                                 { "OptMode", "1"} // Performance mode
-                                                             };
+            var taskParameters = new Dictionary<string, string>()
+            {
+                {"OptMode", "1"} // Performance mode
+            };
 
-            WlbScheduledTask taskA = new WlbScheduledTask("1")
-                                         { 
-                                             DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Friday,
-                                             TaskParameters = taskParameters
-                                         };
-            WlbScheduledTask taskB = new WlbScheduledTask("2")
-                                         {
-                                             DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Monday,
-                                             TaskParameters = taskParameters
-                                         };
+            var taskA = new WlbScheduledTask("1")
+            {
+                DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Friday,
+                TaskParameters = taskParameters
+            };
+
+            var taskB = new WlbScheduledTask("2")
+            {
+                DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Monday,
+                TaskParameters = taskParameters
+            };
 
             //Weekend tasks adds 2 to the virtual task list, one for each day
-            WlbScheduledTask taskC = new WlbScheduledTask("3")
-                                         {
-                                             DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Weekends,
-                                             TaskParameters = taskParameters
-                                         };
-            Dictionary<string, WlbScheduledTask> taskCollection = new Dictionary<string, WlbScheduledTask>()
-                                                                      {
-                                                                          {"schedTask_1", taskA},
-                                                                          {"schedTask_2", taskB},
-                                                                          {"schedTask_3", taskC}
-                                                                      };
+            var taskC = new WlbScheduledTask("3")
+            {
+                DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Weekends,
+                TaskParameters = taskParameters
+            };
+
+            var taskCollection = new Dictionary<string, WlbScheduledTask>()
+            {
+                {"schedTask_1", taskA},
+                {"schedTask_2", taskB},
+                {"schedTask_3", taskC}
+            };
 
             Assert.AreEqual(3, taskCollection.Count, "Setting up task collection");
             tasks.TaskList = taskCollection;
             return tasks;
         }
-
     }
 }

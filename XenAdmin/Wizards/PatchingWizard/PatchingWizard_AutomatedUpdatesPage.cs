@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,8 +32,10 @@ using System.Collections.Generic;
 using XenAPI;
 using System.Linq;
 using System.Text;
+using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAdmin.Alerts;
+using XenAdmin.Wizards.PatchingWizard.PlanActions;
 
 
 namespace XenAdmin.Wizards.PatchingWizard
@@ -43,8 +44,10 @@ namespace XenAdmin.Wizards.PatchingWizard
     {
         public XenServerPatchAlert UpdateAlert { private get; set; }
         public WizardMode WizardMode { private get; set; }
-      
+        public bool IsNewGeneration { get; set; }
         public KeyValuePair<XenServerPatch, string> PatchFromDisk { private get; set; }
+        public bool PostUpdateTasksAutomatically { private get; set; }
+        public Dictionary<Pool, StringBuilder> ManualTextInstructions { private get; set; }
 
         public PatchingWizard_AutomatedUpdatesPage()
         {
@@ -52,35 +55,23 @@ namespace XenAdmin.Wizards.PatchingWizard
         }
 
         #region XenTabPage overrides
-        public override string Text
-        {
-            get
-            {
-                return Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_TEXT;
-            }
-        }
 
-        public override string PageTitle
-        {
-            get
-            {
-                return Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_TITLE;
-            }
-        }
+        public override string Text => IsNewGeneration
+            ? Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_TEXT_CDN
+            : Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_TEXT;
 
-        public override string HelpID
-        {
-            get { return ""; }
-        }
+        public override string PageTitle => Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_TITLE;
+
         #endregion
 
         #region AutomatedUpdatesBesePage overrides
 
         protected override string BlurbText()
         {
-            return WizardMode == WizardMode.AutomatedUpdates
-                ? Messages.PATCHINGWIZARD_UPLOAD_AND_INSTALL_TITLE_AUTOMATED_MODE
-                : Messages.PATCHINGWIZARD_UPLOAD_AND_INSTALL_TITLE_NEW_VERSION_AUTOMATED_MODE;
+            return string.Format(WizardMode == WizardMode.NewVersion
+                    ? Messages.PATCHINGWIZARD_UPLOAD_AND_INSTALL_TITLE_NEW_VERSION_AUTOMATED_MODE
+                    : Messages.PATCHINGWIZARD_UPLOAD_AND_INSTALL_TITLE_AUTOMATED_MODE,
+                BrandManager.BrandConsole);
         }
 
         protected override string SuccessMessageOnCompletion(bool multiplePools)
@@ -100,8 +91,15 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         protected override string SuccessMessagePerPool(Pool pool)
         {
+            var sb = new StringBuilder(Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_SUCCESS_ONE).AppendLine();
 
-            return Messages.PATCHINGWIZARD_AUTOUPDATINGPAGE_SUCCESS_ONE;
+            if (IsNewGeneration && !PostUpdateTasksAutomatically && ManualTextInstructions != null && ManualTextInstructions.ContainsKey(pool))
+            {
+                sb.AppendLine(Messages.PATCHINGWIZARD_SINGLEUPDATE_MANUAL_POST_UPDATE);
+                sb.Append(ManualTextInstructions[pool]).AppendLine();
+            }
+
+            return sb.ToString();
         }
 
         protected override string FailureMessagePerPool(bool multipleErrors)
@@ -126,6 +124,29 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         protected override List<HostPlan> GenerateHostPlans(Pool pool, out List<Host> applicableHosts)
         {
+            if (Helpers.CloudOrGreater(pool.Connection))
+            {
+                applicableHosts = new List<Host>();
+                var hostPlans = new List<HostPlan>();
+
+                if (Updates.CdnUpdateInfoPerConnection.TryGetValue(pool.Connection, out var updateInfo))
+                {
+                    var allHosts = pool.Connection.Cache.Hosts.ToList();
+                    allHosts.Sort();
+
+                    foreach (var server in allHosts)
+                    {
+                        var hostUpdateInfo = updateInfo.HostsWithUpdates.FirstOrDefault(c => c.HostOpaqueRef == server.opaque_ref);
+                        if (hostUpdateInfo?.UpdateIDs?.Length == 0)
+                            continue;
+
+                        hostPlans.Add(GetCdnUpdatePlanActionsForHost(server, updateInfo, hostUpdateInfo));
+                    }
+                }
+
+                return hostPlans;
+            }
+
             bool automatedUpdatesRestricted = pool.Connection.Cache.Hosts.Any(Host.RestrictBatchHotfixApply);
 
             var minimalPatches = WizardMode == WizardMode.NewVersion
@@ -140,11 +161,65 @@ namespace XenAdmin.Wizards.PatchingWizard
 
             var uploadedPatches = new List<XenServerPatch>();
             var hosts = pool.Connection.Cache.Hosts.ToList();
-            hosts.Sort();//master first
+            hosts.Sort(); //coordinator first
 
             applicableHosts = new List<Host>(hosts);
             return hosts.Select(h => GetUpdatePlanActionsForHost(h, hosts, minimalPatches, uploadedPatches, PatchFromDisk)).ToList();
         }
+
         #endregion
+
+        private HostPlan GetCdnUpdatePlanActionsForHost(Host host, CdnPoolUpdateInfo poolUpdateInfo, CdnHostUpdateInfo hostUpdateInfo)
+        {
+            // pre-update tasks and, last in the list, the update itself
+            var planActionsPerHost = new List<PlanAction>();
+            // post-update tasks
+            var delayedActionsPerHost = new List<PlanAction>();
+
+            // hostUpdateInfo.RecommendedGuidance is what's prescribed by the metadata,
+            // host.pending_guidances is what's left there from previous updates
+
+            // evacuate host is a pre-update task and needs to be done either the user has
+            // opted to carry out the post-update tasks automatically or manually, see CA-381225
+            // restart toolstack should run before other post-update tasks, see CA-381718
+
+            if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RestartToolstack) ||
+                host.pending_guidances.Contains(update_guidances.restart_toolstack))
+            {
+                if (PostUpdateTasksAutomatically)
+                    delayedActionsPerHost.Add(new RestartAgentPlanAction(host));
+            }
+
+            if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RebootHost) ||
+                host.pending_guidances.Contains(update_guidances.reboot_host) ||
+                host.pending_guidances.Contains(update_guidances.reboot_host_on_livepatch_failure))
+            {
+                planActionsPerHost.Add(new EvacuateHostPlanAction(host));
+
+                if (PostUpdateTasksAutomatically)
+                    delayedActionsPerHost.Add(new RestartHostPlanAction(host, host.GetRunningVMs()));
+            }
+
+            if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.EvacuateHost) &&
+                !planActionsPerHost.Any(a => a is EvacuateHostPlanAction))
+            {
+                planActionsPerHost.Add(new EvacuateHostPlanAction(host));
+            }
+
+            if (PostUpdateTasksAutomatically)
+                delayedActionsPerHost.Add(new EnableHostPlanAction(host));
+
+            if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RestartDeviceModel) ||
+                host.pending_guidances.Contains(update_guidances.restart_device_model))
+            {
+                if (PostUpdateTasksAutomatically)
+                    delayedActionsPerHost.Add(new RebootVMsPlanAction(host, host.GetRunningVMs()));
+            }
+
+            planActionsPerHost.Add(new ApplyCdnUpdatesPlanAction(host, poolUpdateInfo));
+            delayedActionsPerHost.Add(new CheckForCdnUpdatesPlanAction(host.Connection));
+
+            return new HostPlan(host, null, planActionsPerHost, delayedActionsPerHost);
+        }
     }
 }

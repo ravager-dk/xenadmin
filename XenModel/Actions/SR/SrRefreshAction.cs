@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,23 +28,27 @@
  * SUCH DAMAGE.
  */
 
+using XenAdmin.Core;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class SrRefreshAction : PureAsyncAction
+    public class SrRefreshAction : AsyncAction
     {
         public SrRefreshAction(SR Sr, bool suppress_history = false)
             : base(Sr.Connection, string.Format(Messages.SR_REFRESH_ACTION_TITLE, Sr.NameWithoutHost()), suppress_history)
         {
             SR = Sr;
+            ApiMethodsToRoleCheck.AddRange(StaticRBACDependencies);
         }
+
+        public static RbacMethodList StaticRBACDependencies => new RbacMethodList("SR.scan");
 
         protected override void Run()
         {
-            Description = Messages.SR_REFRESH_ACTION_DESC;
-            XenAPI.SR.scan(Session, SR.opaque_ref);
+            Description = string.Format(Messages.SR_REFRESH_ACTION_DESC, SR.NameWithoutHost());
+            SR.scan(Session, SR.opaque_ref);
             Description = Messages.COMPLETED;
         }
     }

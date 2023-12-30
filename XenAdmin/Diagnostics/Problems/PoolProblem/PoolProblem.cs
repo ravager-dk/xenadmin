@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System.ComponentModel;
 using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
@@ -47,17 +45,8 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             _pool = pool;
         }
 
-        public Pool Pool
-        {
-            get
-            {
-                return _pool;
-            }
-        }
+        public Pool Pool => _pool;
 
-        public sealed override string Title
-        {
-            get { return string.Format(Messages.PROBLEM_POOLPROBLEM_TITLE, Helpers.GetName(Pool).Ellipsise(30)); }
-        }
+        public sealed override string Title => string.Format(Messages.PROBLEM_POOLPROBLEM_TITLE, Helpers.GetName(Pool).Ellipsise(30));
     }
 }

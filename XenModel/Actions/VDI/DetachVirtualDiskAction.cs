@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,15 +29,13 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Core;
 
 
 namespace XenAdmin.Actions
 {
-    public class DetachVirtualDiskAction : PureAsyncAction
+    public class DetachVirtualDiskAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -61,7 +58,7 @@ namespace XenAdmin.Actions
                 vdi.Locked = true;
             VM = vm;
             VM.Locked = true;
-            foreach (VBD v in Connection.ResolveAll<VBD>(VM.VBDs))
+            foreach (VBD v in Connection.ResolveAll(VM.VBDs))
             {
                 if (v.VDI.opaque_ref == vdi.opaque_ref)
                 {
@@ -70,6 +67,14 @@ namespace XenAdmin.Actions
                 }
             }
 
+            if (vbd != null && vbd.currently_attached)
+            {
+                ApiMethodsToRoleCheck.AddRange(
+                    "VBD.get_allowed_operations",
+                    "VBD.async_unplug");
+            }
+
+            ApiMethodsToRoleCheck.Add("VBD.async_destroy");
         }
 
         protected override void Run()
@@ -78,9 +83,10 @@ namespace XenAdmin.Actions
             Description = Messages.ACTION_DISK_DETACHING;
             try
             {
-                if (vbd != null && vbd.currently_attached && XenAPI.VBD.get_allowed_operations(Session, vbd.opaque_ref).Contains(XenAPI.vbd_operations.unplug))
+                if (vbd != null && vbd.currently_attached &&
+                    VBD.get_allowed_operations(Session, vbd.opaque_ref).Contains(vbd_operations.unplug))
                 {
-                    RelatedTask = XenAPI.VBD.async_unplug(Session, vbd.opaque_ref);
+                    RelatedTask = VBD.async_unplug(Session, vbd.opaque_ref);
                     PollToCompletion(0, 50);
                 }
             }
@@ -92,7 +98,8 @@ namespace XenAdmin.Actions
             finally
             {
                 PercentComplete = 50;
-                RelatedTask = XenAPI.VBD.async_destroy(Session, vbd.opaque_ref);
+                if(vbd != null)
+                    RelatedTask = VBD.async_destroy(Session, vbd.opaque_ref);
                 PollToCompletion(51, 100);
             }
             Description = Messages.ACTION_DISK_DETACHED;

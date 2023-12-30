@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using XenAdmin.Core;
 using XenAPI;
 using XenAdmin.Network;
 
@@ -83,7 +81,7 @@ namespace XenAdmin.Actions.VMActions
                     action = new VMResumeAction(vm, _warningDialogHAInvalidConfig, _startDiagnosisForm);
 
                 action.Changed += action_Changed;
-                action.RunExternal(Session);
+                action.RunSync(Session);
                 ActionCountCompleted++;
             }
 
@@ -98,7 +96,7 @@ namespace XenAdmin.Actions.VMActions
                     action = new VMStartAction(vm, _warningDialogHAInvalidConfig, _startDiagnosisForm);
 
                 action.Changed += action_Changed;
-                action.RunExternal(Session);
+                action.RunSync(Session);
                 ActionCountCompleted++;
             }
         }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -50,11 +49,7 @@ namespace XenAdmin.Actions
             Disk = disk;
             Disk.Locked = true;
 
-            #region RBAC Dependencies
-            ApiMethodsToRoleCheck.Add("vbd.unplug");
-            ApiMethodsToRoleCheck.Add("vbd.destroy");
-            ApiMethodsToRoleCheck.Add("vdi.destroy");
-            #endregion
+            ApiMethodsToRoleCheck.AddRange("vbd.unplug", "vbd.destroy", "vdi.destroy");
 
             SR = Connection.Resolve(Disk.SR);
 
@@ -95,7 +90,7 @@ namespace XenAdmin.Actions
                         Helpers.GetName(vm).Ellipsise(20)));
                 }
                 DetachVirtualDiskAction action = new DetachVirtualDiskAction(Disk, vm, false);
-                action.RunExternal(Session);
+                action.RunSync(Session);
             }
 
             RelatedTask = XenAPI.VDI.async_destroy(Session, Disk.opaque_ref);

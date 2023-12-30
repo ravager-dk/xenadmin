@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -38,7 +37,6 @@ using XenAdmin.Controls.DataGridViewEx;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Network;
-using XenAdmin.Properties;
 using XenAPI;
 using XenAdmin.Alerts;
 using System.Linq;
@@ -57,12 +55,12 @@ namespace XenAdmin.Wizards.PatchingWizard
         private const int INDETERMINATE = 2;
 
         private bool poolSelectionOnly;
-        private readonly List<Host> selectedServers = new List<Host>();
 
         public XenServerPatchAlert UpdateAlertFromWeb { private get; set; }
         public XenServerPatchAlert AlertFromFileOnDisk { private get; set; }
         public bool FileFromDiskHasUpdateXml { private get; set; }
         public WizardMode WizardMode { private get; set; }
+        public bool IsNewGeneration { get; set; }
 
         public PatchingWizard_SelectServers()
         {
@@ -70,30 +68,15 @@ namespace XenAdmin.Wizards.PatchingWizard
             dataGridViewHosts.CheckBoxClicked += dataGridViewHosts_CheckBoxClicked;
         }
 
-        public override string Text
-        {
-            get
-            {
-                return Messages.PATCHINGWIZARD_SELECTSERVERPAGE_TEXT;
-            }
-        }
+        public override string Text => Messages.PATCHINGWIZARD_SELECTSERVERPAGE_TEXT;
 
-        public override string PageTitle
-        {
-            get
-            {
-                return Messages.PATCHINGWIZARD_SELECTSERVERPAGE_TITLE;
-            }
-        }
-
-        public override string HelpID
-        {
-            get { return "SelectServers"; }
-        }
+        public override string PageTitle => Messages.PATCHINGWIZARD_SELECTSERVERPAGE_TITLE;
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {
-            poolSelectionOnly = WizardMode == WizardMode.AutomatedUpdates || UpdateAlertFromWeb != null || AlertFromFileOnDisk != null;
+            poolSelectionOnly = WizardMode == WizardMode.AutomatedUpdates ||
+                                UpdateAlertFromWeb != null ||
+                                AlertFromFileOnDisk != null;
 
             switch (WizardMode)
             {
@@ -110,7 +93,8 @@ namespace XenAdmin.Wizards.PatchingWizard
                     break;
             }
 
-            List<IXenConnection> xenConnections = ConnectionsManager.XenConnectionsCopy;
+            var xenConnections = ConnectionsManager.XenConnectionsCopy
+                .Where(c => IsNewGeneration ? Helpers.CloudOrGreater(c) : !Helpers.CloudOrGreater(c)).ToList();
             xenConnections.Sort();
 
             int licensedPoolCount = 0;
@@ -160,30 +144,29 @@ namespace XenAdmin.Wizards.PatchingWizard
                 Host[] hosts = xenConnection.Cache.Hosts;
                 Array.Sort(hosts);
 
-                PatchingHostsDataGridViewRow masterRow = null;
+                PatchingHostsDataGridViewRow coordinatorRow = null;
 
                 foreach (Host host in hosts)
                 {
                     var hostRow = new PatchingHostsDataGridViewRow(host, hasPool, !poolSelectionOnly) {ParentPoolRow = poolRow};
                     dataGridViewHosts.Rows.Add(hostRow);
-                    string tooltipText;
-                    hostRow.Enabled = CanEnableRow(host, out tooltipText);
-                    hostRow.Cells[3].ToolTipText = tooltipText;
+                    hostRow.Enabled = CanEnableRow(host, out var cannotEnableReason);
+                    hostRow.Notes = cannotEnableReason;
 
                     //Enable the pool row
                     if (poolRow != null && hostRow.Enabled)
                         poolRow.Enabled = true;
 
-                    if (masterRow == null) //this will be true for the first iteration
-                        masterRow = hostRow;
+                    if (coordinatorRow == null) //this will be true for the first iteration
+                        coordinatorRow = hostRow;
                 }
 
-                if (poolRow != null && !poolRow.Enabled && masterRow != null)
-                    poolRow.Cells[3].ToolTipText = masterRow.Cells[3].ToolTipText;
+                if (poolRow != null && !poolRow.Enabled && coordinatorRow != null)
+                    poolRow.Notes = coordinatorRow.Notes;
             }
 
             // restore server selection
-            SelectServers(selectedServers);
+            SelectServers(SelectedServers);
         }
 
         public override void SelectDefaultControl()
@@ -196,7 +179,7 @@ namespace XenAdmin.Wizards.PatchingWizard
             //if host is unreachable
             if (!host.IsLive())
             {
-                tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_HOST_UNREACHABLE;
+                tooltipText = Messages.HOST_UNREACHABLE;
                 return false;
             }
 
@@ -205,70 +188,98 @@ namespace XenAdmin.Wizards.PatchingWizard
                 : CanEnableRowNonAutomated(host, out tooltipText);
         }
 
-        private bool CanEnableRowAutomatedUpdates(Host host, out string tooltipText)
+        private bool CanEnableRowAutomatedUpdates(Host host, out string cannotEnableReason)
         {
             var poolOfOne = Helpers.GetPoolOfOne(host.Connection);
 
             // This check is first because it generally can't be fixed, it's a property of the host
             if (poolOfOne != null && poolOfOne.IsAutoUpdateRestartsForbidden()) // Forbids update auto restarts
             {
-                tooltipText = Messages.POOL_FORBIDS_AUTOMATED_UPDATES;
+                cannotEnableReason = Messages.POOL_FORBIDS_AUTOMATED_UPDATES;
                 return false;
             }
 
             var pool = Helpers.GetPool(host.Connection);
             if (WizardMode != WizardMode.NewVersion && pool != null && !pool.IsPoolFullyUpgraded()) //partially upgraded pool is not supported
             {
-                tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_AUTOMATED_UPDATES_NOT_SUPPORTED_PARTIALLY_UPGRADED;
+                cannotEnableReason = string.Format(Messages.PATCHINGWIZARD_SELECTSERVERPAGE_AUTOMATED_UPDATES_NOT_SUPPORTED_PARTIALLY_UPGRADED, BrandManager.ProductBrand);
                 return false;
             }
 
-            //check updgrade sequences
-            var minimalPatches = WizardMode == WizardMode.NewVersion
-                ? Updates.GetMinimalPatches(host)
-                : Updates.GetMinimalPatches(host.Connection);
-            if (minimalPatches == null) //version not supported or too new to have automated updates available
+            if (Helpers.CloudOrGreater(host))
             {
-                var versionSupportsAutomatedUpdates = WizardMode == WizardMode.NewVersion
-                     ? Helpers.DundeeOrGreater(host)
-                     : Helpers.DundeeOrGreater(host.Connection);
+                if (poolOfOne?.repositories.Count == 0)
+                {
+                    cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_CDN_REPOS_NOT_CONFIGURED;
+                    return false;
+                }
 
-                tooltipText = versionSupportsAutomatedUpdates
-                    ? Messages.PATCHINGWIZARD_SELECTSERVERPAGE_SERVER_UP_TO_DATE
-                    : Messages.PATCHINGWIZARD_SELECTSERVERPAGE_AUTOMATED_UPDATES_NOT_SUPPORTED_HOST_VERSION;
-                return false;
+                if (Helpers.XapiEqualOrGreater_23_18_0(host.Connection))
+                {
+                    if (poolOfOne?.last_update_sync == Util.GetUnixMinDateTime())
+                    {
+                        cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_CDN_NOT_SYNCHRONIZED;
+                        return false;
+                    }
+
+                    if (host.latest_synced_updates_applied == latest_synced_updates_applied_state.yes)
+                    {
+                        cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_CDN_UPDATES_APPLIED;
+                        return false;
+                    }
+                }
+
+                if (!Updates.CdnUpdateInfoPerConnection.TryGetValue(host.Connection, out var updateInfo) ||
+                    updateInfo.HostsWithUpdates.FirstOrDefault(u => u.HostOpaqueRef == host.opaque_ref) == null)
+                {
+                    cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_CDN_UPDATES_APPLIED;
+                    return false;
+                }
             }
-
-            //check all hosts are licensed for automated updates (there may be restrictions on individual hosts)
-            if (host.Connection.Cache.Hosts.Any(Host.RestrictBatchHotfixApply))
+            else
             {
-                tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_HOST_UNLICENSED_FOR_AUTOMATED_UPDATES;
-                return false;
+                //check upgrade sequences
+                var minimalPatches = WizardMode == WizardMode.NewVersion
+                    ? Updates.GetMinimalPatches(host)
+                    : Updates.GetMinimalPatches(host.Connection);
+                
+                if (minimalPatches == null) //version not supported or too new to have automated updates available
+                {
+                    cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_SERVER_UP_TO_DATE;
+                    return false;
+                }
+
+                //check all hosts are licensed for automated updates (there may be restrictions on individual hosts)
+                if (host.Connection.Cache.Hosts.Any(Host.RestrictBatchHotfixApply))
+                {
+                    cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_HOST_UNLICENSED_FOR_AUTOMATED_UPDATES;
+                    return false;
+                }
+
+                var us = Updates.GetPatchSequenceForHost(host, minimalPatches);
+                if (us == null)
+                {
+                    cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_SERVER_NOT_AUTO_UPGRADABLE;
+                    return false;
+                }
+
+                //if host is up to date
+                if (us.Count == 0)
+                {
+                    cannotEnableReason = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_SERVER_UP_TO_DATE;
+                    return false;
+                }
             }
 
-            var us = Updates.GetPatchSequenceForHost(host, minimalPatches);
-            if (us == null)
-            {
-                tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_SERVER_NOT_AUTO_UPGRADABLE;
-                return false;
-            }
-
-            //if host is up to date
-            if (us.Count == 0)
-            {
-                tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_SERVER_UP_TO_DATE;
-                return false;
-            }
-
-            tooltipText = null;
+            cannotEnableReason = null;
             return true;
         }
 
         private bool CanEnableRowNonAutomated(Host host, out string tooltipText)
         {
             tooltipText = null;
-            
-            if (!host.CanApplyHotfixes() && (Helpers.ElyOrGreater(host) || SelectedUpdateType != UpdateType.ISO))
+
+            if (Helpers.FeatureForbidden(host, Host.RestrictHotfixApply) && (Helpers.ElyOrGreater(host) || SelectedUpdateType != UpdateType.ISO))
             {
                 tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_HOST_UNLICENSED;
                 return false;
@@ -283,16 +294,15 @@ namespace XenAdmin.Wizards.PatchingWizard
                         return false;
                     }
 
-                    string reason;
-                    if (!IsHostAmongApplicable(host, out reason))
+                    if (!IsHostAmongApplicable(host, out var reason))
                     {
                         tooltipText = reason;
                         return false;
                     }
 
-                    if (!Helpers.ElyOrGreater(host) && Helpers.ElyOrGreater(host.Connection)) // host is pre-Ely, but the master is Ely or greater
+                    if (!Helpers.ElyOrGreater(host) && Helpers.ElyOrGreater(host.Connection)) // host is pre-Ely, but the coordinator is Ely or greater
                     {
-                        tooltipText = string.Format(Messages.PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_UPDATE_MASTER_POST_7_0, BrandManager.ProductVersion70);
+                        tooltipText = string.Format(Messages.PATCHINGWIZARD_SELECTSERVERPAGE_CANNOT_INSTALL_UPDATE_COORDINATOR_POST_7_0, BrandManager.ProductVersion70);
                         return false;
                     }
 
@@ -300,8 +310,10 @@ namespace XenAdmin.Wizards.PatchingWizard
 
                 case UpdateType.ISO:
                     //from Ely onwards, iso does not mean supplemental pack
-                    
-                    if (WizardMode == WizardMode.AutomatedUpdates || UpdateAlertFromWeb != null || AlertFromFileOnDisk != null)
+
+                    if (WizardMode == WizardMode.AutomatedUpdates ||
+                        UpdateAlertFromWeb != null ||
+                        AlertFromFileOnDisk != null)
                         return IsHostAmongApplicable(host, out tooltipText);
 
                     // here a file from disk was selected, but it was not an update (FileFromDiskAlert == null)
@@ -331,7 +343,7 @@ namespace XenAdmin.Wizards.PatchingWizard
             if (UpdateAlertFromWeb != null)
             {
                 applicableHosts = UpdateAlertFromWeb.DistinctHosts;
-                if(UpdateAlertFromWeb.Patch != null)
+                if (UpdateAlertFromWeb.Patch != null)
                     patchUuidFromAlert = UpdateAlertFromWeb.Patch.Uuid;
             }
             else if (AlertFromFileOnDisk != null)
@@ -354,11 +366,11 @@ namespace XenAdmin.Wizards.PatchingWizard
                 {
                     var nonApplicables = host.Connection.Cache.Hosts.Count(h =>
                         !applicableHosts.Contains(h) && !string.IsNullOrEmpty(patchUuidFromAlert) &&
-                        !isPatchApplied(patchUuidFromAlert, h));
+                        !IsPatchApplied(patchUuidFromAlert, h));
 
                     if (0 < nonApplicables && nonApplicables < host.Connection.Cache.Hosts.Length)
                     {
-                        tooltipText = Messages.PATCHINGWIZARD_SELECTSERVERPAGE_NEW_VERSION_UPGRADE_SLAVES_FIRST;
+                        tooltipText = string.Format(Messages.PATCHINGWIZARD_SELECTSERVERPAGE_NEW_VERSION_UPGRADE_SUPPORTERS_FIRST, BrandManager.BrandConsole);
                         return false;
                     }
                 }
@@ -366,7 +378,7 @@ namespace XenAdmin.Wizards.PatchingWizard
 
             if (!applicableHosts.Contains(host) && !string.IsNullOrEmpty(patchUuidFromAlert))
             {
-                if (isPatchApplied(patchUuidFromAlert, host))
+                if (IsPatchApplied(patchUuidFromAlert, host))
                 {
                     if (ApplyUpdatesToNewVersion)
                         return CanEnableRowAutomatedUpdates(host, out tooltipText);
@@ -382,7 +394,7 @@ namespace XenAdmin.Wizards.PatchingWizard
             return true;
         }
 
-        private bool isPatchApplied(string uuid, Host host) 
+        private bool IsPatchApplied(string uuid, Host host) 
         {
             if (Helpers.ElyOrGreater(host))
             {
@@ -404,8 +416,8 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
         {
-            selectedServers.Clear();
-            selectedServers.AddRange(GetSelectedServers());
+            SelectedServers.Clear();
+            SelectedServers.AddRange(GetSelectedServers());
 
             if (direction == PageLoadedDirection.Forward)
             {
@@ -418,20 +430,29 @@ namespace XenAdmin.Wizards.PatchingWizard
                     return;
                 }
 
-                //Upload the patches to the masters if it is necessary
-                List<Host> masters = SelectedMasters;
+                if (ApplyUpdatesToNewVersion && !Updates.CheckCanDownloadUpdates())
+                {
+                    cancel = true;
+                    using (var errDlg = new ClientIdDialog())
+                        errDlg.ShowDialog(ParentForm);
+                    return;
+                }
+
+                //Upload the patches to the coordinators if it is necessary
+                List<Host> coordinators = SelectedCoordinators;
 
                 //Do RBAC check
-                foreach (Host master in masters)
+                foreach (Host coordinator in coordinators)
                 {
-                    if (!(Role.CanPerform(new RbacMethodList("pool_patch.apply"), master.Connection)))
+                    if (!Role.CanPerform(new RbacMethodList("pool_patch.apply"), coordinator.Connection, out _))
                     {
-                        string nameLabel = master.Name();
-                        Pool pool = Helpers.GetPoolOfOne(master.Connection);
+                        string nameLabel = coordinator.Name();
+                        Pool pool = Helpers.GetPoolOfOne(coordinator.Connection);
                         if (pool != null)
                             nameLabel = pool.Name();
 
-                        using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Warning, string.Format(Messages.RBAC_UPDATES_WIZARD, master.Connection.Username, nameLabel), Messages.UPDATES_WIZARD)))
+                        using (var dlg = new WarningDialog(string.Format(Messages.RBAC_UPDATES_WIZARD, coordinator.Connection.Username, nameLabel))
+                            {WindowTitle = Messages.UPDATES_WIZARD})
                         {
                             dlg.ShowDialog(this);
                         }
@@ -459,10 +480,8 @@ namespace XenAdmin.Wizards.PatchingWizard
 
             if (disconnectedServerNames.Count > 0)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning,
-                        string.Format(Messages.UPDATES_WIZARD_DISCONNECTED_SERVER, Helpers.StringifyList(disconnectedServerNames)),
-                        Messages.UPDATES_WIZARD)))
+                using (var dlg = new WarningDialog(string.Format(Messages.UPDATES_WIZARD_DISCONNECTED_SERVER, Helpers.StringifyList(disconnectedServerNames)))
+                    {WindowTitle = Messages.UPDATES_WIZARD})
                 {
                     dlg.ShowDialog(this);
                 }
@@ -499,25 +518,22 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         #region Accessors
 
-        public List<Host> SelectedMasters
+        public List<Host> SelectedCoordinators
         {
             get
             {
                 List<Host> result = new List<Host>();
                 foreach (Host selectedServer in SelectedServers)
                 {
-                    Host master = Helpers.GetMaster(selectedServer.Connection);
-                    if (!result.Contains(master))
-                        result.Add(master);
+                    Host coordinator = Helpers.GetCoordinator(selectedServer.Connection);
+                    if (!result.Contains(coordinator))
+                        result.Add(coordinator);
                 }
                 return result;
             }
         }
 
-        public List<Host> SelectedServers
-        {
-            get { return selectedServers; }
-        }
+        public List<Host> SelectedServers { get; set; } = new List<Host>();
 
         private List<Host> GetSelectedServers()
         {
@@ -544,7 +560,7 @@ namespace XenAdmin.Wizards.PatchingWizard
                 {
                     if (row.IsSelectableHost)
                     {
-                        if ((row.HasPool && ((int)row.Cells[POOL_ICON_HOST_CHECKBOX_COL].Value) == CHECKED) || (!row.HasPool && ((int)row.Cells[POOL_CHECKBOX_COL].Value) == CHECKED))
+                        if ((row.HasPool && (int)row.Cells[POOL_ICON_HOST_CHECKBOX_COL].Value == CHECKED) || (!row.HasPool && (int)row.Cells[POOL_CHECKBOX_COL].Value == CHECKED))
                             hosts.Add((Host)row.Tag);
                     }
                 }
@@ -578,17 +594,11 @@ namespace XenAdmin.Wizards.PatchingWizard
             }
         }
 
-        public bool ApplyUpdatesToNewVersion
-        {
-            get
-            {
-                return applyUpdatesCheckBox.Visible && applyUpdatesCheckBox.Checked;
-            }
-        }
+        public bool ApplyUpdatesToNewVersion => applyUpdatesCheckBox.Visible && applyUpdatesCheckBox.Checked;
 
         public UpdateType SelectedUpdateType { private get; set; }
 
-        public void SelectServers(List<Host> selectedServers)
+        private void SelectServers(List<Host> selectedServers)
         {
             if (selectedServers.Count > 0)
             {
@@ -616,17 +626,6 @@ namespace XenAdmin.Wizards.PatchingWizard
                             }
                         }
                     }
-                }
-            }
-        }
-
-        public void DisableUnselectedServers()
-        {
-            foreach (PatchingHostsDataGridViewRow row in dataGridViewHosts.Rows)
-            {
-                if (row.Enabled && row.CheckValue == UNCHECKED)
-                {
-                    row.Enabled = false;
                 }
             }
         }
@@ -666,32 +665,30 @@ namespace XenAdmin.Wizards.PatchingWizard
             OnPageUpdated();
         }
 
-        private void applyUpdatesCheckBox_CheckedChanged(object sender, System.EventArgs e)
+        private void applyUpdatesCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             PatchingHostsDataGridViewRow masterRow = null;
 
             foreach (PatchingHostsDataGridViewRow row in dataGridViewHosts.Rows)
             {
-                var host = row.Tag as Host;
-                if (host != null)
+                if (row.Tag is Host host)
                 {
-                    string tooltipText;
-                    row.Enabled = CanEnableRow(host, out tooltipText);
-                    row.Cells[3].ToolTipText = tooltipText;
+                    row.Enabled = CanEnableRow(host, out var cannotEnableReason);
+                    row.Notes = cannotEnableReason;
 
                     if (row.ParentPoolRow != null)
                     {
                         if (row.Enabled)
                         {
                             row.ParentPoolRow.Enabled = true;
-                            row.ParentPoolRow.Cells[3].ToolTipText = null;
+                            row.Notes = null;
                         }
 
                         if (masterRow == null)
                         {
                             masterRow = row;
                             if (!row.Enabled)
-                                row.ParentPoolRow.Cells[3].ToolTipText = row.Cells[3].ToolTipText;
+                                row.ParentPoolRow.Notes = row.Notes;
                         }
                     }
                 }
@@ -859,53 +856,49 @@ namespace XenAdmin.Wizards.PatchingWizard
             {
                 protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates cellState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
                 {
-                    Pool pool = value as Pool;
-
-                    if (pool != null)
-                        base.Paint(graphics, clipBounds, cellBounds, rowIndex, cellState, value, formattedValue, errorText, cellStyle, advancedBorderStyle, paintParts);
-                    else
+                    if (value is Pool)
                     {
-                        Host host = value as Host;
-                        if (host != null)
+                        base.Paint(graphics, clipBounds, cellBounds, rowIndex, cellState, value, formattedValue, errorText, cellStyle, advancedBorderStyle, paintParts);
+                    }
+                    else if (value is Host host)
+                    {
+                        PatchingHostsDataGridViewRow row = (PatchingHostsDataGridViewRow)DataGridView.Rows[RowIndex];
+                        if (row.HasPool)
                         {
-                            PatchingHostsDataGridViewRow row = (PatchingHostsDataGridViewRow)this.DataGridView.Rows[this.RowIndex];
-                            if (row.HasPool)
+                            Image hostIcon = Images.GetImage16For(host);
+                            base.Paint(graphics, clipBounds,
+                                new Rectangle(cellBounds.X + 16, cellBounds.Y, cellBounds.Width - 16,
+                                    cellBounds.Height), rowIndex, cellState, value, formattedValue,
+                                errorText, cellStyle, advancedBorderStyle, paintParts);
+
+                            if ((cellState & DataGridViewElementStates.Selected) != 0 && row.Enabled)
                             {
-                                Image hostIcon = Images.GetImage16For(host);
-                                base.Paint(graphics, clipBounds,
-                                           new Rectangle(cellBounds.X + 16, cellBounds.Y, cellBounds.Width - 16,
-                                                         cellBounds.Height), rowIndex, cellState, value, formattedValue,
-                                           errorText, cellStyle, advancedBorderStyle, paintParts);
-
-                                if ((cellState & DataGridViewElementStates.Selected) != 0 && row.Enabled)
-                                {
-                                    using (var brush = new SolidBrush(DataGridView.DefaultCellStyle.SelectionBackColor))
-                                        graphics.FillRectangle(
-                                            brush, cellBounds.X,
-                                            cellBounds.Y, hostIcon.Width, cellBounds.Height);
-                                }
-                                else
-                                {
-                                    using (var brush = new SolidBrush(DataGridView.DefaultCellStyle.BackColor))
-                                        graphics.FillRectangle(brush,
-                                                               cellBounds.X, cellBounds.Y, hostIcon.Width, cellBounds.Height);
-                                }
-
-                                if (row.Enabled)
-                                    graphics.DrawImage(hostIcon, cellBounds.X, cellBounds.Y + 3, hostIcon.Width,
-                                                       hostIcon.Height);
-                                else
-                                    graphics.DrawImage(hostIcon,
-                                                       new Rectangle(cellBounds.X, cellBounds.Y + 3,
-                                                                     hostIcon.Width, hostIcon.Height),
-                                                       0, 0, hostIcon.Width, hostIcon.Height, GraphicsUnit.Pixel,
-                                                       Drawing.GreyScaleAttributes);
+                                using (var brush = new SolidBrush(DataGridView.DefaultCellStyle.SelectionBackColor))
+                                    graphics.FillRectangle(
+                                        brush, cellBounds.X,
+                                        cellBounds.Y, hostIcon.Width, cellBounds.Height);
                             }
                             else
                             {
-                                base.Paint(graphics, clipBounds, cellBounds, rowIndex, cellState, value, formattedValue,
-                                           errorText, cellStyle, advancedBorderStyle, paintParts);
+                                using (var brush = new SolidBrush(DataGridView.DefaultCellStyle.BackColor))
+                                    graphics.FillRectangle(brush,
+                                        cellBounds.X, cellBounds.Y, hostIcon.Width, cellBounds.Height);
                             }
+
+                            if (row.Enabled)
+                                graphics.DrawImage(hostIcon, cellBounds.X, cellBounds.Y + 3, hostIcon.Width,
+                                    hostIcon.Height);
+                            else
+                                graphics.DrawImage(hostIcon,
+                                    new Rectangle(cellBounds.X, cellBounds.Y + 3,
+                                        hostIcon.Width, hostIcon.Height),
+                                    0, 0, hostIcon.Width, hostIcon.Height, GraphicsUnit.Pixel,
+                                    Drawing.GreyScaleAttributes);
+                        }
+                        else
+                        {
+                            base.Paint(graphics, clipBounds, cellBounds, rowIndex, cellState, value, formattedValue,
+                                errorText, cellStyle, advancedBorderStyle, paintParts);
                         }
                     }
                 }
@@ -945,7 +938,7 @@ namespace XenAdmin.Wizards.PatchingWizard
 
             private DataGridViewCell _poolIconHostCheckCell;
             private DataGridViewTextBoxCell _versionCell;
-
+            private DataGridViewTextBoxCell _notesCell;
             private readonly bool _showHostCheckBox = true;
 
             public PatchingHostsDataGridViewRow(Pool pool)
@@ -961,22 +954,15 @@ namespace XenAdmin.Wizards.PatchingWizard
                 SetupCells();
             }
 
-            public int VersionCellIndex
-            {
-                get { return Cells.IndexOf(_versionCell); }
-            }
+            public PatchingHostsDataGridViewRow ParentPoolRow { get; set; }
 
-            public override bool IsCheckable
-            {
-                get { return !HasPool; }
-            }
+            public int VersionCellIndex => Cells.IndexOf(_versionCell);
+
+            public override bool IsCheckable => !HasPool;
 
             public override bool Enabled
             {
-                get
-                {
-                    return base.Enabled;
-                }
+                get => base.Enabled;
                 set
                 {
                     base.Enabled = value;
@@ -984,23 +970,18 @@ namespace XenAdmin.Wizards.PatchingWizard
                 }
             }
 
-            public int CheckValue
-            {
-                get {
-                    return IsPoolOrStandaloneHost
-                               ? (int) Cells[POOL_CHECKBOX_COL].Value
-                               : (int) Cells[POOL_ICON_HOST_CHECKBOX_COL].Value;
-                }
-            }
+            public int CheckValue => IsPoolOrStandaloneHost
+                ? (int)Cells[POOL_CHECKBOX_COL].Value
+                : (int)Cells[POOL_ICON_HOST_CHECKBOX_COL].Value;
 
-            public bool IsSelectableHost
-            {
-                get { return IsAHostRow && Enabled && (_showHostCheckBox || !HasPool); }
-            }
+            public bool IsSelectableHost => IsAHostRow && Enabled && (_showHostCheckBox || !HasPool);
 
-            public bool IsSelectablePool
+            public bool IsSelectablePool => IsAPoolRow && Enabled;
+
+            public string Notes
             {
-                get { return IsAPoolRow && Enabled; }
+                get => _notesCell.Value as string;
+                set => _notesCell.Value = value;
             }
 
             private void SetupCells()
@@ -1014,33 +995,32 @@ namespace XenAdmin.Wizards.PatchingWizard
 
                 _nameCell = new DataGridViewNameCell();
                 _versionCell = new DataGridViewTextBoxCell();
+                _notesCell = new DataGridViewTextBoxCell();
 
-                Cells.AddRange(_expansionCell, _poolCheckBoxCell, _poolIconHostCheckCell, _nameCell, _versionCell);
+                Cells.AddRange(_expansionCell, _poolCheckBoxCell, _poolIconHostCheckCell, _nameCell, _notesCell, _versionCell);
 
-                this.UpdateDetails();
+                UpdateDetails();
             }
 
             private void UpdateDetails()
             {
-                var pool = Tag as Pool;
-                if (pool != null)
+                if (Tag is Pool pool)
                 {
-                    Host master = pool.Connection.Resolve(pool.master);
+                    Host coordinator = pool.Connection.Resolve(pool.master);
                     if (_poolCheckBoxCell.Value == null)
                         _poolCheckBoxCell.Value = CheckState.Unchecked;
-                    _expansionCell.Value = Resources.tree_minus;
+                    _expansionCell.Value = Images.StaticImages.tree_minus;
                     _poolIconHostCheckCell.Value = Images.GetImage16For(pool);
                     _nameCell.Value = pool;
-                    _versionCell.Value = master.ProductVersionTextShort();
+                    _versionCell.Value = $"{coordinator.ProductBrand()} {coordinator.ProductVersionTextShort()}";
                     return;
                 }
 
-                var host = Tag as Host;
-                if (host != null)
+                if (Tag is Host host)
                 {
                     if (_poolCheckBoxCell.Value == null)
                         _poolCheckBoxCell.Value = CheckState.Unchecked;
-                    _expansionCell.Value = Resources.tree_plus;
+                    _expansionCell.Value = Images.StaticImages.tree_plus;
                     if (_hasPool)
                     {
                         if (_poolIconHostCheckCell.Value == null)
@@ -1049,7 +1029,7 @@ namespace XenAdmin.Wizards.PatchingWizard
                     else
                         _poolIconHostCheckCell.Value = Images.GetImage16For(host);
                     _nameCell.Value = host;
-                    _versionCell.Value = host.ProductVersionTextShort();
+                    _versionCell.Value = $"{host.ProductBrand()} {host.ProductVersionTextShort()}";
                 }
             }
 
@@ -1060,8 +1040,6 @@ namespace XenAdmin.Wizards.PatchingWizard
                     _poolIconHostCheckCell.Value = Images.GetImage16For((IXenObject)Tag);
                 }
             }
-
-            public PatchingHostsDataGridViewRow ParentPoolRow { get; set; }
         }
 
         #endregion

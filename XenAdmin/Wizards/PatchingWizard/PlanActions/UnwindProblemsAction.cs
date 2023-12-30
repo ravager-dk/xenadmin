@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System.Collections.Generic;
-using System.Linq;
-using XenAdmin.Actions;
 using XenAdmin.Diagnostics.Problems;
 using XenAdmin.Network;
 
@@ -61,7 +58,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             {
                 var action = _problems[i].CreateUnwindChangesAction();
                 if (action != null && action.Connection != null && action.Connection.IsConnected)
-                    action.RunExternal(null);
+                    action.RunSync(null);
                 PercentComplete = i * 100 / _problems.Count;
             }
         }

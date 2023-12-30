@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using XenAPI;
 using XenAdmin.Core;
@@ -65,8 +63,9 @@ namespace XenAdmin.Actions
             {
                 VM.set_snapshot_schedule(Session, selectedVM.opaque_ref, vmssref.opaque_ref);
             }
-            Description = string.Format(Messages.CREATED_VMSS, _record.Name());
-            PercentComplete = 60;
+
+            Tick(60, string.Format(Messages.CREATED_VMSS, _record.Name()));
+
             if (_runNow)
                 VMSS.snapshot_now(Session, vmssref);
             PercentComplete = 100;

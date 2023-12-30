@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
@@ -359,7 +357,7 @@ namespace XenAdmin.XenSearch
     public abstract class PropertyQuery<T> : QueryFilter
     {
         public readonly PropertyNames property;
-        private readonly PropertyAccessor propertyAccessor;
+        private readonly Func<IXenObject, IComparable> propertyAccessor;
 
         internal readonly bool nullProtect; 
 
@@ -482,27 +480,31 @@ namespace XenAdmin.XenSearch
         // item doesn't use a Server).
         public override bool? MatchProperty(List<T> list)
         {
-            bool seenFalse = false;
-            bool seenNull = false;
-            foreach (T o in list)
+            var seenFalse = false;
+            var seenNull = false;
+            foreach (var o in list)
             {
                 if (o != null)
                 {
-                    bool? b = subQuery.Match(o);
-                    if (b == true)
-                        return true;
-                    else if (b == false)
-                        seenFalse = true;
-                    else
-                        seenNull = true;
+                    var b = subQuery.Match(o);
+                    switch (b)
+                    {
+                        case true:
+                            return true;
+                        case false:
+                            seenFalse = true;
+                            break;
+                        default:
+                            seenNull = true;
+                            break;
+                    }
                 }
             }
             if (seenFalse)
                 return false;
-            else if (seenNull)
+            if (seenNull)
                 return null;
-            else
-                return false;
+            return false;
         }
     }
 
@@ -625,10 +627,14 @@ namespace XenAdmin.XenSearch
             : base(node)
         {
             string queryString = Helpers.GetXmlAttribute(node, "query");
+
             if (queryString.Length == 8)  // new style
-                this.query = DateTime.ParseExact(queryString, "yyyyMMdd", CultureInfo.InvariantCulture);
-            else  // old style
-                this.query = TimeUtil.ParseISO8601DateTime(queryString);
+                query = DateTime.ParseExact(queryString, "yyyyMMdd", CultureInfo.InvariantCulture);
+            else if (Util.TryParseIso8601DateTime(queryString, out var result)) // old style
+                query = result;
+            else
+                query = DateTime.MinValue;
+
             this.type = (PropertyQueryType)Enum.Parse(typeof(PropertyQueryType), Helpers.GetXmlAttribute(node, "type"));
             this.pretendNow = null;
         }
@@ -1185,6 +1191,11 @@ namespace XenAdmin.XenSearch
         public override int GetHashCode()
         {
             return address.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IPAddressQuery other && address.Equals(other.address);
         }
     }
 

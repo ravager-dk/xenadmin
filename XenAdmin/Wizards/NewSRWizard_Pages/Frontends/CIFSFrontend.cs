@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -147,12 +146,12 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages.Frontends
                     dconf["password"] = passwordTextBox.Text;
                 }
 
-                Host master = Helpers.GetMaster(Connection);
-                if (master == null)
+                Host coordinator = Helpers.GetCoordinator(Connection);
+                if (coordinator == null)
                     return;
 
                 // Start probe
-                SrProbeAction action = new SrProbeAction(Connection, master, SR.SRTypes.smb, dconf);
+                SrProbeAction action = new SrProbeAction(Connection, coordinator, SR.SRTypes.smb, dconf);
                 using (var dialog = new ActionProgressDialog(action, ProgressBarStyle.Marquee))
                 {
                     dialog.ShowCancel = true;
@@ -167,7 +166,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages.Frontends
                 if (!action.Succeeded)
                     return;
 
-                List<SR.SRInfo> SRs = SR.ParseSRListXML(action.Result);
+                var SRs = action.SRs ?? new List<SR.SRInfo>();
                 if (SRs.Count == 0)
                 {
                     // Disable box

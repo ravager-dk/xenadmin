@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,83 +29,37 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using XenAdmin;
 using XenCenterLib.Compression;
 
 namespace XenAdminTests.CompressionTests
 {
-    [TestFixture, Category(TestCategories.UICategoryA)]
-    class CompressionFactoryTests
+    [TestFixture, Category(TestCategories.Unit)]
+    public class CompressionFactoryTests
     {
+        [TestCase(CompressionFactory.Type.Gz, ExpectedResult = typeof(GZipOutputStream))]
         [Test]
-        public void TestWriterGeneration()
+        public Type TestWriterGeneration(int archiveType)
         {
-            Dictionary<CompressionFactory.Type, Type> validWriters = new Dictionary<CompressionFactory.Type, Type>() 
-            { 
-                { CompressionFactory.Type.Gz, typeof( DotNetZipGZipOutputStream )},
-                { CompressionFactory.Type.Bz2, typeof( DotNetZipBZip2OutputStream )}
-            };
-
-            foreach (KeyValuePair<CompressionFactory.Type, Type> pair in validWriters)
+            using (MemoryStream ms = new MemoryStream())
             {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    using( CompressionStream providedStream = CompressionFactory.Writer(pair.Key, ms))
-                    {
-                        Assert.AreEqual(providedStream.GetType(), pair.Value);  
-                    }
-                    
-                }
+                using (var providedStream = CompressionFactory.Writer((CompressionFactory.Type)archiveType, ms))
+                    return providedStream.GetType();
             }
         }
 
+        [TestCase(CompressionFactory.Type.Gz, ExpectedResult = typeof(GZipInputStream))]
         [Test]
-        public void TestReaderGeneration()
+        public Type TestReaderGenerationWithFile(int archiveType)
         {
-            Dictionary<CompressionFactory.Type, Type> validReaders = new Dictionary<CompressionFactory.Type, Type>() 
-            { 
-                { CompressionFactory.Type.Gz, typeof( DotNetZipGZipInputStream )},
-                { CompressionFactory.Type.Bz2, typeof( DotNetZipBZip2InputStream )}
-            };
+            string target = TestUtils.GetTestResource("emptyfile.gz");
 
-            foreach (KeyValuePair<CompressionFactory.Type, Type> pair in validReaders)
+            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(target)))
             {
-                string target = Path.Combine(Directory.GetCurrentDirectory(), @"XenAdminTests\TestResources", "emptyfile.bz2");
-                /*
-                 * Note: Reading a bzip2 file in as a byte[] works for gzip as well as bzip2 stream 
-                 * as the implementation of bzip2 must be initialised with a string containing a 
-                 * header, EOF etc.. whereas gzip doesn't mind so the following will work despite
-                 * opening a gzip compression stream with a bzip2 data
-                 */
-                using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(target))) 
-                {
-                    using( CompressionStream providedStream = CompressionFactory.Reader(pair.Key, ms))
-                    {
-                        Assert.AreEqual(providedStream.GetType(), pair.Value);
-                    }
-                    
-                }
+                using (var providedStream = CompressionFactory.Reader((CompressionFactory.Type)archiveType, ms))
+                    return providedStream.GetType();
             }
-        }
-
-        /*
-         * The BZip2 stream provided must contain actual BZip2 data, header, data etc..
-         * As this is not the case then this null construction will throw an exception
-         */
-        [Test]
-        public void TestFailingReaderGeneration()
-        {
-            Assert.Throws<IOException>(() =>
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    using (CompressionFactory.Reader(CompressionFactory.Type.Bz2, ms))
-                    { }
-                }
-            });
         }
     }
 }

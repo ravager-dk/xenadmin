@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
+using XenAdmin.Core;
 using XenAPI;
 
 
@@ -37,39 +36,44 @@ namespace XenAdmin.Actions.VMActions
 {
     public class VMCloneAction : AsyncAction
     {
+        private readonly string _cloneName;
+        private readonly string _cloneDescription;
 
-        protected string _cloneName;
-        protected string _cloneDescription;
         public VMCloneAction(VM vm, string name, string description)
-            : base(vm.Connection, string.Format(Messages.CREATEVM_CLONE, name, vm.Name()))
+            : base(vm.Connection, string.Format(Messages.CREATEVM_CLONE, name, vm.NameWithLocation()))
         {
-            this.Description = Messages.ACTION_PREPARING;
-            this.VM = vm;
-            this.Host = vm.Home();
-            this.Pool = Core.Helpers.GetPool(vm.Connection);
+            VM = vm;
+            Host = vm.Home();
+            Pool = Helpers.GetPool(vm.Connection);
             if (vm.is_a_template)
-                this.Template = vm;
+                Template = vm;
             _cloneName = name;
             _cloneDescription = description;
-            ApiMethodsToRoleCheck.AddRange(Role.CommonSessionApiList);
-            ApiMethodsToRoleCheck.AddRange(Role.CommonTaskApiList);
-            ApiMethodsToRoleCheck.Add("vm.clone");
-            ApiMethodsToRoleCheck.Add("vm.set_name_description");
+
+            ApiMethodsToRoleCheck.AddRange(StaticRBACDependencies);
+        }
+
+        public static RbacMethodList StaticRBACDependencies
+        {
+            get
+            {
+                var list = new RbacMethodList("VM.clone", "VM.set_name_description");
+                list.AddRange(Role.CommonSessionApiList);
+                list.AddRange(Role.CommonTaskApiList);
+                return list;
+            }
         }
 
         protected override void Run()
         {
-            this.Description = Messages.ACTION_TEMPLATE_CLONING;
-            RelatedTask = XenAPI.VM.async_clone(Session, VM.opaque_ref, _cloneName);
+            RelatedTask = VM.async_clone(Session, VM.opaque_ref, _cloneName);
             PollToCompletion();
-            {
-                VM created = Connection.WaitForCache(new XenRef<VM>(Result));
-                XenAPI.VM.set_name_description(Session, created.opaque_ref, _cloneDescription);
-                Result = created.opaque_ref;
-            }
-            this.Description = Messages.ACTION_TEMPLATE_CLONED;
+
+            VM created = Connection.WaitForCache(new XenRef<VM>(Result));
+            VM.set_name_description(Session, created.opaque_ref, _cloneDescription);
+            Result = created.opaque_ref;
+
+            Description = Messages.ACTION_TEMPLATE_CLONED;
         }
     }
-
-
 }

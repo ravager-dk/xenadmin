@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -72,45 +71,49 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             return pool != null ? new EnableHAAction(pool, null, HeartbeatSrs, FailuresToTolerate) : null;
         }
 
-        public override string Description
-        {
-            get 
-            {
-                return String.Format(Messages.UPDATES_WIZARD_HA_ON_DESCRIPTION, Pool);
-            }
-        }
+        public override string Description => String.Format(Messages.UPDATES_WIZARD_HA_ON_DESCRIPTION, Pool);
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return Messages.TURN_HA_OFF;
-            }
-        }
+        public override string HelpMessage => Messages.TURN_HA_OFF;
     }
 
-    class HAEnabledWarning : Warning
+    class DrHAEnabledProblem : HAEnabledProblem
     {
-        private readonly Pool pool;
-        private readonly Host host;
+        public DrHAEnabledProblem(Check check, Pool pool)
+            : base(check, pool)
+        {
+        }
 
-        public HAEnabledWarning(Check check, Pool pool, Host host)
+        public override string Description => Messages.DR_WIZARD_PROBLEM_HA_ENABLED;
+    }
+
+    internal class HaWlbEnabledWarning : Warning
+    {
+        private readonly Pool _pool;
+        private readonly Host _host;
+
+        public HaWlbEnabledWarning(Check check, Pool pool, Host host)
             : base(check)
         {
-            this.pool = pool;
-            this.host = host;
+            _pool = pool;
+            _host = host;
         }
 
-        public override string Title
-        {
-            get { return Check.Description; }
-        }
+        public override string Title => Check.Description;
 
         public override string Description
         {
             get
             {
-                return string.Format(Messages.UPDATES_WIZARD_HA_ON_WARNING, host, pool);
+                if (_pool.ha_enabled && _pool.wlb_enabled)
+                    return string.Format(Messages.UPDATES_WIZARD_HA_AND_WLB_ON_WARNING, _host, _pool);
+
+                if (_pool.ha_enabled)
+                    return string.Format(Messages.UPDATES_WIZARD_HA_ON_WARNING, _host, _pool);
+
+                if (_pool.wlb_enabled)
+                    return string.Format(Messages.UPDATES_WIZARD_WLB_ON_WARNING, _host, _pool);
+
+                return string.Empty;
             }
         }
     }

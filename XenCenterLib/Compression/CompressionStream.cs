@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace XenCenterLib.Compression
 {
@@ -39,6 +39,8 @@ namespace XenCenterLib.Compression
     /// </summary>
     public abstract class CompressionStream : Stream
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         private Stream storedStream = null;
         protected Stream zipStream 
         { 
@@ -51,10 +53,7 @@ namespace XenCenterLib.Compression
             private get { return storedStream; }
         }
 
-        public virtual void SetBaseStream(Stream baseStream)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void SetBaseStream(Stream baseStream);
 
         private bool disposed = true;
 
@@ -99,13 +98,19 @@ namespace XenCenterLib.Compression
             {
                 if (!disposed)
                 {
-                    if (zipStream != null)
+                    try
                     {
-                        zipStream.Dispose();
-                        zipStream = null;
+                        zipStream?.Dispose();
                     }
+                    catch (Exception e)
+                    {
+                        //workaround for CA-347483
+                        log.Error("Failed to dispose compression stream", e);
+                    }
+
+                    zipStream = null;
                     disposed = true;
-                }  
+                }
             }
             base.Dispose(disposing);
         }

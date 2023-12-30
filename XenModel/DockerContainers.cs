@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -254,7 +253,7 @@ namespace XenAdmin.Model
         public static ComparableList<DockerContainer> GetDockerVMs(IXenObject o)
         {
             var vm = o as VM;
-            if (vm != null && vm.is_a_real_vm())
+            if (vm != null && vm.IsRealVm())
             {
                 return new ComparableList<DockerContainer>(DockerContainers.GetContainersFromOtherConfig(vm));
             }

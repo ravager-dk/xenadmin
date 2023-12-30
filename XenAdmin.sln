@@ -14,17 +14,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xva_verify", "xva_verify\xv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XenCenterLib", "XenCenterLib\XenCenterLib.csproj", "{9861DFA1-B41F-432D-A43F-226257DEBBB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XenCenterVNC", "XenCenterVNC\XenCenterVNC.csproj", "{BD345C89-E8F4-4767-9BE0-1F0EAB7FA927}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XenModel", "XenModel\XenModel.csproj", "{B306FC59-4441-4A5F-9F54-D3F68D4EE38D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XenOvfApi", "XenOvfApi\XenOvfApi.csproj", "{2D78AC6C-B867-484A-A447-3C6FC8B8EAF7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XenOvfTransport", "XenOvfTransport\XenOvfTransport.csproj", "{9F7E6285-5CBF-41B4-8CB9-AB06DFF90DC0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CFUValidator", "CFUValidator\CFUValidator.csproj", "{39308480-78C3-40B4-924D-06914F343ACD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XenServerHealthCheck", "XenServerHealthCheck\XenServerHealthCheck.csproj", "{DEB3208D-1153-407C-8C99-0D8899BE25A5}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "installer-xcp-ng", "installer-xcp-ng\installer-xcp-ng.wixproj", "{E0BDD733-D6EB-4EAF-B020-ED0F1154CF80}"
 EndProject

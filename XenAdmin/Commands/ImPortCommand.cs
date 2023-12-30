@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System.Collections.Generic;
-using XenAdmin.Core;
 using XenAdmin.Wizards.ImportWizard;
 using XenAPI;
 
@@ -50,14 +48,14 @@ namespace XenAdmin.Commands
             : base(mainWindow, pool)
         { }
 
-		public override string MenuText { get { return Messages.HOST_MENU_IMPORT_VM_TEXT; } }
-		
-		public override string ContextMenuText{get{return Messages.HOST_MENU_IMPORT_VM_TEXT;}}
+        public override string MenuText => Messages.HOST_MENU_IMPORT_VM_TEXT;
 
-		protected override void ExecuteCore(SelectedItemCollection selection)
+        public override string ContextMenuText => Messages.HOST_MENU_IMPORT_VM_TEXT;
+
+		protected override void RunCore(SelectedItemCollection selection)
 		{
 			var con = selection.GetConnectionOfFirstItem();
-			MainWindowCommandInterface.ShowPerConnectionWizard(con, new ImportWizard(con, selection.FirstAsXenObject, null, false));
+			MainWindowCommandInterface.ShowPerConnectionWizard(con, new ImportWizard(con, selection.FirstAsXenObject, null));
 		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,14 +36,6 @@
 // ------------------------------------------------------------------------------
 namespace XenOvf.Definitions.WSSE
 {
-    using System;
-    using System.Diagnostics;
-    using System.Xml.Serialization;
-    using System.Collections;
-    using System.Xml.Schema;
-    using System.ComponentModel;
-    
-    
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Xsd2Code", "1.0.3350.27636")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]

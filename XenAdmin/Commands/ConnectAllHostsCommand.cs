@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using XenAdmin.Network;
 
 
@@ -53,7 +51,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             bool expand = MainWindowCommandInterface.GetXenConnectionsCopy().Count < 30;
             foreach (IXenConnection c in MainWindowCommandInterface.GetXenConnectionsCopy())
@@ -79,7 +77,7 @@ namespace XenAdmin.Commands
             MainWindowCommandInterface.TrySelectNewObjectInTree(c, false, true, false);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             foreach (IXenConnection c in MainWindowCommandInterface.GetXenConnectionsCopy())
             {

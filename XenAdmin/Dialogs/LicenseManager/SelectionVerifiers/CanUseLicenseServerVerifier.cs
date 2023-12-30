@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using XenAdmin.Core;
 
 namespace XenAdmin.Dialogs.LicenseManagerSelectionVerifiers
 {
@@ -44,7 +44,9 @@ namespace XenAdmin.Dialogs.LicenseManagerSelectionVerifiers
 
         public override string VerificationDetails()
         {
-            return Status == VerificationStatus.Error ? Messages.LICENSE_NO_MULTISELECT_ACTIVATE : string.Empty;
+            return Status == VerificationStatus.Error
+                ? string.Format(Messages.LICENSE_NO_MULTISELECT_ACTIVATE, BrandManager.ProductBrand)
+                : string.Empty;
         }
 
 

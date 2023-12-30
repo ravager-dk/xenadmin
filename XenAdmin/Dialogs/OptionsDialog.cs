@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,11 +29,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Core;
 using XenAdmin.Dialogs.OptionsPages;
@@ -44,17 +39,12 @@ namespace XenAdmin.Dialogs
 {
     public partial class OptionsDialog : VerticallyTabbedDialog
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private const string ToolsOptionsLogHeader = "Tools Options Settings -";
-
         internal OptionsDialog(PluginManager pluginManager)
         {
             InitializeComponent();
-            pluginOptionsPage1.Enabled = pluginManager.Enabled;
-            pluginOptionsPage1.PluginManager = pluginManager;
+            pluginOptionsPage1.SetPluginManager(pluginManager, false);//do not request rebuild; it will be done on load
             verticalTabs.SelectedItem = securityOptionsPage1;
 
-            connectionOptionsPage1.OptionsDialog = this;
             if (!Application.RenderWithVisualStyles)
                 ContentPanel.BackColor = SystemColors.Control;
             // call save serverlist on OK
@@ -64,33 +54,33 @@ namespace XenAdmin.Dialogs
                 verticalTabs.Items.Remove(updatesOptionsPage1);
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            foreach (IOptionsPage page in verticalTabs.Items)
+                page.Build();
+        }
+
         private void okButton_Click(object sender, EventArgs e)
         {
             foreach (IOptionsPage page in verticalTabs.Items)
             {
-                page.Save();
+                if (!page.IsValidToSave(out Control control, out string invalidReason))
+                {
+                    SelectPage(page);
+                    page.ShowValidationMessages(control, invalidReason);
+                    DialogResult = DialogResult.None;
+                    return;
+                }
             }
 
+            foreach (IOptionsPage page in verticalTabs.Items)
+                page.Save();
+
             Settings.TrySaveSettings();
-
-            Log();
-
+            Settings.Log();
             Close();
-        }
-
-        public static void Log()
-        {
-            log.Info(ToolsOptionsLogHeader);
-
-            ConnectionOptionsPage.Log();
-            ConsolesOptionsPage.Log();
-            SecurityOptionsPage.Log();
-            if (!Helpers.CommonCriteriaCertificationRelease)
-                UpdatesOptionsPage.Log();
-            DisplayOptionsPage.Log();
-            SaveAndRestoreOptionsPage.Log();
-            PluginOptionsPage.Log();
-            ConfirmationOptionsPage.Log();
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
@@ -101,6 +91,34 @@ namespace XenAdmin.Dialogs
         public void SelectConnectionOptionsPage()
         {
             SelectPage(connectionOptionsPage1);
+        }
+
+        public void SelectExternalToolsPage()
+        {
+            SelectPage(externalToolsOptionsPage1);
+        }
+
+        public void SelectUpdateOptionsPage()
+        {
+            SelectPage(updatesOptionsPage1);
+        }
+
+        private void OptionsDialog_Move(object sender, EventArgs e)
+        {
+            HideValidationToolTips();
+        }
+
+        private void verticalTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            HideValidationToolTips();
+        }
+
+        private void HideValidationToolTips()
+        {
+            foreach (IOptionsPage page in verticalTabs.Items)
+            {
+                page.HideValidationMessages();
+            }
         }
     }
 }

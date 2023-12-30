@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin.Core;
 using XenAPI;
 
@@ -40,25 +40,23 @@ namespace XenAdmin.Actions
     public class AddHostToPoolAction : PoolAbstractAction
     {
         private readonly List<Host> _hostsToRelicense;
-        private readonly List<Host> _hostsToCpuMask;
         private readonly List<Host> _hostsToAdConfigure;
 
         public AddHostToPoolAction(Pool poolToJoin, Host joiningHost, Func<Host, AdUserAndPassword> getAdCredentials,
-            Func<HostAbstractAction, Pool, long, long, bool> acceptNTolChanges, Action<List<LicenseFailure>, string> doOnLicensingFailure)
+            Action<List<LicenseFailure>, string> doOnLicensingFailure)
             : base(joiningHost.Connection, string.Format(Messages.ADDING_SERVER_TO_POOL, joiningHost.Name(), poolToJoin.Name()),
-            getAdCredentials, acceptNTolChanges, doOnLicensingFailure)
+            getAdCredentials, doOnLicensingFailure)
         {
             this.Pool = poolToJoin;
             this.Host = joiningHost;
-            Host master = Helpers.GetMaster(poolToJoin);
+            Host coordinator = Helpers.GetCoordinator(poolToJoin);
             _hostsToRelicense = new List<Host>();
-            _hostsToCpuMask = new List<Host>();
+
             _hostsToAdConfigure = new List<Host>();
-            if (PoolJoinRules.FreeHostPaidMaster(joiningHost, master, false))
+            if (PoolJoinRules.FreeHostPaidCoordinator(joiningHost, coordinator, false))
                 _hostsToRelicense.Add(joiningHost);
-            if (!PoolJoinRules.CompatibleCPUs(joiningHost, master, false))
-                _hostsToCpuMask.Add(joiningHost);
-            if (!PoolJoinRules.CompatibleAdConfig(joiningHost, master, false))
+
+            if (!PoolJoinRules.CompatibleAdConfig(joiningHost, coordinator, false))
                 _hostsToAdConfigure.Add(joiningHost);
             this.Description = Messages.WAITING;
             AddCommonAPIMethodsToRoleCheck();
@@ -76,7 +74,6 @@ namespace XenAdmin.Actions
             ApiMethodsToRoleCheck.Add("pool.remove_tags");
             ApiMethodsToRoleCheck.Add("pool.set_wlb_enabled");
             ApiMethodsToRoleCheck.Add("pool.set_wlb_verify_cert");
-
             ApiMethodsToRoleCheck.Add("pool.join");
         }
 
@@ -88,29 +85,33 @@ namespace XenAdmin.Actions
             {
                 FixLicensing(Pool, _hostsToRelicense, DoOnLicensingFailure);
                 FixAd(Pool, _hostsToAdConfigure, GetAdCredentials);
-                bool fixedCpus = FixCpus(Pool, _hostsToCpuMask, AcceptNTolChanges);
-                if (fixedCpus)
-                    Session = NewSession();  // We've rebooted the server, so we need to grab the new session
-                RelatedTask = XenAPI.Pool.async_join(Session, Pool.Connection.Hostname, Pool.Connection.Username, Pool.Connection.Password);
+
+                var coordinator = Pool.Connection.TryResolveWithTimeout(Pool.master);
+                var address = coordinator != null ? coordinator.address : Pool.Connection.Hostname;
+
+                RelatedTask = Pool.async_join(Session, address, Pool.Connection.Username, Pool.Connection.Password);
                 PollToCompletion(0, 90);
             }
-            catch (Exception e)
+            catch (Failure f)
             {
-                Failure f = e as Failure;
-                // I think we shouldn't trigger this any more, because it's now checked in PoolJoinRules.
+                // This is probably not needed any more, because it's now checked in PoolJoinRules.
                 // But let's leave it here in case. SRET.
-                if (f != null && f.ErrorDescription[0] == Failure.RBAC_PERMISSION_DENIED)
+                if (f.ErrorDescription.Count > 1 && f.ErrorDescription[0] == Failure.RBAC_PERMISSION_DENIED)
                 {
-                    Session[] sessions = new Session[] { Session, Pool.Connection.Session };
-                    // Special parse to cope with multiple connections.
-                    Failure.ParseRBACFailure(f, sessions);
-                    // Will not get RBAC parsed again after the throw as we have altered the error description in ParseRBACFailure
-                    throw f;
+                    var sessions = new[] {Session, Pool.Connection.Session};
+                    var authRoles = Role.ValidRoleList(f.ErrorDescription[1], Session.Connection);
+
+                    var output = string.Join(", ", sessions.Select(s => string.Format(Messages.ROLE_ON_CONNECTION,
+                        s.FriendlyRoleDescription(), Helpers.GetName(s.Connection).Ellipsise(50))));
+
+                    throw new Failure(Failure.RBAC_PERMISSION_DENIED_FRIENDLY, output, Role.FriendlyCsvRoleList(authRoles));
                 }
+
                 throw;
             }
-            // We need a master session for ClearNonSharedSrs.
-            // No need to log out the slave session, because the server is going to reset its database anyway.
+
+            // We need a coordinator session for ClearNonSharedSrs.
+            // No need to log out the supporter session, because the server is going to reset its database anyway.
 
             Session = NewSession(Pool.Connection);
             ClearNonSharedSrs(Pool);

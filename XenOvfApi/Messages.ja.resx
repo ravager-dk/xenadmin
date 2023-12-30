@@ -123,14 +123,8 @@
   <data name="CERTIFICATE_IS_INVALID" xml:space="preserve">
     <value>証明書が無効です。</value>
   </data>
-  <data name="COMPRESS_FAILED" xml:space="preserve">
-    <value>{0} の圧縮に失敗しました。</value>
-  </data>
   <data name="COMPRESS_INVALID_METHOD" xml:space="preserve">
     <value>圧縮方法 {0} はサポートされていません。</value>
-  </data>
-  <data name="CONVERSION_FAILED" xml:space="preserve">
-    <value>OVF から OVA への変換に失敗しました。</value>
   </data>
   <data name="CONVERSION_NO_DATA" xml:space="preserve">
     <value>HyperV 構成ファイルの変換に失敗しました。</value>
@@ -149,9 +143,6 @@
   </data>
   <data name="EULA_RB_REJECT" xml:space="preserve">
     <value>拒否</value>
-  </data>
-  <data name="EULA_TITLE" xml:space="preserve">
-    <value>[Citrix] OVF EULA</value>
   </data>
   <data name="FAILED_TO_ADD_OS_SECTION" xml:space="preserve">
     <value>仮想システム コレクションが無効なため、オペレーティング システム セクションを追加できませんでした。</value>
@@ -190,7 +181,7 @@
     <value>{0} を開けません。</value>
   </data>
   <data name="OVF_CREATED" xml:space="preserve">
-    <value>[XenCenter] ディスク イメージのインポート機能により作成</value>
+    <value>ディスク イメージのインポート機能により作成</value>
   </data>
   <data name="OVF_DEPLOYMENT_CFG_SECTION_MISSING" xml:space="preserve">
     <value>展開構成セクションが見つかりません。</value>

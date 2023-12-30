@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,25 +42,36 @@ namespace XenAdmin
         public static IXenAdminConfigProvider Provider { get; set; }
     }
 
-    public interface IXenAdminConfigProvider
+    public interface IXenAdminConfigProvider : IConfigProvider
     {
-        Func<List<Role>, IXenConnection, string, AsyncAction.SudoElevationResult> SudoDialogDelegate { get; }
+        Func<List<Role>, IXenConnection, string, AsyncAction.SudoElevationResult> ElevatedSessionDelegate { get; }
         int ConnectionTimeout { get; }
         Session CreateActionSession(Session session, IXenConnection connection);
         bool Exiting { get; }
         bool ForcedExiting { get; }
         string XenCenterUUID { get; }
         bool DontSudo { get; }
-        IWebProxy GetProxyFromSettings(IXenConnection connection);
-        IWebProxy GetProxyFromSettings(IXenConnection connection, bool isForXenServer);
         int GetProxyTimeout(bool timeout);
-        void ShowObject(string newVMRef);
-        void HideObject(string newVMRef);
+        void ShowObject(string opaqueRef);
+        void HideObject(string opaqueRef);
         bool ObjectIsHidden(string opaqueRef);
         string GetLogFile();
         void UpdateServerHistory(string hostnameWithPort);
         void SaveSettingsIfRequired();
         bool ShowHiddenVMs { get; }
-        string GetXenCenterMetadata(bool isForXenCenter);
+        string GetXenCenterMetadata();
+        string GetCustomClientUpdatesXmlLocation();
+        string GetCustomCfuLocation();
+        string GetClientUpdatesQueryParam();
+        string GetCustomFileServicePrefix();
+    }
+
+    public interface IConfigProvider
+    {
+        string FileServiceUsername { get; }
+        string FileServiceClientId { get; }
+        string GetCustomTokenUrl();
+        IWebProxy GetProxyFromSettings(IXenConnection connection);
+        IWebProxy GetProxyFromSettings(IXenConnection connection, bool isForXenServer);
     }
 }

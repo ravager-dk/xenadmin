@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -62,17 +61,13 @@ namespace XenAdmin.Commands
 
         }
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.MESSAGEBOX_ACTIVATE_VD_TITLE;
-            }
-        }
+        public override string ContextMenuText => Messages.MESSAGEBOX_ACTIVATE_VD_TITLE;
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        public override string ButtonText => Messages.ACTIVATE;
+
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<VBD>() && selection.AtLeastOneXenObjectCan<VBD>(CanExecute);
+            return selection.AllItemsAre<VBD>() && selection.AtLeastOneXenObjectCan<VBD>(CanRun);
         }
 
         // We only need to check for IO Drivers for hosts before Ely
@@ -83,14 +78,14 @@ namespace XenAdmin.Commands
                 return false;
             }
 
-            return !vm.GetVirtualisationStatus().HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED);
+            return !vm.GetVirtualizationStatus(out _).HasFlag(VM.VirtualizationStatus.IoDriversInstalled);
         }
 
-        private bool CanExecute(VBD vbd)
+        private bool CanRun(VBD vbd)
         {
             VM vm = vbd.Connection.Resolve<VM>(vbd.VM);
             VDI vdi = vbd.Connection.Resolve<VDI>(vbd.VDI);
-            if (vm == null || vm.not_a_real_vm() || vdi == null)
+            if (vm == null || !vm.IsRealVm() || vdi == null)
                 return false;
             if (vm.power_state != vm_power_state.Running)
                 return false;
@@ -104,16 +99,22 @@ namespace XenAdmin.Commands
             return vbd.allowed_operations.Contains(vbd_operations.plug);
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             VBD vbd = item as VBD;
             if (vbd == null)
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
 
             VM vm = vbd.Connection.Resolve<VM>(vbd.VM);
             VDI vdi = vbd.Connection.Resolve<VDI>(vbd.VDI);
-            if (vm == null || vm.not_a_real_vm() || vdi == null)
-                return base.GetCantExecuteReasonCore(item);
+            if (vm == null || vdi == null)
+                return base.GetCantRunReasonCore(item);
+
+            if (vm.is_a_template)
+                return Messages.CANNOT_ACTIVATE_TEMPLATE_DISK;
+            
+            if (!vm.IsRealVm())
+                return base.GetCantRunReasonCore(item);
 
             SR sr = vdi.Connection.Resolve<SR>(vdi.SR);
             if (sr == null)
@@ -138,22 +139,22 @@ namespace XenAdmin.Commands
                 return Messages.TOOLTIP_DEACTIVATE_SYSVDI;
 
             if (AreIODriversNeededAndMissing(vm))
-                return string.Format(
-                    vm.HasNewVirtualisationStates() ? Messages.CANNOT_ACTIVATE_VD_VM_NEEDS_IO_DRIVERS : Messages.CANNOT_ACTIVATE_VD_VM_NEEDS_TOOLS, 
-                    Helpers.GetName(vm).Ellipsise(50));
+                return vm.HasNewVirtualizationStates()
+                    ? string.Format(Messages.CANNOT_ACTIVATE_VD_VM_NEEDS_IO_DRIVERS, Helpers.GetName(vm).Ellipsise(50))
+                    : string.Format(Messages.CANNOT_ACTIVATE_VD_VM_NEEDS_TOOLS, BrandManager.VmTools, Helpers.GetName(vm).Ellipsise(50));
               
             if (vbd.currently_attached)
                 return string.Format(Messages.CANNOT_ACTIVATE_VD_ALREADY_ACTIVE, Helpers.GetName(vm).Ellipsise(50));
 
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
-            return new CommandErrorDialog(Messages.ERROR_ACTIVATING_VDIS_TITLE, Messages.ERROR_ACTIVATING_VDIS_MESSAGE, cantExecuteReasons);
+            return new CommandErrorDialog(Messages.ERROR_ACTIVATING_VDIS_TITLE, Messages.ERROR_ACTIVATING_VDIS_MESSAGE, cantRunReasons);
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actionsToComplete = new List<AsyncAction>();
             foreach (VBD vbd in selection.AsXenObjects<VBD>())

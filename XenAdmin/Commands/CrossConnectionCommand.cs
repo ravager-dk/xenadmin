@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,15 +28,11 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using XenAdmin.Network;
 using XenAPI;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
-using System.Drawing;
 
 
 namespace XenAdmin.Commands
@@ -65,11 +60,8 @@ namespace XenAdmin.Commands
             if (failedConnections.Count > 0)
             {
                 if (!Program.RunInAutomatedTestMode)
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Error,
-                            MessageBoxMessage(failedConnections),
-                            Messages.PERMISSION_DENIED)))
+                    using (var dlg = new ErrorDialog(MessageBoxMessage(failedConnections))
+                        {WindowTitle = Messages.PERMISSION_DENIED})
                     {
                         dlg.ShowDialog(Program.MainWindow);
                     }

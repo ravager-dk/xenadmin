@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -177,7 +176,7 @@ namespace XenAdmin.Dialogs
             get
             {
                 var version = Program.Version;
-                return version.ToString() == "0.0.0.0" ? version : new Version(BrandManager.ProductVersion70);
+                return version.ToString() == "0.0.0.0" ? version : new Version(BrandManager.ProductVersion70Short);
             }
         }
 
@@ -297,11 +296,10 @@ namespace XenAdmin.Dialogs
                         result.CompareTo(ConversionVpxMinimumSupportedVersion) < 0)
                     {
                         statusLabel.Image = Images.StaticImages._000_error_h32bit_16;
-                        statusLabel.Text = Messages.CONVERSION_VERSION_INCOMPATIBILITY;
+                        statusLabel.Text = string.Format(Messages.CONVERSION_VERSION_INCOMPATIBILITY, BrandManager.BrandConsole);
                         statusLinkLabel.Reset(Messages.MORE_INFO, () =>
                         {
-                            using (var dlog = new ThreeButtonDialog(new ThreeButtonDialog.Details(null,
-                                string.Format(Messages.CONVERSION_VERSION_INCOMPATIBILITY_INFO, BrandManager.ProductVersion70))))
+                            using (var dlog = new NoIconDialog(string.Format(Messages.CONVERSION_VERSION_INCOMPATIBILITY_INFO, ConversionVpxMinimumSupportedVersion, BrandManager.ProductBrand)))
                             {
                                 dlog.ShowDialog(this);
                             }
@@ -309,7 +307,7 @@ namespace XenAdmin.Dialogs
                         return;
                     }
 
-                    statusLabel.Image = Images.StaticImages.ConversionManager;
+                    statusLabel.Image = Images.StaticImages.xcm;
                     statusLabel.Text = Messages.CONVERSION_CONNECTING_VPX_SUCCESS;
                     statusLinkLabel.Reset();
 
@@ -757,10 +755,8 @@ namespace XenAdmin.Dialogs
         {
             if (dataGridViewConversions.SelectedRows.Count == 1 && dataGridViewConversions.SelectedRows[0] is ConversionRow row)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.CONVERSION_CANCEL_CONFIRM),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+                using (var dlog = new WarningDialog(Messages.CONVERSION_CANCEL_CONFIRM,
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
                 {
                     if (dlog.ShowDialog(this) == DialogResult.No)
                         return;
@@ -814,10 +810,8 @@ namespace XenAdmin.Dialogs
 
         private void toolStripButtonClear_Click(object sender, EventArgs e)
         {
-            using (var dlog = new ThreeButtonDialog(
-                new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.CONVERSION_CLEAR_HISTORY_CONFIRM),
-                ThreeButtonDialog.ButtonYes,
-                ThreeButtonDialog.ButtonNo))
+            using (var dlog = new WarningDialog(Messages.CONVERSION_CLEAR_HISTORY_CONFIRM,
+                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
             {
                 if (dlog.ShowDialog(this) == DialogResult.No)
                     return;
@@ -858,8 +852,7 @@ namespace XenAdmin.Dialogs
 
             if (FilterIsOn)
             {
-                using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.CONVERSION_EXPORT_ALL_OR_FILTERED),
+                using (var dlog = new NoIconDialog(Messages.CONVERSION_EXPORT_ALL_OR_FILTERED,
                     new ThreeButtonDialog.TBDButton(Messages.EXPORT_ALL_BUTTON, DialogResult.Yes),
                     new ThreeButtonDialog.TBDButton(Messages.EXPORT_FILTERED_BUTTON, DialogResult.No, ThreeButtonDialog.ButtonType.NONE),
                     ThreeButtonDialog.ButtonCancel))

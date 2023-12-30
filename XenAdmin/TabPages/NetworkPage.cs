@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Forms;
 
 using XenAPI;
@@ -45,9 +45,12 @@ namespace XenAdmin.TabPages
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         // We don't rebuild the controls while the tab is not visible, but instead queue it up later for when the page is displayed.
-        private bool refreshNeeded = false;
+        private bool refreshNeeded;
 
         private IXenObject _xenObject;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IXenObject XenObject
         {
             get
@@ -89,7 +92,7 @@ namespace XenAdmin.TabPages
                 if (_xenObject != null && Helpers.HAEnabled(_xenObject.Connection))
                 {
                     button1.Enabled = false;
-                    toolTipContainerConfigureButton.SetToolTip(Messages.DISABLE_HA_CONFIGURE_MANAGEMENT_INTERFACES);
+                    toolTipContainerConfigureButton.SetToolTip(Messages.DISABLE_HA_CONFIGURE_IP_ADDRESSES);
                 }
                 else
                 {
@@ -153,7 +156,7 @@ namespace XenAdmin.TabPages
                     return;
 
                 List<PIF> pifList = new List<PIF>(_xenObject.Connection.Cache.PIFs);
-                hostList.Sort();  // usual order, i.e. master first
+                hostList.Sort();  // usual order, i.e. coordinator first
                 pifList.Sort();  // This sort ensures that the primary PIF comes before other management PIFs
 
                 List<PIFRow> rows = new List<PIFRow>();

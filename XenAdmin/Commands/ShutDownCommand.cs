@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,17 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAPI;
-using XenAdmin.Core;
-using System.Drawing;
-using XenAdmin.Network;
-using XenAdmin.Actions;
-using System.Windows.Forms;
 using System.Collections.ObjectModel;
-using XenAdmin.Properties;
+using System.Drawing;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -62,39 +54,33 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             Command cmd = new ShutDownHostCommand(MainWindowCommandInterface, selection);
 
-            if (cmd.CanExecute())
+            if (cmd.CanRun())
             {
-                cmd.Execute();
+                cmd.Run();
             }
             else
             {
                 cmd = new ShutDownVMCommand(MainWindowCommandInterface, selection);
 
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
-                    cmd.Execute();
+                    cmd.Run();
                 }
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return new ShutDownVMCommand(MainWindowCommandInterface, selection).CanExecute() || new ShutDownHostCommand(MainWindowCommandInterface, selection).CanExecute();
+            return new ShutDownVMCommand(MainWindowCommandInterface, selection).CanRun() || new ShutDownHostCommand(MainWindowCommandInterface, selection).CanRun();
         }
 
-        public override Image ToolBarImage
-        {
-            get
-            {
-                return Images.StaticImages._001_ShutDown_h32bit_24;
-            }
-        }
+        public override Image ToolBarImage => Images.StaticImages._001_ShutDown_h32bit_24;
 
-        protected override string EnabledToolTipText
+        public override string EnabledToolTipText
         {
             get
             {
@@ -107,12 +93,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        public override string ToolBarText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_TOOLBAR_SHUTDOWN;
-            }
-        }
+        public override string ToolBarText => Messages.MAINWINDOW_TOOLBAR_SHUTDOWN;
     }
 }

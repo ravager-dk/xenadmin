@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -49,13 +48,12 @@ namespace XenAPI
         /// </summary>
         public enum SRTypes
         {
-            local, file, ext, ext4, lvmoiscsi, iso, nfs, lvm, netapp, udev, lvmofc,
-            lvmohba, egenera, egeneracd, dummy, unknown, equal, cslg, shm,
+            local, file, ext, ext4, lvmoiscsi, iso, nfs, lvm, udev, lvmofc,
+            lvmohba, egenera, egeneracd, dummy, unknown, shm,
             iscsi,
             ebs, rawhba,
             smb, lvmofcoe, gfs2,
             nutanix, nutanixiso, 
-            tmpfs, xfs
         }
 
         public const long DISK_MAX_SIZE = 2 * Util.BINARY_TERA;
@@ -69,7 +67,9 @@ namespace XenAPI
             return Name();
         }
 
-        /// <returns>A friendly name for the SR.</returns>
+        /// <summary>
+        /// A friendly name for the SR.
+        /// </summary>
         public override string Name()
         {
             return I18N("name_label", name_label, true);
@@ -96,7 +96,9 @@ namespace XenAPI
             return I18N("name_label", name_label, false);
         }
 
-        /// <returns>A friendly description for the SR.</returns>
+        /// <summary>
+        /// A friendly description for the SR.
+        /// </summary>
         public override string Description()
         {
             return I18N("name_description", name_description, true);
@@ -120,13 +122,25 @@ namespace XenAPI
 
         public string FriendlyTypeName()
         {
-            return getFriendlyTypeName(GetSRType(false));
+            var srType = GetSRType(false);
+
+            if (srType == SRTypes.unknown)
+            {
+                var sm = SM.GetByType(Connection, type);
+
+                if (sm != null &&
+                    Version.TryParse(sm.required_api_version, out var smapiVersion) &&
+                    smapiVersion.CompareTo(new Version(3, 0)) >= 0)
+                    return !string.IsNullOrEmpty(sm.name_label) ? sm.name_label : type;
+            }
+
+            return GetFriendlyTypeName(srType);
         }
 
         /// <summary>
         /// A friendly (internationalized) name for the SR type.
         /// </summary>
-        public static string getFriendlyTypeName(SRTypes srType)
+        public static string GetFriendlyTypeName(SRTypes srType)
         {
             return FriendlyNameManager.GetFriendlyName(string.Format("Label-SR.SRTypes-{0}", srType.ToString()));
         }
@@ -180,8 +194,10 @@ namespace XenAPI
             }
         }
 
-        /// <returns>The name of the host to which this SR is attached, or null if the storage is shared
-        /// or unattached.</returns>
+        /// <summary>
+        /// Gets the name of the host to which this SR is attached, or null if the storage is shared
+        /// or unattached.
+        /// </summary>
         private string GetHostName()
         {
             if (Connection == null)
@@ -190,8 +206,9 @@ namespace XenAPI
             return host == null ? null : host.Name();
         }
 
-
-        /// <returns>The host to which the given SR belongs, or null if the SR is shared or completely disconnected.</returns>
+        /// <summary>
+        /// Gets the host to which the given SR belongs, or null if the SR is shared or completely disconnected.
+        /// </summary>
         public Host GetStorageHost()
         {
             if (shared || PBDs.Count != 1)
@@ -227,10 +244,7 @@ namespace XenAPI
             return type == SRTypes.iso
                 || type == SRTypes.lvmoiscsi
                 || type == SRTypes.nfs
-                || type == SRTypes.equal
-                || type == SRTypes.netapp
                 || type == SRTypes.lvmohba
-                || type == SRTypes.cslg
                 || type == SRTypes.smb
                 || type == SRTypes.lvmofcoe
                 || type == SRTypes.gfs2;
@@ -248,23 +262,6 @@ namespace XenAPI
                    || typ == SRTypes.dummy
                    || typ == SRTypes.ext4
                    || typ == SRTypes.xfs;
-        }
-
-        /// <summary>
-        /// Internal helper function. True if all the PBDs for this SR are currently_attached.
-        /// </summary>
-        /// <returns></returns>
-        private bool AllPBDsAttached()
-        {
-            return Connection.ResolveAll(this.PBDs).All(pbd => pbd.currently_attached);
-        }
-
-        /// <summary>
-        /// Internal helper function. True if any of the PBDs for this SR is currently_attached.
-        /// </summary>
-        private bool AnyPBDAttached()
-        {
-            return Connection.ResolveAll(this.PBDs).Any(pbd => pbd.currently_attached);
         }
 
         /// <summary>
@@ -289,6 +286,23 @@ namespace XenAPI
             return false;
         }
 
+        public bool HasDriverDomain(out VM vm)
+        {
+            foreach (var pbdRef in PBDs)
+            {
+                var pbd = Connection.Resolve(pbdRef);
+                if (pbd != null && pbd.other_config.TryGetValue("storage_driver_domain", out string vmRef))
+                {
+                    vm = Connection.Resolve(new XenRef<VM>(vmRef));
+                    if (vm != null && !vm.IsControlDomainZero(out _))
+                        return true;
+                }
+            }
+
+            vm = null;
+            return false;
+        }
+
         /// <summary>
         /// If host is non-null, return whether this storage can be seen from the given host.
         /// If host is null, return whether the storage is shared, with a PBD for each host and at least one PBD plugged.
@@ -297,9 +311,7 @@ namespace XenAPI
         public virtual bool CanBeSeenFrom(Host host)
         {
             if (host == null)
-            {
-                return shared && Connection != null && !IsBroken(false) && AnyPBDAttached();
-            }
+                return shared && !IsBroken();
 
             foreach (PBD pbd in host.Connection.ResolveAll(PBDs))
                 if (pbd.currently_attached && pbd.host.opaque_ref == host.opaque_ref)
@@ -323,7 +335,7 @@ namespace XenAPI
         public bool IsFull()
         {
             SRTypes t = GetSRType(false);
-            return t != SRTypes.dummy && t != SRTypes.ebs && FreeSpace() < XenAdmin.Util.BINARY_GIGA/2;
+            return t != SRTypes.dummy && t != SRTypes.ebs && FreeSpace() < Util.BINARY_GIGA/2;
         }
 
         public virtual long FreeSpace()
@@ -331,18 +343,19 @@ namespace XenAPI
             return physical_size - physical_utilisation;
         }
 
-        public virtual bool ShowInVDISRList(bool showHiddenVMs)
-        {
-            if (content_type == Content_Type_ISO)
-                return false;
-            return Show(showHiddenVMs);
-
-        }
-
+        /// <summary>
+        /// SR is detached when it has no PBDs or when all its PBDs are unplugged
+        /// </summary>
         public bool IsDetached()
         {
-            // SR is detached when it has no PBDs or when all its PBDs are unplugged
-            return !HasPBDs() || !AnyPBDAttached();
+            foreach (var pbdRef in PBDs)
+            {
+                var pbd = Connection.Resolve(pbdRef);
+                if (pbd != null && pbd.currently_attached)
+                    return false;
+            }
+
+            return true;
         }
 
         public bool HasPBDs()
@@ -384,40 +397,38 @@ namespace XenAPI
         }
 
         /// <summary>
-        /// The SR is broken when it has the wrong number of PBDs, or (optionally) not all the PBDs are attached.
+        /// The SR is broken when it has the wrong number of PBDs, or (optionally) not
+        /// all the PBDs are attached. For standalone host or non-shared SR there should
+        /// be exactly one PBD, otherwise a PBD for each host.
         /// </summary>
         /// <param name="checkAttached">Whether to check that all the PBDs are attached</param>
-        /// <returns></returns>
-        public virtual bool IsBroken(bool checkAttached)
+        public virtual bool IsBroken(bool checkAttached = true)
         {
-            if (PBDs == null || PBDs.Count == 0 ||
-                checkAttached && !AllPBDsAttached())
-            {
+            if (PBDs.Count == 0)
                 return true;
-            }
-            Pool pool = Helpers.GetPoolOfOne(Connection);
-            if (pool == null || !shared)
+
+            if (Helpers.GetPoolOfOne(Connection) == null || !shared)
             {
                 if (PBDs.Count != 1)
-                {
-                    // There should be exactly one PBD, since this is a non-shared SR
                     return true;
-                }
             }
             else
             {
                 if (PBDs.Count != Connection.Cache.HostCount)
-                {
-                    // There isn't a PBD for each host
                     return true;
+            }
+
+            if (checkAttached)
+            {
+                foreach (var pbdRef in PBDs)
+                {
+                    var pbd = Connection?.Resolve(pbdRef);
+                    if (pbd == null || !pbd.currently_attached)
+                        return true;
                 }
             }
-            return false;
-        }
 
-        public bool IsBroken()
-        {
-            return IsBroken(true);
+            return false;
         }
 
         public static bool IsDefaultSr(SR sr)
@@ -425,18 +436,6 @@ namespace XenAPI
             Pool pool = Helpers.GetPoolOfOne(sr.Connection);
             return pool != null && pool.default_SR != null && pool.default_SR.opaque_ref == sr.opaque_ref;
         }
-
-        /// <summary>
-        /// Returns true if a new VM may be created on this SR: the SR supports VDI_CREATE, has the right number of PBDs, and is not full.
-        /// </summary>
-        /// <returns></returns>
-        public bool CanCreateVmOn()
-        {
-            System.Diagnostics.Trace.Assert(Connection != null, "Connection must not be null");
-
-            return SupportsVdiCreate() && !IsBroken(false) && !IsFull();
-        }
-
 
         /// <summary>
         /// Whether the underlying SR backend supports VDI_CREATE. Will return true even if the SR is full.
@@ -488,18 +487,59 @@ namespace XenAPI
             return results;
         }
 
-        public virtual bool VdiCreationCanProceed(long vdiSize)
+        /// <summary>
+        /// Checks if the SR contains enough free space to accomodate the specified VDI size.
+        /// If checking a possibly thinly provisioned SR, provide a value for vdiPhysicalUtilization.
+        ///
+        /// CA-359965: physical_utlization is not actually telling us how much of the VDI is actively being used.
+        /// Any copy of VDIs to a thinly provisioned SR could fail.
+        /// </summary>
+        /// <param name="cannotFitReason">The reason why the disks cannot fit on the SR</param>
+        /// <param name="vdis">The disks to check</param>
+        public virtual bool CanFitDisks(out string cannotFitReason, VDI[] vdis)
         {
-            SM sm = GetSM();
+            var sm = GetSM();
 
-            bool vdiSizeUnlimited = sm != null && Array.IndexOf(sm.capabilities, "LARGE_VDI") != -1;
-            if (!vdiSizeUnlimited && vdiSize > DISK_MAX_SIZE)
+            var vdiSizeUnlimited = sm != null && Array.IndexOf(sm.capabilities, "LARGE_VDI") != -1;
+
+            if (!vdiSizeUnlimited && vdis.Any(vdi => vdi.virtual_size > DISK_MAX_SIZE))
+            {
+                cannotFitReason = string.Format(Messages.SR_DISKSIZE_EXCEEDS_DISK_MAX_SIZE,
+                    Util.DiskSizeString(DISK_MAX_SIZE, 0));
                 return false;
+            }
 
-            bool isThinlyProvisioned = sm != null && Array.IndexOf(sm.capabilities, "THIN_PROVISIONING") != -1;
-            if (!isThinlyProvisioned && vdiSize > FreeSpace())
+            if (IsFull())
+            {
+                cannotFitReason = Messages.SRPICKER_SR_FULL;
                 return false;
+            }
 
+            var isThinlyProvisioned = sm != null && Array.IndexOf(sm.capabilities, "THIN_PROVISIONING") != -1;
+            var vdiPhysicalUtilization = vdis.Sum(vdi => vdi.physical_utilisation);
+            var vdiSize = vdis.Sum(vdi => vdi.virtual_size);
+            var sizeToConsider = isThinlyProvisioned ? vdiPhysicalUtilization : vdiSize;
+
+            if (sizeToConsider > physical_size)
+            {
+                cannotFitReason = string.Format(Messages.SR_PICKER_DISK_TOO_BIG,
+                    Util.DiskSizeString(sizeToConsider, 2),
+                    Util.DiskSizeString(physical_size, 2));
+                return false;
+            }
+
+            var freeSpace = FreeSpace();
+
+            if (sizeToConsider > freeSpace)
+            {
+                cannotFitReason = string.Format(Messages.SR_PICKER_INSUFFICIENT_SPACE,
+                    Util.DiskSizeString(sizeToConsider, 2),
+                    Util.DiskSizeString(freeSpace, 2));
+
+                return false;
+            }
+
+            cannotFitReason = string.Empty;
             return true;
         }
 
@@ -511,16 +551,6 @@ namespace XenAPI
             List<SRInfo> results = new List<SRInfo>();
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
-
-            // If we've got this from an async task result, then it will be wrapped
-            // in a <value> element.  Parse the contents instead.
-            foreach (XmlNode node in doc.GetElementsByTagName("value"))
-            {
-                xml = node.InnerText;
-                doc = new XmlDocument();
-                doc.LoadXml(xml);
-                break;
-            }
 
             foreach (XmlNode node in doc.GetElementsByTagName("SR"))
             {
@@ -572,12 +602,12 @@ namespace XenAPI
 
             // If we've got this from an async task result, then it will be wrapped
             // in a <value> element.  Parse the contents instead.
-            foreach (XmlNode node in doc.GetElementsByTagName("value"))
+            var nodes = doc.GetElementsByTagName("value");
+            if (nodes.Count > 0)
             {
-                xml = node.InnerText;
+                xml = nodes[0].InnerText;
                 doc = new XmlDocument();
                 doc.LoadXml(xml);
-                break;
             }
 
 
@@ -846,32 +876,35 @@ namespace XenAPI
 
         public string Target()
         {
-            SR sr = Connection.Resolve(new XenRef<SR>(this.opaque_ref));
+            SR sr = Connection.Resolve(new XenRef<SR>(opaque_ref));
             if (sr == null)
-                return String.Empty;
+                return string.Empty;
 
             foreach (PBD pbd in sr.Connection.ResolveAll(sr.PBDs))
             {
-                SRTypes type = sr.GetSRType(false);
-                if ((type == SR.SRTypes.netapp || type == SR.SRTypes.lvmoiscsi || type == SR.SRTypes.equal) && pbd.device_config.ContainsKey("target")) // netapp or iscsi
+                SRTypes srType = sr.GetSRType(false);
+                
+                if (srType == SRTypes.lvmoiscsi && pbd.device_config.ContainsKey("target")) //iscsi
                 {
                     return pbd.device_config["target"];
                 }
-                else if (type == SR.SRTypes.iso && pbd.device_config.ContainsKey("location")) // cifs or nfs iso
+                
+                if (srType == SRTypes.iso && pbd.device_config.ContainsKey("location")) // cifs or nfs iso
                 {
-                    String target = Helpers.HostnameFromLocation(pbd.device_config["location"]); // has form //ip_address/path
-                    if (String.IsNullOrEmpty(target))
+                    string target = Helpers.HostnameFromLocation(pbd.device_config["location"]); // has form //ip_address/path
+                    if (string.IsNullOrEmpty(target))
                         continue;
 
                     return target;
                 }
-                else if (type == SR.SRTypes.nfs && pbd.device_config.ContainsKey("server"))
+                
+                if (srType == SRTypes.nfs && pbd.device_config.ContainsKey("server"))
                 {
                     return pbd.device_config["server"];
                 }
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -883,23 +916,6 @@ namespace XenAPI
                 Util.DiskSizeString(physical_utilisation),
                 Util.DiskSizeString(physical_size),
                 Util.DiskSizeString(virtual_allocation));
-        }
-
-        /// <summary>
-        /// A friendly string indicating whether the sr is detached/broken/multipath failing/needs upgrade/ok
-        /// </summary>
-        public String StatusString()
-        {
-            if (!HasPBDs())
-                return Messages.DETACHED;
-
-            if (IsDetached() || IsBroken())
-                return Messages.GENERAL_SR_STATE_BROKEN;
-
-            if (!MultipathAOK())
-                return Messages.GENERAL_MULTIPATH_FAILURE;
-
-            return Messages.GENERAL_STATE_OK;
         }
 
         /// <summary>
@@ -936,15 +952,6 @@ namespace XenAPI
         }
 
         /// <summary>
-        /// Is an iSL type or legacy iSl adapter type
-        /// </summary>
-        public static bool IsIslOrIslLegacy(SR sr)
-        {
-            SRTypes currentType = sr.GetSRType(true);
-            return currentType == SRTypes.cslg || currentType == SRTypes.equal || currentType == SRTypes.netapp;
-        }
-
-        /// <summary>
         /// Whether the underlying SR backend supports SR_TRIM
         /// </summary>
         public bool SupportsTrim()
@@ -953,6 +960,37 @@ namespace XenAPI
 
             SM sm = SM.GetByType(Connection, type);
             return sm != null && sm.features != null && sm.features.ContainsKey("SR_TRIM");
+        }
+
+        /// <summary>
+        /// Whether the underlying SR backend supports read caching.
+        /// </summary>
+        /// <returns></returns>
+        public bool SupportsReadCaching()
+        {
+            // for Stockholm or greater versions, check if the SM has the VDI_READ_CACHING capability
+            if (Helpers.StockholmOrGreater(Connection))
+            {
+                var sm = SM.GetByType(Connection, type);
+                return sm?.features != null && sm.features.ContainsKey("VDI_READ_CACHING");
+            }
+
+            // for older versions, use the SR type; read caching is available for NFS, EXT3 and SMB/CIFS SR types
+            var srType = GetSRType(false);
+            return srType == SRTypes.nfs || srType == SRTypes.ext || srType == SRTypes.smb;
+        }
+
+        public bool GetReadCachingEnabled()
+        {
+            // read caching is enabled when the o_direct key is not defined (or set to false) in other_config
+            // and is disabled if o_direct=true
+            return SupportsReadCaching() && !BoolKey(other_config, "o_direct");
+        }
+
+        public void SetReadCachingEnabled(bool value)
+        {
+            // to enable read caching, remove the o_direct key; to disable it, set o_direct=true
+            other_config = SetDictionaryKey(other_config, "o_direct", value ? null : bool.TrueString.ToLower());
         }
 
         #region IEquatable<SR> Members

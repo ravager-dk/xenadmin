@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,10 +31,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using XenAdmin.Commands;
+using System.Windows.Forms;
+using XenAdmin.Actions;
 using XenAdmin.Controls.CheckableDataGridView;
 using XenAdmin.Controls.SummaryPanel;
 using XenAdmin.Core;
@@ -118,13 +116,13 @@ namespace XenAdmin.Dialogs
         {
             if(!dataToSummarise.XenObject.Connection.IsConnected)
             {
-                View.DrawSummaryForHighlightedRow(dataToSummarise, new LicenseManagerSummaryComponent(), LaunchUrl(InvisibleMessages.UPSELL_SA));
+                View.DrawSummaryForHighlightedRow(dataToSummarise, new LicenseManagerSummaryComponent(), LaunchUrl(InvisibleMessages.LICENSE_BUY_URL), LaunchUrl(InvisibleMessages.CSS_URL));
                 SetSummaryInformation(Messages.POOL_OR_HOST_IS_NOT_CONNECTED);
                 return;
             }
 
             SummaryTextComponent component = BuildSummaryComponent(dataToSummarise);
-            View.DrawSummaryForHighlightedRow(dataToSummarise, component, LaunchUrl(InvisibleMessages.UPSELL_SA));
+            View.DrawSummaryForHighlightedRow(dataToSummarise, component, LaunchUrl(InvisibleMessages.LICENSE_BUY_URL), LaunchUrl(InvisibleMessages.CSS_URL));
             if(dataToSummarise.Disabled)
                 SetSummaryInformation(dataToSummarise.DisabledReason);
         }
@@ -143,27 +141,20 @@ namespace XenAdmin.Dialogs
 
         private void ShowPoolHostNotConnectedError()
         {
-            using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(
-                       SystemIcons.Error,
-                       Messages.SELECTED_HOST_POOL_NOT_CONNECTED,
-                       Messages.XENCENTER)))
-            {
+            using (var dlg = new ErrorDialog(Messages.SELECTED_HOST_POOL_NOT_CONNECTED))
                 dlg.ShowDialog(View.Parent);
-            }
         }
 
         private void SummariseDisconnectedRows(List<CheckableDataGridViewRow> rowsChecked)
         {
             //Refresh current row's details if the pool/host is no longer connected
-            CheckableDataGridViewRow row = rowsChecked.Find(r => r.Highlighted && !r.XenObject.Connection.IsConnected);
+            CheckableDataGridViewRow row = rowsChecked.FirstOrDefault(r => r.Highlighted && !r.XenObject.Connection.IsConnected);
             if (row != null)
                 SummariseSelectedRow(row);
         }
 
         public void AssignLicense(List<CheckableDataGridViewRow> rowsChecked)
         {
-
             if (rowsChecked.Any(r => !r.XenObject.Connection.IsConnected))
             {
                 ShowPoolHostNotConnectedError();
@@ -172,12 +163,14 @@ namespace XenAdmin.Dialogs
                 return;
             }
 
-            List<LicenseDataGridViewRow> licenseRows = rowsChecked.ConvertAll(r => r as LicenseDataGridViewRow);
-            AssignLicenseDialog ald = new AssignLicenseDialog(licenseRows.ConvertAll(r=>r.XenObject),
-                                                                  licenseRows.First().LicenseServerAddress,
-                                                                  licenseRows.First().LicenseServerPort,
-                                                                  licenseRows.First().LicenseEdition);
-            ald.ShowDialog(View.Parent);
+            var licenseRows = rowsChecked.ConvertAll(r => r as LicenseDataGridViewRow);
+            var row = licenseRows.FirstOrDefault();
+            var xenObjects = licenseRows.ConvertAll(r => r.XenObject);
+
+            if (row != null && xenObjects.Count > 0)
+                using (var ald = new AssignLicenseDialog(xenObjects,
+                    row.LicenseServerAddress, row.LicenseServerPort, row.LicenseEdition))
+                    ald.ShowDialog(View.Parent);
 
             SummariseDisconnectedRows(rowsChecked);
             ResetButtonEnablement();
@@ -191,12 +184,11 @@ namespace XenAdmin.Dialogs
 
             if (rowsUsingLicenseServer.Count > 0)
             {
-
-                ApplyLicenseEditionCommand command = new ApplyLicenseEditionCommand(CommandInterface,
-                                                                                    rowsUsingLicenseServer.ConvertAll(r=>r.XenObject),
-                                                                                    Host.Edition.Free, null, null,
-                                                                                    View.Parent);
-                command.Execute();
+                var action = new ApplyLicenseEditionAction(rowsUsingLicenseServer.ConvertAll(r => r.XenObject),
+                    Host.Edition.Free, null, null);
+            
+                using (var actionProgress = new ActionProgressDialog(action, ProgressBarStyle.Marquee))
+                    actionProgress.ShowDialog(View.Parent);
             }
             else
             {
@@ -209,29 +201,23 @@ namespace XenAdmin.Dialogs
 
         public void DownloadLicenseManager()
         {
-            LaunchUrl(InvisibleMessages.LICENSE_SERVER_DOWNLOAD_LINK).Invoke();
+            LaunchUrl(InvisibleMessages.LICENSE_SERVER_DOCS_LINK).Invoke();
         }
 
         private Action LaunchUrl(string url)
         {
             return delegate
-                       {
-                           try
-                           {
-                               Process.Start(url);
-                           }
-                           catch (Exception)
-                           {
-                               using (var dlg = new ThreeButtonDialog(
-                                   new ThreeButtonDialog.Details(
-                                       SystemIcons.Error,
-                                       string.Format(Messages.LICENSE_SERVER_COULD_NOT_OPEN_LINK, url),
-                                       Messages.XENCENTER)))
-                                {
-                                    dlg.ShowDialog(View.Parent);
-                                }
-                           }
-                       };
+            {
+                try
+                {
+                    Process.Start(url);
+                }
+                catch (Exception)
+                {
+                    using (var dlg = new ErrorDialog(string.Format(Messages.LICENSE_SERVER_COULD_NOT_OPEN_LINK, url)))
+                        dlg.ShowDialog(View.Parent);
+                }
+            };
         }
 
         protected virtual IMainWindow CommandInterface
@@ -286,12 +272,8 @@ namespace XenAdmin.Dialogs
                 return;
             }
                 
-            //Assign Button
-            verifier = VerifierFactory.Verifier(SelectionVerifierFactory.Option.OldServer, lRows);
             View.DrawAssignButtonAsDisabled(verifier.Status == LicenseSelectionVerifier.VerificationStatus.Error);
-
-            //Release Button
-            View.DrawReleaseButtonAsDisabled(!lRows.Any(r=>r.IsUsingLicenseServer || r.CurrentLicenseState == LicenseStatus.HostState.PartiallyLicensed));
+            View.DrawReleaseButtonAsDisabled(!lRows.Any(r => r.IsUsingLicenseServer || r.CurrentLicenseState == LicenseStatus.HostState.PartiallyLicensed));
         }
 
         private void DisableAllButtons()

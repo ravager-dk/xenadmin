@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,6 +32,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Forms;
 using XenAdmin.Controls;
+using XenAdmin.Core;
 using XenAdmin.XCM;
 using XenCenterLib;
 
@@ -48,6 +48,7 @@ namespace XenAdmin.Wizards.ConversionWizard
         public CredentialsPage()
         {
             InitializeComponent();
+            label1.Text = string.Format(label1.Text, BrandManager.BrandConsole);
             tableLayoutStatus.Visible = false;
         }
 

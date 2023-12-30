@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -119,7 +118,7 @@ namespace XenAdmin.Controls
                     }
                     else if (xc.IsConnected)
                     {
-                        Host host = Helpers.GetMaster(xc);
+                        Host host = Helpers.GetCoordinator(xc);
                         if (host != null)
                         {
                             HostItem item = new HostItem(host);
@@ -447,7 +446,7 @@ namespace XenAdmin.Controls
             {
                 foreach (SR sr in TheHost.Connection.Cache.SRs)
                 {
-                    if (sr.CanBeSeenFrom(TheHost) && sr.CanCreateVmOn())
+                    if (sr.CanBeSeenFrom(TheHost) && sr.SupportsVdiCreate() && !sr.IsBroken(false) && !sr.IsFull())
                         return true;
                 }
             }

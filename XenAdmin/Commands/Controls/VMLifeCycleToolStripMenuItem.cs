@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -67,7 +63,7 @@ namespace XenAdmin.Commands
                 base.DropDownItems.Clear();
 
                 Command cmd = new ShutDownVMCommand(mainWindow, selection);
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
                     base.DropDownItems.Add(new CommandToolStripMenuItem(cmd));
                 }
@@ -77,7 +73,7 @@ namespace XenAdmin.Commands
                 }
 
                 cmd = new ResumeVMCommand(mainWindow, selection);
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
                     base.DropDownItems.Add(new CommandToolStripMenuItem(cmd));
                 }
@@ -85,16 +81,6 @@ namespace XenAdmin.Commands
                 {
                     base.DropDownItems.Add(new CommandToolStripMenuItem(new SuspendVMCommand(mainWindow, selection)));
                 }
-
-                cmd = new UnPauseVMCommand(mainWindow, selection);
-                if (cmd.CanExecute())
-                {
-                    base.DropDownItems.Add(new CommandToolStripMenuItem(cmd));
-                }
-                else
-                {
-                    base.DropDownItems.Add(new CommandToolStripMenuItem(new PauseVMCommand(mainWindow, selection)));
-                }                
 
                 base.DropDownItems.Add(new CommandToolStripMenuItem(new RebootVMCommand(mainWindow, selection)));
                 base.DropDownItems.Add(new CommandToolStripMenuItem(new VMRecoveryModeCommand(mainWindow, selection)));
@@ -110,14 +96,14 @@ namespace XenAdmin.Commands
 
         private class CmdInt : Command
         {
-            private static bool CanExecute(VM vm)
+            private static bool CanRun(VM vm)
             {
                 return !vm.Locked && !vm.is_a_template;
             }
 
-            protected override bool CanExecuteCore(SelectedItemCollection selection)
+            protected override bool CanRunCore(SelectedItemCollection selection)
             {
-                return selection.AllItemsAre<VM>(CanExecute);
+                return selection.AllItemsAre<VM>(CanRun);
             }
         }
     }

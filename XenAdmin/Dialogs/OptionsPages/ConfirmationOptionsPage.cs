@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,22 +30,23 @@
 
 using System.Drawing;
 using System.Windows.Forms;
-using XenAdmin.Properties;
+using XenAdmin.Core;
 
 
 namespace XenAdmin.Dialogs.OptionsPages
 {
     public partial class ConfirmationOptionsPage : UserControl, IOptionsPage
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         public ConfirmationOptionsPage()
         {
             InitializeComponent();
-            LoadSettings();
+            label1.Text = string.Format(label1.Text, BrandManager.BrandConsole);
+            labelBlurb.Text = string.Format(labelBlurb.Text, BrandManager.BrandConsole);
         }
 
-        private void LoadSettings()
+        #region IOptionsPage Members
+
+        public void Build()
         {
             var def = Properties.Settings.Default;
 
@@ -57,16 +57,20 @@ namespace XenAdmin.Dialogs.OptionsPages
             checkBoxIgnoreOvfWarnings.Checked = def.IgnoreOvfValidationWarnings;
         }
 
-        public static void Log()
+        public bool IsValidToSave(out Control control, out string invalidReason)
         {
-            log.InfoFormat("=== DoNotConfirmDismissAlerts: {0}", Properties.Settings.Default.DoNotConfirmDismissAlerts);
-            log.InfoFormat("=== DoNotConfirmDismissUpdates: {0}", Properties.Settings.Default.DoNotConfirmDismissUpdates);
-            log.InfoFormat("=== DoNotConfirmDismissEvents: {0}", Properties.Settings.Default.DoNotConfirmDismissEvents);
-
-            log.InfoFormat("=== IgnoreOvfValidationWarnings: {0}", Properties.Settings.Default.IgnoreOvfValidationWarnings);
+            control = null;
+            invalidReason = null;
+            return true;
         }
 
-        #region IOptionsPage Members
+        public void ShowValidationMessages(Control control, string message)
+        {
+        }
+
+        public void HideValidationMessages()
+        {
+        }
 
         public void Save()
         {
@@ -91,7 +95,7 @@ namespace XenAdmin.Dialogs.OptionsPages
 
         public string SubText => Messages.CONFIRMATIONS_DETAIL;
 
-        public Image Image => Resources._075_TickRound_h32bit_16;
+        public Image Image => Images.StaticImages._075_TickRound_h32bit_16;
 
         #endregion
     }

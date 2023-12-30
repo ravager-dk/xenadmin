@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,11 +33,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-
 using XenAdmin.Commands;
 using XenAdmin.Model;
 using XenAdmin.Network;
@@ -97,7 +92,7 @@ namespace XenAdmin.Controls.MainWindowControls
         {
             InitializeComponent();
 
-            panel1.BackColor = Program.TitleBarBorderColor;
+            panel1.BackColor = ProfessionalColors.OverflowButtonGradientEnd;
 
             treeView.ImageList = Images.ImageList16;
             if (treeView.ItemHeight < 18)
@@ -555,11 +550,11 @@ namespace XenAdmin.Controls.MainWindowControls
                 return;
 
             Command cmd = new CollapseChildTreeNodesCommand(Program.MainWindow, nodes);
-            if (cmd.CanExecute())
+            if (cmd.CanRun())
                 TreeContextMenu.Items.Insert(insertIndex, new CommandToolStripMenuItem(cmd, true));
 
             cmd = new ExpandTreeNodesCommand(Program.MainWindow, nodes);
-            if (cmd.CanExecute())
+            if (cmd.CanRun())
                 TreeContextMenu.Items.Insert(insertIndex, new CommandToolStripMenuItem(cmd, true));
         }
 
@@ -575,12 +570,12 @@ namespace XenAdmin.Controls.MainWindowControls
 
             Command cmd = new RemoveFromFolderCommand(Program.MainWindow, nodes);
 
-            if (cmd.CanExecute())
+            if (cmd.CanRun())
                 TreeContextMenu.Items.Insert(insertIndex, new CommandToolStripMenuItem(cmd, true));
 
             cmd = new UntagCommand(Program.MainWindow, nodes);
 
-            if (cmd.CanExecute())
+            if (cmd.CanRun())
                 TreeContextMenu.Items.Insert(insertIndex, new CommandToolStripMenuItem(cmd, true));
         }
 
@@ -635,9 +630,9 @@ namespace XenAdmin.Controls.MainWindowControls
                 }
             }
 
-            if (command != null && command.CanExecute())
+            if (command != null && command.CanRun())
             {
-                command.Execute();
+                command.Run();
             }
             else
             {
@@ -691,9 +686,9 @@ namespace XenAdmin.Controls.MainWindowControls
 
             foreach (DragDropCommand cmd in GetDragDropCommands(targetNode, e.Data))
             {
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
-                    cmd.Execute();
+                    cmd.Run();
                     return;
                 }
             }
@@ -705,7 +700,7 @@ namespace XenAdmin.Controls.MainWindowControls
             VirtualTreeNode targetNode = treeView.GetNodeAt(treeView.PointToClient(new Point(e.X, e.Y)));
             foreach (DragDropCommand cmd in GetDragDropCommands(targetNode, e.Data))
             {
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
                     e.Effect = DragDropEffects.Move;
                     return;
@@ -738,19 +733,18 @@ namespace XenAdmin.Controls.MainWindowControls
             }
 
             VirtualTreeNode targetToHighlight = null;
-            
             string statusBarText = null;
+
             foreach (DragDropCommand cmd in GetDragDropCommands(targetNode, e.Data))
             {
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
+                {
                     targetToHighlight = cmd.HighlightNode;
-
-                if (cmd.StatusBarText != null)
                     statusBarText = cmd.StatusBarText;
+                }
             }
 
-            if (DragDropCommandActivated != null)
-                DragDropCommandActivated(statusBarText);
+            DragDropCommandActivated?.Invoke(statusBarText);
 
             if (targetToHighlight != null)
             {
@@ -788,8 +782,8 @@ namespace XenAdmin.Controls.MainWindowControls
 
                 case Keys.F2:
                     var cmd = new PropertiesCommand(Program.MainWindow, Program.MainWindow.SelectionManager.Selection);
-                    if (cmd.CanExecute())
-                        cmd.Execute();
+                    if (cmd.CanRun())
+                        cmd.Run();
                     break;
             }
         }
@@ -830,7 +824,7 @@ namespace XenAdmin.Controls.MainWindowControls
             }
             if (conn != null && !conn.IsConnected)
             {
-                new ReconnectHostCommand(Program.MainWindow, conn).Execute();
+                new ReconnectHostCommand(Program.MainWindow, conn).Run();
                 return;
             }
 
@@ -852,10 +846,10 @@ namespace XenAdmin.Controls.MainWindowControls
                     cmd = new ResumeVMCommand(Program.MainWindow, Program.MainWindow.SelectionManager.Selection);
                 }
 
-                if (cmd != null && cmd.CanExecute())
+                if (cmd != null && cmd.CanRun())
                 {
                     treeView.SelectedNode = e.Node;
-                    cmd.Execute();
+                    cmd.Run();
                 }
                 return;
             }
@@ -864,10 +858,10 @@ namespace XenAdmin.Controls.MainWindowControls
             if (host != null)
             {
                 Command cmd = new PowerOnHostCommand(Program.MainWindow, host);
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
                     treeView.SelectedNode = e.Node;
-                    cmd.Execute();
+                    cmd.Run();
                 }
             }
         }

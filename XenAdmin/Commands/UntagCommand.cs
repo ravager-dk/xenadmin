@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
 using XenAdmin.Actions;
 using XenAdmin.Controls;
 using XenAdmin.Model;
@@ -55,7 +51,7 @@ namespace XenAdmin.Commands
             _nodes = nodes;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (_nodes.Count > 0)
             {
@@ -81,7 +77,7 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             var actions = new List<AsyncAction>();
 

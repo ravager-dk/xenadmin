@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,19 +29,16 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAdmin.Controls.DataGridViewEx;
 using XenAdmin.Core;
-using XenAdmin.Network;
-using XenAdmin.Properties;
-using System.Linq;
-using XenAPI;
 using XenAdmin.Dialogs;
+using XenAdmin.Network;
+using XenAPI;
 
 
 namespace XenAdmin.Wizards.RollingUpgradeWizard
@@ -52,30 +48,15 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
         public RollingUpgradeWizardSelectPool()
         {
             InitializeComponent();
-            this.dataGridView1.CheckBoxClicked += DataGridRowClicked;
-            this.Dock = DockStyle.Fill;
+            dataGridView1.CheckBoxClicked += DataGridRowClicked;
+            Dock = DockStyle.Fill;
         }
 
-        public override string Text
-        {
-            get
-            {
-                return Messages.SELECT_POOL;
-            }
-        }
+        public override string Text => Messages.SELECT_POOL;
 
-        public override string PageTitle
-        {
-            get
-            {
-                return Messages.SELECT_POOL;
-            }
-        }
+        public override string PageTitle => Messages.SELECT_POOL;
 
-        public override string HelpID
-        {
-            get { return "Selectpool"; }
-        }
+        public override string HelpID => "Selectpool";
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
         {
@@ -88,13 +69,13 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
                     return;
                 }
 
-                foreach (var selectedMaster in SelectedMasters)
+                foreach (var selectedCoordinator in SelectedCoordinators)
                 {
-                    if (!(selectedMaster.Connection.Session.IsLocalSuperuser || selectedMaster.Connection.Session.Roles.Any(role => role.name_label == Role.MR_ROLE_POOL_ADMIN)))
+                    if (!(selectedCoordinator.Connection.Session.IsLocalSuperuser || selectedCoordinator.Connection.Session.Roles.Any(role => role.name_label == Role.MR_ROLE_POOL_ADMIN)))
                     {
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(SystemIcons.Warning, string.Format(Messages.RBAC_UPGRADE_WIZARD_MESSAGE, selectedMaster.Connection.Username,
-                                selectedMaster.Name()), Messages.ROLLING_POOL_UPGRADE)))
+                        using (var dlg = new WarningDialog(string.Format(Messages.RBAC_UPGRADE_WIZARD_MESSAGE,
+                                selectedCoordinator.Connection.Username, selectedCoordinator.Name()))
+                            {WindowTitle = Messages.ROLLING_POOL_UPGRADE})
                         {
                             dlg.ShowDialog(this);
                         }
@@ -123,10 +104,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
             if (disconnectedServerNames.Count > 0)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning,
-                        string.Format(Messages.ROLLING_UPGRADE_DISCONNECTED_SERVER, Helpers.StringifyList(disconnectedServerNames)),
-                        Messages.ROLLING_POOL_UPGRADE)))
+                using (var dlg = new WarningDialog(string.Format(Messages.ROLLING_UPGRADE_DISCONNECTED_SERVER, Helpers.StringifyList(disconnectedServerNames)))
+                    {WindowTitle = Messages.ROLLING_POOL_UPGRADE})
                 {
                     dlg.ShowDialog(this);
                 }
@@ -135,23 +114,22 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             return true;
         }
 
-        public IList<Host> SelectedMasters
+        public IList<Host> SelectedCoordinators
         {
             get
             {
                 List<Host> hosts = new List<Host>();
                 foreach (UpgradeDataGridViewRow row in dataGridView1.Rows)
                 {
-                    if (row.Tag is Host)
+                    if (row.Tag is Host host)
                     {
-                        if (!row.HasPool && ((int)row.Cells[1].Value) == 1)
-                            hosts.Add((Host)row.Tag);
+                        if (!row.HasPool && (int)row.Cells[1].Value == 1)
+                            hosts.Add(host);
                     }
-                    else if (row.Tag is Pool && ((int)row.Cells[1].Value) == 1)
+                    else if (row.Tag is Pool pool && (int)row.Cells[1].Value == 1)
                     {
-                        Pool pool = ((Pool)(row.Tag));
-                        Host host = pool.Connection.Resolve(pool.master);
-                        hosts.Add(host);
+                        Host coordinator = pool.Connection.Resolve(pool.master);
+                        hosts.Add(coordinator);
                     }
                 }
                 return hosts;
@@ -170,7 +148,7 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
         private void BuildServerList()
         {
-            IList<Host> masters = SelectedMasters;
+            IList<Host> coordinators = SelectedCoordinators;
             dataGridView1.Rows.Clear();
             List<IXenConnection> xenConnections = ConnectionsManager.XenConnectionsCopy;
             xenConnections.Sort();
@@ -192,7 +170,7 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
                         if (restricted)
                             dataGridView1.Rows[index].Cells[NameColumn.Name].ToolTipText = Messages.ROLLING_UPGRADE_UNLICENSED_POOL;
                     }
-                    else if (masters.Contains(pool.Connection.Resolve(pool.master)))
+                    else if (coordinators.Contains(pool.Connection.Resolve(pool.master)))
                         dataGridView1.CheckBoxChange(index, 1);
                 }
                 else
@@ -211,7 +189,7 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
                         if (restricted)
                             dataGridView1.Rows[index].Cells[NameColumn.Name].ToolTipText = Messages.ROLLING_UPGRADE_UNLICENSED_HOST;
                     }
-                    else if (!hasPool && masters.Contains(host))
+                    else if (!hasPool && coordinators.Contains(host))
                         dataGridView1.CheckBoxChange(index, 1);
                 }
             }
@@ -247,13 +225,19 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
 
         private class UpgradeDataGridView : PoolHostDataGridViewOneCheckbox
         {
-            public UpgradeDataGridView(){}
-            public UpgradeDataGridView(IContainer container) : base(container){}
-            
+            public UpgradeDataGridView()
+            {
+            }
+
+            public UpgradeDataGridView(IContainer container)
+                : base(container)
+            {
+            }
+
             protected override void SortColumns()
             {
-                UpgradeDataGridViewRow firstRow = Rows[0] as UpgradeDataGridViewRow;
-                if (firstRow == null) return;
+                if (!(Rows[0] is UpgradeDataGridViewRow firstRow))
+                    return;
 
                 if (columnToBeSortedIndex == firstRow.NameCellIndex ||
                     columnToBeSortedIndex == firstRow.DescriptionCellIndex ||
@@ -265,14 +249,11 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             {
                 base.OnCellPainting(e);
 
-                if (e.RowIndex >= 0)
+                if (e.RowIndex >= 0 && Rows[e.RowIndex] is PoolHostDataGridViewOneCheckboxRow row &&
+                    !row.Enabled && e.ColumnIndex == row.PoolCheckBoxCellIndex)
                 {
-                    var row = (PoolHostDataGridViewOneCheckboxRow)Rows[e.RowIndex];
-                    if (row != null && !row.Enabled && e.ColumnIndex == row.PoolCheckBoxCellIndex)
-                    {
-                        e.PaintBackground(e.ClipBounds, true);
-                        e.Handled = true;
-                    }
+                    e.PaintBackground(e.ClipBounds, true);
+                    e.Handled = true;
                 }
             }
         }
@@ -292,25 +273,13 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             {
             }
 
-            public int DescriptionCellIndex
-            {
-                get { return Cells.IndexOf(_description); }
-            }
+            public int DescriptionCellIndex => Cells.IndexOf(_description);
 
-            public int VersionCellIndex
-            {
-                get { return Cells.IndexOf(_version); }
-            }
+            public int VersionCellIndex => Cells.IndexOf(_version);
 
-            public string DescriptionText
-            {
-                get { return (string) Cells[DescriptionCellIndex].Value; }
-            }
+            public string DescriptionText => (string) Cells[DescriptionCellIndex].Value;
 
-            public string VersionText
-            {
-                get { return (string)Cells[VersionCellIndex].Value; }
-            }
+            public string VersionText => (string)Cells[VersionCellIndex].Value;
 
             protected override void SetupAdditionalDetailsColumns()
             {
@@ -320,16 +289,17 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
                 Cells.Add(_version);
             }
 
-            protected override void UpdateAdditionalDetailsForPool(Pool pool, Host master)
+            protected override void UpdateAdditionalDetailsForPool(Pool pool, Host coordinator)
             {
                 _description.Value = pool.Description();
-                _version.Value = pool.SmallerVersionHost().ProductVersionTextShort();
+                var host = pool.SmallerVersionHost();
+                _version.Value = $"{host.ProductBrand()} {host.ProductVersionTextShort()}";
             }
 
             protected override void UpdateAdditionalDetailsForHost( Host host )
             {
                 _description.Value = host.Description();
-                _version.Value = host.ProductVersionTextShort();
+                _version.Value = $"{host.ProductBrand()} {host.ProductVersionTextShort()}";
             }
         }
 
@@ -337,9 +307,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
         {
             foreach (UpgradeDataGridViewRow row in dataGridView1.Rows)
             {
-                var checkrow = row.Cells[1] as DataGridViewCheckBoxCell;
-                if (row.Enabled)
-                    checkrow.Value = 1;
+                if (row.Enabled  && row.Cells[1] is DataGridViewCheckBoxCell checkCell)
+                    checkCell.Value = 1;
             }
             OnPageUpdated();
         }
@@ -348,8 +317,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
         {
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
-                var checkrow = row.Cells[1] as DataGridViewCheckBoxCell;
-                checkrow.Value = 0;
+                if (row.Cells[1] is DataGridViewCheckBoxCell checkCell)
+                    checkCell.Value = 0;
             }
             OnPageUpdated();
         }

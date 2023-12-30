@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,7 +36,7 @@ using XenAdmin.Model;
 
 namespace XenAdmin.Actions
 {
-    public class DockerContainerLifetimeAction : PureAsyncAction
+    public abstract class DockerContainerLifetimeAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -45,19 +44,18 @@ namespace XenAdmin.Actions
         private readonly string action;
         private readonly string endDescription;
 
-        public DockerContainerLifetimeAction(DockerContainer dockerContainer,  string title, string startDescription, string endDescription, string action)
+        protected DockerContainerLifetimeAction(DockerContainer dockerContainer,  string title, string startDescription, string endDescription, string action)
             : base(dockerContainer.Connection, title, startDescription)
         {
             this.endDescription = endDescription;
             this.dockerContainer = dockerContainer;
             this.action = action;
+            ApiMethodsToRoleCheck.Add("host.call_plugin");
         }
-
-        public static RbacMethodList StaticRBACDependencies = new RbacMethodList("Host.call_plugin");
 
         protected override void Run()
         {
-            var host = Helpers.GetMaster(Connection);
+            var host = Helpers.GetCoordinator(Connection);
             var result = false;
             try
             {

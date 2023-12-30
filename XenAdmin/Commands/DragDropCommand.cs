@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Controls;
 using System.Collections.ObjectModel;
 using XenAPI;
@@ -74,9 +71,9 @@ namespace XenAdmin.Commands
         }
 
         /// <summary>
-        /// Determines whether this drop-drop operation can execute with the specified target-node and drag-data.
+        /// Determines whether this drop-drop operation can run with the specified target-node and drag-data.
         /// </summary>
-        public bool CanExecute()
+        public bool CanRun()
         {
             if ((DraggedNodes == null || DraggedNodes.Count == 0) && DraggedGridRows == null)
             {
@@ -87,53 +84,41 @@ namespace XenAdmin.Commands
                 return false;
             }
 
-            return CanExecuteCore();
+            return CanRunCore();
         }
 
         /// <summary>
-        /// Determines whether this drop-drop operation can execute with the specified target-node and drag-data.
+        /// Determines whether this drop-drop operation can run with the specified target-node and drag-data.
         /// </summary>
-        protected virtual bool CanExecuteCore()
+        protected virtual bool CanRunCore()
         {
             return false;
         }
 
         /// <summary>
-        /// Executes this drag-drop operation with the specified target-node and drag data.
+        /// Runs this drag-drop operation with the specified target-node and drag data.
         /// </summary>
-        public void Execute()
+        public void Run()
         {
-            ExecuteCore();
+            RunCore();
         }
 
         /// <summary>
-        /// Executes this drag-drop operation with the specified target-node and drag data.
+        /// Runs this drag-drop operation with the specified target-node and drag data.
         /// </summary>
-        protected virtual void ExecuteCore()
+        protected virtual void RunCore()
         {
         }
 
         /// <summary>
         /// Gets the node that the mouse is over during the drag-drop operation.
         /// </summary>
-        protected VirtualTreeNode TargetNode
-        {
-            get
-            {
-                return _targetNode;
-            }
-        }
+        protected VirtualTreeNode TargetNode => _targetNode;
 
         /// <summary>
         /// Gets the node that should be highlighted during the drag-drop operation.
         /// </summary>
-        public virtual VirtualTreeNode HighlightNode
-        {
-            get
-            {
-                return _targetNode;
-            }
-        }
+        public virtual VirtualTreeNode HighlightNode => _targetNode;
 
         /// <summary>
         /// Gets the nearest ancestor of the target node that has a tag of the specified xen object or grouping tag type and returns that tag.
@@ -170,36 +155,18 @@ namespace XenAdmin.Commands
         /// <summary>
         /// Gets the dragged grid rows. Returns null if grid rows weren't dragged.
         /// </summary>
-        protected GridRowCollection DraggedGridRows
-        {
-            get
-            {
-                return _draggedGridRows;
-            }
-        }
+        protected GridRowCollection DraggedGridRows => _draggedGridRows;
 
         /// <summary>
         /// Gets the dragged tree nodes. Returns null if tree nodes weren't dragged.
         /// </summary>
-        protected ReadOnlyCollection<VirtualTreeNode> DraggedNodes
-        {
-            get
-            {
-                return _draggedNodes;
-            }
-        }
+        protected ReadOnlyCollection<VirtualTreeNode> DraggedNodes => _draggedNodes;
 
         /// <summary>
         /// Gets the status bar text tat should be displayed during the drag-drop operation. Returns null
         /// if no text should be displayed.
         /// </summary>
-        public virtual string StatusBarText
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public virtual string StatusBarText => null;
 
         /// <summary>
         /// Gets the dragged items as Xen objects. If any items isn't a XenObject then an empty list is returned.

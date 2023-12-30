@@ -496,8 +496,8 @@
   <data name="memory_dynmax_slider_noedit_small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\memory_dynmax_slider_noedit_small.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="about_box_graphic_423x79" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Branding\Images\about_box_graphic_423x79.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="about_box_graphic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\..\Branding\Images\about_box_graphic.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="_001_ShutDown_h32bit_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\001_ShutDown_h32bit_24.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -568,14 +568,8 @@
   <data name="suse_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\suse_16x.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="alerts_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Branding\Images\alerts_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="_000_WarningAlert_h32bit_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\000_WarningAlert_h32bit_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="XS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Branding\Images\XS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="memory_dynmin_slider_noedit_small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\memory_dynmin_slider_noedit_small.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -591,9 +585,6 @@
   </data>
   <data name="_000_StorageBroken_h32bit_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\000_StorageBroken_h32bit_16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="upsell_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Branding\Images\upsell_16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="_000_Folder_open_h32bit_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\000_Folder_open_h32bit_16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -718,9 +709,6 @@
   <data name="sl_pools_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\sl_pools_16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="WLB" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Images\WLB.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="_000_ExportVirtualAppliance_h32bit_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\000_ExportVirtualAppliance_h32bit_16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -765,9 +753,6 @@
   </data>
   <data name="SpinningFrame5" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\SpinningFrame5.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="_000_XenCenterAlerts_h32bit_24" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\..\Branding\Images\000_XenCenterAlerts_h32bit_24.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="usagebar_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Images\usagebar_1.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -1133,12 +1118,18 @@
     <value>..\images\000_user_h32bit_32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="xcm" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\images\xcm.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\Branding\Images\xcm.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="xcm_32x32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\images\xcm_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\..\Branding\Images\xcm_32x32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="queued" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\images\queued.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="gooroom_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Images\gooroom_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="rocky_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Images\rocky_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

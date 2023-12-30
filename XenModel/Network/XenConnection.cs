@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,22 +34,23 @@ using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-using CookComputing.XmlRpc;
 using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAPI;
 using XenCenterLib;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Xml;
 using System.Xml.Serialization;
-using XenAdmin.ServerDBs;
 
 
 namespace XenAdmin.Network
-{   
+{
     [DebuggerDisplay("IXenConnection :{HostnameWithPort}")]
-    public class XenConnection : IXenConnection,IXmlSerializable
+    public class XenConnection : IXenConnection, IXmlSerializable
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public string Hostname { get; set; }
         public int Port { get; set; }
@@ -73,13 +73,20 @@ namespace XenAdmin.Network
         /// </summary>
         public bool fromDialog = false;
 
+        private volatile bool _expectedDisruption;
+        private volatile bool _suppressErrors;
+        private volatile bool _preventResettingPasswordPrompt;
+        private volatile bool _coordinatorMayChange;
+
         /// <summary>
         /// Whether we're expecting network disruption, say because we're reconfiguring the network at this time.  In that case, we ignore
         /// keepalive failures, and expect task polling to be disrupted.
         /// </summary>
-        private volatile bool _expectedDisruption = false;
-
-        public bool ExpectDisruption { get { return _expectedDisruption; } set { _expectedDisruption = value; } }
+        public bool ExpectDisruption
+        {
+            get => _expectedDisruption;
+            set => _expectedDisruption = value;
+        }
 
         /// <summary>
         /// If we are 'expecting' this connection's Password property to contain the correct password
@@ -90,7 +97,6 @@ namespace XenAdmin.Network
         /// <summary>
         /// Used by the patch wizard, suppress any errors coming from reconnect attempts
         /// </summary>
-        private volatile bool _suppressErrors;
         public bool SuppressErrors
         {
             get => _suppressErrors;
@@ -98,11 +104,24 @@ namespace XenAdmin.Network
         }
 
         /// <summary>
-        /// Indicates whether we are expecting the pool master to change soon (e.g. when explicitly designating a new master).
+        /// The password prompting function (<see cref="_promptForNewPassword"/>) is set to null when the connection is closed.
+        /// Set this value to true in order to prevent that from happening.
+        /// n.b.: remember to set the value back to false once it's not needed anymore
         /// </summary>
-        private volatile bool _masterMayChange = false;
+        public bool PreventResettingPasswordPrompt
+        {
+            get => _preventResettingPasswordPrompt;
+            set => _preventResettingPasswordPrompt = value;
+        }
 
-        public bool MasterMayChange { get { return _masterMayChange; } set { _masterMayChange = value; } }
+        /// <summary>
+        /// Indicates whether we are expecting the pool coordinator to change soon (e.g. when explicitly designating a new coordinator).
+        /// </summary>
+        public bool CoordinatorMayChange
+        {
+            get => _coordinatorMayChange;
+            set => _coordinatorMayChange = value;
+        }
 
         /// <summary>
         /// Set when we detect that Event.next() has become blocked and we need to reset the connection. See CA-33145.
@@ -117,33 +136,37 @@ namespace XenAdmin.Network
         /// <summary>
         /// Set after a successful connection attempt, before the cache is populated.
         /// </summary>
-        private string MasterIPAddress = "";
+        private string CoordinatorIPAddress = "";
 
         /// <summary>
-        /// The lock that must be taken around connectTask and monitor.
+        /// The lock that must be taken around connectTask and heartbeat.
         /// </summary>
         private readonly object connectTaskLock = new object();
         private ConnectTask connectTask = null;
-        private Heartbeat heartbeat = null;
 
         /// <summary>
-        /// Whether we are trying to automatically connect to the new master. Set in HandleConnectionLost.
+        /// This is the metrics monitor. Has to be accessed within the connectTaskLock.
+        /// </summary>
+        private Heartbeat heartbeat;
+
+        /// <summary>
+        /// Whether we are trying to automatically connect to the new coordinator. Set in HandleConnectionLost.
         /// Note: I think we are not using this correctly -- see CA-37864 for details -- but I'm not going
         /// to fix it unless it gives rise to a reported bug, because I can't test the fix.
         /// </summary>
-        private volatile bool FindingNewMaster = false;
+        private volatile bool FindingNewCoordinator = false;
 
         /// <summary>
-        /// The time at which we started looking for the new master.
+        /// The time at which we started looking for the new coordinator.
         /// </summary>
-        private DateTime FindingNewMasterStartedAt = DateTime.MinValue;
+        private DateTime FindingNewCoordinatorStartedAt = DateTime.MinValue;
 
         /// <summary>
         /// Timeout before we consider that Event.next() has got blocked: see CA-33145
         /// </summary>
         private const int EVENT_NEXT_TIMEOUT = 120 * 1000;  // 2 minutes
 
-        private string LastMasterHostname = "";
+        private string LastCoordinatorHostname = "";
         public readonly object PoolMembersLock = new object();
         private List<string> _poolMembers = new List<string>();
         public List<string> PoolMembers { get { return _poolMembers; } set { _poolMembers = value; } }
@@ -154,7 +177,7 @@ namespace XenAdmin.Network
 
         private DateTime m_startTime = DateTime.MinValue;
         private int m_lastDebug;
-        private TimeSpan ServerTimeOffset_ = TimeSpan.Zero;
+        private TimeSpan _serverTimeOffset = TimeSpan.Zero;
         private object ServerTimeOffsetLock = new object();
         /// <summary>
         /// The offset between the clock at the client and the clock at the server.  server time + ServerTimeOffset = client time.
@@ -167,15 +190,14 @@ namespace XenAdmin.Network
             {
                 lock (ServerTimeOffsetLock)
                 {
-                    return ServerTimeOffset_;
+                    return _serverTimeOffset;
                 }
             }
-
             set
             {
                 lock (ServerTimeOffsetLock)
                 {
-                    TimeSpan diff = ServerTimeOffset_ - value;
+                    TimeSpan diff = _serverTimeOffset - value;
 
                     if (diff.TotalSeconds < -1 || 1 < diff.TotalSeconds)
                     {
@@ -185,14 +207,14 @@ namespace XenAdmin.Network
                                                      now.ToString("o", CultureInfo.InvariantCulture),
                                                      (now.Subtract(value)).ToString("o", CultureInfo.InvariantCulture));
 
-                       if (m_startTime.Ticks == 0)//log it the first time it is detected
+                        if (m_startTime.Ticks == 0)//log it the first time it is detected
                         {
                             m_startTime = now;
                             log.Info(debugMsg);
                         }
 
                         //then log every 5mins
-                       int currDebug = (int)((now - m_startTime).TotalSeconds) / 300;
+                        int currDebug = (int)((now - m_startTime).TotalSeconds) / 300;
                         if (currDebug > m_lastDebug)
                         {
                             m_lastDebug = currDebug;
@@ -200,11 +222,8 @@ namespace XenAdmin.Network
                         }
                     }
 
-                    ServerTimeOffset_ = value;
+                    _serverTimeOffset = value;
                 }
-
-                if (TimeSkewUpdated != null)
-                    TimeSkewUpdated(this, EventArgs.Empty);
             }
         }
 
@@ -224,8 +243,6 @@ namespace XenAdmin.Network
             }
         }
 
-        public string Version { get; set; }
-
         public string Name
         {
             get
@@ -240,8 +257,7 @@ namespace XenAdmin.Network
         /// <summary>
         /// The cache of XenAPI objects for this connection.
         /// </summary>
-        private readonly ICache _cache = new Cache();
-        public ICache Cache { get { return _cache; } }
+        public ICache Cache { get; } = new Cache();
 
         private readonly LockFreeQueue<ObjectChange> eventQueue = new LockFreeQueue<ObjectChange>();
         private readonly System.Threading.Timer cacheUpdateTimer;
@@ -249,11 +265,19 @@ namespace XenAdmin.Network
         /// <summary>
         /// Whether the cache for this connection has been populated.
         /// </summary>
-        private bool cacheIsPopulated = false;
         public bool CacheIsPopulated
         {
-            get { return cacheIsPopulated; }
+            get => _cacheIsPopulated;
+            private set
+            {
+                _cacheIsPopulated = value;
+
+                if (_cacheIsPopulated)
+                    CachePopulated?.Invoke(this);
+            }
         }
+
+        private bool _cacheIsPopulated;
 
         private bool cacheUpdaterRunning = false;
         private bool updatesWaiting = false;
@@ -266,60 +290,11 @@ namespace XenAdmin.Network
             Port = ConnectionsManager.DEFAULT_XEN_PORT;
             Username = "root";
             SaveDisconnected = false;
-            ExpectPasswordIsCorrect = true;
-            cacheUpdateTimer = new System.Threading.Timer(cacheUpdater);
+            ExpectPasswordIsCorrect = true; 
+            cacheUpdateTimer = new Timer(cacheUpdater);
         }
 
-        /// <summary>
-        /// For use by unit tests only.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        public Session Connect(string user, string password)
-        {
-            heartbeat = new Heartbeat(this, XenAdminConfigManager.Provider.ConnectionTimeout);
-            Session session = SessionFactory.CreateSession(this, Hostname, Port);
-
-            try
-            {
-                session.login_with_password(user, password, Helper.APIVersionString(API_Version.LATEST), Session.UserAgent);
-
-                // this is required so connection.IsConnected returns true in the unit tests.
-                connectTask = new ConnectTask("test", 0);
-                connectTask.Connected = true;
-                connectTask.Session = session;
-
-                return session;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
-        }
-
-        /// <summary>
-        /// Used by unit tests only.
-        /// </summary>
-        /// <param name="session">The session.</param>
-        public void LoadCache(Session session)
-        {
-            this.Cache.Clear();
-
-            cacheIsPopulated = false;
-
-            string token = "";
-            XenObjectDownloader.GetAllObjects(session, eventQueue, () => false, ref token);
-            List<ObjectChange> events = new List<ObjectChange>();
-
-            while (eventQueue.NotEmpty)
-                events.Add(eventQueue.Dequeue());
-
-            this.Cache.UpdateFrom(this, events);
-            cacheIsPopulated = true;
-
-        }
+        #region Events
 
         /// <summary>
         /// Fired just before the cache is cleared (i.e. the cache is still populated).
@@ -341,8 +316,48 @@ namespace XenAdmin.Network
         /// </summary>
         public event EventHandler<EventArgs> XenObjectsUpdated;
 
+        #endregion
+
+        public void LoadFromDatabaseFile(string databaseFile)
+        {
+            IsSimulatedConnection = true;
+
+            var foundConn = ConnectionsManager.XenConnections.Cast<XenConnection>().FirstOrDefault(c =>
+                    c.Hostname == databaseFile && c.CoordinatorIPAddress == CoordinatorIPAddress);
+            if (foundConn != null && foundConn.IsConnected)
+                throw new ConnectionExists(this);
+
+            var document = new XmlDocument();
+            using (var sr = new StreamReader(databaseFile))
+                document.LoadXml(sr.ReadToEnd());
+
+            var db = new Db(document);
+            var events = db.Tables.SelectMany(t => t.Rows).Select(r => r.ObjectChange).ToList();
+
+            var session = new Session(this, Path.GetFileName(Hostname), Port);
+            connectTask = new ConnectTask(Hostname, Port) { Connected = true, Session = session };
+
+            OnBeforeMajorChange(false);
+            Cache.Clear();
+            CacheIsPopulated = false;
+            OnAfterMajorChange(false);
+
+            OnBeforeMajorChange(false);
+            Cache.UpdateFrom(this, events);
+            OnAfterMajorChange(false);
+            CacheIsPopulated = true;
+
+            var pool = Cache.Pools[0];
+            CoordinatorIPAddress = Cache.Hosts.FirstOrDefault(h => h.opaque_ref == pool.master)?.address;
+            
+            HandleSuccessfulConnection(connectTask, pool);
+            MarkConnectActionComplete();
+            OnXenObjectsUpdated();
+        }
+
         public NetworkCredential NetworkCredential { get; set; }
-        public event EventHandler<EventArgs> TimeSkewUpdated;
+
+        public bool IsSimulatedConnection { get; private set; }
 
         public bool IsConnected
         {
@@ -387,7 +402,7 @@ namespace XenAdmin.Network
             Session s = Session;
             if (s == null)
                 throw new DisconnectionException();
-            return SessionFactory.DuplicateSession(s, this, timeout);
+            return new Session(s, this) { Timeout = timeout };
         }
 
         /// <summary>
@@ -426,12 +441,13 @@ namespace XenAdmin.Network
                 // For elevated session we use the elevated username and password passed into this function, 
                 // as the connection's Username and Password are not updated.
 
-                Session session = SessionFactory.CreateSession(this, hostname, port);
+                Session session = new Session(this, hostname, port);
                 if (isElevated)
                     session.IsElevatedSession = true;
+
                 try
                 {
-                    session.login_with_password(uname, pwd, !string.IsNullOrEmpty(Version) ? Version : Helper.APIVersionString(API_Version.LATEST), Session.UserAgent);
+                    session.login_with_password(uname, pwd, Helper.APIVersionString(API_Version.LATEST), Session.UserAgent);
                     NetworkCredential = new NetworkCredential(uname, pwd);
                     return session;
                 }
@@ -460,9 +476,9 @@ namespace XenAdmin.Network
                                 }
                                 break;
                             case Failure.HOST_IS_SLAVE:
-                                // we know it is a slave so there there is no need to try and connect again, we need to connect to the master
+                            // we know it is a supporter so there there is no need to try and connect again, we need to connect to the coordinator
                             case Failure.RBAC_PERMISSION_DENIED:
-                                // No point retrying this, the user needs the read only role at least to log in
+                            // No point retrying this, the user needs the read only role at least to log in
                             case Failure.HOST_UNKNOWN_TO_MASTER:
                                 // Will never succeed, CA-74718
                                 throw;
@@ -540,16 +556,6 @@ namespace XenAdmin.Network
             return p1.opaque_ref.CompareTo(p2.opaque_ref);
         }
 
-        /// <summary>
-        /// Set the pool and master details in the Action to allow proper filtering in HistoryPanel.
-        /// </summary>
-        private void SetPoolAndHostInAction(ActionBase action)
-        {
-            Pool pool = Helpers.GetPoolOfOne(this);
-            if (pool != null)
-                SetPoolAndHostInAction(action, pool, PoolOpaqueRef);
-        }
-
         private void SetPoolAndHostInAction(ActionBase action, Pool pool, string poolopaqueref)
         {
             if (pool != null && !string.IsNullOrEmpty(poolopaqueref))
@@ -584,30 +590,32 @@ namespace XenAdmin.Network
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="initiateMasterSearch">If true, if connection to the master fails we will start trying to connect to
-        /// each remembered slave in turn.</param>
+        /// <param name="initiateCoordinatorSearch">If true, if connection to the coordinator fails we will start trying to connect to
+        /// each remembered supporter in turn.</param>
         /// <param name="promptForNewPassword">A function that prompts the user for the changed password for a server.</param>
-        public void BeginConnect(bool initiateMasterSearch, Func<IXenConnection, string, bool> promptForNewPassword)
+        public void BeginConnect(bool initiateCoordinatorSearch, Func<IXenConnection, string, bool> promptForNewPassword)
         {
             _promptForNewPassword = promptForNewPassword;
 
             //InvokeHelper.Synchronizer is used for synchronizing the cache update. Must not be null at this point. It can be initialized through InvokeHelper.Initialize()
             Trace.Assert(InvokeHelper.Synchronizer != null);
-            
+
             InvokeHelper.AssertOnEventThread();
 
-            if (initiateMasterSearch)
+            if (initiateCoordinatorSearch)
             {
-                FindingNewMaster = true;
-                FindingNewMasterStartedAt = DateTime.Now;
+                FindingNewCoordinator = true;
+                FindingNewCoordinatorStartedAt = DateTime.Now;
             }
-            MasterMayChange = false;
+            CoordinatorMayChange = false;
 
             if (!HandlePromptForNewPassword())
                 return;
 
             lock (connectTaskLock)
             {
+                //if connectTask != null a connection is already in progress
+
                 if (connectTask == null)
                 {
                     ClearEventQueue();
@@ -615,16 +623,15 @@ namespace XenAdmin.Network
                     Cache.Clear();
                     OnAfterMajorChange(false);
                     connectTask = new ConnectTask(Hostname, Port);
-                    StopMonitor();
+
+                    heartbeat?.Stop();
+                    heartbeat = null;
                     heartbeat = new Heartbeat(this, XenAdminConfigManager.Provider.ConnectionTimeout);
+
                     Thread t = new Thread(ConnectWorkerThread);
                     t.Name = "Connection to " + Hostname;
                     t.IsBackground = true;
                     t.Start(connectTask);
-                }
-                else
-                {
-                    // a connection is already in progress
                 }
             }
         }
@@ -642,7 +649,7 @@ namespace XenAdmin.Network
             }
             try
             {
-                while (true)
+                for (int i = 0; i < 120; i++)
                 {
                     lock (WaitForMonitor)
                     {
@@ -745,7 +752,9 @@ namespace XenAdmin.Network
 
             lock (connectTaskLock)
             {
-                StopMonitor();
+                heartbeat?.Stop();
+                heartbeat = null;
+
                 if (task != null)
                 {
                     task.Cancelled = true;
@@ -759,6 +768,7 @@ namespace XenAdmin.Network
             }
 
             MarkConnectActionComplete();
+            log.Info($"Connection to {Hostname} is ended.");
 
             // Save list of addresses of current hosts in pool
             List<string> members = new List<string>();
@@ -776,15 +786,20 @@ namespace XenAdmin.Network
             {
                 ClearCache();
             }
-
-            _promptForNewPassword = null;
+            if (!PreventResettingPasswordPrompt)
+            {
+                // CA-371356: Preventing the reset of the prompt allows
+                // for it to be shown when attempting to reconnect to a host
+                // whose password has changed since last login
+                _promptForNewPassword = null;
+            }
             OnConnectionClosed();
         }
 
         /// <summary>
         /// Try to logout the given session. This will cause any threads blocking on Event.next() to get
-        /// a XenAPI.Failure (which is better than them hanging around forever).
-        /// Do on a background thread - otherwise, if the master has died, then this will block
+        /// a XenAPI.Failure (which is better than them freezing around forever).
+        /// Do on a background thread - otherwise, if the coordinator has died, then this will block
         /// until the timeout is reached (default 20s).
         /// However, in the case of exiting, the thread need to be set as foreground. 
         /// Otherwise the logging out operation can be terminated when other foreground threads finish.
@@ -856,30 +871,14 @@ namespace XenAdmin.Network
             Cache.Clear();
         }
 
-        private void OnCachePopulated()
-        {
-            lock (connectTaskLock)
-            {
-                if (heartbeat != null)
-                    heartbeat.Start();
-            }
-
-            CachePopulated?.Invoke(this);
-            MarkConnectActionComplete();
-        }
-
         private string GetReason(Exception error)
         {
-            if (error is CookComputing.XmlRpc.XmlRpcServerException)
-            {
-                return string.Format(Messages.SERVER_FAILURE, error.Message);
-            }
-            else if (error is ArgumentException)
+            if (error is ArgumentException)
             {
                 // This happens if the server API is incompatible with our bindings.  This should
                 // never happen in production, but will happen during development if a field
                 // changes type, for example.
-                return Messages.SERVER_API_INCOMPATIBLE;
+                return string.Format(Messages.SERVER_API_INCOMPATIBLE, BrandManager.BrandConsole);
             }
             else if (error is WebException)
             {
@@ -929,8 +928,16 @@ namespace XenAdmin.Network
             }
         }
 
-        private void HandleSuccessfulConnection(string taskHostname, int task_port)
+        private void HandleSuccessfulConnection(ConnectTask task, Pool pool)
         {
+            // Remove any other (disconnected) entries for this server from the tree
+
+            var existingConnections = ConnectionsManager.XenConnections.Where(c =>
+                c.Hostname.Equals(task.Hostname) && !c.IsConnected).ToList();
+
+            foreach (var conn in existingConnections)
+                ConnectionsManager.ClearCacheAndRemoveConnection(conn);
+
             // add server name to history (if it's not already there)
             XenAdminConfigManager.Provider.UpdateServerHistory(HostnameWithPort);
 
@@ -944,18 +951,20 @@ namespace XenAdmin.Network
                 InvokeHelper.Invoke(XenAdminConfigManager.Provider.SaveSettingsIfRequired);
             }
 
-            log.InfoFormat("Connected to {0} ({1}:{2})", FriendlyName, taskHostname, task_port);
-            string name = string.IsNullOrEmpty(FriendlyName) || FriendlyName == taskHostname
-                              ? taskHostname
-                              : string.Format("{0} ({1})", FriendlyName, taskHostname);
+            string name = string.IsNullOrEmpty(FriendlyName) || FriendlyName == task.Hostname
+                              ? task.Hostname
+                              : string.Format("{0} ({1})", FriendlyName, task.Hostname);
             string title = string.Format(Messages.CONNECTING_NOTICE_TITLE, name);
             string msg = string.Format(Messages.CONNECTING_NOTICE_TEXT, name);
-            log.Info($"Connecting to {name} in progress.");
 
-            ConnectAction = new ActionBase(title, msg, false, false);
+            ConnectAction = new DummyAction(title, msg);
+            SetPoolAndHostInAction(ConnectAction, pool, PoolOpaqueRef);
 
             ExpectPasswordIsCorrect = true;
             OnConnectionResult(true, null, null);
+
+            log.InfoFormat("Completed connection phase for pool {0} ({1}:{2}, {3}).",
+                FriendlyName, task.Hostname, task.Port, PoolOpaqueRef);
         }
 
         /// <summary>
@@ -971,13 +980,6 @@ namespace XenAdmin.Network
                 return false;
             }
             return true;
-        }
-
-        private void HandleConnectionTermination()
-        {
-            // clean up action so we dont stay open forever
-            if (ConnectAction != null)
-                ConnectAction.IsCompleted = true;
         }
 
         private readonly object PromptLock = new object();
@@ -1065,6 +1067,7 @@ namespace XenAdmin.Network
             // on the GUI thread to be included in this set of
             // updates, otherwise we might hose the gui thread
             // during an event storm (ie deleting 1000 vms)
+
             List<ObjectChange> events = new List<ObjectChange>();
 
             while (eventQueue.NotEmpty)
@@ -1072,43 +1075,24 @@ namespace XenAdmin.Network
 
             if (events.Count > 0)
             {
-                InvokeHelper.Invoke(delegate()
+                InvokeHelper.Invoke(() =>
                 {
-                    try
-                    {
-                        OnBeforeMajorChange(false);
-                        bool fire = Cache.UpdateFrom(this, events);
-                        OnAfterMajorChange(false);
+                    OnBeforeMajorChange(false);
+                    bool fire = Cache.UpdateFrom(this, events);
+                    OnAfterMajorChange(false);
 
-                        if (fire)
-                            OnXenObjectsUpdated();
-                    }
-                    catch (Exception e)
-                    {
-                        log.Error("Exception updating cache.", e);
-#if DEBUG
-                        if (System.Diagnostics.Debugger.IsAttached)
-                            throw;
-#endif
-                    }
-
+                    if (fire)
+                        OnXenObjectsUpdated();
                 });
 
-                if (!cacheIsPopulated)
+                if (!CacheIsPopulated)
                 {
-                    cacheIsPopulated = true;
-                    try
-                    {
-                        OnCachePopulated();
-                    }
-                    catch (Exception e)
-                    {
-                        log.Error("Exception calling OnCachePopulated.", e);
-#if DEBUG
-                        if (System.Diagnostics.Debugger.IsAttached)
-                            throw;
-#endif
-                    }
+                    lock (connectTaskLock)
+                        heartbeat?.Start();
+
+                    CacheIsPopulated = true;
+                    MarkConnectActionComplete();
+                    log.Info($"Connection to {Hostname} successful.");
                 }
             }
         }
@@ -1122,10 +1106,12 @@ namespace XenAdmin.Network
             {
                 string title = string.Format(Messages.CONNECTION_OK_NOTICE_TITLE, Hostname);
                 string msg = string.Format(Messages.CONNECTION_OK_NOTICE_TEXT, Hostname);
-                log.Info($"Connection to {Hostname} successful.");
                 ConnectAction.Title = title;
                 ConnectAction.Description = msg;
-                SetPoolAndHostInAction(ConnectAction);
+
+                Pool pool = Helpers.GetPoolOfOne(this);
+                if (pool != null)
+                    SetPoolAndHostInAction(ConnectAction, pool, PoolOpaqueRef);
 
                 // mark the connect action as completed
                 ConnectAction.Finished = DateTime.Now;
@@ -1134,30 +1120,9 @@ namespace XenAdmin.Network
             }
         }
 
-        /// <summary>
-        /// Stops this connection's XenMetricsMonitor thread.
-        /// Expects to be locked under connectTaskLock.
-        /// </summary>
-        private void StopMonitor()
-        {
-            if (heartbeat != null)
-            {
-                heartbeat.Stop();
-                heartbeat = null;
-            }
-        }
-
         private const int DEFAULT_MAX_SESSION_LOGIN_ATTEMPTS = 3;
 
-        private bool IsSimulatorConnection
-        {
-            get
-            {
-                return DbProxy.IsSimulatorUrl(this.Hostname);
-            }
-        }
-
-        private readonly string eventNextConnectionGroupName = Guid.NewGuid().ToString(); 
+        private readonly string eventNextConnectionGroupName = Guid.NewGuid().ToString();
 
         /// <summary>
         /// The main method for a connection to a XenServer. This method runs until the connection is lost, and
@@ -1178,14 +1143,14 @@ namespace XenAdmin.Network
                 // Save the session so we can log it out later
                 task.Session = session;
 
-                if (session.APIVersion < API_Version.API_2_5)
+                if (session.APIVersion < API_Version.API_2_6)
                     throw new ServerNotSupported();
 
                 // Event.next uses a different session with a shorter timeout: see CA-33145.
                 Session eventNextSession = DuplicateSession(EVENT_NEXT_TIMEOUT);
                 eventNextSession.ConnectionGroupName = eventNextConnectionGroupName; // this will force the eventNextSession onto its own set of TCP streams (see CA-108676)
 
-                cacheIsPopulated = false;
+                CacheIsPopulated = false;
                 session.CacheWarming = true;
 
                 string token = "";
@@ -1206,14 +1171,18 @@ namespace XenAdmin.Network
                             OnConnectionMessageChanged(string.Format(Messages.LABEL_SYNC, this.Hostname));
                         }
 
+                        log.Debug("Cache is warming. Starting XenObjectDownloader.GetAllObjects");
                         XenObjectDownloader.GetAllObjects(session, eventQueue, task.GetCancelled, ref token);
+                        log.Debug("Cache is warming. XenObjectDownloader.GetAllObjects finished successfully");
                         session.CacheWarming = false;
                     }
                     else
                     {
                         try
                         {
+                            log.Debug("Starting XenObjectDownloader.GetEvents");
                             XenObjectDownloader.GetEvents(eventNextSession, eventQueue, task.GetCancelled, ref token);
+                            log.Debug("Starting XenObjectDownloader.GetEvents finished successfully");
                             eventsExceptionLogged = false;
                         }
                         catch (Exception exn)
@@ -1224,9 +1193,8 @@ namespace XenAdmin.Network
                             log.DebugFormat("Exception (disruption is expected) in XenObjectDownloader.GetEvents: {0}", exn.GetType().Name);
 
                             // ignoring some exceptions when disruption is expected
-                            if (exn is XmlRpcIllFormedXmlException || 
-                                exn is System.IO.IOException || 
-                                (exn is WebException && ((exn as WebException).Status == WebExceptionStatus.KeepAliveFailure || (exn as WebException).Status == WebExceptionStatus.ConnectFailure)))
+                            if (exn is IOException ||
+                                (exn is WebException webEx && (webEx.Status == WebExceptionStatus.KeepAliveFailure || webEx.Status == WebExceptionStatus.ConnectFailure)))
                             {
                                 if (!eventsExceptionLogged)
                                 {
@@ -1250,9 +1218,9 @@ namespace XenAdmin.Network
                         lock (ConnectionsManager.ConnectionsLock)
                         {
                             pool = ObjectChange.GetPool(eventQueue, out PoolOpaqueRef);
-                            Host master = ObjectChange.GetMaster(eventQueue);
+                            Host coordinator = ObjectChange.GetCoordinator(eventQueue);
 
-                            MasterIPAddress = master.address;
+                            CoordinatorIPAddress = coordinator.address;
 
                             foreach (IXenConnection iconn in ConnectionsManager.XenConnections)
                             {
@@ -1266,65 +1234,30 @@ namespace XenAdmin.Network
                                 if (!sameRef)
                                     continue;
 
-                                bool sameMaster = MasterIPAddress == connection.MasterIPAddress;
+                                bool sameCoordinator = CoordinatorIPAddress == connection.CoordinatorIPAddress;
 
-                                if (sameRef && sameMaster)
-                                {
+                                if (sameRef && sameCoordinator)
                                     throw new ConnectionExists(connection);
-                                }
-                                else
-                                {
-                                    // CA-15633: XenCenter does not allow connection to host 
-                                    //           on which backup is restored.
 
-                                    throw new BadRestoreDetected(connection);
-                                }
+                                // CA-15633: XenCenter does not allow connection to host on which backup is restored.
+                                throw new BadRestoreDetected(connection);
                             }
 
                             task.Connected = true;
 
                             string poolName = pool.Name();
-                            
+
                             FriendlyName = !string.IsNullOrEmpty(poolName)
                                 ? poolName
-                                : !string.IsNullOrEmpty(master.Name())
-                                    ? master.Name()
+                                : !string.IsNullOrEmpty(coordinator.Name())
+                                    ? coordinator.Name()
                                     : task.Hostname;
                         } // ConnectionsLock
-
-                        // Remove any other (disconnected) entries for this server from the tree
-                        List<IXenConnection> existingConnections = new List<IXenConnection>();
-                        foreach (IXenConnection connection in ConnectionsManager.XenConnections)
-                        {
-                            if (connection.Hostname.Equals(task.Hostname) && !connection.IsConnected)
-                            {
-                                existingConnections.Add(connection);
-                            }
-                        }
-                        foreach (IXenConnection connection in existingConnections)
-                        {
-                            ConnectionsManager.ClearCacheAndRemoveConnection(connection);
-                        }
-
 
                         log.DebugFormat("Getting server time for pool {0} ({1})...", FriendlyName, PoolOpaqueRef);
                         SetServerTimeOffset(session, pool.master.opaque_ref);
 
-                        // add server name to history (if it's not already there)
-                        XenAdminConfigManager.Provider.UpdateServerHistory(HostnameWithPort);
-
-                        HandleSuccessfulConnection(task.Hostname, task.Port);
-
-                        try
-                        {
-                            SetPoolAndHostInAction(ConnectAction, pool, PoolOpaqueRef);
-                        }
-                        catch (Exception e)
-                        {
-                            log.Error(e, e);
-                        }
-
-                        log.DebugFormat("Completed connection phase for pool {0} ({1}).", FriendlyName, PoolOpaqueRef);
+                        HandleSuccessfulConnection(task, pool);
                     }
 
                     EventsPending();
@@ -1343,16 +1276,6 @@ namespace XenAdmin.Network
                 }
             }
             catch (WebException e)
-            {
-                error = e;
-                log.Debug(e.Message);
-            }
-            catch (XmlRpcFaultException e)
-            {
-                error = e;
-                log.Debug(e.Message);
-            }
-            catch (XmlRpcException e)
             {
                 error = e;
                 log.Debug(e.Message);
@@ -1399,7 +1322,7 @@ namespace XenAdmin.Network
         {
             if (task != connectTask)
             {
-                // We've been superceded by a newer ConnectTask. Exit silently without firing events.
+                // We've been superseded by a newer ConnectTask. Exit silently without firing events.
                 // Can happen when user disconnects while sync is taking place, then reconnects
                 // (creating a new _connectTask) before the sync is complete.
             }
@@ -1408,23 +1331,12 @@ namespace XenAdmin.Network
                 ClearEventQueue();
 
                 connectTask = null;
-                HandleConnectionTermination();
 
-                if (error is ExpressRestriction)
-                {
-                    EndConnect(true, task, false);
+                // clean up action so we don't stay open forever
+                if (ConnectAction != null)
+                    ConnectAction.IsCompleted = true;
 
-                    ExpressRestriction e = (ExpressRestriction)error;
-                    // This can happen when the user attempts to connect to a second XE Express host from the UI
-                    string msg = string.Format(Messages.CONNECTION_RESTRICTED_MESSAGE, e.HostName, e.ExistingHostName);
-                    log.Info($"Connection to Server {e.HostName} restricted because a connection already exists to another XE Express Server ({e.ExistingHostName})");
-                    string title = string.Format(Messages.CONNECTION_RESTRICTED_NOTICE_TITLE, e.HostName);
-                    ActionBase action = new ActionBase(title, msg, false, true, msg);
-                    SetPoolAndHostInAction(action, pool, PoolOpaqueRef);
-
-                    OnConnectionResult(false, Messages.CONNECTION_RESTRICTED_MESSAGE, error);
-                }
-                else if (error is ServerNotSupported)
+                if (error is ServerNotSupported)
                 {
                     EndConnect(true, task, false);
                     log.Info(error.Message);
@@ -1460,44 +1372,45 @@ namespace XenAdmin.Network
                     {
                         // Create a new log message to say the connection attempt failed
                         string title = string.Format(Messages.CONNECTION_FAILED_TITLE, HostnameWithPort);
-                        ActionBase n = new ActionBase(title, reason, false, true, reason);
-                        SetPoolAndHostInAction(n, pool, PoolOpaqueRef);
+                        var action = new DummyAction(title, reason, reason);
+                        SetPoolAndHostInAction(action, pool, PoolOpaqueRef);
+                        action.Run();
                     }
 
-                    // We only want to continue the master search in certain circumstances
-                    if (FindingNewMaster && (error is WebException || (f != null && f.ErrorDescription[0] != Failure.RBAC_PERMISSION_DENIED)))
+                    // We only want to continue the coordinator search in certain circumstances
+                    if (FindingNewCoordinator && (error is WebException || (f != null && f.ErrorDescription[0] != Failure.RBAC_PERMISSION_DENIED)))
                     {
                         if (f != null)
                         {
                             if (f.ErrorDescription[0] == XenAPI.Failure.HOST_IS_SLAVE)
                             {
-                                log.DebugFormat("Found a slave of {0} at {1}; redirecting to the master at {2}",
-                                                LastMasterHostname, Hostname, f.ErrorDescription[1]);
+                                log.DebugFormat("Found a member of {0} at {1}; redirecting to the coordinator at {2}",
+                                                LastCoordinatorHostname, Hostname, f.ErrorDescription[1]);
                                 Hostname = f.ErrorDescription[1];
-                                OnConnectionMessageChanged(string.Format(Messages.CONNECTION_REDIRECTING, LastMasterHostname, Hostname));
-                                ReconnectMaster();
+                                OnConnectionMessageChanged(string.Format(Messages.CONNECTION_REDIRECTING, LastCoordinatorHostname, Hostname));
+                                ReconnectCoordinator();
                             }
                             else if (f.ErrorDescription[0] == XenAPI.Failure.HOST_STILL_BOOTING)
                             {
-                                log.DebugFormat("Found a slave of {0} at {1}, but it's still booting; trying the next pool member",
-                                                LastMasterHostname, Hostname);
-                                MaybeStartNextSlaveTimer(reason, error);
+                                log.DebugFormat("Found a member of {0} at {1}, but it's still booting; trying the next pool member",
+                                                LastCoordinatorHostname, Hostname);
+                                MaybeStartNextPoolMemberTimer(reason, error);
                             }
                             else
                             {
-                                log.DebugFormat("Found a slave of {0} at {1}, but got a failure; trying the next pool member",
-                                                LastMasterHostname, Hostname);
-                                MaybeStartNextSlaveTimer(reason, error);
+                                log.DebugFormat("Found a member of {0} at {1}, but got a failure; trying the next pool member",
+                                                LastCoordinatorHostname, Hostname);
+                                MaybeStartNextPoolMemberTimer(reason, error);
                             }
                         }
                         else if (PoolMemberRemaining())
                         {
                             log.DebugFormat("Connection to {0} failed; trying the next pool member", Hostname);
-                            MaybeStartNextSlaveTimer(reason, error);
+                            MaybeStartNextPoolMemberTimer(reason, error);
                         }
                         else
                         {
-                            if (ExpectDisruption || DateTime.Now - FindingNewMasterStartedAt < SEARCH_NEW_MASTER_STOP_AFTER)
+                            if (ExpectDisruption || DateTime.Now - FindingNewCoordinatorStartedAt < SEARCH_NEW_COORDINATOR_STOP_AFTER)
                             {
                                 log.DebugFormat("While trying to find a connection for {0}, tried to connect to every remembered host. Will now loop back through pool members again.",
                                     this.HostnameWithPort);
@@ -1505,15 +1418,15 @@ namespace XenAdmin.Network
                                 {
                                     PoolMemberIndex = 0;
                                 }
-                                MaybeStartNextSlaveTimer(reason, error);
+                                MaybeStartNextPoolMemberTimer(reason, error);
                             }
-                            else if (LastMasterHostname != "")
+                            else if (LastCoordinatorHostname != "")
                             {
-                                log.DebugFormat("Stopping search for new master for {0}: timeout reached without success. Trying the old master one last time",
+                                log.DebugFormat("Stopping search for new coordinator for {0}: timeout reached without success. Trying the old coordinator one last time",
                                                 LastConnectionFullName);
-                                FindingNewMaster = false;
-                                Hostname = LastMasterHostname;
-                                ReconnectMaster();
+                                FindingNewCoordinator = false;
+                                Hostname = LastCoordinatorHostname;
+                                ReconnectCoordinator();
                             }
                             else
                             {
@@ -1529,9 +1442,9 @@ namespace XenAdmin.Network
             }
         }
 
-        private void SetServerTimeOffset(Session session, string master_opaqueref)
+        private void SetServerTimeOffset(Session session, string coordinator_opaqueref)
         {
-            DateTime t = Host.get_servertime(session, master_opaqueref);
+            DateTime t = Host.get_servertime(session, coordinator_opaqueref);
             ServerTimeOffset = DateTime.UtcNow - t;
         }
 
@@ -1559,8 +1472,8 @@ namespace XenAdmin.Network
                     members.Add(host.address);
             }
 
-            // Save master's address so we don't try to reconnect to it first
-            Host master = Helpers.GetMaster(this);
+            // Save coordinator's address so we don't try to reconnect to it first
+            Host coordinator = Helpers.GetCoordinator(this);
             // Save ha_enabled status before we clear the cache
             bool ha_enabled = IsHAEnabled();
 
@@ -1568,7 +1481,7 @@ namespace XenAdmin.Network
             EndConnect(true, task, false);
 
             string description;
-            LastMasterHostname = Hostname;
+            LastCoordinatorHostname = Hostname;
             string poolName = pool.Name();
             if (string.IsNullOrEmpty(poolName))
             {
@@ -1578,7 +1491,7 @@ namespace XenAdmin.Network
             {
                 LastConnectionFullName = string.Format("'{0}' ({1})", poolName, HostnameWithPort);
             }
-            if (!EventNextBlocked && (MasterMayChange || ha_enabled) && members.Count > 1)
+            if (!EventNextBlocked && (CoordinatorMayChange || ha_enabled) && members.Count > 1)
             {
                 log.DebugFormat("Will now try to connect to another pool member");
 
@@ -1587,18 +1500,18 @@ namespace XenAdmin.Network
                     PoolMembers.Clear();
                     PoolMembers.AddRange(members);
                     PoolMemberIndex = 0;
-                    // Don't reconnect to the master straight away, try a slave first
-                    if (master != null && PoolMembers[0] == master.address && PoolMembers.Count > 1)
+                    // Don't reconnect to the coordinator straight away, try a supporter first
+                    if (coordinator != null && PoolMembers[0] == coordinator.address && PoolMembers.Count > 1)
                     {
                         PoolMemberIndex = 1;
                     }
                 }
-                FindingNewMaster = true;
-                // Record the time at which we started the new master search.
-                FindingNewMasterStartedAt = DateTime.Now;
-                StartReconnectMasterTimer();
-                description = string.Format(Messages.CONNECTION_LOST_NOTICE_MASTER_IN_X_SECONDS, LastConnectionFullName, XenConnection.SEARCH_NEW_MASTER_TIMEOUT_MS / 1000);
-                log.DebugFormat("Beginning search for new master; will give up after {0} seconds", SEARCH_NEW_MASTER_STOP_AFTER.TotalSeconds);
+                FindingNewCoordinator = true;
+                // Record the time at which we started the new coordinator search.
+                FindingNewCoordinatorStartedAt = DateTime.Now;
+                StartReconnectCoordinatorTimer();
+                description = string.Format(Messages.CONNECTION_LOST_NOTICE_COORDINATOR_IN_X_SECONDS, LastConnectionFullName, XenConnection.SEARCH_NEW_COORDINATOR_TIMEOUT_MS / 1000);
+                log.DebugFormat("Beginning search for new coordinator; will give up after {0} seconds", SEARCH_NEW_COORDINATOR_STOP_AFTER.TotalSeconds);
             }
             else
             {
@@ -1611,8 +1524,9 @@ namespace XenAdmin.Network
 
             string title = string.Format(Messages.CONNECTION_LOST_NOTICE_TITLE,
                                          LastConnectionFullName);
-            ActionBase n = new ActionBase(title, description, false, true, description);
-            SetPoolAndHostInAction(n, pool, poolopaqueref);
+            var action = new DummyAction(title, description, description);
+            SetPoolAndHostInAction(action, pool, poolopaqueref);
+            action.Run();
             OnConnectionLost();
         }
 
@@ -1639,30 +1553,30 @@ namespace XenAdmin.Network
         {
             get
             {
-                if (EventNextBlocked || IsSimulatorConnection)
+                if (EventNextBlocked || IsSimulatedConnection)
                     return RECONNECT_SHORT_TIMEOUT_MS;
-                else
-                    return RECONNECT_HOST_TIMEOUT_MS;
+                
+                return RECONNECT_HOST_TIMEOUT_MS;
             }
         }
 
         /// <summary>
-        /// When HA is enabled, the timeout after losing connection to the master before we start searching for a new master.
-        /// i.e. This should be the time it takes master failover to be sorted out on the server, plus a margin.
+        /// When HA is enabled, the timeout after losing connection to the coordinator before we start searching for a new coordinator.
+        /// i.e. This should be the time it takes coordinator failover to be sorted out on the server, plus a margin.
         /// NB we already have an additional built-in delay - it takes time for us to decide that the host is not responding,
-        /// and kill the connection to the dead host, before starting the search.
+        /// and stop the connection to the dead host, before starting the search.
         /// </summary>
-        private const int SEARCH_NEW_MASTER_TIMEOUT_MS = 60 * 1000;
+        private const int SEARCH_NEW_COORDINATOR_TIMEOUT_MS = 60 * 1000;
         /// <summary>
-        /// When HA is enabled, and going through each of the slaves to try and find the new master, the time between failing
-        /// to connect to one slave and trying to connect to the next in the list.
+        /// When HA is enabled, and going through each of the supporters to try and find the new coordinator, the time between failing
+        /// to connect to one supporter and trying to connect to the next in the list.
         /// </summary>
-        private const int SEARCH_NEXT_SLAVE_TIMEOUT_MS = 15 * 1000;
+        private const int SEARCH_NEXT_SUPPORTER_TIMEOUT_MS = 15 * 1000;
         /// <summary>
-        /// When going through each of the remembered members of the pool looking for the new master, don't start another pass
+        /// When going through each of the remembered members of the pool looking for the new coordinator, don't start another pass
         /// through connecting to each of the hosts if we've already been looking for this long.
         /// </summary>
-        private static readonly TimeSpan SEARCH_NEW_MASTER_STOP_AFTER = TimeSpan.FromMinutes(6);
+        private static readonly TimeSpan SEARCH_NEW_COORDINATOR_STOP_AFTER = TimeSpan.FromMinutes(6);
 
         private void StartReconnectSingleHostTimer()
         {
@@ -1671,24 +1585,24 @@ namespace XenAdmin.Network
                 ReconnectHostTimeoutMs, ReconnectHostTimeoutMs);
         }
 
-        private void StartReconnectMasterTimer()
+        private void StartReconnectCoordinatorTimer()
         {
-            StartReconnectMasterTimer(SEARCH_NEW_MASTER_TIMEOUT_MS);
+            StartReconnectCoordinatorTimer(SEARCH_NEW_COORDINATOR_TIMEOUT_MS);
         }
 
-        private void MaybeStartNextSlaveTimer(string reason, Exception error)
+        private void MaybeStartNextPoolMemberTimer(string reason, Exception error)
         {
             if (PoolMemberRemaining())
-                StartReconnectMasterTimer(SEARCH_NEXT_SLAVE_TIMEOUT_MS);
-           else
-                OnConnectionResult(false, reason, error); 
+                StartReconnectCoordinatorTimer(SEARCH_NEXT_SUPPORTER_TIMEOUT_MS);
+            else
+                OnConnectionResult(false, reason, error);
         }
 
-        private void StartReconnectMasterTimer(int timeout)
+        private void StartReconnectCoordinatorTimer(int timeout)
         {
-            OnConnectionMessageChanged(string.Format(Messages.CONNECTION_WILL_RETRY_SLAVE, LastConnectionFullName.Ellipsise(25) , timeout / 1000));
+            OnConnectionMessageChanged(string.Format(Messages.CONNECTION_WILL_RETRY_SUPPORTER, LastConnectionFullName.Ellipsise(25), timeout / 1000));
             ReconnectionTimer =
-                new System.Threading.Timer((TimerCallback)ReconnectMasterTimer, null,
+                new System.Threading.Timer((TimerCallback)ReconnectCoordinatorTimer, null,
                                            timeout, Timeout.Infinite);
         }
 
@@ -1717,7 +1631,7 @@ namespace XenAdmin.Network
             log.DebugFormat("Reconnecting to server {0}...", Hostname);
             if (!XenAdminConfigManager.Provider.Exiting)
             {
-                InvokeHelper.Invoke(delegate()
+                InvokeHelper.Invoke(delegate ()
                 {
                     /*ConnectionResult += new EventHandler<ConnectionResultEventArgs>(XenConnection_ConnectionResult);
                     CachePopulated += new EventHandler<EventArgs>(XenConnection_CachePopulated);*/
@@ -1727,11 +1641,11 @@ namespace XenAdmin.Network
             }
         }
 
-        private void ReconnectMasterTimer(object state)
+        private void ReconnectCoordinatorTimer(object state)
         {
             if (IsConnected || !ConnectionsManager.XenConnectionsContains(this))
             {
-                log.DebugFormat("Master has been found for {0} at {1}", LastMasterHostname, Hostname);
+                log.DebugFormat("Coordinator has been found for {0} at {1}", LastCoordinatorHostname, Hostname);
                 return;
             }
 
@@ -1744,39 +1658,37 @@ namespace XenAdmin.Network
                 }
             }
 
-            OnConnectionMessageChanged(string.Format(Messages.CONNECTION_RETRYING_SLAVE, LastConnectionFullName.Ellipsise(25), Hostname));
-            ReconnectMaster();
+            OnConnectionMessageChanged(string.Format(Messages.CONNECTION_RETRYING_SUPPORTER, LastConnectionFullName.Ellipsise(25), Hostname));
+            ReconnectCoordinator();
         }
 
-        private void ReconnectMaster()
+        private void ReconnectCoordinator()
         {
             // Add an informational entry to the log
-            string title = string.Format(Messages.CONNECTION_FINDING_MASTER_TITLE, LastConnectionFullName);
-            string descr = string.Format(Messages.CONNECTION_FINDING_MASTER_DESCRIPTION, LastConnectionFullName, Hostname);
-            ActionBase action = new ActionBase(title, descr, false, true);
+            string title = string.Format(Messages.CONNECTION_FINDING_COORDINATOR_TITLE, LastConnectionFullName);
+            string descr = string.Format(Messages.CONNECTION_FINDING_COORDINATOR_DESCRIPTION, LastConnectionFullName, Hostname);
+            var action = new DummyAction(title, descr);
             SetPoolAndHostInAction(action, null, PoolOpaqueRef);
-            log.DebugFormat("Looking for master for {0} on {1}...", LastConnectionFullName, Hostname);
+            action.Run();
+            log.DebugFormat("Looking for coordinator for {0} on {1}...", LastConnectionFullName, Hostname);
 
             if (!XenAdminConfigManager.Provider.Exiting)
             {
-                InvokeHelper.Invoke(delegate()
-                {
-                    /*ConnectionResult += new EventHandler<ConnectionResultEventArgs>(XenConnection_ConnectionResult);
-                    CachePopulated += new EventHandler<EventArgs>(XenConnection_CachePopulated);*/
-                    BeginConnect(false, _promptForNewPassword);
-                });
+                InvokeHelper.Invoke(() => BeginConnect(false, _promptForNewPassword));
                 OnConnectionReconnecting();
             }
         }
 
         private Pool getAPool(ICache objects, out string opaqueref)
         {
-            foreach (Pool pool in objects.Pools)
+            var pools = objects.Pools;
+            if (pools.Length > 0)
             {
+                var pool = pools.First();
                 opaqueref = pool.opaque_ref;
                 return pool;
             }
-            System.Diagnostics.Trace.Assert(false);
+            Trace.Assert(false);
             opaqueref = null;
             return null;
         }
@@ -1840,7 +1752,7 @@ namespace XenAdmin.Network
         {
             // Using BeginInvoke here means that the XenObjectsUpdated event gets fired after any
             // CollectionChanged events fired by ChangeableDictionary during Cache.UpdateFrom.
-            InvokeHelper.BeginInvoke(delegate()
+            InvokeHelper.BeginInvoke(delegate ()
             {
                 if (XenObjectsUpdated != null)
                     XenObjectsUpdated(this, null);
@@ -1941,13 +1853,13 @@ namespace XenAdmin.Network
                     if (pool == null)
                         continue;
 
-                    Host master = connection.Resolve(pool.master);
-                    if (master == null)
+                    Host coordinator = connection.Resolve(pool.master);
+                    if (coordinator == null)
                         continue;
 
-                    if (master.address == hostname)
+                    if (coordinator.address == hostname)
                     {
-                        // we have tried to connect to a slave that is a member of a pool we are already connected to.
+                        // we have tried to connect to a supporter that is a member of a pool we are already connected to.
                         return pool.Name();
                     }
                 }
@@ -1969,7 +1881,7 @@ namespace XenAdmin.Network
 
         public void WriteXml(System.Xml.XmlWriter writer)
         {
-            writer.WriteElementString("Hostname",Hostname);
+            writer.WriteElementString("Hostname", Hostname);
         }
 
         #endregion
@@ -1986,9 +1898,10 @@ namespace XenAdmin.Network
         }
 
         private bool disposed;
+
         protected virtual void Dispose(bool disposing)
         {
-            if(!disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
@@ -2004,7 +1917,7 @@ namespace XenAdmin.Network
                     BeforeMajorChange = null;
                     AfterMajorChange = null;
                     XenObjectsUpdated = null;
-                    TimeSkewUpdated = null;
+
                     if (ReconnectionTimer != null)
                         ReconnectionTimer.Dispose();
                     if (cacheUpdateTimer != null)
@@ -2018,63 +1931,47 @@ namespace XenAdmin.Network
         #endregion
     }
 
-
-    public class ExpressRestriction : DisconnectionException
-    {
-        public readonly string HostName;
-        public readonly string ExistingHostName;
-
-        public ExpressRestriction(string HostName, string ExistingHostName)
-        {
-            this.HostName = HostName;
-            this.ExistingHostName = ExistingHostName;
-        }
-
-        public override string Message
-        {
-            get
-            {
-                return string.Format(Messages.LICENSE_RESTRICTION_MESSAGE, HostName, ExistingHostName);
-            }
-        }
-    }
-
     public class ServerNotSupported : DisconnectionException
     {
-        public override string Message => string.Format(Messages.SERVER_TOO_OLD, BrandManager.ProductVersion70);
+        public override string Message => string.Format(Messages.SERVER_TOO_OLD, BrandManager.BrandConsole,
+            BrandManager.ProductVersion712, BrandManager.ProductVersion80);
     }
 
     public class ConnectionExists : DisconnectionException
     {
-        public IXenConnection connection;
+        protected readonly IXenConnection Connection;
 
         public ConnectionExists(IXenConnection connection)
         {
-            this.connection = connection;
+            Connection = connection;
         }
 
         public override string Message
         {
             get
             {
-                if (connection != null)
-                    return string.Format(Messages.CONNECTION_EXISTS, connection.Hostname);
-                else
+                if (Connection == null)
                     return Messages.CONNECTION_EXISTS_NULL;
+
+                return string.Format(Messages.CONNECTION_EXISTS, Connection.Hostname);
+
             }
         }
 
-        public virtual string GetDialogMessage(IXenConnection _this)
+        public virtual string GetDialogMessage()
         {
-            Pool p = Helpers.GetPool(connection);
-            if (p == null)
-                return String.Format(Messages.ALREADY_CONNECTED, _this.Hostname);
+            if (Connection == null)
+                return Messages.CONNECTION_EXISTS_NULL;
 
-            return String.Format(Messages.SLAVE_ALREADY_CONNECTED, _this.Hostname, p.Name());
+            Pool p = Helpers.GetPool(Connection);
+            if (p == null)
+                return string.Format(Messages.ALREADY_CONNECTED, Connection.Hostname);
+
+            return string.Format(Messages.SUPPORTER_ALREADY_CONNECTED, Connection.Hostname, p.Name());
         }
     }
 
-    class BadRestoreDetected : ConnectionExists
+    internal class BadRestoreDetected : ConnectionExists
     {
         public BadRestoreDetected(IXenConnection xc)
             : base(xc)
@@ -2085,11 +1982,14 @@ namespace XenAdmin.Network
         {
             get
             {
-                return String.Format(Messages.BAD_RESTORE_DETECTED, connection.Name);
+                if (Connection == null)
+                    return Messages.CONNECTION_EXISTS_NULL;
+
+                return string.Format(Messages.BAD_RESTORE_DETECTED, Connection.Name);
             }
         }
 
-        public override string GetDialogMessage(IXenConnection _this)
+        public override string GetDialogMessage()
         {
             return Message;
         }

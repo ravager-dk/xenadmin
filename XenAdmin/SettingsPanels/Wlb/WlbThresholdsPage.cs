@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Wlb;
 using XenAPI;
 
@@ -82,33 +80,27 @@ namespace XenAdmin.SettingsPanels
         private void InitializeControls()
         {
             _loading = true;
-            updownCPUCriticalPoint.Value = GetSafeUpDownValue(_poolConfiguration.HostCpuThresholdCritical, updownCPUCriticalPoint);
-            updownMemoryCriticalPoint.Value = GetSafeUpDownValue(WlbPoolConfiguration.ConvertToMB(_poolConfiguration.HostMemoryThresholdCritical), updownMemoryCriticalPoint);
-            updownDiskReadCriticalPoint.Value = GetSafeUpDownValue(WlbPoolConfiguration.ConvertToMB(_poolConfiguration.HostDiskReadThresholdCritical), updownDiskReadCriticalPoint);
-            updownDiskWriteCriticalPoint.Value = GetSafeUpDownValue(WlbPoolConfiguration.ConvertToMB(_poolConfiguration.HostDiskWriteThresholdCritical), updownDiskWriteCriticalPoint);
-            updownNetworkReadCriticalPoint.Value = GetSafeUpDownValue(WlbPoolConfiguration.ConvertToMB(_poolConfiguration.HostNetworkReadThresholdCritical), updownNetworkReadCriticalPoint);
-            updownNetworkWriteCriticalPoint.Value = GetSafeUpDownValue(WlbPoolConfiguration.ConvertToMB(_poolConfiguration.HostNetworkWriteThresholdCritical), updownNetworkWriteCriticalPoint);
 
-            labelCPUUnits.Text = string.Format(labelCPUUnits.Text, updownCPUCriticalPoint.Minimum, updownCPUCriticalPoint.Maximum);
-            labelFreeMemoryUnits.Text = string.Format(labelFreeMemoryUnits.Text, updownMemoryCriticalPoint.Minimum, updownMemoryCriticalPoint.Maximum);
-            labelDiskReadUnits.Text = string.Format(labelDiskReadUnits.Text, updownDiskReadCriticalPoint.Minimum, updownDiskReadCriticalPoint.Maximum);
-            labelDiskWriteUnits.Text = string.Format(labelDiskWriteUnits.Text, updownDiskWriteCriticalPoint.Minimum, updownDiskWriteCriticalPoint.Maximum);
-            labelNetworkReadUnits.Text = string.Format(labelNetworkReadUnits.Text, updownNetworkReadCriticalPoint.Minimum, updownNetworkReadCriticalPoint.Maximum);
-            labelNetworkWriteUnits.Text = string.Format(labelNetworkWriteUnits.Text, updownNetworkWriteCriticalPoint.Minimum, updownNetworkWriteCriticalPoint.Maximum);
-
-            // CA-194940:
-            // Host disk read/write threshold and weight settings work since Dundee.
-            // For previous XenServer, hide the host disk read/write settings.
-            if (!Helpers.DundeeOrGreater(_connection))
+            try
             {
-                updownDiskReadCriticalPoint.Visible = false;
-                updownDiskWriteCriticalPoint.Visible = false;
-                labelDiskReadUnits.Visible = false;
-                labelDiskWriteUnits.Visible = false;
-                labelDiskRead.Visible = false;
-                label1DiskWrite.Visible = false;
+                updownCPUCriticalPoint.Value = GetSafeUpDownValue(_poolConfiguration.HostCpuThresholdCritical, updownCPUCriticalPoint);
+                updownMemoryCriticalPoint.Value = GetSafeUpDownValue(WlbConfigurationBase.ConvertToMB(_poolConfiguration.HostMemoryThresholdCritical), updownMemoryCriticalPoint);
+                updownDiskReadCriticalPoint.Value = GetSafeUpDownValue(WlbConfigurationBase.ConvertToMB(_poolConfiguration.HostDiskReadThresholdCritical), updownDiskReadCriticalPoint);
+                updownDiskWriteCriticalPoint.Value = GetSafeUpDownValue(WlbConfigurationBase.ConvertToMB(_poolConfiguration.HostDiskWriteThresholdCritical), updownDiskWriteCriticalPoint);
+                updownNetworkReadCriticalPoint.Value = GetSafeUpDownValue(WlbConfigurationBase.ConvertToMB(_poolConfiguration.HostNetworkReadThresholdCritical), updownNetworkReadCriticalPoint);
+                updownNetworkWriteCriticalPoint.Value = GetSafeUpDownValue(WlbConfigurationBase.ConvertToMB(_poolConfiguration.HostNetworkWriteThresholdCritical), updownNetworkWriteCriticalPoint);
+
+                labelCPUUnits.Text = string.Format(labelCPUUnits.Text, updownCPUCriticalPoint.Minimum, updownCPUCriticalPoint.Maximum);
+                labelFreeMemoryUnits.Text = string.Format(labelFreeMemoryUnits.Text, updownMemoryCriticalPoint.Minimum, updownMemoryCriticalPoint.Maximum);
+                labelDiskReadUnits.Text = string.Format(labelDiskReadUnits.Text, updownDiskReadCriticalPoint.Minimum, updownDiskReadCriticalPoint.Maximum);
+                labelDiskWriteUnits.Text = string.Format(labelDiskWriteUnits.Text, updownDiskWriteCriticalPoint.Minimum, updownDiskWriteCriticalPoint.Maximum);
+                labelNetworkReadUnits.Text = string.Format(labelNetworkReadUnits.Text, updownNetworkReadCriticalPoint.Minimum, updownNetworkReadCriticalPoint.Maximum);
+                labelNetworkWriteUnits.Text = string.Format(labelNetworkWriteUnits.Text, updownNetworkWriteCriticalPoint.Minimum, updownNetworkWriteCriticalPoint.Maximum);
             }
-            _loading = false; ;
+            finally
+            {
+                _loading = false;
+            }
         }
 
         private decimal GetSafeUpDownValue(decimal value, NumericUpDown thisControl)
@@ -174,6 +166,9 @@ namespace XenAdmin.SettingsPanels
             throw new NotImplementedException();
         }
 
+        public void HideLocalValidationMessages()
+        { }
+
         public void Cleanup()
         {
             throw new NotImplementedException();
@@ -185,10 +180,9 @@ namespace XenAdmin.SettingsPanels
 
         #region IVerticalTab Members
 
-
         public string SubText => Messages.WLB_THRESHOLDS_SUBTEXT;
 
-        public Image Image => Properties.Resources._000_GetMemoryInfo_h32bit_16;
+        public Image Image => Images.StaticImages._000_GetMemoryInfo_h32bit_16;
 
         #endregion
     }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,10 +32,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
-using XenAPI;
+using XenAdmin.Actions;
 using XenAdmin.Dialogs;
 using XenAdmin.Controls.DataGridViewEx;
-using XenAdmin.Core;
+using XenAPI;
 
 
 namespace XenAdmin.TabPages
@@ -44,6 +43,8 @@ namespace XenAdmin.TabPages
     public partial class UsbPage : BaseTabPage
     {
         private Host _host;
+        private HostUsbRow selectedRow;
+        private bool InBuildList;
 
         public UsbPage()
         {
@@ -57,6 +58,8 @@ namespace XenAdmin.TabPages
 
         public override string HelpID => "TabPageUSB";
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IXenObject XenObject
         {
             get
@@ -81,7 +84,6 @@ namespace XenAdmin.TabPages
             }
         }
 
-        public bool InBuildList = false;
         private void BuildList()
         {
             Program.AssertOnEventThread();
@@ -122,11 +124,6 @@ namespace XenAdmin.TabPages
             }
         }
 
-        protected override void OnVisibleChanged(EventArgs e)
-        {
-            base.OnVisibleChanged(e);
-        }
-
         public override void PageHidden()
         {
             UnregisterHandlers();
@@ -134,12 +131,12 @@ namespace XenAdmin.TabPages
             base.PageHidden();
         }
 
-        void Host_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Host_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             RefreshAllItems();
         }
 
-        void UsbCollectionChanged(object sender, EventArgs e)
+        private void UsbCollectionChanged(object sender, EventArgs e)
         {
             BuildList();
         }
@@ -154,7 +151,7 @@ namespace XenAdmin.TabPages
             }
         }
 
-        internal void UnregisterHandlers()
+        private void UnregisterHandlers()
         {
             if (_host != null)
             {
@@ -170,7 +167,6 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private HostUsbRow selectedRow = null;
         private void dataGridViewUsbList_SelectionChanged(object sender, EventArgs e)
         {
             selectedRow = null;
@@ -206,10 +202,25 @@ namespace XenAdmin.TabPages
 
         private void buttonPassthrough_Click(object sender, EventArgs e)
         {
-            if (selectedRow != null)
+            if (selectedRow == null)
+                return;
+
+            var pusb = selectedRow.Pusb;
+
+            var message = pusb.passthrough_enabled 
+                ? Messages.DIALOG_USB_USAGE_DISABLE_PASSTHROUGH
+                : Messages.DIALOG_USB_USAGE_ENABLE_PASSTHROUGH;
+
+            var yesText = pusb.passthrough_enabled
+                ? Messages.DIALOG_USB_USAGE_OKBUTTON_DISABLE
+                : Messages.DIALOG_USB_USAGE_OKBUTTON_ENABLE;
+
+            using (var dialog = new WarningDialog(message,
+                new ThreeButtonDialog.TBDButton(yesText, DialogResult.Yes, ThreeButtonDialog.ButtonType.ACCEPT, true),
+                ThreeButtonDialog.ButtonNo))
             {
-                UsbUsageDialog dialog = new UsbUsageDialog(selectedRow.Pusb);
-                dialog.ShowDialog(Program.MainWindow);
+                if (dialog.ShowDialog(this) == DialogResult.Yes)
+                    new SetUsbPassthroughAction(pusb, !pusb.passthrough_enabled).RunAsync();
             }
         }
 

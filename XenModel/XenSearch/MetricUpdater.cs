@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,10 +34,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.IO;
 using System.Xml;
-
-using XenCenterLib;
 using XenAPI;
-
 using XenAdmin.Core;
 using System.Threading.Tasks;
 using System.Linq;
@@ -95,9 +91,9 @@ namespace XenAdmin.XenSearch
                 Monitor.PulseAll(_sleepMonitor);
         }
 
-        public void Kill()
+        public void Stop()
         {
-            log.Info("Killing MetricUpdater thread");
+            log.Info("Stopping MetricUpdater thread");
             _run = false;
             _pause = false;
             lock (_pauseMonitor)
@@ -353,7 +349,7 @@ namespace XenAdmin.XenSearch
             builder.Host = host.address;
             builder.Port = host.Connection.Port;
             builder.Path = RrdUpdatesPath;
-            builder.Query = string.Format(RrdHostAndVmUpdatesQuery, Uri.EscapeDataString(session.opaque_ref), TimeUtil.TicksToSecondsSince1970(DateTime.UtcNow.Ticks - (host.Connection.ServerTimeOffset.Ticks + TicksInTenSeconds)), RrdCFAverage, 5);
+            builder.Query = string.Format(RrdHostAndVmUpdatesQuery, Uri.EscapeDataString(session.opaque_ref), Util.TicksToSecondsSince1970(DateTime.UtcNow.Ticks - (host.Connection.ServerTimeOffset.Ticks + TicksInTenSeconds)), RrdCFAverage, 5);
             return builder.Uri;
         }
 
@@ -365,7 +361,7 @@ namespace XenAdmin.XenSearch
                 host = obj.Connection.Resolve<Host>(((VM)obj).resident_on);
                 if (host == null)
                 {
-                    host = Helpers.GetMaster(obj.Connection);
+                    host = Helpers.GetCoordinator(obj.Connection);
                 }
             }
             return host;

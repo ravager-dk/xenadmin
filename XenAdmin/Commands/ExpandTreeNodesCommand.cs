@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Controls;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -56,7 +52,7 @@ namespace XenAdmin.Commands
             _nodes = nodes;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             foreach (VirtualTreeNode node in _nodes)
             {
@@ -64,7 +60,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return SomeCollapsedNodes(_nodes);
         }

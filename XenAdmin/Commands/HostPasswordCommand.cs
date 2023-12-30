@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -41,9 +40,9 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return new ChangeHostPasswordCommand(MainWindowCommandInterface, selection).CanExecute() || new ForgetSavedPasswordCommand(MainWindowCommandInterface, selection).CanExecute();
+            return new ChangeHostPasswordCommand(MainWindowCommandInterface, selection).CanRun() || new ForgetSavedPasswordCommand(MainWindowCommandInterface, selection).CanRun();
         }
     }
 }

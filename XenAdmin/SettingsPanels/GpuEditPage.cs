@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -40,7 +39,6 @@ using XenAdmin.Controls;
 using XenAdmin.Controls.DataGridViewEx;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
-using XenAdmin.Properties;
 using XenAPI;
 
 
@@ -50,8 +48,6 @@ namespace XenAdmin.SettingsPanels
     {
         public VM vm;
         private List<VGPU> currentGpus = new List<VGPU>();
-        private GPU_group[] gpu_groups;
-        private bool gpusAvailable;
 
         public GpuEditPage()
         {
@@ -73,7 +69,7 @@ namespace XenAdmin.SettingsPanels
             }
         }
 
-        public VM.HA_Restart_Priority SelectedPriority { private get; set; }
+        public VM.HaRestartPriority SelectedPriority { private get; set; }
 
         #region IEditPage Members
 
@@ -102,6 +98,10 @@ namespace XenAdmin.SettingsPanels
         {
         }
 
+        public void HideLocalValidationMessages()
+        {
+        }
+
         public void Cleanup()
         {
         }
@@ -116,20 +116,17 @@ namespace XenAdmin.SettingsPanels
             {
                 string txt = Messages.UNAVAILABLE;
 
-                if (gpusAvailable)
+                if (Helpers.GpusAvailable(Connection))
                 {
                     var vGpus = VGpus;
-                    txt = vGpus.Count > 0 ? string.Join(",", vGpus.Select(v => v.VGpuTypeDescription())) : Messages.GPU_NONE;
+                    txt = vGpus.Count > 0 ? string.Join(",", vGpus.Select(v => v.VGpuTypeDescription())) : Messages.NONE_UPPER;
                 }
 
                 return txt;
             }
         }
 
-        public Image Image
-        {
-            get { return Resources._000_GetMemoryInfo_h32bit_16; }
-        }
+        public Image Image => Images.StaticImages._000_GetMemoryInfo_h32bit_16;
 
         #endregion
 
@@ -159,26 +156,8 @@ namespace XenAdmin.SettingsPanels
         public override void PopulatePage()
         {
             currentGpus.Clear();
-
-            gpu_groups = Connection.Cache.GPU_groups.Where(g => g.PGPUs.Count > 0 && g.supported_VGPU_types.Count != 0).ToArray();
-            //not showing empty groups
-
-            gpusAvailable = gpu_groups.Length > 0;
-
-            if (gpusAvailable)
-            {
-                PopulateGrid();
-                ShowHideWarnings();
-            }
-            else
-            {
-                labelRubric.Text = Helpers.GetPool(Connection) == null
-                                       ? Messages.GPU_RUBRIC_NO_GPUS_SERVER
-                                       : Messages.GPU_RUBRIC_NO_GPUS_POOL;
-
-                gpuGrid.Visible = addButton.Visible = deleteButton.Visible = false;
-                warningsTable.Visible = false;
-            }
+            PopulateGrid();
+            ShowHideWarnings();
         }
 
         public override void SelectDefaultControl()
@@ -217,9 +196,6 @@ namespace XenAdmin.SettingsPanels
 
         public void ShowHideWarnings()
         {
-            if (!gpusAvailable)
-                return;
-
             var vGpus = VGpus;
 
             imgExperimental.Visible = labelExperimental.Visible =
@@ -255,7 +231,7 @@ namespace XenAdmin.SettingsPanels
             }
 
             var multipleVgpuSupport = vGpus.All(v => { var x = Connection.Resolve(v.type); return x != null && x.compatible_types_in_vm.Count > 0; });
-            addButton.Enabled = multipleVgpuSupport;
+            addButton.Enabled = Helpers.GpusAvailable(Connection) && multipleVgpuSupport;
             deleteButton.Enabled = gpuGrid.SelectedRows.Count > 0;
 
             imgMulti.Visible = labelMulti.Visible = vGpus.Count > 0;
@@ -271,14 +247,6 @@ namespace XenAdmin.SettingsPanels
 
             imgNeedGpu.Visible = labelNeedGpu.Visible =
                 labelNeedDriver.Visible = imgNeedDriver.Visible = vGpus.Count > 0;
-        }
-
-        private void warningsTable_SizeChanged(object sender, EventArgs e)
-        {
-            int[] columnsWidth = warningsTable.GetColumnWidths();
-            int textColumnWidth = columnsWidth.Length > 1 ? columnsWidth[1] : 1;
-
-            labelRDP.MaximumSize = labelStopVM.MaximumSize = new Size(textColumnWidth, 999);
         }
 
         private void addButton_Click(object sender, EventArgs e)
@@ -325,8 +293,6 @@ namespace XenAdmin.SettingsPanels
         private readonly DataGridViewTextBoxCell deviceColumn = new DataGridViewTextBoxCell();
         private readonly DataGridViewTextBoxCell nameColumn = new DataGridViewTextBoxCell();
         private readonly DataGridViewTextBoxCell vGpusPerGpuColumn = new DataGridViewTextBoxCell();
-        private readonly DataGridViewTextBoxCell maxResolutionColumn = new DataGridViewTextBoxCell();
-        private readonly DataGridViewTextBoxCell maxDisplaysColumn = new DataGridViewTextBoxCell();
         private readonly DataGridViewTextBoxCell videoRamColumn = new DataGridViewTextBoxCell();
         // Xapi reserves device numbers [0,20] for vGPU for backwards compatibility.
         // The guest PCI bus slots lie within [11,31], hence XenCenter needs to
@@ -340,7 +306,7 @@ namespace XenAdmin.SettingsPanels
             VGpu = vGpu;
 
             SetCells();
-            Cells.AddRange(deviceColumn, nameColumn, vGpusPerGpuColumn, maxResolutionColumn, maxDisplaysColumn, videoRamColumn);
+            Cells.AddRange(deviceColumn, nameColumn, vGpusPerGpuColumn, videoRamColumn);
         }
 
         private void SetCells()
@@ -363,17 +329,6 @@ namespace XenAdmin.SettingsPanels
                 vGpusPerGpuColumn.Value = vGpuType.Capacity();
             else
                 vGpusPerGpuColumn.Value = string.Empty;
-
-            if (!isPassThru)
-            {
-                var maxRes = vGpuType.MaxResolution();
-                maxResolutionColumn.Value = maxRes == "0x0" || String.IsNullOrEmpty(maxRes) ? "" : maxRes;
-            }
-
-            if (!isPassThru)
-                maxDisplaysColumn.Value = vGpuType.max_heads < 1 ? "" : String.Format("{0}", vGpuType.max_heads);
-            else
-                maxDisplaysColumn.Value = string.Empty;
 
             videoRamColumn.Value = vGpuType.framebuffer_size != 0 ? Util.MemorySizeStringSuitableUnits(vGpuType.framebuffer_size, true) : string.Empty;
         }

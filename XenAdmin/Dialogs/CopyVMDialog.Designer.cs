@@ -42,6 +42,7 @@ namespace XenAdmin.Dialogs
             this.groupBox1 = new XenAdmin.Controls.DecentGroupBox();
             this.tableLayoutPanelSrPicker = new System.Windows.Forms.TableLayoutPanel();
             this.labelSrHint = new System.Windows.Forms.Label();
+            this.buttonRescan = new System.Windows.Forms.Button();
             this.toolTipContainer1 = new XenAdmin.Controls.ToolTipContainer();
             this.FastClonePanel = new System.Windows.Forms.Panel();
             this.groupBox1.SuspendLayout();
@@ -53,8 +54,15 @@ namespace XenAdmin.Dialogs
             // srPicker1
             // 
             resources.ApplyResources(this.srPicker1, "srPicker1");
-            this.srPicker1.Connection = null;
+            this.srPicker1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.srPicker1.Name = "srPicker1";
+            this.srPicker1.NodeIndent = 3;
+            this.srPicker1.RootAlwaysExpanded = false;
+            this.srPicker1.ShowCheckboxes = false;
+            this.srPicker1.ShowDescription = true;
+            this.srPicker1.ShowImages = true;
+            this.srPicker1.ShowRootLines = true;
+            this.srPicker1.CanBeScannedChanged += new System.Action(this.srPicker1_CanBeScannedChanged);
             this.srPicker1.SelectedIndexChanged += new System.EventHandler(this.srPicker1_SelectedIndexChanged);
             // 
             // CloseButton
@@ -98,7 +106,7 @@ namespace XenAdmin.Dialogs
             resources.ApplyResources(this.CopyRadioButton, "CopyRadioButton");
             this.CopyRadioButton.Name = "CopyRadioButton";
             this.CopyRadioButton.UseVisualStyleBackColor = true;
-            this.CopyRadioButton.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
+            this.CopyRadioButton.CheckedChanged += new System.EventHandler(this.CopyRadioButton_CheckedChanged);
             // 
             // DescriptionTextBox
             // 
@@ -114,7 +122,6 @@ namespace XenAdmin.Dialogs
             // FastCloneDescription
             // 
             resources.ApplyResources(this.FastCloneDescription, "FastCloneDescription");
-            this.FastCloneDescription.AutoEllipsis = true;
             this.FastCloneDescription.Name = "FastCloneDescription";
             // 
             // groupBox1
@@ -131,12 +138,21 @@ namespace XenAdmin.Dialogs
             resources.ApplyResources(this.tableLayoutPanelSrPicker, "tableLayoutPanelSrPicker");
             this.tableLayoutPanelSrPicker.Controls.Add(this.srPicker1, 0, 1);
             this.tableLayoutPanelSrPicker.Controls.Add(this.labelSrHint, 0, 0);
+            this.tableLayoutPanelSrPicker.Controls.Add(this.buttonRescan, 1, 1);
             this.tableLayoutPanelSrPicker.Name = "tableLayoutPanelSrPicker";
             // 
             // labelSrHint
             // 
             resources.ApplyResources(this.labelSrHint, "labelSrHint");
+            this.tableLayoutPanelSrPicker.SetColumnSpan(this.labelSrHint, 2);
             this.labelSrHint.Name = "labelSrHint";
+            // 
+            // buttonRescan
+            // 
+            resources.ApplyResources(this.buttonRescan, "buttonRescan");
+            this.buttonRescan.Name = "buttonRescan";
+            this.buttonRescan.UseVisualStyleBackColor = true;
+            this.buttonRescan.Click += new System.EventHandler(this.buttonRescan_Click);
             // 
             // toolTipContainer1
             // 
@@ -167,7 +183,6 @@ namespace XenAdmin.Dialogs
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.Name = "CopyVMDialog";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            this.Shown += new System.EventHandler(this.CopyVMDialog_Shown);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tableLayoutPanelSrPicker.ResumeLayout(false);
@@ -197,5 +212,6 @@ namespace XenAdmin.Dialogs
         private System.Windows.Forms.Panel FastClonePanel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelSrPicker;
         private System.Windows.Forms.Label labelSrHint;
+        private System.Windows.Forms.Button buttonRescan;
     }
 }

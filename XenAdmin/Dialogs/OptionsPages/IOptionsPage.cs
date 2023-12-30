@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,15 +28,17 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Windows.Forms;
 using XenAdmin.Controls;
 
 namespace XenAdmin.Dialogs.OptionsPages
 {
     interface IOptionsPage : VerticalTabs.IVerticalTab
     {
+        void Build();
+        bool IsValidToSave(out Control control, out string invalidReason);
+        void ShowValidationMessages(Control control, string message);
+        void HideValidationMessages();
         void Save();
     }
 }

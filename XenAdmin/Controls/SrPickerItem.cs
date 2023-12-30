@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,279 +36,307 @@ using XenAPI;
 
 namespace XenAdmin.Controls
 {
-    public class SrPickerLunPerVDIItem : SrPickerVmItem
-    {
-        public SrPickerLunPerVDIItem(SR sr, Host aff, long diskSize, VDI[] vdis)
-            : base(sr, aff, diskSize, vdis)
-        {
-        }
-
-        protected override bool CanBeEnabled
-        {
-            get
-            {
-                if(TheSR.HBALunPerVDI())
-                    return !TheSR.IsBroken(false) && TheSR.CanBeSeenFrom(Affinity);
-                return base.CanBeEnabled;
-            }
-        }
-
-        protected override bool UnsupportedSR => false;
-    }
-
-
     public class SrPickerMigrateItem : SrPickerItem
     {
-        public SrPickerMigrateItem(SR sr, Host aff, long diskSize, VDI[] vdis)
-            : base(sr, aff, diskSize, vdis)
+        public SrPickerMigrateItem(SR sr, Host aff, VDI[] vdis)
+            : base(sr, aff, vdis)
         {
         }
 
-        /// <summary>
-        /// We can move VDIs to a local SR only if the VDI is attached to VMs
-        /// that have a home server that can see the SR
-        /// </summary>
-        private static bool HomeHostCanSeeTargetSr(VDI vdi, SR targetSr)
+        protected override bool CanBeEnabled(out string cannotEnableReason)
         {
-            var vms = vdi.GetVMs();
-            var homeHosts = (from VM vm in vms
-                let host = vm.Home()
-                where host != null
-                select host).ToList();
+            if (IsCurrentLocation(out cannotEnableReason))
+                return false;
 
-            return homeHosts.Count > 0 && homeHosts.All(targetSr.CanBeSeenFrom);
-        }
-
-        protected override string DisabledReason
-        {
-            get
+            if (TheSR.IsLocalSR())
             {
-                if (ExistingVDILocation())
-                    return Messages.CURRENT_LOCATION;
-
-                if (TheSR.IsLocalSR())
+                foreach (var vdi in ExistingVDIs)
                 {
-                    foreach (var vdi in existingVDIs)
-                    {
-                        var homeHosts = new List<Host>();
-                        var vms = vdi.GetVMs();
-                        foreach (var vm in vms)
-                        {
-                            var homeHost = vm.Home();
-                            if (homeHost != null)
-                            {
-                                homeHosts.Add(homeHost);
+                    var homeHosts = new List<Host>();
 
-                                if (!TheSR.CanBeSeenFrom(homeHost))
-                                    return vm.power_state == vm_power_state.Running
-                                        ? Messages.SRPICKER_ERROR_LOCAL_SR_MUST_BE_RESIDENT_HOSTS
-                                        : string.Format(Messages.SR_CANNOT_BE_SEEN, Helpers.GetName(homeHost));
+                    var vms = vdi.GetVMs();
+                    foreach (var vm in vms)
+                    {
+                        var homeHost = vm.Home();
+                        if (homeHost != null)
+                        {
+                            homeHosts.Add(homeHost);
+
+                            if (!TheSR.CanBeSeenFrom(homeHost))
+                            {
+                                cannotEnableReason = vm.power_state == vm_power_state.Running
+                                    ? Messages.SRPICKER_ERROR_LOCAL_SR_MUST_BE_RESIDENT_HOSTS
+                                    : string.Format(Messages.SR_CANNOT_BE_SEEN, Helpers.GetName(homeHost));
+                                return false;
                             }
                         }
+                    }
 
-                        if (homeHosts.Count == 0)
-                            return Messages.SR_IS_LOCAL;
+                    if (homeHosts.Count == 0)
+                    {
+                        cannotEnableReason = Messages.SR_IS_LOCAL;
+                        return false;
                     }
                 }
-
-                if (!TheSR.CanBeSeenFrom(Affinity))
-                    return TheSR.Connection != null
-                        ? string.Format(Messages.SR_CANNOT_BE_SEEN, Affinity == null ? Helpers.GetName(TheSR.Connection) : Helpers.GetName(Affinity))
-                        : Messages.SR_DETACHED;
-
-                if (!TheSR.SupportsStorageMigration())
-                    return Messages.UNSUPPORTED_SR_TYPE;
-
-                return base.DisabledReason;
             }
-        }
 
-        protected override bool CanBeEnabled
-        {
-            get
-            {
-                return existingVDIs.Length > 0 &&
-                       !ExistingVDILocation() &&
-                       (!TheSR.IsLocalSR() || existingVDIs.All(v => HomeHostCanSeeTargetSr(v, TheSR))) &&
-                       TheSR.SupportsVdiCreate() &&
-                       !TheSR.IsDetached() && TheSR.VdiCreationCanProceed(DiskSize) &&
-                       TheSR.SupportsStorageMigration();
-            }
+            return SupportsStorageMigration(out cannotEnableReason) &&
+                   SupportsVdiCreate(out cannotEnableReason) &&
+                   !IsDetached(out cannotEnableReason) &&
+                   TheSR.CanFitDisks(out cannotEnableReason, ExistingVDIs);
         }
     }
 
 
-    public class SrPickerMoveCopyItem : SrPickerItem
+    public class SrPickerCopyItem : SrPickerItem
     {
-        public SrPickerMoveCopyItem(SR sr, Host aff, long diskSize, VDI[] vdis)
-            : base(sr, aff, diskSize, vdis)
+        public SrPickerCopyItem(SR sr, Host aff, VDI[] vdis)
+            : base(sr, aff, vdis)
         {
         }
 
-        protected override bool CanBeEnabled
+        protected override bool CanBeEnabled(out string cannotEnableReason)
         {
-            get
-            {
-                return !TheSR.IsDetached() && TheSR.SupportsVdiCreate() && !ExistingVDILocation() &&
-                       TheSR.VdiCreationCanProceed(DiskSize);
-            }
+            return !IsDetached(out cannotEnableReason) &&
+                   SupportsVdiCreate(out cannotEnableReason) &&
+                   TheSR.CanFitDisks(out cannotEnableReason, ExistingVDIs);
+        }
+    }
+
+    
+    public class SrPickerMoveItem : SrPickerItem
+    {
+        public SrPickerMoveItem(SR sr, Host aff, VDI[] vdis)
+            : base(sr, aff, vdis)
+        {
         }
 
-        protected override string DisabledReason
-        {   
-	        get 
-	        {
-                if (TheSR.IsDetached())
-                    return Messages.SR_DETACHED;
-                if (ExistingVDILocation())
-                    return Messages.CURRENT_LOCATION;
-	            return base.DisabledReason;
-	        }
+        protected override bool CanBeEnabled(out string cannotEnableReason)
+        {
+            return !IsDetached(out cannotEnableReason) &&
+                   !IsCurrentLocation(out cannotEnableReason) &&
+                   SupportsVdiCreate(out cannotEnableReason) &&
+                   TheSR.CanFitDisks(out cannotEnableReason, ExistingVDIs);
         }
-                        
     }
 
 
     public class SrPickerInstallFromTemplateItem : SrPickerItem
     {
-        public SrPickerInstallFromTemplateItem(SR sr, Host aff, long diskSize, VDI[] vdis)
-            : base(sr, aff, diskSize, vdis)
+        public SrPickerInstallFromTemplateItem(SR sr, Host aff, VDI[] vdis)
+            : base(sr, aff, vdis)
         {
         }
 
-        protected override bool CanBeEnabled
+        protected override bool CanBeEnabled(out string cannotEnableReason)
         {
-            get { return TheSR.SupportsVdiCreate() && !TheSR.IsDetached() && TheSR.VdiCreationCanProceed(DiskSize); }
-        }
-
-        protected override string DisabledReason
-        {
-            get
-            {
-                if (TheSR.IsDetached())
-                    return Messages.SR_DETACHED;
-                return base.DisabledReason;
-            }
+            return SupportsVdiCreate(out cannotEnableReason) &&
+                   !IsDetached(out cannotEnableReason) &&
+                   TheSR.CanFitDisks(out cannotEnableReason, ExistingVDIs);
         }
     }
 
 
-
     public class SrPickerVmItem : SrPickerItem
     {
-        public SrPickerVmItem(SR sr, Host aff, long diskSize, VDI[] vdis)
-            : base(sr, aff, diskSize, vdis)
+        public SrPickerVmItem(SR sr, Host aff, VDI[] vdis)
+            : base(sr, aff, vdis)
         {
         }
 
-        protected override bool CanBeEnabled
+        protected override bool CanBeEnabled(out string cannotEnableReason)
         {
-            get { return TheSR.CanBeSeenFrom(Affinity) && TheSR.CanCreateVmOn() && TheSR.VdiCreationCanProceed(DiskSize); }
+            return CanBeSeenFromAffinity(out cannotEnableReason) &&
+                   SupportsVdiCreate(out cannotEnableReason) &&
+                   !IsBroken(out cannotEnableReason) &&
+                   TheSR.CanFitDisks(out cannotEnableReason, ExistingVDIs);
+        }
+    }
+
+
+    public class SrPickerLunPerVDIItem : SrPickerVmItem
+    {
+        public SrPickerLunPerVDIItem(SR sr, Host aff, VDI[] vdis)
+            : base(sr, aff, vdis)
+        {
         }
 
-        protected override string DisabledReason
+        protected override bool CanBeEnabled(out string cannotEnableReason)
         {
-            get
-            {
-                if (Affinity == null && !TheSR.shared)
-                    return Messages.SR_IS_LOCAL;
-                if (!TheSR.CanBeSeenFrom(Affinity))
-                    return TheSR.Connection != null
-                        ? string.Format(Messages.SR_CANNOT_BE_SEEN, Affinity == null ? Helpers.GetName(TheSR.Connection) : Helpers.GetName(Affinity))
-                        : Messages.SR_DETACHED;
-                return base.DisabledReason;
-            }
+            if (TheSR.HBALunPerVDI())
+                return CanBeSeenFromAffinity(out cannotEnableReason) &&
+                       !IsBroken(out cannotEnableReason);
+
+            return base.CanBeEnabled(out cannotEnableReason);
         }
+
+        protected override bool SupportsCurrentOperation => true;
     }
 
 
     public abstract class SrPickerItem : CustomTreeNode, IComparable<SrPickerItem>
     {
+        private bool _scanning;
         public SR TheSR { get; }
-        public bool Show { get; private set; }
+        public bool Show { get; private set; } = true;
         protected readonly Host Affinity;
-        protected long DiskSize { get; private set; }
-        protected readonly VDI[] existingVDIs;
+        protected VDI[] ExistingVDIs { get; private set; }
 
-        protected SrPickerItem(SR sr, Host aff, long diskSize, VDI[] vdis)
+        public event Action<SrPickerItem> ItemUpdated;
+
+        protected SrPickerItem(SR sr, Host aff, VDI[] vdis)
         {
-            existingVDIs = vdis ?? new VDI[0];
+            ExistingVDIs = vdis ?? Array.Empty<VDI>();
             TheSR = sr;
             Affinity = aff;
-            DiskSize = diskSize;
             Update();
         }
 
-        private bool ShowHiddenVDIs
+        public bool Scanning
         {
-            get
+            get => _scanning;
+            set
             {
-                return TheSR.ShowInVDISRList(Properties.Settings.Default.ShowHiddenVMs);
+                _scanning = value;
+                Update();
             }
         }
 
-        protected virtual bool UnsupportedSR => TheSR.HBALunPerVDI();
+        protected virtual bool SupportsCurrentOperation => !TheSR.HBALunPerVDI();
 
-        protected abstract bool CanBeEnabled { get; }
+        protected abstract bool CanBeEnabled(out string cannotEnableReason);
 
-        protected virtual void SetImage()
+        public void UpdateDisks(params VDI[] disks)
         {
-            Image = Images.GetImage16For(TheSR);
-        }
-
-        public void UpdateDiskSize(long diskSize)
-        {
-            DiskSize = diskSize;
+            ExistingVDIs = disks;
             Update();
         }
 
-        private void Update()
+        public void Update()
         {
             Text = TheSR.Name();
-            SetImage();
+            Image = Images.GetImage16For(TheSR);
 
-            if (UnsupportedSR)
+            if (!SupportsCurrentOperation || !SupportsVdiCreate(out _) ||
+                !TheSR.Show(Properties.Settings.Default.ShowHiddenVMs))
+            {
+                Show = false;
                 return;
+            }
 
-            if (ShowHiddenVDIs && !ExistingVDILocation() && CanBeEnabled)
+            if (Scanning)
+            {
+                Description = Messages.SR_REFRESH_ACTION_TITLE_GENERIC;
+                Enabled = false;
+            }
+            else if (CanBeEnabled(out var cannotEnableReason))
             {
                 Description = string.Format(Messages.SRPICKER_DISK_FREE, Util.DiskSizeString(TheSR.FreeSpace(), 2),
                     Util.DiskSizeString(TheSR.physical_size, 2));
                 Enabled = true;
-                Show = true;
             }
-            else if (TheSR.PBDs.Count > 0 && TheSR.SupportsVdiCreate())
+            else
             {
-                Description = DisabledReason;
+                Description = cannotEnableReason;
                 Enabled = false;
-                Show = true;
             }
+
+            ItemUpdated?.Invoke(this);
         }
 
-        protected bool ExistingVDILocation()
+        protected bool IsCurrentLocation(out string cannotEnableReason)
         {
-            return existingVDIs.Length > 0 && existingVDIs.All(vdi => vdi.SR.opaque_ref == TheSR.opaque_ref);
-        }
-
-        protected virtual string DisabledReason
-        {
-            get
+            if (ExistingVDIs.Length > 0 && ExistingVDIs.All(vdi => vdi.SR.opaque_ref == TheSR.opaque_ref))
             {
-                if (TheSR.IsBroken(false))
-                    return Messages.SR_IS_BROKEN;
-                if (TheSR.IsFull())
-                    return Messages.SRPICKER_SR_FULL;
-                if (DiskSize > TheSR.physical_size)
-                    return string.Format(Messages.SR_PICKER_DISK_TOO_BIG, Util.DiskSizeString(DiskSize, 2),
-                                         Util.DiskSizeString(TheSR.physical_size, 2));
-                if (DiskSize > TheSR.FreeSpace())
-                    return string.Format(Messages.SR_PICKER_INSUFFICIENT_SPACE, Util.DiskSizeString(DiskSize, 2),
-                                         Util.DiskSizeString(TheSR.FreeSpace(), 2));
-                if (DiskSize > SR.DISK_MAX_SIZE)
-                    return string.Format(Messages.SR_DISKSIZE_EXCEEDS_DISK_MAX_SIZE,
-                        Util.DiskSizeString(SR.DISK_MAX_SIZE, 0));
-                return "";
+                cannotEnableReason = Messages.CURRENT_LOCATION;
+                return true;
             }
+
+            cannotEnableReason = string.Empty;
+            return false;
+        }
+
+        protected bool IsBroken(out string cannotEnableReason)
+        {
+            if (TheSR.IsBroken())
+            {
+                cannotEnableReason = Messages.SR_IS_BROKEN;
+                return true;
+            }
+
+            cannotEnableReason = string.Empty;
+            return false;
+        }
+
+        protected bool IsDetached(out string cannotEnableReason)
+        {
+            if (TheSR.IsDetached())
+            {
+                cannotEnableReason = Messages.SR_DETACHED;
+                return true;
+            }
+
+            cannotEnableReason = string.Empty;
+            return false;
+        }
+
+        protected bool SupportsVdiCreate(out string cannotEnableReason)
+        {
+            if (TheSR.SupportsVdiCreate())
+            {
+                cannotEnableReason = string.Empty;
+                return true;
+            }
+
+            cannotEnableReason = Messages.STORAGE_READ_ONLY;
+            return false;
+        }
+
+        protected bool SupportsStorageMigration(out string cannotEnableReason)
+        {
+            if (TheSR.SupportsStorageMigration())
+            {
+                cannotEnableReason = string.Empty;
+                return true;
+            }
+
+            cannotEnableReason = Messages.UNSUPPORTED_SR_TYPE;
+            return false;
+        }
+
+        protected bool CanBeSeenFromAffinity(out string cannotEnableReason)
+        {
+            if (Affinity == null)
+            {
+                if (TheSR.shared)
+                {
+                    cannotEnableReason = string.Empty;
+                    return true;
+                }
+
+                cannotEnableReason = Messages.SR_IS_LOCAL;
+                return false;
+            }
+
+            foreach (var pbdRef in TheSR.PBDs)
+            {
+                var pbd = TheSR.Connection.Resolve(pbdRef);
+                    
+                if (pbd.host.opaque_ref == Affinity.opaque_ref)
+                {
+                    if (pbd.currently_attached)
+                    {
+                        cannotEnableReason = string.Empty;
+                        return true;
+                    }
+
+                    cannotEnableReason = string.Format(Messages.SR_DETACHED_FROM_HOST, Helpers.GetName(Affinity));
+                    return false;
+                }
+            }
+
+            cannotEnableReason = string.Format(Messages.SR_CANNOT_BE_SEEN, Helpers.GetName(Affinity));
+            return false;
         }
 
         public int CompareTo(SrPickerItem other)
@@ -332,20 +359,22 @@ namespace XenAdmin.Controls
         }
 
 
-        public static SrPickerItem Create(SR sr, SrPicker.SRPickerType usage, Host aff, long diskSize, VDI[] vdis)
+        public static SrPickerItem Create(SR sr, SrPicker.SRPickerType usage, Host aff, VDI[] vdis)
         {
             switch (usage)
             {
                 case SrPicker.SRPickerType.Migrate:
-                    return new SrPickerMigrateItem(sr, aff, diskSize, vdis);
-                case SrPicker.SRPickerType.MoveOrCopy:
-                    return new SrPickerMoveCopyItem(sr, aff, diskSize, vdis);
+                    return new SrPickerMigrateItem(sr, aff, vdis);
+                case SrPicker.SRPickerType.Copy:
+                    return new SrPickerCopyItem(sr, aff, vdis);
+                case SrPicker.SRPickerType.Move:
+                    return new SrPickerMoveItem(sr, aff, vdis);
                 case SrPicker.SRPickerType.InstallFromTemplate:
-                    return new SrPickerInstallFromTemplateItem(sr, aff, diskSize, vdis);
+                    return new SrPickerInstallFromTemplateItem(sr, aff, vdis);
                 case SrPicker.SRPickerType.VM:
-                    return new SrPickerVmItem(sr, aff, diskSize, vdis);
+                    return new SrPickerVmItem(sr, aff, vdis);
                 case SrPicker.SRPickerType.LunPerVDI:
-                    return new SrPickerLunPerVDIItem(sr, aff, diskSize, vdis);
+                    return new SrPickerLunPerVDIItem(sr, aff, vdis);
                 default:
                     throw new ArgumentException("There is no SRPickerItem for the type: " + usage);
             }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,11 +32,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Core;
 using XenAPI;
 
 
@@ -64,20 +60,11 @@ namespace XenAdmin.Controls.Ballooning
         [Browsable(false)]
         public double Increment { get; set; }
 
-        public double Dynamic_min
-        {
-            get { return dynamic_min; }
-        }
+        public double Dynamic_min => dynamic_min;
 
-        public double Dynamic_max
-        {
-            get { return dynamic_max; }
-        }
+        public double Dynamic_max => dynamic_max;
 
-        private bool Equal
-        {
-            get { return Dynamic_min == Dynamic_max;  }
-        }
+        private bool Equal => Dynamic_min == Dynamic_max;
 
         public void SetRanges(double dynamic_min_lowlimit, double dynamic_min_highlimit, double dynamic_max_lowlimit, double dynamic_max_highlimit, string units)
         {
@@ -141,7 +128,7 @@ namespace XenAdmin.Controls.Ballooning
             static_max = vm.memory_static_max;
             dynamic_min = dynamic_min_orig = Util.CorrectRoundingErrors(vm.memory_dynamic_min);
             dynamic_max = dynamic_max_orig = Util.CorrectRoundingErrors(vm.memory_dynamic_max);
-            has_ballooning = vm.has_ballooning();
+            has_ballooning = vm.SupportsBallooning();
             allowEdit = allowMemEdit;
         }
 
@@ -228,10 +215,10 @@ namespace XenAdmin.Controls.Ballooning
             Rectangle rect = new Rectangle(barArea.Left, barArea.Top, left_width, barArea.Height);
             string bytesString = Util.MemorySizeStringSuitableUnits(memoryUsed, false);
             string toolTip = string.Format(multiple ? Messages.CURRENT_MEMORY_USAGE_MULTIPLE : Messages.CURRENT_MEMORY_USAGE, bytesString);
-            DrawToTarget(g, barArea, rect, BallooningColors.VMShinyBar_Used, bytesString, BallooningColors.VMShinyBar_Text, HorizontalAlignment.Right, toolTip);
+            DrawToTarget(g, barArea, rect, VMShinyBar_Used, bytesString, ShinyBar_Text, HorizontalAlignment.Right, toolTip);
 
             rect = new Rectangle(barArea.Left + left_width, barArea.Top, barArea.Width - left_width, barArea.Height);
-            DrawToTarget(g, barArea, rect, BallooningColors.VMShinyBar_Unused);
+            DrawToTarget(g, barArea, rect, ShinyBar_Unused);
 
             // Sliders
 
@@ -342,7 +329,7 @@ namespace XenAdmin.Controls.Ballooning
             int min = barArea.Left + (int)(SliderMinLimit / BytesPerPixel);
             int max = barArea.Left + (int)(SliderMaxLimit / BytesPerPixel);
 
-            using (Brush brush = new SolidBrush(BallooningColors.SliderLimits))
+            using (Brush brush = new SolidBrush(SliderLimits))
             {
                 g.FillRectangle(brush, min, barRect.Bottom, max - min, Height);
             }
@@ -354,13 +341,13 @@ namespace XenAdmin.Controls.Ballooning
             Image min_image, max_image;
             if (allowEdit)
             {
-                min_image = XenAdmin.Properties.Resources.memory_dynmin_slider;
-                max_image = XenAdmin.Properties.Resources.memory_dynmax_slider;
+                min_image = Images.StaticImages.memory_dynmin_slider;
+                max_image = Images.StaticImages.memory_dynmax_slider;
             }
             else
             {
-                min_image = XenAdmin.Properties.Resources.memory_dynmin_slider_noedit;
-                max_image = XenAdmin.Properties.Resources.memory_dynmax_slider_noedit;                
+                min_image = Images.StaticImages.memory_dynmin_slider_noedit;
+                max_image = Images.StaticImages.memory_dynmax_slider_noedit;                
             }
 
             // Calculate where to draw the sliders
@@ -373,16 +360,16 @@ namespace XenAdmin.Controls.Ballooning
             if (allowEdit)
             {
                 if (activeSlider == Slider.MIN)
-                    min_image = XenAdmin.Properties.Resources.memory_dynmin_slider_dark;
+                    min_image = Images.StaticImages.memory_dynmin_slider_dark;
                 if (activeSlider == Slider.MAX)
-                    max_image = XenAdmin.Properties.Resources.memory_dynmax_slider_dark;
+                    max_image = Images.StaticImages.memory_dynmax_slider_dark;
 
                 if (activeSlider == Slider.NONE && !mouseIsDown)
                 {
                     if (min_slider_rect.Contains(mouseLocation))
-                        min_image = XenAdmin.Properties.Resources.memory_dynmin_slider_light;
+                        min_image = Images.StaticImages.memory_dynmin_slider_light;
                     else if (max_slider_rect.Contains(mouseLocation))
-                        max_image = XenAdmin.Properties.Resources.memory_dynmax_slider_light;
+                        max_image = Images.StaticImages.memory_dynmax_slider_light;
                 }
             }
 
@@ -391,12 +378,6 @@ namespace XenAdmin.Controls.Ballooning
             g.DrawImageUnscaled(max_image, max_pt);
         }
 
-        protected override int barHeight
-        {
-            get
-            {
-                return 20;
-            }
-        }
+        protected override int barHeight => 20;
     }
 }

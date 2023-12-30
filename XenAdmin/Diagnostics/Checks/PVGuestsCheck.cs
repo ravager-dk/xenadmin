@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,53 +30,94 @@
 
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using XenAdmin.Core;
-using XenAPI;
+using XenAdmin.Diagnostics.Hotfixing;
 using XenAdmin.Diagnostics.Problems;
 using XenAdmin.Diagnostics.Problems.PoolProblem;
-using System.Collections.Generic;
-using System.Web.Script.Serialization;
+using XenAdmin.Diagnostics.Problems.HostProblem;
+using XenAPI;
+
 
 namespace XenAdmin.Diagnostics.Checks
 {
     class PVGuestsCheck : HostPostLivenessCheck
     {
         private readonly Pool _pool;
-        private readonly bool _upgrade;
-        private readonly Dictionary<string, string> _installMethodConfig;
+        private readonly XenServerVersion _newVersion;
         private readonly bool _manualUpgrade;
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly Dictionary<string, string> _installMethodConfig;
+        private List<VM> _pvGuests = new List<VM>();
 
-        public PVGuestsCheck(Pool pool, bool upgrade, Dictionary<string, string> installMethodConfig = null, bool manualUpgrade = false)
-            : base(Helpers.GetMaster(pool.Connection))
+        public PVGuestsCheck(Host host, XenServerVersion newVersion)
+            : base(host)
         {
-            _pool = pool;
-            _upgrade = upgrade;
-            _installMethodConfig = installMethodConfig;
+            _newVersion = newVersion;
+            _pool = Helpers.GetPoolOfOne(Host?.Connection);
+        }
+
+        public PVGuestsCheck(Host coordinator, bool manualUpgrade = false, Dictionary<string, string> installMethodConfig = null)
+            : base(coordinator)
+        {
+            _pool = Helpers.GetPoolOfOne(Host?.Connection);
             _manualUpgrade = manualUpgrade;
+            _installMethodConfig = installMethodConfig;
+        }
+
+        public override bool CanRun()
+        {
+            if (Helpers.YangtzeOrGreater(Host))
+                return false;
+
+            if (_pool == null)
+                return false;
+
+            _pvGuests = _pool.Connection.Cache.VMs.Where(vm => vm.IsPvVm()).ToList();
+            if (_pvGuests.Count <= 0)
+                return false;
+
+            if (_newVersion != null && !Helpers.NaplesOrGreater(Host))
+                return false;
+
+            return true;
         }
 
         protected override Problem RunHostCheck()
         {
-            string upgradePlatformVersion;
-            if (!_pool.Connection.Cache.VMs.Any(vm => vm.IsPvVm()))
-                return null;
-            if (!_upgrade || _manualUpgrade)
-                return new PoolHasPVGuestWarningUrl(this, _pool);
-            try
+            //update case
+            if (_newVersion != null)
             {
-                var result = Host.call_plugin(Host.Connection.Session, Host.opaque_ref, "prepare_host_upgrade.py", "getVersion", _installMethodConfig);
-                var serializer = new JavaScriptSerializer();
-                var version = (Dictionary<string, object>)serializer.DeserializeObject(result);
-                upgradePlatformVersion = version.ContainsKey("platform-version") ? (string)version["platform-version"] : null;
+                if (_newVersion.Version.CompareTo(new Version(BrandManager.ProductVersion821)) >= 0)
+                    return new PoolHasPVGuestProblem(this, _pool, _pvGuests);
+                
+                return new PoolHasPVGuestWarningUrl(this, _pool, _pvGuests);
             }
-            catch (Exception exception)
+
+            //upgrade case
+
+            if (!_manualUpgrade)
             {
-                log.Warn($"Plugin call prepare_host_upgrade.getVersion on {Host.Name()} threw an exception.", exception);
-                return new PoolHasPVGuestWarningUrl(this, _pool);
+                var hotfix = HotfixFactory.Hotfix(Host);
+                if (hotfix != null && hotfix.ShouldBeAppliedTo(Host))
+                    return new HostDoesNotHaveHotfixWarning(this, Host);
             }
+
+            string upgradePlatformVersion = null;
+
+            if (_installMethodConfig != null)
+                Host.TryGetUpgradeVersion(Host, _installMethodConfig, out upgradePlatformVersion, out _);
+
+            // we don't know the upgrade version, so add warning
+            // (this is the case of the manual upgrade or when the rpu plugin doesn't have the function)
+            if (string.IsNullOrEmpty(upgradePlatformVersion))
+                return new PoolHasPVGuestWarningUrl(this, _pool, _pvGuests);
+
+            if (Helpers.YangtzeOrGreater(upgradePlatformVersion))
+                return new PoolHasPVGuestProblem(this, _pool, _pvGuests);
+
             if (Helpers.QuebecOrGreater(upgradePlatformVersion))
-                return new PoolHasPVGuestWarningUrl(this, _pool);
+                return new PoolHasPVGuestWarningUrl(this, _pool, _pvGuests);
+
             return null;
         }
 

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -68,13 +67,7 @@ namespace XenAdmin.SettingsPanels
             get { return _ValidToSave; }
         }
 
-        public Image Image
-        {
-            get
-            {
-                return Properties.Resources._000_Network_h32bit_16;
-            }
-        }
+        public Image Image => Images.StaticImages._000_Network_h32bit_16;
 
         public void SetXenObjects(IXenObject orig, IXenObject clone)
         {
@@ -82,8 +75,8 @@ namespace XenAdmin.SettingsPanels
             if (network == null)
                 return;
 
-            // use the pif of the master to populate the controls. We use it later in the create_VLAN_from_PIF call in Network Action
-            host = Helpers.GetMaster(network.Connection);
+            // use the pif of the coordinator to populate the controls. We use it later in the create_VLAN_from_PIF call in Network Action
+            host = Helpers.GetCoordinator(network.Connection);
             
             Repopulate();
             EnableDisable();
@@ -373,7 +366,7 @@ namespace XenAdmin.SettingsPanels
             foreach (VIF v in network.Connection.ResolveAll<VIF>(network.VIFs))
             {
                 VM vm = network.Connection.Resolve<VM>(v.VM);
-                if (vm.power_state != vm_power_state.Running || vm.GetVirtualisationStatus().HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED))
+                if (vm.power_state != vm_power_state.Running || vm.GetVirtualizationStatus(out _).HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
                     continue;
 
                 runningVMsWithoutTools = true;
@@ -439,7 +432,7 @@ namespace XenAdmin.SettingsPanels
                         !pif.Show(Properties.Settings.Default.ShowHiddenVMs))
                         continue;
 
-                    if (!pif.IsPhysical() || pif.IsBondSlave())
+                    if (!pif.IsPhysical() || pif.IsBondMember())
                         continue;
 
                     if (pif.host.opaque_ref != host.opaque_ref)
@@ -528,6 +521,10 @@ namespace XenAdmin.SettingsPanels
         }
 
         public void ShowLocalValidationMessages()
+        {
+        }
+
+        public void HideLocalValidationMessages()
         {
         }
 
@@ -747,10 +744,10 @@ namespace XenAdmin.SettingsPanels
                 if (HostPNICList.SelectedIndex == 0)
                     return Messages.NETWORKPANEL_INTERNAL;
 
-                if (pif.sriov_logical_PIF_of != null && pif.sriov_logical_PIF_of.Count != 0)
+                if (pif?.sriov_logical_PIF_of != null && pif.sriov_logical_PIF_of.Count != 0)
                     return Messages.NETWORK_SRIOV;
 
-                return String.Format(Messages.NIC_VLAN, HostPNICList.SelectedItem, numUpDownVLAN.Value);
+                return string.Format(Messages.NIC_VLAN, HostPNICList.SelectedItem, numUpDownVLAN.Value);
             }
         }
 

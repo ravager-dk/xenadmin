@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -195,8 +194,8 @@ namespace XenAdmin.Actions
             List<Role> rolesAbleToCompleteAction;
             bool ableToCompleteAction = Role.CanPerform(methodsToCheck, xenConnection, out rolesAbleToCompleteAction);
             
-            log.DebugFormat("Roles able to complete action: {0}", Role.FriendlyCSVRoleList(rolesAbleToCompleteAction));
-            log.DebugFormat("Subject {0} has roles: {1}", xenConnection.Session.UserLogName(), Role.FriendlyCSVRoleList(xenConnection.Session.Roles));
+            log.DebugFormat("Roles able to complete action: {0}", Role.FriendlyCsvRoleList(rolesAbleToCompleteAction));
+            log.DebugFormat("Subject {0} has roles: {1}", xenConnection.Session.UserLogName(), Role.FriendlyCsvRoleList(xenConnection.Session.Roles));
 
             if (ableToCompleteAction)
             {
@@ -207,7 +206,7 @@ namespace XenAdmin.Actions
             // Can't run on this connection, bail out
             string desc = string.Format(FriendlyErrorNames.RBAC_PERMISSION_DENIED_FRIENDLY_CONNECTION,
                 xenConnection.Session.FriendlyRoleDescription(),
-                Role.FriendlyCSVRoleList(rolesAbleToCompleteAction),
+                Role.FriendlyCsvRoleList(rolesAbleToCompleteAction),
                 xenConnection.Name);
             throw new Exception(desc);
         }
@@ -227,11 +226,10 @@ namespace XenAdmin.Actions
             {
                 Program.Invoke(Program.MainWindow, delegate
                 {
-                    using (var d = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(System.Drawing.SystemIcons.Warning, string.Format(Messages.FORCE_CLOSE_PLUGIN_PROMPT, _menuItemFeature.ToString())),
-                        "ProcessForceClosePrompt",
+                    using (var d = new WarningDialog(string.Format(Messages.FORCE_CLOSE_PLUGIN_PROMPT, _menuItemFeature.ToString()),
                         new ThreeButtonDialog.TBDButton(Messages.FORCE_CLOSE, DialogResult.Yes),
-                        new ThreeButtonDialog.TBDButton(Messages.ALLOW_TO_CONTINUE, DialogResult.No)))
+                        new ThreeButtonDialog.TBDButton(Messages.ALLOW_TO_CONTINUE, DialogResult.No))
+                        {HelpNameSetter = "ProcessForceClosePrompt"})
                     {
                         if (d.ShowDialog(Program.MainWindow) == DialogResult.Yes && !_extAppProcess.HasExited)
                             _extAppProcess.Kill();
@@ -247,40 +245,40 @@ namespace XenAdmin.Actions
         }
 
         // Returns a set of params which relate to the object you have selected in the treeview
-        private List<string> RetrieveParams(IXenObject obj)
+        private IEnumerable<string> RetrieveParams(IXenObject obj)
         {
-            IXenConnection connection = obj.Connection;
-            Host master = connection != null ? Helpers.GetMaster(connection) : null; // get master asserts connection is not null
-            string masterAddress = EmptyParameter;
+            var connection = obj?.Connection;
+            var coordinator = connection != null ? Helpers.GetCoordinator(connection) : null; // get coordinator asserts connection is not null
+            var coordinatorAddress = EmptyParameter;
 
-            if (master != null)
+            if (coordinator != null)
             {
-                masterAddress = Helpers.GetUrl(master.Connection);
-                WriteTrustedCertificates(master.Connection);
+                coordinatorAddress = Helpers.GetUrl(coordinator.Connection);
+                WriteTrustedCertificates(coordinator.Connection);
             }
 
-            string sessionRef = connection.Session != null ? connection.Session.opaque_ref : EmptyParameter;
-            string objCls = obj != null ? obj.GetType().Name : EmptyParameter;
-            string objUuid = obj != null && connection.Session != null ? Helpers.GetUuid(obj) : EmptyParameter;
-            return new List<string>(new string[] { masterAddress, sessionRef, objCls, objUuid });
+            var sessionRef = connection?.Session != null ? connection.Session.opaque_ref : EmptyParameter;
+            var objCls = obj != null ? obj.GetType().Name : EmptyParameter;
+            var objUuid = connection?.Session != null ? Helpers.GetUuid(obj) : EmptyParameter;
+            return new List<string>(new string[] { coordinatorAddress, sessionRef, objCls, objUuid });
         }
 
         // Returns a set of params which relate to the connection in general, with no obj information
         private List<string> RetrieveParams(IXenConnection connection)
         {
-            Host master = connection != null ? Helpers.GetMaster(connection) : null; // get master asserts connection is not null
-            string masterAddress = EmptyParameter;
+            Host coordinator = connection != null ? Helpers.GetCoordinator(connection) : null; // get coordinator asserts connection is not null
+            string coordinatorAddress = EmptyParameter;
 
-            if (master != null)
+            if (coordinator != null)
             {
-                masterAddress = Helpers.GetUrl(master.Connection);
-                WriteTrustedCertificates(master.Connection);
+                coordinatorAddress = Helpers.GetUrl(coordinator.Connection);
+                WriteTrustedCertificates(coordinator.Connection);
             }
 
-            string sessionRef = connection.Session != null ? connection.Session.opaque_ref : EmptyParameter;
+            string sessionRef = connection?.Session != null ? connection.Session.opaque_ref : EmptyParameter;
             string objCls = BlankParamter;
             string objUuid = BlankParamter;
-            return new List<string>(new string[] { masterAddress, sessionRef, objCls, objUuid });
+            return new List<string>(new string[] { coordinatorAddress, sessionRef, objCls, objUuid });
         }
 
         private void WriteTrustedCertificates(IXenConnection connection)

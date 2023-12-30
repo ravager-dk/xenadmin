@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System.Collections;
 using System.Collections.Generic;
 using XenAdmin.Controls.CheckableDataGridView;
-using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Dialogs.LicenseManagerLicenseRowComparers;
 

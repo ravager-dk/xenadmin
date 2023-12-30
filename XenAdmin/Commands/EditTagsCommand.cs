@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,13 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Model;
 using XenAdmin.Dialogs;
 using XenAPI;
 using XenAdmin.Actions;
 using System.Windows.Forms;
 using System.Drawing;
-using XenAdmin.Properties;
 
 
 namespace XenAdmin.Commands
@@ -61,17 +57,17 @@ namespace XenAdmin.Commands
         {
         }
 
-        private bool CanExecute(IXenObject xenObject)
+        private bool CanRun(IXenObject xenObject)
         {
             return !(xenObject is Folder) && xenObject.Connection != null;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<IXenObject>(CanExecute);
+            return selection.AllItemsAre<IXenObject>(CanRun);
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<string> tags = new List<string>();
             List<string> indeterminateTags = new List<string>();

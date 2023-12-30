@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using XenAPI;
 using XenAdmin.Core;
@@ -50,7 +47,7 @@ namespace XenAdmin.Controls.CustomDataGraph
             : base(x, y)
         {
             Message = message;
-            xo = Helpers.XenObjectFromMessage(message);
+            xo = message.GetXenObject();
         }
 
         public void DrawToBuffer(Graphics g, Point p, Rectangle rectangle, int stripheight)

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,25 +28,81 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAPI;
+using System.Linq;
+using XenAdmin.Actions;
+using XenAdmin.Actions.VMActions;
+using XenAdmin.Core;
 using XenAdmin.Dialogs;
-using System.Collections.ObjectModel;
-
+using XenAdmin.Network;
+using XenAdmin.Wizards.CrossPoolMigrateWizard;
+using XenAPI;
 
 namespace XenAdmin.Commands
 {
-    /// <summary>
-    /// Launches the Copy-VM dialog for the selected VM.
-    /// </summary>
-    internal class CopyVMCommand : Command
+    internal abstract class CopyVmTemplateCommandBase : Command
     {
-        /// <summary>
-        /// Initializes a new instance of this Command. The parameter-less constructor is required in the derived
-        /// class if it is to be attached to a ToolStrip menu item or button. It should not be used in any other scenario.
-        /// </summary>
+        protected CopyVmTemplateCommandBase()
+        {
+        }
+
+        protected CopyVmTemplateCommandBase(IMainWindow mainWindow, IEnumerable<SelectedItem> selection)
+            : base(mainWindow, selection)
+        {
+        }
+
+        protected override bool CanRunCore(SelectedItemCollection selection)
+        {
+            return selection.ContainsOneItemOfType<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanRun);
+        }
+
+        protected override void RunCore(SelectedItemCollection selection)
+        {
+            var vm = (VM)selection[0].XenObject;
+
+            if (CanLaunchMigrateWizard(vm))
+            {
+                MainWindowCommandInterface.ShowPerConnectionWizard(vm.Connection,
+                    new CrossPoolMigrateWizard(vm.Connection, selection, null, WizardMode.Copy));
+                return;
+            }
+
+            if (CheckRbacPermissions(vm.Connection))
+                new CopyVMDialog(vm).ShowPerXenObject(vm, Program.MainWindow);
+        }
+
+        private bool CheckRbacPermissions(IXenConnection connection)
+        {
+            if (connection.Session.IsLocalSuperuser)
+                return true;
+
+            var methodList = new RbacMethodList();
+            methodList.AddRange(SrRefreshAction.StaticRBACDependencies);
+            methodList.AddRange(VMCopyAction.StaticRBACDependencies);
+            methodList.AddRange(VMCloneAction.StaticRBACDependencies);
+
+            var currentRoles = connection.Session.Roles;
+            var validRoles = Role.ValidRoleList(methodList, connection);
+
+            if (currentRoles.Any(currentRole => validRoles.Contains(currentRole)))
+                return true;
+
+            currentRoles.Sort();
+
+            using (var dlg = new ErrorDialog(string.Format(RbacMessage, currentRoles[0].FriendlyName())))
+                dlg.ShowDialog(Parent);
+
+            return false;
+        }
+
+        protected abstract string RbacMessage { get; }
+        protected abstract bool CanRun(VM vm);
+        protected abstract bool CanLaunchMigrateWizard(VM vm);
+    }
+
+
+    internal class CopyVMCommand : CopyVmTemplateCommandBase
+    {
         public CopyVMCommand()
         {
         }
@@ -57,37 +112,54 @@ namespace XenAdmin.Commands
         {
         }
 
-        public CopyVMCommand(IMainWindow mainWindow, VM vm)
-            : base(mainWindow, vm)
+        protected override bool CanRun(VM vm)
+        {
+            if (vm == null || vm.is_a_template || vm.Locked || vm.allowed_operations == null)
+                return false;
+
+            if (CanLaunchMigrateWizard(vm))
+                return true;
+
+            return vm.allowed_operations.Contains(vm_operations.export) && vm.power_state != vm_power_state.Suspended;
+        }
+
+        protected override bool CanLaunchMigrateWizard(VM vm)
+        {
+            return vm.power_state == vm_power_state.Halted && CrossPoolMigrateCommand.CanRun(vm, null, out _);
+        }
+
+        public override string MenuText => Messages.MAINWINDOW_COPY_VM;
+        protected override string RbacMessage => Messages.RBAC_INTRA_POOL_COPY_VM_BLOCKED;
+    }
+
+
+    internal class CopyTemplateCommand : CopyVmTemplateCommandBase
+    {
+        public CopyTemplateCommand()
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        public CopyTemplateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection)
+            : base(mainWindow, selection)
         {
-            VM vm = (VM)selection[0].XenObject;
-
-            if (CrossPoolCopyVMCommand.CanExecute(vm, null, false))
-                new CrossPoolCopyVMCommand(MainWindowCommandInterface, selection).Execute();
-            else
-                new CopyVMDialog(vm).ShowPerXenObject(vm, Program.MainWindow);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRun(VM vm)
         {
-            return selection.ContainsOneItemOfType<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanExecute);
+            if (vm == null || !vm.is_a_template || vm.is_a_snapshot || vm.Locked || vm.allowed_operations == null || vm.InternalTemplate()) return false;
+
+            if (CanLaunchMigrateWizard(vm))
+                return true;
+            
+            return vm.allowed_operations.Contains(vm_operations.clone) || vm.allowed_operations.Contains(vm_operations.copy);
         }
 
-        private static bool CanExecute(VM vm)
+        protected override bool CanLaunchMigrateWizard(VM vm)
         {
-            return vm != null && (CrossPoolCopyVMCommand.CanExecute(vm, null, false) || vm.CanBeCopied());
+            return !vm.DefaultTemplate() && CrossPoolMigrateCommand.CanRun(vm, null, out _);
         }
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_COPY_VM;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_COPY_TEMPLATE;
+        protected override string RbacMessage => Messages.RBAC_INTRA_POOL_COPY_TEMPLATE_BLOCKED;
     }
 }

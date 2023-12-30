@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Diagnostics.Checks;
 using XenAdmin.Wizards;
@@ -55,34 +52,30 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             this.device_config = device_config;
         }
 
-        public override string Title
-        {
-            get { return Check.Description; }
-        }
+        public override string Title => Check.Description;
 
 
         public override string Description
         {
             get
             {
-                return String.Format(sr.shared ? Messages.DR_WIZARD_PROBLEM_MISSING_SR : Messages.DR_WIZARD_PROBLEM_LOCAL_STORAGE, sr.Name());
+                if (sr == null)
+                    return Messages.DR_WIZARD_PROBLEM_MISSING_SR_NO_INFO;
+
+                return string.Format(sr.shared ? Messages.DR_WIZARD_PROBLEM_MISSING_SR : Messages.DR_WIZARD_PROBLEM_LOCAL_STORAGE, sr.Name());
             }
         }
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return sr.shared ? Messages.DR_WIZARD_PROBLEM_MISSING_SR_HELPMESSAGE : "";
-            }
-        }
+        public override string HelpMessage => sr != null && sr.shared
+            ? Messages.DR_WIZARD_PROBLEM_MISSING_SR_HELPMESSAGE
+            : "";
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
             Program.AssertOnEventThread();
             cancelled = false;
 
-            if (!sr.shared)
+            if (sr == null || !sr.shared)
             {
                 return null;
             }
@@ -94,8 +87,8 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
                 return wizard.FinalAction;
             }
 
-            Host master = pool.Connection.Resolve(pool.master);
-            if (master == null)
+            Host coordinator = pool.Connection.Resolve(pool.master);
+            if (coordinator == null)
             {
                 return null;
             }

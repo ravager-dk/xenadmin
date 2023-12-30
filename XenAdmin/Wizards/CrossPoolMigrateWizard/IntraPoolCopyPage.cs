@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAPI;
@@ -40,15 +40,15 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
 {
     public partial class IntraPoolCopyPage : XenTabPage
     {
-        public readonly VM TheVM;
+        private bool _buttonNextEnabled;
 
         public IntraPoolCopyPage(List<VM> selectedVMs)
         {
-            this.TheVM = selectedVMs[0]; 
+            TheVM = selectedVMs[0]; 
             InitializeComponent();
         }
 
-        private bool _buttonNextEnabled;
+        public VM TheVM { get; }
 
         public bool CloneVM => !tableLayoutPanelSrPicker.Enabled || CloneRadioButton.Checked;
 
@@ -87,15 +87,7 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
 
         public override void PopulatePage()
         {
-            srPicker1.Usage = SrPicker.SRPickerType.MoveOrCopy;
-            Host affinity = TheVM.Home();
-            srPicker1.Connection = TheVM.Connection;
-            srPicker1.DiskSize = TheVM.TotalVMSize();
             labelSrHint.Text = TheVM.is_a_template ? Messages.COPY_TEMPLATE_SELECT_SR : Messages.COPY_VM_SELECT_SR;
-            srPicker1.SetAffinity(affinity);
-            Pool pool = Helpers.GetPoolOfOne(TheVM.Connection);
-            if (pool != null)
-                srPicker1.DefaultSR = TheVM.Connection.Resolve(pool.default_SR);
 
             NameTextBox.Text = GetDefaultCopyName(TheVM);
 
@@ -105,11 +97,15 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
 
             CopyRadioButton.Enabled = allow_copy && hasAtLeastOneDisk;
             FastClonePanel.Enabled = !allow_copy || anyDiskFastCloneable || !hasAtLeastOneDisk;
+
             if (!FastClonePanel.Enabled)
-            {
                 CloneRadioButton.Checked = false;
-            }
+
+            if (!CloneRadioButton.Enabled)
+                CopyRadioButton.Checked = true;
+
             toolTipContainer1.SetToolTip(Messages.FAST_CLONE_UNAVAILABLE);
+
             if (TheVM.is_a_template && !(anyDiskFastCloneable || allow_copy))
             {
                 CloneRadioButton.Text = Messages.COPY_VM_CLONE_TEMPLATE_SLOW;
@@ -120,20 +116,24 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
                 FastCloneDescription.Text = !TheVM.is_a_template ? Messages.COPY_VM_FAST_CLONE_DESCRIPTION : Messages.COPY_TEMPLATE_FAST_CLONE_DESCRIPTION;
             }
 
-            if (!CloneRadioButton.Enabled)
-                CopyRadioButton.Checked = true;
-
             if (TheVM.DescriptionType() != VM.VmDescriptionType.None)
                 DescriptionTextBox.Text = TheVM.Description();
-
-            srPicker1.Invalidate();
-            srPicker1.selectDefaultSROrAny();
 
             tableLayoutPanelSrPicker.Enabled = CopyRadioButton.Enabled && CopyRadioButton.Checked;
 
             labelRubric.Text = TheVM.is_a_template
                                    ? Messages.COPY_TEMPLATE_INTRA_POOL_RUBRIC
                                    : Messages.COPY_VM_INTRA_POOL_RUBRIC;
+
+            UpdateButtons();
+
+            var vdis = (from VBD vbd in TheVM.Connection.ResolveAll(TheVM.VBDs)
+                where vbd.type != vbd_type.CD
+                let vdi = TheVM.Connection.Resolve(vbd.VDI)
+                where vdi != null
+                select vdi).ToArray();
+
+            srPicker1.Populate(SrPicker.SRPickerType.Copy, TheVM.Connection, TheVM.Home(), null, vdis);
         }
 
         public override bool EnableNext()
@@ -150,6 +150,7 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
             if (!CrossPoolMigrateWizard.AllVMsAvailable(l))
                 cancel = true;
         }
+
         #endregion
 
         private void UpdateButtons()
@@ -164,9 +165,25 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
             OnPageUpdated();
         }
 
+        private void EnableRescanButton()
+        {
+            buttonRescan.Enabled = tableLayoutPanelSrPicker.Enabled && srPicker1.CanBeScanned;
+        }
+
         private void srPicker1_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateButtons();
+        }
+
+        private void srPicker1_CanBeScannedChanged()
+        {
+            EnableRescanButton();
+            UpdateButtons();
+        }
+
+        private void buttonRescan_Click(object sender, EventArgs e)
+        {
+            srPicker1.ScanSRs();
         }
 
         private void NameTextBox_TextChanged(object sender, EventArgs e)
@@ -194,6 +211,7 @@ namespace XenAdmin.Wizards.CrossPoolMigrateWizard
         private void CopyRadioButton_CheckedChanged(object sender, EventArgs e)
         {
             tableLayoutPanelSrPicker.Enabled = CopyRadioButton.Checked;
+            EnableRescanButton();
             // Since the radiobuttons aren't in the same panel, we have to do manual mutual exclusion
             CloneRadioButton.Checked = !CopyRadioButton.Checked;
             UpdateButtons();

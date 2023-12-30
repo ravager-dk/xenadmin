@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,10 +30,11 @@
 
 using System;
 using System.ComponentModel;
-using XenAdmin.Core;
 using System.IO;
-using XenAdmin.Network;
 using System.Threading;
+using CommandLib;
+using XenAdmin.Core;
+using XenAdmin.Network;
 using XenAPI;
 using XenCenterLib.Archive;
 using XenCenterLib;
@@ -97,9 +97,7 @@ namespace XenAdmin.Actions
             SafeToExit = false;
             Description = Messages.ACTION_EXPORT_DESCRIPTION_IN_PROGRESS;
 
-            RelatedTask = XenAPI.Task.create(Session,
-                string.Format(Messages.ACTION_EXPORT_TASK_NAME, VM.Name()),
-                string.Format(Messages.ACTION_EXPORT_TASK_DESCRIPTION, VM.Name()));
+            RelatedTask = Task.create(Session, "export", $"Exporting {VM.Name()} to backup file");
 
             UriBuilder uriBuilder = new UriBuilder(this.Session.Url);
             uriBuilder.Path = "export";
@@ -111,7 +109,7 @@ namespace XenAdmin.Actions
             log.DebugFormat("Exporting {0} to {1}", VM.Name(), _filename);
 
             // The DownloadFile call will block, so we need a separate thread to poll for task status.
-            Thread taskThread = new Thread(progressPoll);
+            Thread taskThread = new Thread(ProgressPoll);
             taskThread.Name = "Progress polling thread for ExportVmAction for " + VM.Name().Ellipsise(20);
             taskThread.IsBackground = true;
             taskThread.Start();
@@ -129,7 +127,7 @@ namespace XenAdmin.Actions
                 {
                     // If task is pending and has zero progress, it probably hasn't been started,
                     // which probably means there was an exception in the GUI code before the
-                    // action got going. Kill the task so that we don't block forever on
+                    // action got going. Stop the task so that we don't block forever on
                     // taskThread.Join(). Brought to light by CA-11100.
                     DestroyTask();
                 }
@@ -157,7 +155,7 @@ namespace XenAdmin.Actions
                 int i = 0;
                 long filesize = new FileInfo(tmpFile).Length / 50; //Div by 50 to save doing the * 50 in the callback
 
-                Export.verifyCallback callback = size =>
+                void Callback(uint size)
                     {
                         read += size;
                         i++;
@@ -169,7 +167,7 @@ namespace XenAdmin.Actions
                             PercentComplete = 50 + (int)(read / filesize);
                             i = 0;
                         }
-                    };
+                    }
 
                 try
                 {
@@ -179,7 +177,7 @@ namespace XenAdmin.Actions
                         this.Description = Messages.ACTION_EXPORT_VERIFY;
 
                         export = new Export();
-                        export.verify(fs, null, () => Cancelling, callback);
+                        export.verify(fs, null, () => Cancelling, Callback);
                     }
                 }
                 catch (Exception e)
@@ -227,7 +225,9 @@ namespace XenAdmin.Actions
                     }
                 }
                 catch (Exception)
-                {}
+                {
+                    // ignored
+                }
 
                 log.DebugFormat("Deleting {0}", tmpFile);
                 File.Delete(tmpFile);
@@ -245,8 +245,6 @@ namespace XenAdmin.Actions
             }
         }
 
-
-
         private void HttpGet(string filename, Uri uri)
         {
             using (FileStream fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
@@ -258,7 +256,7 @@ namespace XenAdmin.Actions
             }
         }
 
-        private void progressPoll()
+        private void ProgressPoll()
         {
             try
             {

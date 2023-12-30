@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -62,7 +61,7 @@ namespace XenAdmin.Controls
                                      e.Bounds, SystemColors.ControlText,
                                      TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
                 }
-                else if (obj.IsNotEnabledVgpu)
+                else if (!obj.Enabled)
                 {
                     string text = (obj.IsVgpuSubitem ? "    " : string.Empty) + obj;
 
@@ -94,14 +93,12 @@ namespace XenAdmin.Controls
 
         protected bool IsHeaderItem(object obj)
         {
-            var tuple = obj as GpuTuple;
-            return tuple != null && tuple.IsGpuHeaderItem;
+            return obj is GpuTuple tuple && tuple.IsGpuHeaderItem;
         }
 
         protected override bool IsItemNonSelectable(object obj)
         {
-            var tuple = obj as GpuTuple;
-            return tuple != null && (tuple.IsGpuHeaderItem || tuple.IsNotEnabledVgpu);
+            return obj is GpuTuple tuple && (tuple.IsGpuHeaderItem || !tuple.Enabled);
         }
 
     }
@@ -112,12 +109,11 @@ namespace XenAdmin.Controls
         public readonly VGPU_type[] VgpuTypes;
         public readonly bool IsGpuHeaderItem;
         public readonly bool IsVgpuSubitem;
-        public readonly bool IsFractionalVgpu;
-        public readonly bool IsNotEnabledVgpu;
+        public readonly bool Enabled = true;
         private string displayName = string.Empty;
 
         /// <summary>
-        /// Create a GpuTuple that refers to a vGPU type which is a subitem of a GPU group
+        /// Create a GpuTuple that refers to a vGPU type which is a sub-item of a GPU group
         /// </summary>
         public GpuTuple(GPU_group gpuGroup, VGPU_type vgpuType, VGPU_type[] disabledVGpuTypes)
         {
@@ -126,15 +122,15 @@ namespace XenAdmin.Controls
             if (vgpuType != null)
             {
                 IsVgpuSubitem = gpuGroup.HasVGpu();
-                IsFractionalVgpu = !vgpuType.IsPassthrough();
+
                 if (disabledVGpuTypes != null && disabledVGpuTypes.Select(t => t.opaque_ref).Contains(vgpuType.opaque_ref))
-                    IsNotEnabledVgpu = true;
+                    Enabled = false;
             }
             UpdateDisplayName();
         }
 
         /// <summary>
-        /// Create a GpuTuple that refers to a GPU group head item, which is also non-selectable
+        /// Create a GpuTuple that refers to a non-selectable GPU group header item
         /// </summary>
         public GpuTuple(GPU_group gpuGroup, VGPU_type[] vgpuTypes)
         {
@@ -149,21 +145,21 @@ namespace XenAdmin.Controls
             if (GpuGroup == null)
             {
                 //this refers to the item "None"
-                displayName = Messages.GPU_NONE;
+                displayName = Messages.NONE_UPPER;
             }
             else if (VgpuTypes == null || VgpuTypes.Length == 0 || VgpuTypes[0] == null)
             {
-                //this refers to an item mapping a GPU with only passthrough type
+                //this refers to an item mapping a GPU with only pass-through type
                 displayName = GpuGroup.Name();
             }
             else if (IsVgpuSubitem)
             {
-                //this refers to vGPU type which is a subitem of a GPU group
+                //this refers to vGPU type which is a sub-item of a GPU group
                 displayName = VgpuTypes[0].Description();
             }
             else
             {
-                //this refers to a GPU group head item, which is also non-selectable
+                //this refers to a non-selectable GPU group header item
                 displayName = GpuGroup.Name();
             }    
         }

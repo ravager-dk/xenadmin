@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using XenAdmin.Network;
 using XenAPI;
@@ -38,7 +36,6 @@ using System.Windows.Forms;
 using XenAdmin.Dialogs;
 using XenAdmin.Actions;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Linq;
 
 
@@ -78,14 +75,10 @@ namespace XenAdmin.Commands
         {
             Pool pool = Helpers.GetPool(host.Connection);
 
-            if (pool != null && pool.ha_enabled && host.IsMaster())
+            if (pool != null && pool.ha_enabled && host.IsCoordinator())
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Error,
-                        String.Format(Messages.HA_CANNOT_EVACUATE_MASTER,
-                            Helpers.GetName(host).Ellipsise(Helpers.DEFAULT_NAME_TRIM_LENGTH)),
-                        Messages.XENCENTER)))
+                using (var dlg = new ErrorDialog(string.Format(Messages.HA_CANNOT_EVACUATE_COORDINATOR,
+                        Helpers.GetName(host).Ellipsise(Helpers.DEFAULT_NAME_TRIM_LENGTH))))
                 {
                     dlg.ShowDialog(Parent);
                 }
@@ -93,7 +86,8 @@ namespace XenAdmin.Commands
                 return;
             }
 
-            if (!host.GetRunningVMs().Any() && (pool == null || !host.IsMaster()))
+            if (!host.GetRunningVMs().Any() &&
+                (pool == null || pool.Connection.Cache.Hosts.Length == 1 || !host.IsCoordinator()))
             {
                 Program.MainWindow.CloseActiveWizards(host.Connection);
                 var action = new EvacuateHostAction(host, null, new Dictionary<XenRef<VM>, string[]>(), AddHostToPoolCommand.NtolDialog, AddHostToPoolCommand.EnableNtolDialog);
@@ -101,8 +95,32 @@ namespace XenAdmin.Commands
                 action.RunAsync();
                 return;
             }
-            
-            new EvacuateHostDialog(host).ShowPerXenObject(host, Program.MainWindow);
+
+            //The EvacuateHostDialog uses several different actions all of which might need an elevated session
+            //We sudo once for all of them and store the session
+
+            string elevatedUsername = null;
+            string elevatedPassword = null;
+            Session elevatedSession = null;
+
+            if (!host.Connection.Session.IsLocalSuperuser &&
+                !Registry.DontSudo &&
+                !Role.CanPerform(new RbacMethodList(EvacuateHostDialog.RbacMethods), host.Connection, out var validRoles))
+            {
+                using (var d = new RoleElevationDialog(host.Connection, host.Connection.Session, validRoles,
+                    string.Format(Messages.EVACUATE_HOST_DIALOG_TITLE, host.Name())))
+                    if (d.ShowDialog(Program.MainWindow) == DialogResult.OK)
+                    {
+                        elevatedUsername = d.elevatedUsername;
+                        elevatedPassword = d.elevatedPassword;
+                        elevatedSession = d.elevatedSession;
+                    }
+                    else
+                        return;
+            }
+
+            new EvacuateHostDialog(host, elevatedUsername, elevatedPassword, elevatedSession)
+                .ShowPerXenObject(host, Program.MainWindow);
         }
 
         private void ExitMaintenanceMode(Host host)
@@ -146,7 +164,7 @@ namespace XenAdmin.Commands
             action.RunAsync();
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             Host host = selection[0].HostAncestor;
 
@@ -174,13 +192,13 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {
                 IXenConnection connection = selection[0].Connection;
                 Host hostAncestor = selection[0].HostAncestor;
-                return hostAncestor != null &&  Helpers.GetMaster(connection) != null;
+                return hostAncestor != null &&  Helpers.GetCoordinator(connection) != null;
             }
             return false;
         }

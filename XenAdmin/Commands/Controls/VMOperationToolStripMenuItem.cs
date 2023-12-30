@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,11 +32,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using XenAdmin.Controls;
-using XenAPI;
-using XenAdmin.Core;
 using XenAdmin.Actions;
+using XenAdmin.Actions.Wlb;
+using XenAdmin.Controls;
+using XenAdmin.Core;
 using XenAdmin.Network;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -111,13 +111,13 @@ namespace XenAdmin.Commands
 
             // Adds the migrate wizard button, do this before the enable checks on the other items
             AddAdditionalMenuItems(selection);
-            
+
             UpdateHostList();
         }
 
         /// <summary>
         /// Hook to add additional members to the menu item
-        /// Note: Called on main window thread by executing code
+        /// Note: Called on main window thread by running code
         /// </summary>
         protected virtual void AddAdditionalMenuItems(SelectedItemCollection selection) { return; }
 
@@ -162,11 +162,13 @@ namespace XenAdmin.Commands
             if (Helpers.WlbEnabled(connection))
             {
                 var vms = selection.AsXenObjects<VM>();
+                if (vms == null || vms.Count == 0) 
+                    return;
+
                 var retrieveVmRecommendationsAction = new WlbRetrieveVmRecommendationsAction(connection, vms);
                 retrieveVmRecommendationsAction.Completed += delegate
                 {
-                    if (Stopped || retrieveVmRecommendationsAction.Cancelled ||
-                        !retrieveVmRecommendationsAction.Succeeded)
+                    if (Stopped || retrieveVmRecommendationsAction.Cancelled || !retrieveVmRecommendationsAction.Succeeded)
                         return;
 
                     var recommendations = new WlbRecommendations(vms, retrieveVmRecommendationsAction.Recommendations);
@@ -203,7 +205,7 @@ namespace XenAdmin.Commands
                 selection, _operation, recommendations);
 
             firstItem.Command = firstItemCmd;
-            firstItem.Enabled = firstItemCmd.CanExecute();
+            firstItem.Enabled = firstItemCmd.CanRun();
 
             var hostMenuItems = new List<VMOperationToolStripMenuSubItem>();
             foreach (var item in DropDownItems)
@@ -219,7 +221,7 @@ namespace XenAdmin.Commands
                         _operation, recommendations.GetStarRating(host));
 
                     hostMenuItem.Command = cmd;
-                    hostMenuItem.Enabled = cmd.CanExecute();
+                    hostMenuItem.Enabled = cmd.CanRun();
 
                     hostMenuItems.Add(hostMenuItem);
                 }
@@ -243,8 +245,8 @@ namespace XenAdmin.Commands
             var firstItem = DropDownItems[0] as VMOperationToolStripMenuSubItem;
             if (firstItem == null)
                 return;
-                
-            // API calls could happen in CanExecute(), which take time to wait. So a Producer-Consumer-Queue with size 25 is used here to :
+
+            // API calls could happen in CanRun(), which take time to wait. So a Producer-Consumer-Queue with size 25 is used here to :
             //   1. Make API calls for different menu items happen in parallel;
             //   2. Limit the count of concurrent threads (now it's 25).
             workerQueueWithoutWlb = new ProduceConsumerQueue(25);
@@ -253,7 +255,7 @@ namespace XenAdmin.Commands
             var connection = selection[0].Connection;
             var session = connection.DuplicateSession();
 
-            var affinityHost = connection.Resolve(((VM) selection[0].XenObject).affinity);
+            var affinityHost = connection.Resolve(((VM)selection[0].XenObject).affinity);
 
             EnqueueHostMenuItem(this, session, affinityHost, firstItem, true);
 
@@ -278,11 +280,11 @@ namespace XenAdmin.Commands
             workerQueueWithoutWlb.EnqueueItem(() =>
             {
                 var selection = menu.Command.GetSelection();
-                var cmd = isHomeServer 
+                var cmd = isHomeServer
                     ? new VMOperationHomeServerCommand(menu.Command.MainWindowCommandInterface, selection, menu._operation, session)
                     : new VMOperationHostCommand(menu.Command.MainWindowCommandInterface, selection, delegate { return host; }, host.Name().EscapeAmpersands(), menu._operation, session);
 
-                var oldMigrateCmdCanRun = cmd.CanExecute();
+                var oldMigrateCmdCanRun = cmd.CanRun();
                 if (Stopped)
                     return;
 
@@ -300,13 +302,13 @@ namespace XenAdmin.Commands
                         ? new CrossPoolMigrateToHomeCommand(menu.Command.MainWindowCommandInterface, selection, host, false)
                         : new CrossPoolMigrateCommand(menu.Command.MainWindowCommandInterface, selection, host, false, menu._resumeAfter);
 
-                    var crossPoolMigrateCmdCanRun = cpmCmd.CanExecute();
+                    var crossPoolMigrateCmdCanRun = cpmCmd.CanRun();
                     if (Stopped)
                         return;
 
                     Program.Invoke(Program.MainWindow, delegate
                     {
-                        if (crossPoolMigrateCmdCanRun || !string.IsNullOrEmpty(cpmCmd.CantExecuteReason))
+                        if (crossPoolMigrateCmdCanRun || !string.IsNullOrEmpty(cpmCmd.CantRunReason))
                         {
                             hostMenuItem.Command = cpmCmd;
                             hostMenuItem.Enabled = crossPoolMigrateCmdCanRun;
@@ -320,7 +322,7 @@ namespace XenAdmin.Commands
                 }
             });
         }
-        
+
         #endregion
 
         /// <summary>

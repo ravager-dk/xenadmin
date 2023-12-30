@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -78,11 +77,11 @@ namespace XenAdmin.Actions.GUIActions
         private vm_operations vmOperation;
 
         public MeddlingAction(Task task)
-            : base(task.Name(), task.Description(), false, false)
+            : base(task.Name(), task.Description(), false)
         {
             RelatedTask = new XenRef<Task>(task.opaque_ref);
 
-            Host = task.Connection.Resolve(task.resident_on) ?? Helpers.GetMaster(task.Connection);
+            Host = task.Connection.Resolve(task.resident_on) ?? Helpers.GetCoordinator(task.Connection);
 
             Started = (task.created + task.Connection.ServerTimeOffset).ToLocalTime();
             SetAppliesToData(task);
@@ -164,8 +163,8 @@ namespace XenAdmin.Actions.GUIActions
             else
             {
                 // A non-aware client has created this task.  We'll create a new action for this, and place it under
-                // the task.resident_on host, or if that doesn't resolve, the pool master.
-                Host host = task.Connection.Resolve(task.resident_on) ?? Helpers.GetMaster(task.Connection);
+                // the task.resident_on host, or if that doesn't resolve, the pool coordinator.
+                Host host = task.Connection.Resolve(task.resident_on) ?? Helpers.GetCoordinator(task.Connection);
                 if (host != null)
                     AppliesTo.Add(host.opaque_ref);
             }
@@ -228,7 +227,7 @@ namespace XenAdmin.Actions.GUIActions
             }
             else
             {
-                host1 = task.Connection.Resolve(task.resident_on) ?? Helpers.GetMaster(task.Connection);
+                host1 = task.Connection.Resolve(task.resident_on) ?? Helpers.GetCoordinator(task.Connection);
             }
 
             List<string> names = new List<string>();
@@ -314,7 +313,7 @@ namespace XenAdmin.Actions.GUIActions
         /// </summary>
         public static bool IsTaskUnwanted(Task task)
         {
-            return task.XenCenterUUID() == Program.XenCenterUUID ||
+            return task.GetXenCenterUUID() == Program.XenCenterUUID ||
                    task.Connection.Resolve(task.subtask_of) != null ||
                    GetVmOperation(task) == vm_operations.unknown;
         }

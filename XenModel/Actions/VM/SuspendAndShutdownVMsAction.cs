@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Network;
 using XenAPI;
 
@@ -74,7 +71,7 @@ namespace XenAdmin.Actions.VMActions
                 Description = string.Format(Messages.SUSPENDING_VM_OUT_OF, ActionCountCompleted + 1, VmsToSuspend.Count);
                 var action = new VMSuspendAction(vm);
                 action.Changed += action_Changed;
-                action.RunExternal(Session);
+                action.RunSync(Session);
                 ActionCountCompleted++;
             }
 
@@ -83,7 +80,7 @@ namespace XenAdmin.Actions.VMActions
                 Description = string.Format(Messages.SHUTTING_DOWN_VM_OUT_OF, ActionCountCompleted - VmsToSuspend.Count + 1, VmsToShutdown.Count);
                 var action = new VMHardShutdown(vm);
                 action.Changed += action_Changed;
-                action.RunExternal(Session);
+                action.RunSync(Session);
                 ActionCountCompleted++;
             }
         }

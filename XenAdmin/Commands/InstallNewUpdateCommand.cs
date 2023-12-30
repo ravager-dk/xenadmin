@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using XenAdmin.Network;
-using XenAdmin.Wizards.PatchingWizard;
-using XenAdmin.Properties;
 using System.Drawing;
 using System.Linq;
-using XenAdmin.Core;
-using XenAPI;
+using XenAdmin.Wizards.PatchingWizard;
 
 
 namespace XenAdmin.Commands
@@ -61,30 +53,18 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             MainWindowCommandInterface.ShowForm(typeof(PatchingWizard));
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return ConnectionsManager.XenConnectionsCopy.Any(xenConnection => xenConnection.IsConnected);
+            return ConnectionsManager.XenConnectionsCopy.Any(c => c.IsConnected);
         }
 
-        public override Image ContextMenuImage
-        {
-            get
-            {
-                return Images.StaticImages._000_HostUnpatched_h32bit_16;
-            }
-        }
+        public override Image ContextMenuImage => Images.StaticImages._000_HostUnpatched_h32bit_16;
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.INSTALL_PENDING_UPDATES;
-            }
-        }
+        public override string ContextMenuText => Messages.INSTALL_PENDING_UPDATES;
     }
 }

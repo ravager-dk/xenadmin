@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Properties;
 using XenAPI;
 
 namespace XenAdmin.Controls.DataGridViewEx
@@ -124,13 +118,13 @@ namespace XenAdmin.Controls.DataGridViewEx
 
         public void SetCollapseIcon()
         {
-            _expansionCell.Value = Resources.tree_minus;
+            _expansionCell.Value = Images.StaticImages.tree_minus;
             IsACollapsedRow = false;
         }
 
         public void SetExpandIcon()
         {
-            _expansionCell.Value = Resources.tree_plus;
+            _expansionCell.Value = Images.StaticImages.tree_plus;
             IsACollapsedRow = true;
         }
 

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,15 +28,11 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Core;
 using XenAPI;
 using XenAdmin.Actions;
-using XenAdmin.Properties;
 using System.Drawing;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -65,17 +60,17 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            new SrAction(SrActionKind.SetAsDefault, (SR)selection[0].XenObject).RunAsync();
+            new SetSrAsDefaultAction((SR)selection[0].XenObject).RunAsync();
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.ContainsOneItemOfType<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanExecute);
+            return selection.ContainsOneItemOfType<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanRun);
         }
 
-        private static bool CanExecute(SR sr)
+        private static bool CanRun(SR sr)
         {
             return sr != null
                     && sr.HasPBDs()

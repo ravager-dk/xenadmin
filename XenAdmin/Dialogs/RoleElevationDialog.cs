@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAPI;
 using XenAdmin.Actions;
@@ -48,8 +46,6 @@ namespace XenAdmin.Dialogs
         public Session elevatedSession;
         public string elevatedPassword;
         public string elevatedUsername;
-        public string originalUsername;
-        public string originalPassword;
 
         private List<Role> authorizedRoles;
 
@@ -66,14 +62,12 @@ namespace XenAdmin.Dialogs
         {
             InitializeComponent();
             UserDetails ud = session.CurrentUserDetails;
-            labelCurrentUserValue.Text = ud.UserDisplayName ?? ud.UserName ?? Messages.UNKNOWN_AD_USER;
-            labelCurrentRoleValue.Text = Role.FriendlyCSVRoleList(session.Roles);
+            labelCurrentUserValue.Text = ud?.UserDisplayName ?? ud?.UserName ?? Messages.UNKNOWN_AD_USER;
+            labelCurrentRoleValue.Text = Role.FriendlyCsvRoleList(session.Roles);
             authorizedRoles.Sort((r1, r2) => r2.CompareTo(r1));
-            labelRequiredRoleValue.Text = Role.FriendlyCSVRoleList(authorizedRoles);
+            labelRequiredRoleValue.Text = Role.FriendlyCsvRoleList(authorizedRoles);
             labelServerValue.Text = Helpers.GetName(connection);
             labelServer.Text = Helpers.IsPool(connection) ? Messages.POOL_COLON : Messages.SERVER_COLON;
-            originalUsername = session.Connection.Username;
-            originalPassword = session.Connection.Password;
 
             if (string.IsNullOrEmpty(actionTitle))
             {
@@ -88,13 +82,19 @@ namespace XenAdmin.Dialogs
             this.authorizedRoles = authorizedRoles;
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Text = BrandManager.BrandConsole;
+        }
+
         private void buttonAuthorize_Click(object sender, EventArgs e)
         {
             try
             {
                 Exception delegateException = null;
                 log.Debug("Testing logging in with the new credentials");
-                DelegatedAsyncAction loginAction = new DelegatedAsyncAction(connection, 
+                var loginAction = new DelegatedAsyncAction(connection, 
                     Messages.AUTHORIZING_USER, 
                     Messages.CREDENTIALS_CHECKING, 
                     Messages.CREDENTIALS_CHECK_COMPLETE, 
@@ -108,9 +108,9 @@ namespace XenAdmin.Dialogs
                     {
                         delegateException = ex;
                     }
-                });
+                }, true);
 
-                using (var dlg = new ActionProgressDialog(loginAction, ProgressBarStyle.Marquee, false))
+                using (var dlg = new ActionProgressDialog(loginAction, ProgressBarStyle.Marquee) {ShowTryAgainMessage = false})
                     dlg.ShowDialog(this);
                 
                 // The exception would have been handled by the action progress dialog, just return the user to the sudo dialog
@@ -134,14 +134,8 @@ namespace XenAdmin.Dialogs
             catch (Exception ex)
             {
                 log.DebugFormat("Exception when attempting to sudo action: {0} ", ex);
-                using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(
-                       SystemIcons.Error,
-                       String.Format(Messages.USER_AUTHORIZATION_FAILED, TextBoxUsername.Text),
-                       Messages.XENCENTER)))
-                {
+                using (var dlg = new ErrorDialog(string.Format(Messages.USER_AUTHORIZATION_FAILED, BrandManager.BrandConsole, TextBoxUsername.Text)))
                     dlg.ShowDialog(Parent);
-                }
 
                 TextBoxPassword.Focus();
                 TextBoxPassword.SelectAll();
@@ -178,11 +172,8 @@ namespace XenAdmin.Dialogs
 
         private void ShowNotAuthorisedDialog()
         {
-            using (var dlg = new ThreeButtonDialog(
-                new ThreeButtonDialog.Details(
-                    SystemIcons.Error,
-                    Messages.USER_NOT_AUTHORIZED,
-                    Messages.PERMISSION_DENIED)))
+            using (var dlg = new ErrorDialog(Messages.USER_NOT_AUTHORIZED)
+                {WindowTitle = Messages.PERMISSION_DENIED})
             {
                 dlg.ShowDialog(this);
             }

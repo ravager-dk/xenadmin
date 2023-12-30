@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -96,7 +95,7 @@ namespace XenAdmin.Actions
             if (pool != null)
                 Pool = pool;
             else
-                Host = Helpers.GetMaster(connection);
+                Host = Helpers.GetCoordinator(connection);
             this.subjectNamesToAdd = subjectNamesToAdd;
             this.subjectsToRemove = subjectsToRemove;
 
@@ -254,7 +253,7 @@ namespace XenAdmin.Actions
                 {
                     if (!Connection.Session.IsLocalSuperuser && selfSid == sid)
                     {
-                        // Committing suicide. We will log ourselves out later.
+                        // We will log ourselves out later.
                         logoutSession = true;
                     }
                     else

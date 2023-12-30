@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Core;
 using XenAdmin.Network;
@@ -60,6 +58,7 @@ namespace XenAdmin.Controls
         private readonly CollectionChangeEventHandler m_hostCollectionChangedWithInvoke;
         private bool inFilterListUpdate;
         private bool retryFilterListUpdate;
+        private Func<IXenConnection, bool> _connectionPredicate = c => true;
 
         private ToolStripMenuItem toolStripMenuItemAll;
 
@@ -86,13 +85,20 @@ namespace XenAdmin.Controls
         /// Build the list of hosts to filter by for the first time and set all
         /// of them to be checked
         /// </summary>
-        public void InitializeHostList()
+        /// <param name="connectionPredicate">The criteria for allowing connections to show in the filter.</param>
+        public void InitializeHostList(Func<IXenConnection, bool> connectionPredicate = null)
         {
-            foreach (IXenConnection c in ConnectionsManager.XenConnectionsCopy)
+            _connectionPredicate = connectionPredicate ?? (c => true);
+
+            var connections = ConnectionsManager.XenConnectionsCopy.Where(_connectionPredicate).ToList();
+
+            foreach (IXenConnection c in connections)
             {
                 foreach (Host h in c.Cache.Hosts)
                     HostCheckStates[h.uuid] = true;
             }
+
+            BuildFilterList();
         }
 
         public void RefreshLists()
@@ -101,7 +107,7 @@ namespace XenAdmin.Controls
             OnFilterChanged();
         }
 
-        public void BuildFilterList()
+        private void BuildFilterList()
         {
             Program.AssertOnEventThread();
 
@@ -121,18 +127,20 @@ namespace XenAdmin.Controls
                 DeregisterEvents();
                 RegisterEvents();
 
-                foreach (IXenConnection c in ConnectionsManager.XenConnectionsCopy)
+                var connections = ConnectionsManager.XenConnectionsCopy.Where(_connectionPredicate).ToList();
+
+                foreach (var c in connections)
                 {
-                    Pool p = Helpers.GetPool(c);
+                    var p = Helpers.GetPool(c);
 
                     if (p == null)// Stand alone host
                     {
-                        foreach (Host h in c.Cache.Hosts)
+                        if (c.Cache.Hosts.Length > 0)
                         {
-                            var item = GenerateFilterItem(h, h.uuid);
-                            item.Checked = HostCheckStates.ContainsKey(h.uuid);
+                            var host = c.Cache.Hosts.First();
+                            var item = GenerateFilterItem(host, host.uuid);
+                            item.Checked = HostCheckStates.ContainsKey(host.uuid);
                             DropDownItems.Add(item);
-                            break;
                         }
                     }
                     else
@@ -187,7 +195,7 @@ namespace XenAdmin.Controls
 
             return hostUuids.TrueForAll(uuid => HostCheckStates.ContainsKey(uuid) && !HostCheckStates[uuid]);
         }
-        
+
         public bool FilterIsOn
         {
             get { return HostCheckStates.ContainsValue(false); }
@@ -227,7 +235,9 @@ namespace XenAdmin.Controls
 
         private void RegisterEvents()
         {
-            foreach (IXenConnection c in ConnectionsManager.XenConnectionsCopy)
+            var connections = ConnectionsManager.XenConnectionsCopy.Where(_connectionPredicate).ToList();
+
+            foreach (IXenConnection c in connections)
             {
                 c.ConnectionStateChanged += connection_ConnectionStateChanged;
                 c.Cache.RegisterCollectionChanged<Host>(m_hostCollectionChangedWithInvoke);
@@ -296,10 +306,9 @@ namespace XenAdmin.Controls
 
         private void XenConnections_CollectionChanged(object sender, CollectionChangeEventArgs e)
         {
-            if (e.Action == CollectionChangeAction.Add)
+            if (e.Action == CollectionChangeAction.Add && e.Element is IXenConnection connection &&
+                _connectionPredicate(connection))
             {
-                IXenConnection connection = e.Element as IXenConnection;
-
                 foreach (Host host in connection.Cache.Hosts)
                     HostCheckStates[host.uuid] = true;
             }
@@ -371,7 +380,6 @@ namespace XenAdmin.Controls
             {
                 toolStripMenuItemAll.Enabled = false;
                 InitializeHostList();
-                BuildFilterList();
             }
             else
             {
@@ -380,9 +388,7 @@ namespace XenAdmin.Controls
                 item.Checked = !item.Checked;
                 HostCheckStates[uuid] = item.Checked;
 
-                ToolStripMenuItem poolItem = item.OwnerItem as ToolStripMenuItem;
-
-                if (poolItem != null)
+                if (item.OwnerItem is ToolStripMenuItem poolItem)
                 {
                     //this is not a standalone host; change the parent pool's check state
 

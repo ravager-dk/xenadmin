@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,6 +38,7 @@ using XenAPI;
 using XenAdmin.XenSearch;
 using XenAdmin.Core;
 using System.Drawing;
+using System.Linq;
 
 
 namespace XenAdmin
@@ -174,7 +174,7 @@ namespace XenAdmin
                     break;
                 default://includes Infrastructure and Notifications
                     Util.ThrowIfParameterNull(search, "search");
-                    newRootNode = new VirtualTreeNode(BrandManager.BRAND_CONSOLE) { ImageIndex = (int)Icons.Home };
+                    newRootNode = new VirtualTreeNode(BrandManager.BrandConsole) { ImageIndex = (int)Icons.Home };
                     groupAcceptor = CreateGroupAcceptor(newRootNode);
                     search.PopulateAdapters(groupAcceptor);
                     break;
@@ -396,8 +396,13 @@ namespace XenAdmin
 
             private VirtualTreeNode AddVMNode(VM vm)
             {
+                if (vm.Connection.Cache.Hosts.Any(Host.RestrictVtpm) &&
+                    vm.is_a_template &&
+                    vm.platform.TryGetValue("vtpm", out var result) && result.ToLower() == "true")
+                    return null;
+
                 bool hidden = vm.IsHidden();
-                string name = hidden ? String.Format(Messages.X_HIDDEN, vm.Name()) : vm.Name();
+                string name = hidden ? string.Format(Messages.X_HIDDEN, vm.Name()) : vm.Name();
 
                 return AddNode(name, Images.GetIconFor(vm), hidden, vm);
             }
@@ -427,14 +432,14 @@ namespace XenAdmin
             private VirtualTreeNode AddNetworkNode(XenAPI.Network network)
             {
                 bool hidden = network.IsHidden();
-                bool slave = network.IsSlave();
+                bool supporter = network.IsMember();
                 string rawName = network.Name();
-                String name = slave
-                                  ? String.Format(Messages.NIC_SLAVE, rawName)
+                String name = supporter
+                                  ? String.Format(Messages.NIC_BONDED_MEMBER, rawName)
                                   : hidden
                                         ? String.Format(Messages.X_HIDDEN, rawName)
                                         : rawName;
-                return AddNode(name, Images.GetIconFor(network), slave || hidden, network);
+                return AddNode(name, Images.GetIconFor(network), supporter || hidden, network);
             }
 
             private VirtualTreeNode AddVDINode(VDI vdi)

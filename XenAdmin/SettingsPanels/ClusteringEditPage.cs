@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAPI;
 
@@ -65,20 +62,15 @@ namespace XenAdmin.SettingsPanels
             get { return CheckBoxEnableClustering.Checked ? Messages.ENABLED : Messages.DISABLED; } 
         }
 
-        public Image Image
-        {
-            get { return Properties.Resources._000_Storage_h32bit_16; }
-        }
+        public Image Image => Images.StaticImages._000_Storage_h32bit_16;
 
         public AsyncAction SaveSettings()
         {
             if (CheckBoxEnableClustering.Checked)
             {
-                var network = ((NetworkComboBoxItem)comboBoxNetwork.SelectedItem).Network;
+                var network = comboBoxNetwork.SelectedNetwork;
                 if (network != null)
-                {
                     return new EnableClusteringAction(pool, network);
-                }
             }
             else
             {
@@ -112,6 +104,13 @@ namespace XenAdmin.SettingsPanels
                 HelpersGUI.ShowBalloonMessage(comboBoxNetwork, SelectNetworkToolTip);
             }
         }
+        public void HideLocalValidationMessages()
+        {
+            if (comboBoxNetwork != null)
+            {
+                SelectNetworkToolTip.Hide(comboBoxNetwork);
+            }
+        }
 
         public void Cleanup()
         {
@@ -129,8 +128,7 @@ namespace XenAdmin.SettingsPanels
         #region PrivateMethods
         private void LoadNetworks(Cluster cluster)
         {
-            comboBoxNetwork.IncludeOnlyEnabledNetworksInComboBox = false;
-            comboBoxNetwork.IncludeOnlyNetworksWithIPAddresses = true;
+            comboBoxNetwork.ExcludeNetworksWithoutIpAddresses = true;
 
             if (cluster == null)
             {
@@ -156,8 +154,7 @@ namespace XenAdmin.SettingsPanels
 
         private void action_Completed(ActionBase sender)
         {
-            var action = (AsyncAction) sender;
-            if (!action.Succeeded)
+            if (!(sender is AsyncAction action) || !action.Succeeded)
                 commonNetwork = null;
 
             Program.Invoke(ParentForm, delegate
@@ -181,6 +178,8 @@ namespace XenAdmin.SettingsPanels
             }
             else if (pool.ha_enabled)
                 DisableControls(Messages.GFS2_HA_ENABLED);
+            else if (!pool.Connection.Cache.Hosts.Any(Host.RestrictPoolSecretRotation) && pool.is_psr_pending)
+                DisableControls(Messages.ROTATE_POOL_SECRET_PENDING_CLUSTER);
 
             labelHostCountWarning.Visible = pool.Connection.Cache.HostCount < 3;
         }

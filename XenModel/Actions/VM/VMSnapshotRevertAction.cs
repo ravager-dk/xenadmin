@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,39 +34,65 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class VMSnapshotRevertAction : PureAsyncAction
+    public class VMSnapshotRevertAction : AsyncAction
     {
-        private VM m_Snapshot;
-        private Host previousHost; // The host the VM was running on before the snapshot
+        private readonly VM m_Snapshot;
+        private readonly Host previousHost; // The host the VM was running on before the snapshot
+        private bool _finished;
+        private readonly bool _revertPowerState;
 
         public VMSnapshotRevertAction(VM snapshot)
-            : base(snapshot.Connection, String.Format(Messages.ACTION_VM_REVERT_SNAPSHOT_TITLE, snapshot.Name()))
+            : base(snapshot.Connection, string.Format(Messages.ACTION_VM_REVERT_SNAPSHOT_TITLE, snapshot.Name()))
         {
-            this.VM = Connection.Resolve<VM>(snapshot.snapshot_of);
-            previousHost = Connection.Resolve<Host>(VM.resident_on);
-            this.m_Snapshot = snapshot;
-            Description = String.Format(Messages.VM_REVERTING, m_Snapshot.Name());
+            VM = Connection.Resolve(snapshot.snapshot_of);
+            previousHost = Connection.Resolve(VM.resident_on);
+            m_Snapshot = snapshot;
+            Description = string.Format(Messages.VM_REVERTING, m_Snapshot.Name());
 
+            if (snapshot.snapshot_info.TryGetValue("power-state-at-snapshot", out var state) &&
+                state == vm_power_state.Running.ToString())
+                _revertPowerState = true;
+
+            ApiMethodsToRoleCheck.Add("VM.async_revert");
+
+            if (_revertPowerState)
+            {
+                if (VM.power_state == vm_power_state.Halted)
+                {
+                    if (previousHost == null)
+                        ApiMethodsToRoleCheck.Add("VM.async_start");
+                    else
+                        ApiMethodsToRoleCheck.AddRange("VM.assert_can_boot_here", "VM.async_start_on");
+                }
+                else if (VM.power_state == vm_power_state.Suspended)
+                {
+                    if (previousHost == null)
+                        ApiMethodsToRoleCheck.Add("VM.async_resume");
+                    else
+                        ApiMethodsToRoleCheck.AddRange("VM.assert_can_boot_here", "VM.async_resume_on");
+                }
+            }
         }
-        private bool _finished = false;
+
         protected override void Run()
         {
-
-
-            Description = String.Format(Messages.VM_REVERTING, m_Snapshot.Name());
-            RelatedTask = XenAPI.VM.async_revert(Session, m_Snapshot.opaque_ref);
+            Description = string.Format(Messages.VM_REVERTING, m_Snapshot.Name());
+            RelatedTask = VM.async_revert(Session, m_Snapshot.opaque_ref);
             PollToCompletion();
             _finished = true;
-            PercentComplete = 90;
-            Description = String.Format(Messages.REVERTING_POWER_STATE, VM.Name());
+            Tick(90, string.Format(Messages.REVERTING_POWER_STATE, VM.Name()));
+
             try
             {
-                RevertPowerState(m_Snapshot, VM);
+                if (_revertPowerState)
+                    RevertPowerState(VM);
             }
             catch (Exception)
-            { }
-            PercentComplete = 100;
-            Description = String.Format(Messages.VM_REVERTED, m_Snapshot.Name());
+            {
+                // ignored
+            }
+
+            Tick(100, string.Format(Messages.VM_REVERTED, m_Snapshot.Name()));
         }
 
         public override int PercentComplete
@@ -83,45 +108,31 @@ namespace XenAdmin.Actions
             }
         }
 
-
-        private void RevertPowerState(VM snapshot, VM vm)
+        private void RevertPowerState(VM vm)
         {
-            string state;
-            if (snapshot.snapshot_info.TryGetValue("power-state-at-snapshot",
-                                                   out state))
+            if (vm.power_state == vm_power_state.Halted)
             {
-                if (state == vm_power_state.Running.ToString())
+                if (previousHost != null && VMCanBootOnHost(vm, previousHost))
                 {
-                    if (vm.power_state == vm_power_state.Halted)
-                    {
-                        if (previousHost != null && VMCanBootOnHost(vm, previousHost))
-                        {
-                            RelatedTask = XenAPI.VM.async_start_on(Session,
-                                vm.opaque_ref, previousHost.opaque_ref, false, false);
-                        }
-                        else
-                        {
-                            RelatedTask = XenAPI.VM.async_start(Session,
-                                vm.opaque_ref, false, false);
-                        }
-
-                    }
-                    else if (vm.power_state == vm_power_state.Suspended)
-                    {
-                        if (previousHost != null && VMCanBootOnHost(vm, previousHost))
-                        {
-                            RelatedTask = XenAPI.VM.async_resume_on(Session, vm.opaque_ref, previousHost.opaque_ref,
-                                false, false);
-                        }
-                        else
-                        {
-                            RelatedTask = XenAPI.VM.async_resume(Session, vm.opaque_ref, false, false);
-                        }
-
-                    }
-                    PollToCompletion();
+                    RelatedTask = VM.async_start_on(Session, vm.opaque_ref, previousHost.opaque_ref, false, false);
+                }
+                else
+                {
+                    RelatedTask = VM.async_start(Session, vm.opaque_ref, false, false);
                 }
             }
+            else if (vm.power_state == vm_power_state.Suspended)
+            {
+                if (previousHost != null && VMCanBootOnHost(vm, previousHost))
+                {
+                    RelatedTask = VM.async_resume_on(Session, vm.opaque_ref, previousHost.opaque_ref, false, false);
+                }
+                else
+                {
+                    RelatedTask = VM.async_resume(Session, vm.opaque_ref, false, false);
+                }
+            }
+            PollToCompletion();
         }
 
         private bool VMCanBootOnHost(VM vm, Host host)

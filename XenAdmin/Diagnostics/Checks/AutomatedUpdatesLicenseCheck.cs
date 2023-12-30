@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -49,25 +48,17 @@ namespace XenAdmin.Diagnostics.Checks
 
         protected override Problem RunHostCheck()
         {
-            if (_pool != null && _pool.Connection.Cache.Hosts.Any(h => Helpers.DundeeOrGreater(h) && Host.RestrictBatchHotfixApply(h)))
+            if (_pool != null && _pool.Connection.Cache.Hosts.Any(Host.RestrictBatchHotfixApply))
                 return new NotLicensedForAutomatedUpdatesWarning(this, _pool);
 
             return null;
         }
 
-        public override string Description
-        {
-            get { return Messages.AUTOMATED_UPDATES_LICENSE_CHECK_DESCRIPTION; }
-        }
+        public override string Description => Messages.AUTOMATED_UPDATES_LICENSE_CHECK_DESCRIPTION;
 
-        public override string SuccessfulCheckDescription
-        {
-            get
-            {
-                return _pool == null
-                    ? string.Format(Messages.PATCHING_WIZARD_CHECK_OK, Description)
-                    : string.Format(Messages.PATCHING_WIZARD_HOST_CHECK_OK, _pool.Name(), Description);
-            }
-        }
+        public override string SuccessfulCheckDescription =>
+            _pool == null
+                ? string.Format(Messages.PATCHING_WIZARD_CHECK_OK, Description)
+                : string.Format(Messages.PATCHING_WIZARD_CHECK_ON_XENOBJECT_OK, _pool.Name(), Description);
     }
 }

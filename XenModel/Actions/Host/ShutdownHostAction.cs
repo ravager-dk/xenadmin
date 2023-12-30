@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -44,8 +43,6 @@ namespace XenAdmin.Actions
         public ShutdownHostAction(Host host, Func<HostAbstractAction, Pool, long, long, bool> acceptNTolChanges)
             : base(host.Connection, Messages.HOST_SHUTDOWN, Messages.WAITING, acceptNTolChanges, null)
         {
-            if (host == null)
-                throw new ArgumentNullException("host");
             Host = host;
             ApiMethodsToRoleCheck.Add("pool.ha_compute_hypothetical_max_host_failures_to_tolerate");
             ApiMethodsToRoleCheck.Add("pool.set_ha_host_failures_to_tolerate");
@@ -63,7 +60,7 @@ namespace XenAdmin.Actions
             bool wasEnabled = Host.enabled;
             this.Description = string.Format(Messages.ACTION_HOST_SHUTTING_DOWN, Helpers.GetName(Host));
 
-            MaybeReduceNtolBeforeOp(HostActionKind.Shutdown);
+            MaybeReduceNtolBeforeOp();
             ShutdownVMs(false);
             try
             {
@@ -106,8 +103,8 @@ namespace XenAdmin.Actions
                 throw;
             }
 
-            // Close the IXenConnection if it is not to a pool, or is to the master of a pool
-            if (Helpers.HostIsMaster(Host))
+            // Close the IXenConnection if it is not to a pool, or is to the coordinator of a pool
+            if (Helpers.HostIsCoordinator(Host))
             {
                 Host.Connection.EndConnect();
             }

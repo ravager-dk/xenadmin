@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -108,96 +108,35 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new SR from a Proxy_SR.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public SR(Proxy_SR proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given SR.
         /// </summary>
-        public override void UpdateFrom(SR update)
+        public override void UpdateFrom(SR record)
         {
-            uuid = update.uuid;
-            name_label = update.name_label;
-            name_description = update.name_description;
-            allowed_operations = update.allowed_operations;
-            current_operations = update.current_operations;
-            VDIs = update.VDIs;
-            PBDs = update.PBDs;
-            virtual_allocation = update.virtual_allocation;
-            physical_utilisation = update.physical_utilisation;
-            physical_size = update.physical_size;
-            type = update.type;
-            content_type = update.content_type;
-            shared = update.shared;
-            other_config = update.other_config;
-            tags = update.tags;
-            sm_config = update.sm_config;
-            blobs = update.blobs;
-            local_cache_enabled = update.local_cache_enabled;
-            introduced_by = update.introduced_by;
-            clustered = update.clustered;
-            is_tools_sr = update.is_tools_sr;
-        }
-
-        internal void UpdateFrom(Proxy_SR proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            name_label = proxy.name_label == null ? null : proxy.name_label;
-            name_description = proxy.name_description == null ? null : proxy.name_description;
-            allowed_operations = proxy.allowed_operations == null ? null : Helper.StringArrayToEnumList<storage_operations>(proxy.allowed_operations);
-            current_operations = proxy.current_operations == null ? null : Maps.convert_from_proxy_string_storage_operations(proxy.current_operations);
-            VDIs = proxy.VDIs == null ? null : XenRef<VDI>.Create(proxy.VDIs);
-            PBDs = proxy.PBDs == null ? null : XenRef<PBD>.Create(proxy.PBDs);
-            virtual_allocation = proxy.virtual_allocation == null ? 0 : long.Parse(proxy.virtual_allocation);
-            physical_utilisation = proxy.physical_utilisation == null ? 0 : long.Parse(proxy.physical_utilisation);
-            physical_size = proxy.physical_size == null ? 0 : long.Parse(proxy.physical_size);
-            type = proxy.type == null ? null : proxy.type;
-            content_type = proxy.content_type == null ? null : proxy.content_type;
-            shared = (bool)proxy.shared;
-            other_config = proxy.other_config == null ? null : Maps.convert_from_proxy_string_string(proxy.other_config);
-            tags = proxy.tags == null ? new string[] {} : (string [])proxy.tags;
-            sm_config = proxy.sm_config == null ? null : Maps.convert_from_proxy_string_string(proxy.sm_config);
-            blobs = proxy.blobs == null ? null : Maps.convert_from_proxy_string_XenRefBlob(proxy.blobs);
-            local_cache_enabled = (bool)proxy.local_cache_enabled;
-            introduced_by = proxy.introduced_by == null ? null : XenRef<DR_task>.Create(proxy.introduced_by);
-            clustered = (bool)proxy.clustered;
-            is_tools_sr = (bool)proxy.is_tools_sr;
-        }
-
-        public Proxy_SR ToProxy()
-        {
-            Proxy_SR result_ = new Proxy_SR();
-            result_.uuid = uuid ?? "";
-            result_.name_label = name_label ?? "";
-            result_.name_description = name_description ?? "";
-            result_.allowed_operations = allowed_operations == null ? new string[] {} : Helper.ObjectListToStringArray(allowed_operations);
-            result_.current_operations = Maps.convert_to_proxy_string_storage_operations(current_operations);
-            result_.VDIs = VDIs == null ? new string[] {} : Helper.RefListToStringArray(VDIs);
-            result_.PBDs = PBDs == null ? new string[] {} : Helper.RefListToStringArray(PBDs);
-            result_.virtual_allocation = virtual_allocation.ToString();
-            result_.physical_utilisation = physical_utilisation.ToString();
-            result_.physical_size = physical_size.ToString();
-            result_.type = type ?? "";
-            result_.content_type = content_type ?? "";
-            result_.shared = shared;
-            result_.other_config = Maps.convert_to_proxy_string_string(other_config);
-            result_.tags = tags;
-            result_.sm_config = Maps.convert_to_proxy_string_string(sm_config);
-            result_.blobs = Maps.convert_to_proxy_string_XenRefBlob(blobs);
-            result_.local_cache_enabled = local_cache_enabled;
-            result_.introduced_by = introduced_by ?? "";
-            result_.clustered = clustered;
-            result_.is_tools_sr = is_tools_sr;
-            return result_;
+            uuid = record.uuid;
+            name_label = record.name_label;
+            name_description = record.name_description;
+            allowed_operations = record.allowed_operations;
+            current_operations = record.current_operations;
+            VDIs = record.VDIs;
+            PBDs = record.PBDs;
+            virtual_allocation = record.virtual_allocation;
+            physical_utilisation = record.physical_utilisation;
+            physical_size = record.physical_size;
+            type = record.type;
+            content_type = record.content_type;
+            shared = record.shared;
+            other_config = record.other_config;
+            tags = record.tags;
+            sm_config = record.sm_config;
+            blobs = record.blobs;
+            local_cache_enabled = record.local_cache_enabled;
+            introduced_by = record.introduced_by;
+            clustered = record.clustered;
+            is_tools_sr = record.is_tools_sr;
         }
 
         /// <summary>
@@ -217,7 +156,7 @@ namespace XenAPI
             if (table.ContainsKey("allowed_operations"))
                 allowed_operations = Helper.StringArrayToEnumList<storage_operations>(Marshalling.ParseStringArray(table, "allowed_operations"));
             if (table.ContainsKey("current_operations"))
-                current_operations = Maps.convert_from_proxy_string_storage_operations(Marshalling.ParseHashTable(table, "current_operations"));
+                current_operations = Maps.ToDictionary_string_storage_operations(Marshalling.ParseHashTable(table, "current_operations"));
             if (table.ContainsKey("VDIs"))
                 VDIs = Marshalling.ParseSetRef<VDI>(table, "VDIs");
             if (table.ContainsKey("PBDs"))
@@ -235,13 +174,13 @@ namespace XenAPI
             if (table.ContainsKey("shared"))
                 shared = Marshalling.ParseBool(table, "shared");
             if (table.ContainsKey("other_config"))
-                other_config = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "other_config"));
+                other_config = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "other_config"));
             if (table.ContainsKey("tags"))
                 tags = Marshalling.ParseStringArray(table, "tags");
             if (table.ContainsKey("sm_config"))
-                sm_config = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "sm_config"));
+                sm_config = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "sm_config"));
             if (table.ContainsKey("blobs"))
-                blobs = Maps.convert_from_proxy_string_XenRefBlob(Marshalling.ParseHashTable(table, "blobs"));
+                blobs = Maps.ToDictionary_string_XenRefBlob(Marshalling.ParseHashTable(table, "blobs"));
             if (table.ContainsKey("local_cache_enabled"))
                 local_cache_enabled = Marshalling.ParseBool(table, "local_cache_enabled");
             if (table.ContainsKey("introduced_by"))
@@ -259,38 +198,29 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            if (!ignoreCurrentOperations && !Helper.AreEqual2(this.current_operations, other.current_operations))
+            if (!ignoreCurrentOperations && !Helper.AreEqual2(current_operations, other.current_operations))
                 return false;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._name_label, other._name_label) &&
-                Helper.AreEqual2(this._name_description, other._name_description) &&
-                Helper.AreEqual2(this._allowed_operations, other._allowed_operations) &&
-                Helper.AreEqual2(this._VDIs, other._VDIs) &&
-                Helper.AreEqual2(this._PBDs, other._PBDs) &&
-                Helper.AreEqual2(this._virtual_allocation, other._virtual_allocation) &&
-                Helper.AreEqual2(this._physical_utilisation, other._physical_utilisation) &&
-                Helper.AreEqual2(this._physical_size, other._physical_size) &&
-                Helper.AreEqual2(this._type, other._type) &&
-                Helper.AreEqual2(this._content_type, other._content_type) &&
-                Helper.AreEqual2(this._shared, other._shared) &&
-                Helper.AreEqual2(this._other_config, other._other_config) &&
-                Helper.AreEqual2(this._tags, other._tags) &&
-                Helper.AreEqual2(this._sm_config, other._sm_config) &&
-                Helper.AreEqual2(this._blobs, other._blobs) &&
-                Helper.AreEqual2(this._local_cache_enabled, other._local_cache_enabled) &&
-                Helper.AreEqual2(this._introduced_by, other._introduced_by) &&
-                Helper.AreEqual2(this._clustered, other._clustered) &&
-                Helper.AreEqual2(this._is_tools_sr, other._is_tools_sr);
-        }
-
-        internal static List<SR> ProxyArrayToObjectList(Proxy_SR[] input)
-        {
-            var result = new List<SR>();
-            foreach (var item in input)
-                result.Add(new SR(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_name_label, other._name_label) &&
+                Helper.AreEqual2(_name_description, other._name_description) &&
+                Helper.AreEqual2(_allowed_operations, other._allowed_operations) &&
+                Helper.AreEqual2(_VDIs, other._VDIs) &&
+                Helper.AreEqual2(_PBDs, other._PBDs) &&
+                Helper.AreEqual2(_virtual_allocation, other._virtual_allocation) &&
+                Helper.AreEqual2(_physical_utilisation, other._physical_utilisation) &&
+                Helper.AreEqual2(_physical_size, other._physical_size) &&
+                Helper.AreEqual2(_type, other._type) &&
+                Helper.AreEqual2(_content_type, other._content_type) &&
+                Helper.AreEqual2(_shared, other._shared) &&
+                Helper.AreEqual2(_other_config, other._other_config) &&
+                Helper.AreEqual2(_tags, other._tags) &&
+                Helper.AreEqual2(_sm_config, other._sm_config) &&
+                Helper.AreEqual2(_blobs, other._blobs) &&
+                Helper.AreEqual2(_local_cache_enabled, other._local_cache_enabled) &&
+                Helper.AreEqual2(_introduced_by, other._introduced_by) &&
+                Helper.AreEqual2(_clustered, other._clustered) &&
+                Helper.AreEqual2(_is_tools_sr, other._is_tools_sr);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, SR server)
@@ -330,6 +260,7 @@ namespace XenAPI
                 return null;
             }
         }
+
         /// <summary>
         /// Get a record containing the current state of the given SR.
         /// First published in XenServer 4.0.
@@ -338,10 +269,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static SR get_record(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_record(session.opaque_ref, _sr);
-            else
-                return new SR(session.XmlRpcProxy.sr_get_record(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_record(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -352,10 +280,7 @@ namespace XenAPI
         /// <param name="_uuid">UUID of object to return</param>
         public static XenRef<SR> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.sr_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -366,10 +291,7 @@ namespace XenAPI
         /// <param name="_label">label of object to return</param>
         public static List<XenRef<SR>> get_by_name_label(Session session, string _label)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_by_name_label(session.opaque_ref, _label);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_get_by_name_label(session.opaque_ref, _label ?? "").parse());
+            return session.JsonRpcClient.sr_get_by_name_label(session.opaque_ref, _label);
         }
 
         /// <summary>
@@ -380,10 +302,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static string get_uuid(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_uuid(session.opaque_ref, _sr);
-            else
-                return session.XmlRpcProxy.sr_get_uuid(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_uuid(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -394,10 +313,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static string get_name_label(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_name_label(session.opaque_ref, _sr);
-            else
-                return session.XmlRpcProxy.sr_get_name_label(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_name_label(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -408,10 +324,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static string get_name_description(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_name_description(session.opaque_ref, _sr);
-            else
-                return session.XmlRpcProxy.sr_get_name_description(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_name_description(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -422,10 +335,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static List<storage_operations> get_allowed_operations(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_allowed_operations(session.opaque_ref, _sr);
-            else
-                return Helper.StringArrayToEnumList<storage_operations>(session.XmlRpcProxy.sr_get_allowed_operations(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_allowed_operations(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -436,10 +346,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static Dictionary<string, storage_operations> get_current_operations(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_current_operations(session.opaque_ref, _sr);
-            else
-                return Maps.convert_from_proxy_string_storage_operations(session.XmlRpcProxy.sr_get_current_operations(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_current_operations(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -450,10 +357,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static List<XenRef<VDI>> get_VDIs(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_vdis(session.opaque_ref, _sr);
-            else
-                return XenRef<VDI>.Create(session.XmlRpcProxy.sr_get_vdis(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_vdis(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -464,10 +368,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static List<XenRef<PBD>> get_PBDs(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_pbds(session.opaque_ref, _sr);
-            else
-                return XenRef<PBD>.Create(session.XmlRpcProxy.sr_get_pbds(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_pbds(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -478,10 +379,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static long get_virtual_allocation(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_virtual_allocation(session.opaque_ref, _sr);
-            else
-                return long.Parse(session.XmlRpcProxy.sr_get_virtual_allocation(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_virtual_allocation(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -492,10 +390,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static long get_physical_utilisation(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_physical_utilisation(session.opaque_ref, _sr);
-            else
-                return long.Parse(session.XmlRpcProxy.sr_get_physical_utilisation(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_physical_utilisation(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -506,10 +401,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static long get_physical_size(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_physical_size(session.opaque_ref, _sr);
-            else
-                return long.Parse(session.XmlRpcProxy.sr_get_physical_size(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_physical_size(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -520,10 +412,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static string get_type(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_type(session.opaque_ref, _sr);
-            else
-                return session.XmlRpcProxy.sr_get_type(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_type(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -534,10 +423,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static string get_content_type(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_content_type(session.opaque_ref, _sr);
-            else
-                return session.XmlRpcProxy.sr_get_content_type(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_content_type(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -548,10 +434,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static bool get_shared(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_shared(session.opaque_ref, _sr);
-            else
-                return (bool)session.XmlRpcProxy.sr_get_shared(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_shared(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -562,10 +445,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static Dictionary<string, string> get_other_config(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_other_config(session.opaque_ref, _sr);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.sr_get_other_config(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_other_config(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -576,10 +456,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static string[] get_tags(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_tags(session.opaque_ref, _sr);
-            else
-                return (string [])session.XmlRpcProxy.sr_get_tags(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_tags(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -590,10 +467,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static Dictionary<string, string> get_sm_config(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_sm_config(session.opaque_ref, _sr);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.sr_get_sm_config(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_sm_config(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -604,10 +478,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static Dictionary<string, XenRef<Blob>> get_blobs(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_blobs(session.opaque_ref, _sr);
-            else
-                return Maps.convert_from_proxy_string_XenRefBlob(session.XmlRpcProxy.sr_get_blobs(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_blobs(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -618,10 +489,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static bool get_local_cache_enabled(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_local_cache_enabled(session.opaque_ref, _sr);
-            else
-                return (bool)session.XmlRpcProxy.sr_get_local_cache_enabled(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_local_cache_enabled(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -632,10 +500,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<DR_task> get_introduced_by(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_introduced_by(session.opaque_ref, _sr);
-            else
-                return XenRef<DR_task>.Create(session.XmlRpcProxy.sr_get_introduced_by(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_introduced_by(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -646,10 +511,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static bool get_clustered(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_clustered(session.opaque_ref, _sr);
-            else
-                return (bool)session.XmlRpcProxy.sr_get_clustered(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_clustered(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -660,10 +522,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static bool get_is_tools_sr(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_is_tools_sr(session.opaque_ref, _sr);
-            else
-                return (bool)session.XmlRpcProxy.sr_get_is_tools_sr(session.opaque_ref, _sr ?? "").parse();
+            return session.JsonRpcClient.sr_get_is_tools_sr(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -675,10 +534,7 @@ namespace XenAPI
         /// <param name="_other_config">New value to set</param>
         public static void set_other_config(Session session, string _sr, Dictionary<string, string> _other_config)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_other_config(session.opaque_ref, _sr, _other_config);
-            else
-                session.XmlRpcProxy.sr_set_other_config(session.opaque_ref, _sr ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse();
+            session.JsonRpcClient.sr_set_other_config(session.opaque_ref, _sr, _other_config);
         }
 
         /// <summary>
@@ -691,10 +547,7 @@ namespace XenAPI
         /// <param name="_value">Value to add</param>
         public static void add_to_other_config(Session session, string _sr, string _key, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_add_to_other_config(session.opaque_ref, _sr, _key, _value);
-            else
-                session.XmlRpcProxy.sr_add_to_other_config(session.opaque_ref, _sr ?? "", _key ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sr_add_to_other_config(session.opaque_ref, _sr, _key, _value);
         }
 
         /// <summary>
@@ -706,10 +559,7 @@ namespace XenAPI
         /// <param name="_key">Key to remove</param>
         public static void remove_from_other_config(Session session, string _sr, string _key)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_remove_from_other_config(session.opaque_ref, _sr, _key);
-            else
-                session.XmlRpcProxy.sr_remove_from_other_config(session.opaque_ref, _sr ?? "", _key ?? "").parse();
+            session.JsonRpcClient.sr_remove_from_other_config(session.opaque_ref, _sr, _key);
         }
 
         /// <summary>
@@ -721,10 +571,7 @@ namespace XenAPI
         /// <param name="_tags">New value to set</param>
         public static void set_tags(Session session, string _sr, string[] _tags)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_tags(session.opaque_ref, _sr, _tags);
-            else
-                session.XmlRpcProxy.sr_set_tags(session.opaque_ref, _sr ?? "", _tags).parse();
+            session.JsonRpcClient.sr_set_tags(session.opaque_ref, _sr, _tags);
         }
 
         /// <summary>
@@ -736,10 +583,7 @@ namespace XenAPI
         /// <param name="_value">New value to add</param>
         public static void add_tags(Session session, string _sr, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_add_tags(session.opaque_ref, _sr, _value);
-            else
-                session.XmlRpcProxy.sr_add_tags(session.opaque_ref, _sr ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sr_add_tags(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -751,10 +595,7 @@ namespace XenAPI
         /// <param name="_value">Value to remove</param>
         public static void remove_tags(Session session, string _sr, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_remove_tags(session.opaque_ref, _sr, _value);
-            else
-                session.XmlRpcProxy.sr_remove_tags(session.opaque_ref, _sr ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sr_remove_tags(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -766,10 +607,7 @@ namespace XenAPI
         /// <param name="_sm_config">New value to set</param>
         public static void set_sm_config(Session session, string _sr, Dictionary<string, string> _sm_config)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_sm_config(session.opaque_ref, _sr, _sm_config);
-            else
-                session.XmlRpcProxy.sr_set_sm_config(session.opaque_ref, _sr ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse();
+            session.JsonRpcClient.sr_set_sm_config(session.opaque_ref, _sr, _sm_config);
         }
 
         /// <summary>
@@ -782,10 +620,7 @@ namespace XenAPI
         /// <param name="_value">Value to add</param>
         public static void add_to_sm_config(Session session, string _sr, string _key, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_add_to_sm_config(session.opaque_ref, _sr, _key, _value);
-            else
-                session.XmlRpcProxy.sr_add_to_sm_config(session.opaque_ref, _sr ?? "", _key ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sr_add_to_sm_config(session.opaque_ref, _sr, _key, _value);
         }
 
         /// <summary>
@@ -797,10 +632,7 @@ namespace XenAPI
         /// <param name="_key">Key to remove</param>
         public static void remove_from_sm_config(Session session, string _sr, string _key)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_remove_from_sm_config(session.opaque_ref, _sr, _key);
-            else
-                session.XmlRpcProxy.sr_remove_from_sm_config(session.opaque_ref, _sr ?? "", _key ?? "").parse();
+            session.JsonRpcClient.sr_remove_from_sm_config(session.opaque_ref, _sr, _key);
         }
 
         /// <summary>
@@ -818,10 +650,7 @@ namespace XenAPI
         /// <param name="_shared">True if the SR (is capable of) being shared by multiple hosts</param>
         public static XenRef<SR> create(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type, bool _shared)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_create(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared).parse());
+            return session.JsonRpcClient.sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared);
         }
 
         /// <summary>
@@ -839,10 +668,7 @@ namespace XenAPI
         /// <param name="_shared">True if the SR (is capable of) being shared by multiple hosts</param>
         public static XenRef<Task> async_create(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type, bool _shared)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_create(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared).parse());
+          return session.JsonRpcClient.async_sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared);
         }
 
         /// <summary>
@@ -861,10 +687,7 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options First published in XenServer 4.1.</param>
         public static XenRef<SR> create(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type, bool _shared, Dictionary<string, string> _sm_config)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_create(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared, Maps.convert_to_proxy_string_string(_sm_config)).parse());
+            return session.JsonRpcClient.sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
         }
 
         /// <summary>
@@ -883,10 +706,7 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options First published in XenServer 4.1.</param>
         public static XenRef<Task> async_create(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type, bool _shared, Dictionary<string, string> _sm_config)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_create(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared, Maps.convert_to_proxy_string_string(_sm_config)).parse());
+          return session.JsonRpcClient.async_sr_create(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
         }
 
         /// <summary>
@@ -902,10 +722,7 @@ namespace XenAPI
         /// <param name="_shared">True if the SR (is capable of) being shared by multiple hosts</param>
         public static XenRef<SR> introduce(Session session, string _uuid, string _name_label, string _name_description, string _type, string _content_type, bool _shared)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_introduce(session.opaque_ref, _uuid ?? "", _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared).parse());
+            return session.JsonRpcClient.sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared);
         }
 
         /// <summary>
@@ -921,10 +738,7 @@ namespace XenAPI
         /// <param name="_shared">True if the SR (is capable of) being shared by multiple hosts</param>
         public static XenRef<Task> async_introduce(Session session, string _uuid, string _name_label, string _name_description, string _type, string _content_type, bool _shared)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_introduce(session.opaque_ref, _uuid ?? "", _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared).parse());
+          return session.JsonRpcClient.async_sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared);
         }
 
         /// <summary>
@@ -941,10 +755,7 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options First published in XenServer 4.1.</param>
         public static XenRef<SR> introduce(Session session, string _uuid, string _name_label, string _name_description, string _type, string _content_type, bool _shared, Dictionary<string, string> _sm_config)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_introduce(session.opaque_ref, _uuid ?? "", _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared, Maps.convert_to_proxy_string_string(_sm_config)).parse());
+            return session.JsonRpcClient.sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
         }
 
         /// <summary>
@@ -961,10 +772,7 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options First published in XenServer 4.1.</param>
         public static XenRef<Task> async_introduce(Session session, string _uuid, string _name_label, string _name_description, string _type, string _content_type, bool _shared, Dictionary<string, string> _sm_config)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_introduce(session.opaque_ref, _uuid ?? "", _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", _shared, Maps.convert_to_proxy_string_string(_sm_config)).parse());
+          return session.JsonRpcClient.async_sr_introduce(session.opaque_ref, _uuid, _name_label, _name_description, _type, _content_type, _shared, _sm_config);
         }
 
         /// <summary>
@@ -983,10 +791,7 @@ namespace XenAPI
         [Deprecated("XenServer 4.1")]
         public static string make(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type);
-            else
-                return session.XmlRpcProxy.sr_make(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "").parse();
+            return session.JsonRpcClient.sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type);
         }
 
         /// <summary>
@@ -1005,10 +810,7 @@ namespace XenAPI
         [Deprecated("XenServer 4.1")]
         public static XenRef<Task> async_make(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_make(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "").parse());
+          return session.JsonRpcClient.async_sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type);
         }
 
         /// <summary>
@@ -1028,10 +830,7 @@ namespace XenAPI
         [Deprecated("XenServer 4.1")]
         public static string make(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type, Dictionary<string, string> _sm_config)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _sm_config);
-            else
-                return session.XmlRpcProxy.sr_make(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse();
+            return session.JsonRpcClient.sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _sm_config);
         }
 
         /// <summary>
@@ -1051,10 +850,7 @@ namespace XenAPI
         [Deprecated("XenServer 4.1")]
         public static XenRef<Task> async_make(Session session, string _host, Dictionary<string, string> _device_config, long _physical_size, string _name_label, string _name_description, string _type, string _content_type, Dictionary<string, string> _sm_config)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _sm_config);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_make(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _physical_size.ToString(), _name_label ?? "", _name_description ?? "", _type ?? "", _content_type ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse());
+          return session.JsonRpcClient.async_sr_make(session.opaque_ref, _host, _device_config, _physical_size, _name_label, _name_description, _type, _content_type, _sm_config);
         }
 
         /// <summary>
@@ -1065,10 +861,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void destroy(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_destroy(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_destroy(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_destroy(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1079,10 +872,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_destroy(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_destroy(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_destroy(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_destroy(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1093,10 +883,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void forget(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_forget(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_forget(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_forget(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1107,10 +894,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_forget(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_forget(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_forget(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_forget(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1121,10 +905,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void update(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_update(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_update(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_update(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1135,10 +916,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_update(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_update(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_update(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_update(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1148,10 +926,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static string[] get_supported_types(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_supported_types(session.opaque_ref);
-            else
-                return (string [])session.XmlRpcProxy.sr_get_supported_types(session.opaque_ref).parse();
+            return session.JsonRpcClient.sr_get_supported_types(session.opaque_ref);
         }
 
         /// <summary>
@@ -1162,10 +937,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void scan(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_scan(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_scan(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_scan(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1176,10 +948,31 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_scan(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_scan(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_scan(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_scan(session.opaque_ref, _sr);
+        }
+
+        /// <summary>
+        /// Perform a backend-specific scan, using the given device_config.  If the device_config is complete, then this will return a list of the SRs present of this type on the device, if any.  If the device_config is partial, then a backend-specific scan will be performed, returning results that will guide the user in improving the device_config.
+        /// First published in XenServer 4.1.
+        /// </summary>
+        /// <param name="session">The session</param>
+        /// <param name="_host">The host to create/make the SR on</param>
+        /// <param name="_device_config">The device config string that will be passed to backend SR driver</param>
+        public static string probe(Session session, string _host, Dictionary<string, string> _device_config)
+        {
+            return session.JsonRpcClient.sr_probe(session.opaque_ref, _host, _device_config);
+        }
+
+        /// <summary>
+        /// Perform a backend-specific scan, using the given device_config.  If the device_config is complete, then this will return a list of the SRs present of this type on the device, if any.  If the device_config is partial, then a backend-specific scan will be performed, returning results that will guide the user in improving the device_config.
+        /// First published in XenServer 4.1.
+        /// </summary>
+        /// <param name="session">The session</param>
+        /// <param name="_host">The host to create/make the SR on</param>
+        /// <param name="_device_config">The device config string that will be passed to backend SR driver</param>
+        public static XenRef<Task> async_probe(Session session, string _host, Dictionary<string, string> _device_config)
+        {
+          return session.JsonRpcClient.async_sr_probe(session.opaque_ref, _host, _device_config);
         }
 
         /// <summary>
@@ -1193,10 +986,7 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options</param>
         public static string probe(Session session, string _host, Dictionary<string, string> _device_config, string _type, Dictionary<string, string> _sm_config)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_probe(session.opaque_ref, _host, _device_config, _type, _sm_config);
-            else
-                return session.XmlRpcProxy.sr_probe(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _type ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse();
+            return session.JsonRpcClient.sr_probe(session.opaque_ref, _host, _device_config, _type, _sm_config);
         }
 
         /// <summary>
@@ -1210,15 +1000,12 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options</param>
         public static XenRef<Task> async_probe(Session session, string _host, Dictionary<string, string> _device_config, string _type, Dictionary<string, string> _sm_config)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_probe(session.opaque_ref, _host, _device_config, _type, _sm_config);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_probe(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _type ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse());
+          return session.JsonRpcClient.async_sr_probe(session.opaque_ref, _host, _device_config, _type, _sm_config);
         }
 
         /// <summary>
         /// Perform a backend-specific scan, using the given device_config.  If the device_config is complete, then this will return a list of the SRs present of this type on the device, if any.  If the device_config is partial, then a backend-specific scan will be performed, returning results that will guide the user in improving the device_config.
-        /// Experimental. First published in XenServer 7.5.
+        /// First published in XenServer 7.6.
         /// </summary>
         /// <param name="session">The session</param>
         /// <param name="_host">The host to create/make the SR on</param>
@@ -1227,15 +1014,12 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options</param>
         public static List<Probe_result> probe_ext(Session session, string _host, Dictionary<string, string> _device_config, string _type, Dictionary<string, string> _sm_config)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_probe_ext(session.opaque_ref, _host, _device_config, _type, _sm_config);
-            else
-                return Probe_result.ProxyArrayToObjectList(session.XmlRpcProxy.sr_probe_ext(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _type ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse());
+            return session.JsonRpcClient.sr_probe_ext(session.opaque_ref, _host, _device_config, _type, _sm_config);
         }
 
         /// <summary>
         /// Perform a backend-specific scan, using the given device_config.  If the device_config is complete, then this will return a list of the SRs present of this type on the device, if any.  If the device_config is partial, then a backend-specific scan will be performed, returning results that will guide the user in improving the device_config.
-        /// Experimental. First published in XenServer 7.5.
+        /// First published in XenServer 7.6.
         /// </summary>
         /// <param name="session">The session</param>
         /// <param name="_host">The host to create/make the SR on</param>
@@ -1244,10 +1028,7 @@ namespace XenAPI
         /// <param name="_sm_config">Storage backend specific configuration options</param>
         public static XenRef<Task> async_probe_ext(Session session, string _host, Dictionary<string, string> _device_config, string _type, Dictionary<string, string> _sm_config)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_probe_ext(session.opaque_ref, _host, _device_config, _type, _sm_config);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_probe_ext(session.opaque_ref, _host ?? "", Maps.convert_to_proxy_string_string(_device_config), _type ?? "", Maps.convert_to_proxy_string_string(_sm_config)).parse());
+          return session.JsonRpcClient.async_sr_probe_ext(session.opaque_ref, _host, _device_config, _type, _sm_config);
         }
 
         /// <summary>
@@ -1259,10 +1040,7 @@ namespace XenAPI
         /// <param name="_value">True if the SR is shared</param>
         public static void set_shared(Session session, string _sr, bool _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_shared(session.opaque_ref, _sr, _value);
-            else
-                session.XmlRpcProxy.sr_set_shared(session.opaque_ref, _sr ?? "", _value).parse();
+            session.JsonRpcClient.sr_set_shared(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1274,10 +1052,7 @@ namespace XenAPI
         /// <param name="_value">True if the SR is shared</param>
         public static XenRef<Task> async_set_shared(Session session, string _sr, bool _value)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_set_shared(session.opaque_ref, _sr, _value);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_set_shared(session.opaque_ref, _sr ?? "", _value).parse());
+          return session.JsonRpcClient.async_sr_set_shared(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1289,10 +1064,7 @@ namespace XenAPI
         /// <param name="_value">The name label for the SR</param>
         public static void set_name_label(Session session, string _sr, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_name_label(session.opaque_ref, _sr, _value);
-            else
-                session.XmlRpcProxy.sr_set_name_label(session.opaque_ref, _sr ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sr_set_name_label(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1304,10 +1076,7 @@ namespace XenAPI
         /// <param name="_value">The name label for the SR</param>
         public static XenRef<Task> async_set_name_label(Session session, string _sr, string _value)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_set_name_label(session.opaque_ref, _sr, _value);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_set_name_label(session.opaque_ref, _sr ?? "", _value ?? "").parse());
+          return session.JsonRpcClient.async_sr_set_name_label(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1319,10 +1088,7 @@ namespace XenAPI
         /// <param name="_value">The name description for the SR</param>
         public static void set_name_description(Session session, string _sr, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_name_description(session.opaque_ref, _sr, _value);
-            else
-                session.XmlRpcProxy.sr_set_name_description(session.opaque_ref, _sr ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sr_set_name_description(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1334,10 +1100,7 @@ namespace XenAPI
         /// <param name="_value">The name description for the SR</param>
         public static XenRef<Task> async_set_name_description(Session session, string _sr, string _value)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_set_name_description(session.opaque_ref, _sr, _value);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_set_name_description(session.opaque_ref, _sr ?? "", _value ?? "").parse());
+          return session.JsonRpcClient.async_sr_set_name_description(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1350,10 +1113,7 @@ namespace XenAPI
         /// <param name="_mime_type">The mime type for the data. Empty string translates to application/octet-stream</param>
         public static XenRef<Blob> create_new_blob(Session session, string _sr, string _name, string _mime_type)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type);
-            else
-                return XenRef<Blob>.Create(session.XmlRpcProxy.sr_create_new_blob(session.opaque_ref, _sr ?? "", _name ?? "", _mime_type ?? "").parse());
+            return session.JsonRpcClient.sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type);
         }
 
         /// <summary>
@@ -1366,10 +1126,7 @@ namespace XenAPI
         /// <param name="_mime_type">The mime type for the data. Empty string translates to application/octet-stream</param>
         public static XenRef<Task> async_create_new_blob(Session session, string _sr, string _name, string _mime_type)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_create_new_blob(session.opaque_ref, _sr ?? "", _name ?? "", _mime_type ?? "").parse());
+          return session.JsonRpcClient.async_sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type);
         }
 
         /// <summary>
@@ -1383,10 +1140,7 @@ namespace XenAPI
         /// <param name="_public">True if the blob should be publicly available First published in XenServer 6.1.</param>
         public static XenRef<Blob> create_new_blob(Session session, string _sr, string _name, string _mime_type, bool _public)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type, _public);
-            else
-                return XenRef<Blob>.Create(session.XmlRpcProxy.sr_create_new_blob(session.opaque_ref, _sr ?? "", _name ?? "", _mime_type ?? "", _public).parse());
+            return session.JsonRpcClient.sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type, _public);
         }
 
         /// <summary>
@@ -1400,10 +1154,7 @@ namespace XenAPI
         /// <param name="_public">True if the blob should be publicly available First published in XenServer 6.1.</param>
         public static XenRef<Task> async_create_new_blob(Session session, string _sr, string _name, string _mime_type, bool _public)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type, _public);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_create_new_blob(session.opaque_ref, _sr ?? "", _name ?? "", _mime_type ?? "", _public).parse());
+          return session.JsonRpcClient.async_sr_create_new_blob(session.opaque_ref, _sr, _name, _mime_type, _public);
         }
 
         /// <summary>
@@ -1415,10 +1166,7 @@ namespace XenAPI
         /// <param name="_value">The new value of the SR's physical_size</param>
         public static void set_physical_size(Session session, string _sr, long _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_set_physical_size(session.opaque_ref, _sr, _value);
-            else
-                session.XmlRpcProxy.sr_set_physical_size(session.opaque_ref, _sr ?? "", _value.ToString()).parse();
+            session.JsonRpcClient.sr_set_physical_size(session.opaque_ref, _sr, _value);
         }
 
         /// <summary>
@@ -1429,10 +1177,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void assert_can_host_ha_statefile(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_assert_can_host_ha_statefile(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_assert_can_host_ha_statefile(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_assert_can_host_ha_statefile(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1443,10 +1188,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_assert_can_host_ha_statefile(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_assert_can_host_ha_statefile(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_assert_can_host_ha_statefile(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_assert_can_host_ha_statefile(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1457,10 +1199,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void assert_supports_database_replication(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_assert_supports_database_replication(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_assert_supports_database_replication(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_assert_supports_database_replication(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1471,10 +1210,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_assert_supports_database_replication(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_assert_supports_database_replication(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_assert_supports_database_replication(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_assert_supports_database_replication(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1485,10 +1221,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void enable_database_replication(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_enable_database_replication(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_enable_database_replication(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_enable_database_replication(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1499,10 +1232,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_enable_database_replication(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_enable_database_replication(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_enable_database_replication(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_enable_database_replication(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1513,10 +1243,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static void disable_database_replication(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_disable_database_replication(session.opaque_ref, _sr);
-            else
-                session.XmlRpcProxy.sr_disable_database_replication(session.opaque_ref, _sr ?? "").parse();
+            session.JsonRpcClient.sr_disable_database_replication(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1527,10 +1254,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static XenRef<Task> async_disable_database_replication(Session session, string _sr)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_sr_disable_database_replication(session.opaque_ref, _sr);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_sr_disable_database_replication(session.opaque_ref, _sr ?? "").parse());
+          return session.JsonRpcClient.async_sr_disable_database_replication(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1541,10 +1265,7 @@ namespace XenAPI
         /// <param name="_sr">The opaque_ref of the given sr</param>
         public static List<Data_source> get_data_sources(Session session, string _sr)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_data_sources(session.opaque_ref, _sr);
-            else
-                return Data_source.ProxyArrayToObjectList(session.XmlRpcProxy.sr_get_data_sources(session.opaque_ref, _sr ?? "").parse());
+            return session.JsonRpcClient.sr_get_data_sources(session.opaque_ref, _sr);
         }
 
         /// <summary>
@@ -1556,10 +1277,7 @@ namespace XenAPI
         /// <param name="_data_source">The data source to record</param>
         public static void record_data_source(Session session, string _sr, string _data_source)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_record_data_source(session.opaque_ref, _sr, _data_source);
-            else
-                session.XmlRpcProxy.sr_record_data_source(session.opaque_ref, _sr ?? "", _data_source ?? "").parse();
+            session.JsonRpcClient.sr_record_data_source(session.opaque_ref, _sr, _data_source);
         }
 
         /// <summary>
@@ -1571,10 +1289,7 @@ namespace XenAPI
         /// <param name="_data_source">The data source to query</param>
         public static double query_data_source(Session session, string _sr, string _data_source)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_query_data_source(session.opaque_ref, _sr, _data_source);
-            else
-                return Convert.ToDouble(session.XmlRpcProxy.sr_query_data_source(session.opaque_ref, _sr ?? "", _data_source ?? "").parse());
+            return session.JsonRpcClient.sr_query_data_source(session.opaque_ref, _sr, _data_source);
         }
 
         /// <summary>
@@ -1586,10 +1301,7 @@ namespace XenAPI
         /// <param name="_data_source">The data source whose archives are to be forgotten</param>
         public static void forget_data_source_archives(Session session, string _sr, string _data_source)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sr_forget_data_source_archives(session.opaque_ref, _sr, _data_source);
-            else
-                session.XmlRpcProxy.sr_forget_data_source_archives(session.opaque_ref, _sr ?? "", _data_source ?? "").parse();
+            session.JsonRpcClient.sr_forget_data_source_archives(session.opaque_ref, _sr, _data_source);
         }
 
         /// <summary>
@@ -1599,10 +1311,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<SR>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_all(session.opaque_ref);
-            else
-                return XenRef<SR>.Create(session.XmlRpcProxy.sr_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.sr_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -1612,10 +1321,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<SR>, SR> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sr_get_all_records(session.opaque_ref);
-            else
-                return XenRef<SR>.Create<Proxy_SR>(session.XmlRpcProxy.sr_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.sr_get_all_records(session.opaque_ref);
         }
 
         /// <summary>

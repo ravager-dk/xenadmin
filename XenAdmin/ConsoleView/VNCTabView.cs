@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,20 +29,22 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using System.Threading;
+using System.Windows.Forms;
+using XenAdmin.Commands;
+using XenAdmin.Controls.ConsoleTab;
+using XenAdmin.Controls.GradientPanel;
 using XenAdmin.Core;
+using XenAdmin.Dialogs;
 using XenAdmin.Network;
 using XenAPI;
-using XenAdmin.Commands;
-using XenAdmin.Dialogs;
-using System.Collections.Generic;
-using System.Diagnostics;
-using XenAdmin.Controls.ConsoleTab;
 
 
 namespace XenAdmin.ConsoleView
@@ -70,22 +71,23 @@ namespace XenAdmin.ConsoleView
         private FullScreenHint fullscreenHint;
         private Size LastDesktopSize;
         private bool switchOnTabOpened = false;
+        private Font titleLabelFont = new Font(DefaultFont.FontFamily, DefaultFont.Size + 1f, FontStyle.Bold);
 
         /// <summary>
         /// Whether to ignore VNC resize events.  We turn this on when changing
         /// the scaling settings, because this in turn triggers a VNC resize.
         /// </summary>
-        private bool ignoringResizes = false;
+        private bool ignoringResizes;
 
-        private bool ignoreScaleChange = false;
+        private bool ignoreScaleChange;
 
         internal readonly ConsoleKeyHandler KeyHandler = new ConsoleKeyHandler();
 
-        private bool hasRDP { get { return source != null && source.HasRDP(); } }
+        private bool HasRDP => source != null && source.HasRDP();
 
-        private bool RDPEnabled { get { return source != null && source.RDPEnabled(); } }
+        private bool RDPEnabled => source != null && source.RDPEnabled();
 
-        private bool RDPControlEnabled { get { return source != null && source.RDPControlEnabled(); } }
+        private bool RDPControlEnabled => source != null && source.RDPControlEnabled();
 
         public bool IsRDPControlEnabled() { return RDPControlEnabled; }
 
@@ -98,11 +100,11 @@ namespace XenAdmin.ConsoleView
             var tooltipForGeneralInformationMessage = new ToolTip();
             tooltipForGeneralInformationMessage.SetToolTip(labelGeneralInformationMessage, labelGeneralInformationMessage.Text);
 
-            HostLabel.Font = Program.HeaderGradientFont;
-            HostLabel.ForeColor = Program.HeaderGradientForeColor;
-            multipleDvdIsoList1.LabelSingleDvdForeColor = Program.HeaderGradientForeColor;
-            multipleDvdIsoList1.LabelNewCdForeColor = Program.HeaderGradientForeColor;
-            multipleDvdIsoList1.LinkLabelLinkColor = Color.White;
+            HostLabel.Font = titleLabelFont;
+            HostLabel.ForeColor = HorizontalGradientPanel.TextColor;
+            multipleDvdIsoList1.LabelSingleDvdForeColor = HorizontalGradientPanel.TextColor;
+            multipleDvdIsoList1.LabelNewCdForeColor = HorizontalGradientPanel.TextColor;
+            multipleDvdIsoList1.LinkLabelLinkColor = HorizontalGradientPanel.TextColor;
 
 #pragma warning disable 0219
             // Force the handle to be created, because resize events
@@ -110,11 +112,11 @@ namespace XenAdmin.ConsoleView
             IntPtr _ = Handle;
 #pragma warning restore 0219
 
-            this.parentVNCView = parent;
-            this.scaleCheckBox.Checked = false;
+            parentVNCView = parent;
+            scaleCheckBox.Checked = false;
             this.source = source;
-            this.guestMetrics = source.Connection.Resolve(source.guest_metrics);
-            if (this.guestMetrics != null)
+            guestMetrics = source.Connection.Resolve(source.guest_metrics);
+            if (guestMetrics != null)
                 guestMetrics.PropertyChanged += guestMetrics_PropertyChanged;
             log.DebugFormat("'{0}' console: Register Server_PropertyChanged event listener on {0}", this.source.Name());
             this.source.PropertyChanged += Server_PropertyChanged;
@@ -122,62 +124,67 @@ namespace XenAdmin.ConsoleView
             VM_CollectionChangedWithInvoke = Program.ProgramInvokeHandler(VM_CollectionChanged);
             source.Connection.Cache.RegisterCollectionChanged<VM>(VM_CollectionChangedWithInvoke);
 
-            if (source.is_control_domain)
+            if (source.IsControlDomainZero(out Host host))
             {
-                Host host = source.Connection.Resolve(source.resident_on);
-                if (host != null)
+                log.DebugFormat("'{0}' console: Register Server_PropertyChanged event listener on {1}", this.source.Name(), host.Name());
+                host.PropertyChanged += Server_PropertyChanged;
+
+                Host_metrics hostMetrics = source.Connection.Resolve(host.metrics);
+                if (hostMetrics != null)
                 {
-                    log.DebugFormat("'{0}' console: Register Server_PropertyChanged event listener on {1}", this.source.Name(), host.Name());
-                    host.PropertyChanged += Server_PropertyChanged;
-
-                    Host_metrics hostMetrics = source.Connection.Resolve(host.metrics);
-                    if (hostMetrics != null)
-                    {
-                        log.DebugFormat("'{0}' console: Register Server_PropertyChanged event listener on host metrics", this.source.Name());
-                        hostMetrics.PropertyChanged += Server_PropertyChanged;
-                    }
-
-                    HostLabel.Text = string.Format(source.IsControlDomainZero() ? Messages.CONSOLE_HOST : Messages.CONSOLE_HOST_NUTANIX, host.Name());
-                    HostLabel.Visible = true;
+                    log.DebugFormat("'{0}' console: Register Server_PropertyChanged event listener on host metrics", this.source.Name());
+                    hostMetrics.PropertyChanged += Server_PropertyChanged;
                 }
+
+                HostLabel.Text = string.Format(Messages.CONSOLE_HOST, host.Name());
+                HostLabel.Visible = true;
+            }
+            else if (source.IsSrDriverDomain(out SR sr))
+            {
+                log.DebugFormat("'{0}' console: Register Server_PropertyChanged event listener on {1}", this.source.Name(), sr.Name());
+                sr.PropertyChanged += Server_PropertyChanged;
+
+                HostLabel.Text = string.Format(Messages.CONSOLE_SR_DRIVER_DOMAIN, sr.Name());
+                HostLabel.Visible = true;
             }
             else
             {
                 source.Connection.Cache.RegisterCollectionChanged<Host>(Host_CollectionChangedWithInvoke);
                 targetHost = source.GetStorageHost(false);
-                
+
                 foreach (Host cachedHost in source.Connection.Cache.Hosts)
                 {
                     log.DebugFormat("'{0}' console: Register Server_EnabledPropertyChanged event listener on {1}",
                                     source.Name(), cachedHost.Name());
                     cachedHost.PropertyChanged += Server_EnabledPropertyChanged;
                 }
-                
+
                 HostLabel.Visible = false;
             }
 
             log.DebugFormat("'{0}' console: Update power state (on VNCTabView constructor)", this.source.Name());
             updatePowerState();
-            this.vncScreen = new XSVNCScreen(source, new EventHandler(RDPorVNCResizeHandler), this, elevatedUsername, elevatedPassword);
+            vncScreen = new XSVNCScreen(source, new EventHandler(RDPorVNCResizeHandler), this, elevatedUsername, elevatedPassword);
             ShowGpuWarningIfRequired(vncScreen.MustConnectRemoteDesktop());
             vncScreen.GpuStatusChanged += ShowGpuWarningIfRequired;
 
-            if (source.IsControlDomainZero() || source.IsHVM() && !hasRDP) //Linux HVM guests should only have one console: the console switch button vanishes altogether.
+            if (source.IsControlDomainZero(out var _) || source.IsHVM() && !HasRDP) //Linux HVM guests should only have one console: the console switch button vanishes altogether.
             {
                 toggleConsoleButton.Visible = false;
             }
             else
             {
                 toggleConsoleButton.Visible = true;
-                this.vncScreen.OnDetectRDP = this.OnDetectRDP;
-                this.vncScreen.OnDetectVNC = this.OnDetectVNC;
-                this.vncScreen.UserCancelledAuth += this.OnUserCancelledAuth;
-                this.vncScreen.VncConnectionAttemptCancelled += this.OnVncConnectionAttemptCancelled;
+                vncScreen.UserCancelledAuth += OnUserCancelledAuth;
+                vncScreen.VncConnectionAttemptCancelled += OnVncConnectionAttemptCancelled;
             }
+
+            vncScreen.OnDetectRDP = OnDetectRDP;
+            vncScreen.OnDetectVNC = OnDetectVNC;
 
             LastDesktopSize = vncScreen.DesktopSize;
 
-            this.insKeyTimer = new System.Threading.Timer(new TimerCallback(notInsKeyPressed));
+            insKeyTimer = new System.Threading.Timer(new TimerCallback(notInsKeyPressed));
 
             Properties.Settings.Default.PropertyChanged += Default_PropertyChanged;
 
@@ -189,11 +196,11 @@ namespace XenAdmin.ConsoleView
 
             KeyHandler.AddKeyHandler(ConsoleShortcutKey.CTRL_ALT_INS, cancelWaitForInsKeyAndSendCAD);
 
-            this.vncScreen.Parent = this.contentPanel;
-            this.vncScreen.Dock = DockStyle.Fill;
+            vncScreen.Parent = contentPanel;
+            vncScreen.Dock = DockStyle.Fill;
 
             string rdpLabel = GuessNativeConsoleLabel(source);
-            this.toggleConsoleButton.Text = rdpLabel;
+            toggleConsoleButton.Text = rdpLabel;
 
             UpdateFullScreenButton();
 
@@ -211,7 +218,7 @@ namespace XenAdmin.ConsoleView
 
             //If RDP enabled and AutoSwitchToRDP selected, switch RDP connection will be done when VNC already get the correct screen resolution.
             //This change is only for Cream, because RDP port scan was removed in Cream.
-            if (Properties.Settings.Default.AutoSwitchToRDP && RDPEnabled )
+            if (Properties.Settings.Default.AutoSwitchToRDP && RDPEnabled)
                 vncScreen.AutoSwitchRDPLater = true;
         }
 
@@ -230,11 +237,11 @@ namespace XenAdmin.ConsoleView
         private void toggleConsoleButton_EnabledChanged(object sender, EventArgs e)
         {
             ButtonBase button = sender as ButtonBase;
-            if(button == null)
+            if (button == null)
                 return;
 
             string format = "Console tab 'Switch to...' button disabled for VM '{0}'";
-            
+
             if (button.Enabled)
                 format = "Console tab 'Switch to...' button enabled for VM '{0}'";
 
@@ -251,7 +258,7 @@ namespace XenAdmin.ConsoleView
                 {
                     // the VM we are looking at has gone away. We should redock if necessary, otherwise it
                     // avoids the destroy (and re-create in the case of dom0) when the tab itself goes.
-                    if (!parentVNCView.isDocked)
+                    if (!parentVNCView.IsDocked)
                         parentVNCView.DockUnDock();
                 }
             }
@@ -259,11 +266,10 @@ namespace XenAdmin.ConsoleView
 
         private void Host_CollectionChanged(object sender, CollectionChangeEventArgs e)
         {
-            if (source.IsControlDomainZero())
+            if (source.IsControlDomainZero(out _))
                 return;
 
-            Host host = e.Element as Host;
-            if (host != null)
+            if (e.Element is Host host)
             {
                 if (e.Action == CollectionChangeAction.Add)
                 {
@@ -292,26 +298,28 @@ namespace XenAdmin.ConsoleView
             source.PropertyChanged -= new PropertyChangedEventHandler(Server_PropertyChanged);
             source.Connection.Cache.DeregisterCollectionChanged<VM>(VM_CollectionChangedWithInvoke);
 
-            if (this.guestMetrics != null)
-                this.guestMetrics.PropertyChanged -= guestMetrics_PropertyChanged; 
+            if (guestMetrics != null)
+                guestMetrics.PropertyChanged -= guestMetrics_PropertyChanged;
 
-            if (source.IsControlDomainZero())
+            if (source.IsControlDomainZero(out Host host))
             {
-                Host host = source.Connection.Resolve<Host>(source.resident_on);
-                if (host != null)
-                {
-                    log.DebugFormat("'{0}' console: Unregister Server_PropertyChanged event listener on {1}",
-                                    source.Name(), host.Name());
-                    host.PropertyChanged -= Server_PropertyChanged;
+                log.DebugFormat("'{0}' console: Unregister Server_PropertyChanged event listener on {1}",
+                    source.Name(), host.Name());
+                host.PropertyChanged -= Server_PropertyChanged;
 
-                    Host_metrics hostMetrics = source.Connection.Resolve<Host_metrics>(host.metrics);
-                    if (hostMetrics != null)
-                    {
-                        log.DebugFormat("'{0}' console: Unregister Server_PropertyChanged event listener on host metrics",
-                                        source.Name());
-                        hostMetrics.PropertyChanged -= Server_PropertyChanged;
-                    }
+                Host_metrics hostMetrics = source.Connection.Resolve<Host_metrics>(host.metrics);
+                if (hostMetrics != null)
+                {
+                    log.DebugFormat("'{0}' console: Unregister Server_PropertyChanged event listener on host metrics",
+                        source.Name());
+                    hostMetrics.PropertyChanged -= Server_PropertyChanged;
                 }
+            }
+            else if (source.IsSrDriverDomain(out SR sr))
+            {
+                log.DebugFormat("'{0}' console: Unregister Server_PropertyChanged event listener on {1}",
+                    source.Name(), sr.Name());
+                sr.PropertyChanged -= Server_PropertyChanged;
             }
             else
             {
@@ -383,17 +391,18 @@ namespace XenAdmin.ConsoleView
             if (Properties.Settings.Default.DockShortcutKey == 1)
             {
                 // Alt + Shift + U
-                KeyHandler.AddKeyHandler(ConsoleShortcutKey.ALT_SHIFT_U, toggleDockUnDock);}
+                KeyHandler.AddKeyHandler(ConsoleShortcutKey.ALT_SHIFT_U, toggleDockUnDock);
+            }
             else if (Properties.Settings.Default.DockShortcutKey == 2)
             {
                 // F11
-                KeyHandler.AddKeyHandler(ConsoleShortcutKey.F11, toggleDockUnDock); 
+                KeyHandler.AddKeyHandler(ConsoleShortcutKey.F11, toggleDockUnDock);
             }
             else if (Properties.Settings.Default.DockShortcutKey == 0)
             {
                 // <none>
                 KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.ALT_SHIFT_U);
-                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.F11); 
+                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.F11);
             }
 
             UpdateDockButton();
@@ -402,12 +411,12 @@ namespace XenAdmin.ConsoleView
             if (Properties.Settings.Default.UncaptureShortcutKey == 0)
             {
                 // Right Ctrl
-                KeyHandler.AddKeyHandler(ConsoleShortcutKey.RIGHT_CTRL, ToggleConsoleFocus); 
+                KeyHandler.AddKeyHandler(ConsoleShortcutKey.RIGHT_CTRL, ToggleConsoleFocus);
             }
             else if (Properties.Settings.Default.UncaptureShortcutKey == 1)
             {
                 // Left Alt
-                KeyHandler.AddKeyHandler(ConsoleShortcutKey.LEFT_ALT, ToggleConsoleFocus); 
+                KeyHandler.AddKeyHandler(ConsoleShortcutKey.LEFT_ALT, ToggleConsoleFocus);
             }
         }
 
@@ -438,37 +447,37 @@ namespace XenAdmin.ConsoleView
             if (Properties.Settings.Default.FullScreenShortcutKey != 3)
             {
                 // Ctrl + Enter
-                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.CTRL_ENTER); 
+                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.CTRL_ENTER);
             }
 
             if (Properties.Settings.Default.DockShortcutKey != 1)
             {
                 // Alt + Shift + U
-                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.ALT_SHIFT_U); 
+                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.ALT_SHIFT_U);
             }
 
             if (Properties.Settings.Default.DockShortcutKey != 2)
             {
                 // F11
-                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.F11); 
+                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.F11);
             }
 
             // Uncapture keyboard and mouse Key
             if (Properties.Settings.Default.UncaptureShortcutKey != 0)
             {
                 // Right Ctrl
-                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.RIGHT_CTRL); 
+                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.RIGHT_CTRL);
             }
             if (Properties.Settings.Default.UncaptureShortcutKey != 1)
             {
                 // Left Alt
-                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.LEFT_ALT); 
+                KeyHandler.RemoveKeyHandler(ConsoleShortcutKey.LEFT_ALT);
             }
         }
 
         public void UpdateDockButton()
         {
-            dockButton.Text = parentVNCView.isDocked ? Messages.VNC_UNDOCK : Messages.VNC_REDOCK;
+            dockButton.Text = parentVNCView.IsDocked ? Messages.VNC_UNDOCK : Messages.VNC_REDOCK;
             if (Properties.Settings.Default.DockShortcutKey == 1)
             {
                 dockButton.Text += Messages.VNC_DOCK_ALT_SHIFT_U;
@@ -477,7 +486,7 @@ namespace XenAdmin.ConsoleView
             {
                 dockButton.Text += Messages.VNC_DOCK_F11;
             }
-            dockButton.Image = parentVNCView.isDocked ? Properties.Resources.detach_24 : Properties.Resources.attach_24;
+            dockButton.Image = parentVNCView.IsDocked ? Images.StaticImages.detach_24 : Images.StaticImages.attach_24;
         }
 
         public void UpdateFullScreenButton()
@@ -516,13 +525,13 @@ namespace XenAdmin.ConsoleView
             else if (e.PropertyName == "guest_metrics")
             {
                 var newGuestMetrics = source.Connection.Resolve(source.guest_metrics);
-                
+
                 //unsubscribing from the previous instance's event
-                if (this.guestMetrics != null)
-                    this.guestMetrics.PropertyChanged -= guestMetrics_PropertyChanged; 
-                
-                this.guestMetrics = newGuestMetrics;
-                if (this.guestMetrics != null)
+                if (guestMetrics != null)
+                    guestMetrics.PropertyChanged -= guestMetrics_PropertyChanged;
+
+                guestMetrics = newGuestMetrics;
+                if (guestMetrics != null)
                     guestMetrics.PropertyChanged += guestMetrics_PropertyChanged;
 
                 EnableRDPIfCapable();
@@ -534,13 +543,22 @@ namespace XenAdmin.ConsoleView
                 UpdateOpenSSHConsoleButtonState();
             }
 
-            if (source.is_control_domain && e.PropertyName == "name_label")
+            if (e.PropertyName == "name_label")
             {
-                string text = string.Format(source.IsControlDomainZero() ? Messages.CONSOLE_HOST : Messages.CONSOLE_HOST_NUTANIX, source.AffinityServerString());
-                HostLabel.Text = text;
+                string text = null;
 
-                if (parentVNCView != null && parentVNCView.undockedForm != null)
-                    parentVNCView.undockedForm.Text = text;
+                if (source.IsControlDomainZero(out Host host))
+                    text = string.Format(Messages.CONSOLE_HOST, host.Name());
+                else if (source.IsSrDriverDomain(out SR sr))
+                    text = string.Format(Messages.CONSOLE_SR_DRIVER_DOMAIN, sr.Name());
+
+                if (text != null)
+                {
+                    HostLabel.Text = text;
+
+                    if (parentVNCView?.undockedForm != null)
+                        parentVNCView.undockedForm.Text = text;
+                }
             }
         }
 
@@ -565,26 +583,23 @@ namespace XenAdmin.ConsoleView
                     EnableRDPIfCapable();
                 UpdateButtons();
             }
+            else if (e.PropertyName == "networks")
+            {
+                UpdateOpenSSHConsoleButtonState();
+            }
         }
 
         private void EnableRDPIfCapable()
         {
-            if (!toggleConsoleButton.Visible && hasRDP)
-            {
-                // The toggle button is not visible now, because RDP had not been enabled on the VM when we started the console.
-                // However, the current guest_metrics indicates that RDP is now supported (HasRDP==true). (eg. XenTools has been installed in the meantime.)
-                // This means that now we should show and enable the toggle RDP button and start polling (if allowed) RDP as well.
-
-                log.DebugFormat( "'{0}' console: Enabling RDP button, because RDP capability has appeared.", source);
-
-                toggleConsoleButton.Visible = true;
-                toggleConsoleButton.Enabled = true;
-            }
+            var enable = source.CanUseRDP();
+            if(enable)
+                log.DebugFormat("'{0}' console: Enabling RDP button, because RDP capability has appeared.", source);
+            toggleConsoleButton.Visible = toggleConsoleButton.Enabled = enable;
         }
 
         private void Server_EnabledPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != "enabled" || source.IsControlDomainZero())
+            if (e.PropertyName != "enabled" || source.IsControlDomainZero(out _))
                 return;
 
             Host host = sender as Host;
@@ -607,13 +622,9 @@ namespace XenAdmin.ConsoleView
 
         private void updatePowerState()
         {
-            if (source.IsControlDomainZero())
+            if (source.IsControlDomainZero(out Host host))
             {
-                Host host = source.Connection.Resolve<Host>(source.resident_on);
-                if (host == null)
-                    return;
-
-                Host_metrics hostMetrics = source.Connection.Resolve<Host_metrics>(host.metrics);
+                Host_metrics hostMetrics = source.Connection.Resolve(host.metrics);
                 if (hostMetrics == null)
                     return;
 
@@ -673,7 +684,7 @@ namespace XenAdmin.ConsoleView
         private void hideTopBarContents()
         {
             VMPowerOff();
-            if (source.IsControlDomainZero())
+            if (source.IsControlDomainZero(out _))
             {
                 log.DebugFormat("'{0}' console: Hide top bar contents, server is unavailable", source.Name());
                 DisablePowerStateLabel(Messages.CONSOLE_HOST_DEAD);
@@ -695,18 +706,10 @@ namespace XenAdmin.ConsoleView
                 }
                 else if (source.power_state == vm_power_state.Paused)
                 {
-                    if (source.allowed_operations.Contains(vm_operations.unpause))
-                    {
-                        //EnablePowerStateLabel(Messages.CONSOLE_POWER_STATE_PAUSED_UNPAUSE);
-                        // CA-12637: Pause/UnPause is not supported in the GUI.  Comment out
-                        // the EnablePowerStateLabel because it gives the appearance that we
-                        // support unpause via the GUI.
-                        DisablePowerStateLabel(Messages.CONSOLE_POWER_STATE_PAUSED);
-                    }
-                    else
-                    {
-                        DisablePowerStateLabel(Messages.CONSOLE_POWER_STATE_PAUSED);
-                    }
+                    // CA-12637: Pause/UnPause is not supported in the GUI.  Comment out
+                    // the EnablePowerStateLabel because it gives the impression that we
+                    // support unpause via the GUI.
+                    DisablePowerStateLabel(Messages.CONSOLE_POWER_STATE_PAUSED);
                 }
                 else if (source.power_state == vm_power_state.Suspended)
                 {
@@ -747,7 +750,7 @@ namespace XenAdmin.ConsoleView
                     {
                         DisablePowerStateLabel(powerStateLabel.Text);
 
-                        new StartVMCommand(Program.MainWindow, source).Execute();
+                        new StartVMCommand(Program.MainWindow, source).Run();
                     }
                     break;
                 case vm_power_state.Paused:
@@ -760,7 +763,7 @@ namespace XenAdmin.ConsoleView
                     if (source.allowed_operations.Contains(vm_operations.resume))
                     {
                         DisablePowerStateLabel(powerStateLabel.Text);
-                        new ResumeVMCommand(Program.MainWindow, source).Execute();
+                        new ResumeVMCommand(Program.MainWindow, source).Run();
                     }
                     break;
             }
@@ -914,7 +917,7 @@ namespace XenAdmin.ConsoleView
             try
             {
                 ignoringResizes = true;
-                this.vncScreen.Scaling = this.scaleCheckBox.Checked;
+                vncScreen.Scaling = scaleCheckBox.Checked;
             }
             finally
             {
@@ -926,7 +929,7 @@ namespace XenAdmin.ConsoleView
 
         private void sendCAD_Click(object sender, EventArgs e)
         {
-            this.vncScreen.SendCAD();
+            vncScreen.SendCAD();
             FocusVNC();
         }
 
@@ -934,7 +937,7 @@ namespace XenAdmin.ConsoleView
         {
             if (isFullscreen)
                 return;
-            this.parentVNCView.DockUnDock();
+            parentVNCView.DockUnDock();
         }
 
         private void fullscreenButton_Click(object sender, EventArgs e)
@@ -946,20 +949,20 @@ namespace XenAdmin.ConsoleView
 
         private void waitForInsKey()
         {
-            lock (this.insKeyTimer)
+            lock (insKeyTimer)
             {
-                this.insKeyTimer.Change(INS_KEY_TIMEOUT, System.Threading.Timeout.Infinite);
+                insKeyTimer.Change(INS_KEY_TIMEOUT, Timeout.Infinite);
             }
         }
 
         private void cancelWaitForInsKeyAndSendCAD()
         {
-            lock (this.insKeyTimer)
+            lock (insKeyTimer)
             {
                 // We have seen the INS key, so lets cancel the timer and send CAD
 
-                this.insKeyTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
-                this.vncScreen.SendCAD();
+                insKeyTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                vncScreen.SendCAD();
             }
         }
 
@@ -967,14 +970,14 @@ namespace XenAdmin.ConsoleView
         {
             Program.AssertOffEventThread();
 
-            Program.Invoke(this, delegate()
+            Program.Invoke(this, delegate ()
             {
-                lock (this.insKeyTimer)
+                lock (insKeyTimer)
                 {
                     // We have not seen the INS key, so lets toggleFullscreen and cancel the timer
 
-                    this.toggleFullscreen();
-                    this.insKeyTimer.Change(System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+                    toggleFullscreen();
+                    insKeyTimer.Change(Timeout.Infinite, Timeout.Infinite);
                 }
             });
         }
@@ -1036,7 +1039,7 @@ namespace XenAdmin.ConsoleView
                     source.Connection.BeforeConnectionEnd -= Connection_BeforeConnectionEnd;
 
                 fullscreenForm.DetachVncScreen(vncScreen);
-                vncScreen.Parent = this.contentPanel;
+                vncScreen.Parent = contentPanel;
                 vncScreen.DisplayFocusRectangle = true;
                 FocusVNC();
                 vncScreen.CaptureKeyboardAndMouse();
@@ -1093,9 +1096,9 @@ namespace XenAdmin.ConsoleView
                 if (vncScreen.UseVNC)
                     toggleConsoleButton.Text = CanEnableRDP() ? enableRDP : UseRDP;
 
-                toggleConsoleButton.Enabled = true;
+                EnableRDPIfCapable();
                 tip.SetToolTip(toggleConsoleButton, null);
-                if (!vncScreen.UserWantsToSwitchProtocol&& Properties.Settings.Default.AutoSwitchToRDP)
+                if (!vncScreen.UserWantsToSwitchProtocol && Properties.Settings.Default.AutoSwitchToRDP)
                 {
                     if (Program.MainWindow.TheTabControl.SelectedTab == Program.MainWindow.TabPageConsole)
                         toggleConsoleButton_Click(null, null);
@@ -1119,10 +1122,10 @@ namespace XenAdmin.ConsoleView
             try
             {
                 log.DebugFormat("VNC detected for VM '{0}'", source == null ? "unknown/null" : source.name_label);
-                this.toggleToXVNCorRDP = XVNC;
-                this.toggleConsoleButton.Text = vncScreen.UseSource ? UseXVNC : UseVNC;
-                this.toggleConsoleButton.Enabled = true;
-                tip.SetToolTip(this.toggleConsoleButton, null);
+                toggleToXVNCorRDP = XVNC;
+                toggleConsoleButton.Text = vncScreen.UseSource ? UseXVNC : UseVNC;
+                toggleConsoleButton.Enabled = true;
+                tip.SetToolTip(toggleConsoleButton, null);
             }
             catch (InvalidOperationException exn)
             {
@@ -1154,11 +1157,9 @@ namespace XenAdmin.ConsoleView
                     if (CanEnableRDP())
                     {
                         DialogResult dialogResult;
-                        using (ThreeButtonDialog dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(SystemIcons.Question, Messages.FORCE_ENABLE_RDP),
-                            "EnableRDPonVM",
-                            new ThreeButtonDialog.TBDButton(Messages.YES, DialogResult.Yes),
-                            new ThreeButtonDialog.TBDButton(Messages.NO, DialogResult.No)))
+                        using (ThreeButtonDialog dlg = new NoIconDialog(Messages.FORCE_ENABLE_RDP,
+                            ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                        { HelpNameSetter = "EnableRDPonVM" })
                         {
                             dialogResult = dlg.ShowDialog(Program.MainWindow);
                         }
@@ -1166,13 +1167,13 @@ namespace XenAdmin.ConsoleView
                         {
                             Session session = source.Connection.DuplicateSession();
                             Dictionary<string, string> _arguments = new Dictionary<string, string>();
-                            XenAPI.VM.call_plugin(session, source.opaque_ref, "guest-agent-operation", "request-rdp-on", _arguments);
+                            VM.call_plugin(session, source.opaque_ref, "guest-agent-operation", "request-rdp-on", _arguments);
                             tryToConnectRDP = true;
                         }
                     }
 
                     // disable toggleConsoleButton; it will be re-enabled in TryToConnectRDP() when rdp port polling is complete (CA-102755)
-                    if (vncScreen.rdpIP == null)
+                    if (vncScreen.RdpIp == null)
                         toggleConsoleButton.Enabled = false;
                     ThreadPool.QueueUserWorkItem(TryToConnectRDP);
                 }
@@ -1184,7 +1185,7 @@ namespace XenAdmin.ConsoleView
                 Unpause();
                 UpdateButtons();
             }
-            catch(COMException ex)
+            catch (COMException ex)
             {
                 log.DebugFormat("Disabling toggle-console button as COM related exception thrown: {0}", ex.Message);
                 toggleConsoleButton.Enabled = false;
@@ -1220,13 +1221,13 @@ namespace XenAdmin.ConsoleView
         private void UpdateTooltipOfToggleButton()
         {
             if (RDPEnabled || RDPControlEnabled)
-                tip.SetToolTip(this.toggleConsoleButton, null);
+                tip.SetToolTip(toggleConsoleButton, null);
         }
 
         private void TryToConnectRDP(object x)
         {
-            bool hasToReconnect = vncScreen.rdpIP == null;
-            vncScreen.rdpIP = vncScreen.PollPort(XSVNCScreen.RDP_PORT, true);
+            bool hasToReconnect = vncScreen.RdpIp == null;
+            vncScreen.RdpIp = vncScreen.PollPort(XSVNCScreen.RDPPort, true);
             Program.Invoke(this, (MethodInvoker)(() =>
             {
                 if (hasToReconnect)
@@ -1267,13 +1268,13 @@ namespace XenAdmin.ConsoleView
 
         internal void SendCAD()
         {
-            if (this.vncScreen != null)
-                this.vncScreen.SendCAD();
+            if (vncScreen != null)
+                vncScreen.SendCAD();
         }
 
         internal void focus_vnc()
         {
-            if (this.vncScreen != null)
+            if (vncScreen != null)
                 FocusVNC();
         }
 
@@ -1290,10 +1291,12 @@ namespace XenAdmin.ConsoleView
         {
             toggleConsoleButton.Enabled = false;
 
-            VBD cddrive = source.FindVMCDROM();
-            bool allowEject = cddrive != null ? cddrive.allowed_operations.Contains(vbd_operations.eject) : false;
-            bool allowInsert = cddrive != null ? cddrive.allowed_operations.Contains(vbd_operations.insert) : false;
-            multipleDvdIsoList1.Enabled = (source.power_state == vm_power_state.Halted) && (allowEject || allowInsert);
+            VBD cdDrive = source.FindVMCDROM();
+
+            multipleDvdIsoList1.Enabled = cdDrive == null ||
+                                          source.power_state == vm_power_state.Halted &&
+                                          (cdDrive.allowed_operations.Contains(vbd_operations.eject) ||
+                                           cdDrive.allowed_operations.Contains(vbd_operations.insert));
 
             sendCAD.Enabled = false;
         }
@@ -1322,8 +1325,8 @@ namespace XenAdmin.ConsoleView
 
             if (!RDPControlEnabled)
                 toggleConsoleButton.Enabled = false;
-            
-            vncScreen.imediatelyPollForConsole();
+
+            vncScreen.ImmediatelyPollForConsole();
         }
 
         internal void SwitchIfRequired()
@@ -1346,19 +1349,13 @@ namespace XenAdmin.ConsoleView
                 LifeCycleMenuStrip.Hide();
                 return;
             }
+
             if (source == null)
-            {
                 return;
-            }
-            Host host = source.Connection.Resolve<Host>(source.resident_on);
-            if (host == null)
-            {
-                return;
-            }
 
             ContextMenuItemCollection contextMenuItems = new ContextMenuItemCollection();
 
-            if (source.IsControlDomainZero())
+            if (source.IsControlDomainZero(out Host host))
             {
                 // We're looking at the host console
                 if (host.Connection.IsConnected)
@@ -1390,28 +1387,22 @@ namespace XenAdmin.ConsoleView
 
         private void pictureBox1_MouseEnter(object sender, EventArgs e)
         {
-            pictureBox1.Image = Properties.Resources.lifecycle_hot;
+            pictureBox1.Image = Images.StaticImages.lifecycle_hot;
         }
 
         private void pictureBox1_MouseLeave(object sender, EventArgs e)
         {
-            if (droppedDown)
-                pictureBox1.Image = Properties.Resources.lifecycle_pressed;
-            else
-                pictureBox1.Image = Properties.Resources._001_LifeCycle_h32bit_24;
+            pictureBox1.Image = droppedDown ? Images.StaticImages.lifecycle_pressed : Images.StaticImages._001_LifeCycle_h32bit_24;
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            pictureBox1.Image = Properties.Resources.lifecycle_pressed;
+            pictureBox1.Image = Images.StaticImages.lifecycle_pressed;
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (droppedDown)
-                pictureBox1.Image = Properties.Resources.lifecycle_pressed;
-            else
-                pictureBox1.Image = Properties.Resources.lifecycle_hot;
+            pictureBox1.Image = droppedDown ? Images.StaticImages.lifecycle_pressed : Images.StaticImages.lifecycle_hot;
         }
 
         private void LifeCycleMenuStrip_Opened(object sender, EventArgs e)
@@ -1421,10 +1412,10 @@ namespace XenAdmin.ConsoleView
 
         private void LifeCycleMenuStrip_Closing(object sender, ToolStripDropDownClosingEventArgs e)
         {
-            if (e.CloseReason != ToolStripDropDownCloseReason.AppClicked || !pictureBox1.ClientRectangle.Contains(this.PointToClient(MousePosition)))
+            if (e.CloseReason != ToolStripDropDownCloseReason.AppClicked || !pictureBox1.ClientRectangle.Contains(PointToClient(MousePosition)))
             {
                 droppedDown = false;
-                pictureBox1.Image = Properties.Resources._001_LifeCycle_h32bit_24;
+                pictureBox1.Image = Images.StaticImages._001_LifeCycle_h32bit_24;
             }
             else
             {
@@ -1468,71 +1459,121 @@ namespace XenAdmin.ConsoleView
             dedicatedGpuWarning.Visible = mustConnectRemoteDesktop;
         }
 
-        internal bool IsVNC
-        {
-            get { return vncScreen.UseVNC; }
-        }
-
         public void UpdateRDPResolution(bool fullscreen = false)
         {
             if (vncScreen != null)
                 vncScreen.UpdateRDPResolution(fullscreen);
         }
-        
+
         #region SSH Console methods
 
         private void buttonSSH_Click(object sender, EventArgs e)
         {
-            if (CanStartSSHConsole)
+            if (!IsSSHConsoleSupported || !CanStartSSHConsole) 
+                return;
+
+            var customSshConsole = Properties.Settings.Default.CustomSshConsole;
+            var sshConsolePath = GetConsolePath(customSshConsole);
+
+            if (string.IsNullOrEmpty(sshConsolePath))
             {
-                var puttyPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "putty.exe");
+                OpenSshConsoleWarningDialog(Messages.CONFIGURE_SSH_CONSOLE_FILE_NOT_CONFIGURED);
+                return;
+            }
 
-                try
-                {
-                    var startInfo = new ProcessStartInfo(puttyPath, source.IPAddressForSSH());
-                    Process.Start(startInfo);
-                }
-                catch (Exception ex)
-                {
-                    log.Error("Error starting PuTTY.", ex);
+            if (!File.Exists(sshConsolePath))
+            {
+                OpenSshConsoleWarningDialog(Messages.CONFIGURE_SSH_CONSOLE_FILE_NOT_FOUND);
+                return;
+            }
 
-                    using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Error, Messages.ERROR_PUTTY_LAUNCHING + "\n\n" + puttyPath + "\n\n" + ex.Message, Messages.XENCENTER)))
-                    {    
-                        dlg.ShowDialog(Parent);
-                    }
+            try
+            {
+                var command = $"{source.IPAddressForSSH()}";
+                if (customSshConsole == SshConsole.OpenSSH)
+                {
+                    // OpenSSH doesn't have an option to prompt the user for the username.
+                    // We use the session's subject.
+                    var currentSubject = source.Connection.Resolve(source.Connection.Session.SessionSubject);
+                    command = $"{currentSubject?.SubjectName ?? "root"}@{source.IPAddressForSSH()}";
                 }
+                Process.Start(new ProcessStartInfo(sshConsolePath, command));
+            }
+            catch (Exception ex)
+            {
+                log.Error("Could not start the selected SSH console.", ex);
+                OpenSshConsoleErrorDialog();
+            }
+        }
+
+        private static string GetConsolePath(SshConsole customSshConsole)
+        {
+            switch (customSshConsole)
+            {
+                case SshConsole.Putty:
+                    return Properties.Settings.Default.PuttyLocation;
+                case SshConsole.OpenSSH:
+                    return Properties.Settings.Default.OpenSSHLocation;
+                default:
+                    return null;
+            }
+        }
+
+        private void OpenSshConsoleWarningDialog(string message)
+        {
+            var configureSshClientButton = new ThreeButtonDialog.TBDButton(Messages.CONFIGURE_SSH_CONSOLE_TITLE,
+                DialogResult.OK, ThreeButtonDialog.ButtonType.ACCEPT, true);
+
+            using (var dlg = new WarningDialog(message, configureSshClientButton, ThreeButtonDialog.ButtonCancel))
+            {
+                if (dlg.ShowDialog(Parent) == DialogResult.OK)
+                {
+                    OpenExternalToolsPage();
+                }
+            }
+        }
+
+        private void OpenSshConsoleErrorDialog()
+        {
+            var configureSshClientButton = new ThreeButtonDialog.TBDButton(Messages.CONFIGURE_SSH_CONSOLE_TITLE,
+                DialogResult.OK, ThreeButtonDialog.ButtonType.ACCEPT, true);
+
+            using (var dlg = new ErrorDialog(Messages.CONFIGURE_SSH_CONSOLE_ERROR,
+                       configureSshClientButton, ThreeButtonDialog.ButtonCancel))
+            {
+                if (dlg.ShowDialog(Parent) == DialogResult.OK)
+                {
+                    OpenExternalToolsPage();
+                }
+            }
+        }
+
+        private void OpenExternalToolsPage()
+        {
+            using (var optionsDialog = new OptionsDialog(Program.MainWindow.PluginManager))
+            {
+                optionsDialog.SelectExternalToolsPage();
+                optionsDialog.ShowDialog();
             }
         }
 
         private void UpdateOpenSSHConsoleButtonState()
         {
-            buttonSSH.Visible = IsSSHConsoleButtonShown;
-            buttonSSH.Enabled = CanStartSSHConsole;
-        }
-
-        private bool IsSSHConsoleButtonShown
-        {
-            get
-            {
-                return
-                    IsSSHConsoleSupported && source.power_state != vm_power_state.Halted;
-            }
+            var isSshConsoleSupported = IsSSHConsoleSupported;
+            buttonSSH.Visible = isSshConsoleSupported && source.power_state != vm_power_state.Halted;
+            buttonSSH.Enabled = isSshConsoleSupported && CanStartSSHConsole;
         }
 
         private bool IsSSHConsoleSupported
-        { 
+        {
             get
             {
                 if (source.IsWindows())
                     return false;
 
-                if (source.IsControlDomainZero())
+                if (source.IsControlDomainZero(out Host host))
                 {
-                    Host host = source.Connection.Resolve<Host>(source.resident_on);
-                    if (host == null)
-                        return false;
-
-                    Host_metrics hostMetrics = source.Connection.Resolve<Host_metrics>(host.metrics);
+                    Host_metrics hostMetrics = source.Connection.Resolve(host.metrics);
                     if (hostMetrics == null)
                         return false;
 
@@ -1544,16 +1585,8 @@ namespace XenAdmin.ConsoleView
             }
         }
 
-        private bool CanStartSSHConsole
-        {
-            get
-            {
-               return
-                   IsSSHConsoleSupported &&
-                   source.power_state == vm_power_state.Running &&
-                   !string.IsNullOrEmpty(source.IPAddressForSSH());
-            }
-        }
+        private bool CanStartSSHConsole =>
+            source.power_state == vm_power_state.Running && !string.IsNullOrEmpty(source.IPAddressForSSH());
 
         #endregion SSH Console methods
     }

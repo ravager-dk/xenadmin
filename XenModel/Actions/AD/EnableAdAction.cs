@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Collections.Generic;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
-using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -63,7 +61,7 @@ namespace XenAdmin.Actions
             if (pool != null)
                 Pool = pool;
             else
-                Host = Helpers.GetMaster(connection);
+                Host = Helpers.GetCoordinator(connection);
 
             this.domain = domain;
             this.user = user;
@@ -90,7 +88,7 @@ namespace XenAdmin.Actions
                 }
                 catch (Exception ex)
                 {
-                    log.Debug("Tried to disable AD before enabling it, but it has failed. Ignoring it, because in this case we are executing disable on best effort basis only.", ex);
+                    log.Debug("Tried to disable AD before enabling it, but it has failed. Ignoring it, because in this case we are running disable on best effort basis only.", ex);
                 }
 
                 Pool.enable_external_auth(Session, pool.opaque_ref, config, domain, Auth.AUTH_TYPE_AD);

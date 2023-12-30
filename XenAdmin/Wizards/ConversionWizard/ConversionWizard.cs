@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,14 +31,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Threading;
-using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAdmin.XCM;
 using XenAdmin.Core;
-using XenAdmin.Dialogs;
 using XenAdmin.Mappings;
 using Tuple = System.Collections.Generic.KeyValuePair<string, string>;
 
@@ -61,7 +56,7 @@ namespace XenAdmin.Wizards.ConversionWizard
         public ConversionWizard(ConversionClient client)
             : base(client.Connection)
         {
-            pictureBoxWizard.Image = Images.StaticImages.ConversionManager_32;
+            pictureBoxWizard.Image = Images.StaticImages.xcm_32x32;
            
             _conversionClient = client;
 

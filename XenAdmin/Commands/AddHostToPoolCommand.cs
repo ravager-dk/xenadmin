@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,7 @@
  */
 
 using System.Collections.Generic;
-using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Core;
@@ -67,12 +66,12 @@ namespace XenAdmin.Commands
             _pool = pool;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             var reasons = new Dictionary<IXenObject, string>();
             foreach (Host host in _hosts)
             {
-                PoolJoinRules.Reason reason = PoolJoinRules.CanJoinPool(host.Connection, _pool.Connection, true, true, true, _hosts.Count);
+                PoolJoinRules.Reason reason = PoolJoinRules.CanJoinPool(host.Connection, _pool.Connection, true, true, _hosts.Count);
                 if (reason != PoolJoinRules.Reason.Allowed)
                     reasons[host] = PoolJoinRules.ReasonMessage(reason);
             }
@@ -86,13 +85,21 @@ namespace XenAdmin.Commands
                 return;
             }
 
-            if (_confirm && !ShowConfirmationDialog())
+            if (_confirm)
             {
-                // Bail out if the user doesn't want to continue.
-                return;
+                var msg = _hosts.Count > 1
+                    ? string.Format(Messages.MAINWINDOW_CONFIRM_MOVE_TO_POOL_MULTIPLE, _pool.Name().Ellipsise(500))
+                    : string.Format(Messages.MAINWINDOW_CONFIRM_MOVE_TO_POOL, _hosts[0].Name().Ellipsise(500), _pool.Name().Ellipsise(500));
+
+                using (var dialog = new WarningDialog(msg, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                    {WindowTitle = Messages.POOLCREATE_ADDING})
+                {
+                    if (dialog.ShowDialog(Parent ?? Program.MainWindow) == DialogResult.No)
+                        return;
+                }
             }
 
-            if (!Helpers.IsConnected(_pool))
+            if (_pool == null || _pool.Connection == null || !_pool.Connection.IsConnected)
             {
                 string message = _hosts.Count == 1
                                      ? string.Format(Messages.ADD_HOST_TO_POOL_DISCONNECTED_POOL,
@@ -100,51 +107,102 @@ namespace XenAdmin.Commands
                                      : string.Format(Messages.ADD_HOST_TO_POOL_DISCONNECTED_POOL_MULTIPLE,
                                                      Helpers.GetName(_pool).Ellipsise(500));
 
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Error, message, Messages.XENCENTER)))
-                {
+                using (var dlg = new ErrorDialog(message))
                     dlg.ShowDialog(Parent);
-                }
+
                 return;
             }
 
             // Check supp packs and warn
             List<string> badSuppPacks = PoolJoinRules.HomogeneousSuppPacksDiffering(_hosts, _pool);
-            if (!HelpersGUI.GetPermissionFor(badSuppPacks, sp => true,
-                Messages.ADD_HOST_TO_POOL_SUPP_PACK, Messages.ADD_HOST_TO_POOL_SUPP_PACKS, false, "PoolJoinSuppPacks"))
+
+            if (!Program.RunInAutomatedTestMode && badSuppPacks.Count > 0)
             {
-                return;
+                string msg = string.Format(badSuppPacks.Count == 1 ? Messages.ADD_HOST_TO_POOL_SUPP_PACK : Messages.ADD_HOST_TO_POOL_SUPP_PACKS,
+                    string.Join("\n", badSuppPacks));
+
+                using (var dlg = new WarningDialog(msg,
+                        new ThreeButtonDialog.TBDButton(Messages.PROCEED, DialogResult.OK, selected: false),
+                        new ThreeButtonDialog.TBDButton(Messages.CANCEL, DialogResult.Cancel, selected: true))
+                    {HelpNameSetter = "PoolJoinSuppPacks"})
+                {
+                    if (dlg.ShowDialog(Program.MainWindow) == DialogResult.Cancel)
+                        return;
+                }
             }
 
             // Are there any hosts which are forbidden from masking their CPUs for licensing reasons?
             // If so, we need to show upsell.
-            Host master = Helpers.GetMaster(_pool);
+            Host coordinator = Helpers.GetCoordinator(_pool);
             if (null != _hosts.Find(host =>
-                !PoolJoinRules.CompatibleCPUs(host, master, false) &&
+                !PoolJoinRules.CompatibleCPUs(host, coordinator) &&
                 Helpers.FeatureForbidden(host, Host.RestrictCpuMasking) &&
-                !PoolJoinRules.FreeHostPaidMaster(host, master, false)))  // in this case we can upgrade the license and then mask the CPU
+                !PoolJoinRules.FreeHostPaidCoordinator(host, coordinator, false)))  // in this case we can upgrade the license and then mask the CPU
             {
-                using (var dlg = new UpsellDialog(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_CPUMASKING : Messages.UPSELL_BLURB_CPUMASKING + Messages.UPSELL_BLURB_TRIAL,
-                                                    InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL))
-                    dlg.ShowDialog(Parent);
+                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_CPUMASKING, Parent);
                 return;
             }
 
-            // Get permission for any fix-ups: 1) Licensing free hosts; 2) CPU masking 3) Ad configuration 4) CPU feature levelling (Dundee or higher only)
+            // Get permission for any fix-ups:
+            // 1) Licensing free hosts
+            // 2) CPU masking
+            // 3) Ad configuration
+            // 4) CPU feature levelling (Dundee or higher only)
             // (We already know that these things are fixable because we have been through CanJoinPool() above).
-            if (!HelpersGUI.GetPermissionFor(_hosts, host => PoolJoinRules.FreeHostPaidMaster(host, master, false),
-                Messages.ADD_HOST_TO_POOL_LICENSE_MESSAGE, Messages.ADD_HOST_TO_POOL_LICENSE_MESSAGE_MULTIPLE, true, "PoolJoinRelicensing")
-                ||
-                !HelpersGUI.GetPermissionFor(_hosts, host => !PoolJoinRules.CompatibleCPUs(host, master, false),
-                Messages.ADD_HOST_TO_POOL_CPU_MASKING_MESSAGE, Messages.ADD_HOST_TO_POOL_CPU_MASKING_MESSAGE_MULTIPLE, true, "PoolJoinCpuMasking")
-                ||
-                !HelpersGUI.GetPermissionFor(_hosts, host => !PoolJoinRules.CompatibleAdConfig(host, master, false),
-                Messages.ADD_HOST_TO_POOL_AD_MESSAGE, Messages.ADD_HOST_TO_POOL_AD_MESSAGE_MULTIPLE, true, "PoolJoinAdConfiguring")  
-                ||
-                !HelpersGUI.GetPermissionForCpuFeatureLevelling(_hosts, _pool))
+            
+            if (!Program.RunInAutomatedTestMode)
             {
-                return;
+                var hosts1 = _hosts.FindAll(host => PoolJoinRules.FreeHostPaidCoordinator(host, coordinator, false));
+                if (hosts1.Count > 0)
+                {
+                    string msg = string.Format(hosts1.Count == 1
+                            ? Messages.ADD_HOST_TO_POOL_LICENSE_MESSAGE
+                            : Messages.ADD_HOST_TO_POOL_LICENSE_MESSAGE_MULTIPLE,
+                        string.Join("\n", hosts1.Select(h => h.Name())));
+
+                    using (var dlg = new WarningDialog(msg, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                        {HelpNameSetter = "PoolJoinRelicensing"})
+                    {
+                        if (dlg.ShowDialog(Program.MainWindow) == DialogResult.No)
+                            return;
+                    }
+                }
+
+                var hosts2 = _hosts.FindAll(host => !PoolJoinRules.CompatibleCPUs(host, coordinator));
+                if (hosts2.Count > 0)
+                {
+                    string msg = string.Format(hosts2.Count == 1
+                            ? Messages.ADD_HOST_TO_POOL_CPU_MASKING_MESSAGE
+                            : Messages.ADD_HOST_TO_POOL_CPU_MASKING_MESSAGE_MULTIPLE,
+                        string.Join("\n", hosts2.Select(h => h.Name())), BrandManager.ProductBrand);
+
+                    using (var dlg = new WarningDialog(msg, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                        {HelpNameSetter = "PoolJoinCpuMasking"})
+                    {
+                        if (dlg.ShowDialog(Program.MainWindow) == DialogResult.No)
+                            return;
+                    }
+                }
+
+                var hosts3 = _hosts.FindAll(host => !PoolJoinRules.CompatibleAdConfig(host, coordinator, false));
+                if (hosts3.Count > 0)
+                {
+                    string msg = string.Format(hosts3.Count == 1
+                            ? Messages.ADD_HOST_TO_POOL_AD_MESSAGE
+                            : Messages.ADD_HOST_TO_POOL_AD_MESSAGE_MULTIPLE,
+                        string.Join("\n", hosts3.Select(h => h.Name())));
+
+                    using (var dlg = new WarningDialog(msg, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                        {HelpNameSetter = "PoolJoinAdConfiguring"})
+                    {
+                        if (dlg.ShowDialog(Program.MainWindow) == DialogResult.No)
+                            return;
+                    }
+                }
             }
+
+            if (!HelpersGUI.GetPermissionForCpuFeatureLevelling(_hosts, _pool))
+                return;
 
             MainWindowCommandInterface.SelectObjectInTree(_pool);
 
@@ -152,18 +210,32 @@ namespace XenAdmin.Commands
             foreach (Host host in _hosts)
             {
                 string opaque_ref = host.opaque_ref;
-                AddHostToPoolAction action = new AddHostToPoolAction(_pool, host, GetAdPrompt, NtolDialog, ApplyLicenseEditionCommand.ShowLicensingFailureDialog);
-                action.Completed += s => Program.ShowObject(opaque_ref);
+                var action = new AddHostToPoolAction(_pool, host, GetAdPrompt,
+                    (licenseFailures, exceptionMessage) =>
+                    {
+                        if (licenseFailures.Count > 0)
+                        {
+                            Program.Invoke(Program.MainWindow, () =>
+                            {
+                                using (var dlg = new CommandErrorDialog(Messages.LICENSE_ERROR_TITLE, exceptionMessage,
+                                    licenseFailures.ToDictionary<LicenseFailure, IXenObject, string>(f => f.Host, f => f.AlertText)))
+                                {
+                                    dlg.ShowDialog(Program.MainWindow);
+                                }
+                            });
+                        }
+                    });
+                action.Completed += s => XenAdminConfigManager.Provider.ShowObject(opaque_ref);
                 actions.Add(action);
 
                 // hide connection. If the action fails, re-show it.
-                Program.HideObject(opaque_ref);
+                XenAdminConfigManager.Provider.HideObject(opaque_ref);
             }
 
             RunMultipleActions(actions, string.Format(Messages.ADDING_SERVERS_TO_POOL, _pool.Name()), Messages.POOLCREATE_ADDING, Messages.POOLCREATE_ADDED, true);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (_hosts.Count > 0)
             {
@@ -180,33 +252,9 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override string ConfirmationDialogText
+        public static PoolAbstractAction.AdUserAndPassword GetAdPrompt(Host poolCoordinator)
         {
-            get
-            {
-                if (_hosts.Count == 1)
-                {
-                    return string.Format(Messages.MAINWINDOW_CONFIRM_MOVE_TO_POOL, _hosts[0].Name().Ellipsise(500), _pool.Name().Ellipsise(500));
-                }
-                else if (_hosts.Count > 1)
-                {
-                    return string.Format(Messages.MAINWINDOW_CONFIRM_MOVE_TO_POOL_MULTIPLE, _pool.Name().Ellipsise(500));
-                }
-                return null;
-            }
-        }
-
-        protected override string ConfirmationDialogTitle
-        {
-            get
-            {
-                return Messages.POOLCREATE_ADDING;
-            }
-        }
-
-        public static PoolAbstractAction.AdUserAndPassword GetAdPrompt(Host poolMaster)
-        {
-            AdPasswordPrompt adPrompt = new AdPasswordPrompt(true, poolMaster.external_auth_service_name);
+            AdPasswordPrompt adPrompt = new AdPasswordPrompt(true, poolCoordinator.external_auth_service_name);
 
             Program.Invoke(Program.MainWindow, delegate
                                                    {
@@ -224,10 +272,10 @@ namespace XenAdmin.Commands
                 string poolName = Helpers.GetName(pool).Ellipsise(500);
                 string hostName = Helpers.GetName(host).Ellipsise(500);
                 string msg = string.Format(Messages.HA_HOST_ENABLE_NTOL_RAISE_QUERY, poolName, hostName, currentNtol, max);
-                using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(null, msg, Messages.HIGH_AVAILABILITY),
+                using (var dlg = new NoIconDialog(msg,
                         ThreeButtonDialog.ButtonYes,
-                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                    {WindowTitle = Messages.HIGH_AVAILABILITY})
                 {
                     if (dlg.ShowDialog(Program.MainWindow) == DialogResult.Yes)
                     {
@@ -284,11 +332,9 @@ namespace XenAdmin.Commands
                     msg = string.Format(f, poolName, currentNtol, hostName, targetNtol);
                 }
 
-                using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, msg, Messages.HIGH_AVAILABILITY),
-                        ThreeButtonDialog.ButtonYes,
-                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)
-                        ))
+                using (var dlg = new WarningDialog(msg, ThreeButtonDialog.ButtonYes,
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true)
+                        ){WindowTitle = Messages.HIGH_AVAILABILITY})
                 {
                     if (dlg.ShowDialog(Program.MainWindow) == DialogResult.No)
                     {

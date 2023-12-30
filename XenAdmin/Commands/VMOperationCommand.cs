@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -102,19 +101,19 @@ namespace XenAdmin.Commands
         /// </summary>
         protected abstract Host GetHost(VM vm);
 
-        protected sealed override bool CanExecuteCore(SelectedItemCollection selection)
+        protected sealed override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanExecute);
+            return selection.AllItemsAre<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanRun);
         }
 
         /// <summary>
-        /// Determines whether the specified VM can be executed (i.e. resumed-on, started-on or migrated.)
+        /// Determines whether the specified VM can be run (i.e. resumed-on, started-on or migrated.)
         /// </summary>
-        protected abstract bool CanExecute(VM vm);
+        protected abstract bool CanRun(VM vm);
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            AssertOperationAllowsExecution();
+            AssertOperationAllowsRunning();
 
             string title = Messages.ACTION_VMS_RESUMING_ON_TITLE;
             string startDescription = Messages.ACTION_VMS_RESUMING_ON_TITLE;
@@ -127,7 +126,7 @@ namespace XenAdmin.Commands
                 title = Messages.ACTION_VMS_MIGRATING_TITLE;
                 startDescription = Messages.ACTION_VMS_MIGRATING_TITLE;
                 endDescription = Messages.ACTION_VM_MIGRATED;
-                foreach (VM vm in selection.AsXenObjects<VM>(CanExecute))
+                foreach (VM vm in selection.AsXenObjects<VM>(CanRun))
                 {
                     XenDialogBase.CloseAll(vm);
                     Host host = GetHost(vm);
@@ -139,7 +138,7 @@ namespace XenAdmin.Commands
                 title = Messages.ACTION_VMS_STARTING_ON_TITLE;
                 startDescription = Messages.ACTION_VMS_STARTING_ON_TITLE;
                 endDescription = Messages.ACTION_VM_STARTED;
-                foreach (VM vm in selection.AsXenObjects<VM>(CanExecute))
+                foreach (VM vm in selection.AsXenObjects<VM>(CanRun))
                 {
                     Host host = GetHost(vm);
                     actions.Add(new VMStartOnAction(vm, host,WarningDialogHAInvalidConfig, StartDiagnosisForm));
@@ -150,7 +149,7 @@ namespace XenAdmin.Commands
                 title = Messages.ACTION_VMS_RESUMING_ON_TITLE;
                 startDescription = Messages.ACTION_VMS_RESUMING_ON_TITLE;
                 endDescription = Messages.ACTION_VM_RESUMED;
-                foreach (VM vm in selection.AsXenObjects<VM>(CanExecute))
+                foreach (VM vm in selection.AsXenObjects<VM>(CanRun))
                 {
                     Host host = GetHost(vm);
                     actions.Add(new VMResumeOnAction(vm, host, WarningDialogHAInvalidConfig, StartDiagnosisForm));
@@ -160,7 +159,7 @@ namespace XenAdmin.Commands
             RunMultipleActions(actions, title, startDescription, endDescription, true);
         }
 
-        private void AssertOperationAllowsExecution()
+        private void AssertOperationAllowsRunning()
         {
             if(_operation == vm_operations.unknown)
                 throw new NotSupportedException("VM operation unknown is not supported");
@@ -203,13 +202,10 @@ namespace XenAdmin.Commands
             Program.Invoke(Program.MainWindow, () =>
             {
                 DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning,
-                        String.Format(isStart ? Messages.HA_INVALID_CONFIG_START : Messages.HA_INVALID_CONFIG_RESUME,
-                            Helpers.GetName(vm).Ellipsise(500)),
-                        Messages.HIGH_AVAILABILITY),
+                using (var dlg = new WarningDialog(string.Format(isStart ? Messages.HA_INVALID_CONFIG_START : Messages.HA_INVALID_CONFIG_RESUME,
+                        Helpers.GetName(vm).Ellipsise(500)),
                     ThreeButtonDialog.ButtonOK,
-                    ThreeButtonDialog.ButtonCancel))
+                    ThreeButtonDialog.ButtonCancel){WindowTitle = Messages.HIGH_AVAILABILITY})
                 {
                     dialogResult = dlg.ShowDialog(Program.MainWindow);
                 }
@@ -315,10 +311,8 @@ namespace XenAdmin.Commands
                         Helpers.GetName(VMStartAction.VM).Ellipsise(100));
                     Program.Invoke(Program.MainWindow, delegate()
                     {
-                        using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Warning, msg, Messages.HIGH_AVAILABILITY)))
-                        {
+                        using (var dlg = new WarningDialog(msg){WindowTitle = Messages.HIGH_AVAILABILITY})
                             dlg.ShowDialog(Program.MainWindow);
-                        }
                     });
                 }
                 else
@@ -331,10 +325,10 @@ namespace XenAdmin.Commands
                     Program.Invoke(Program.MainWindow, delegate()
                     {
                         DialogResult r;
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(SystemIcons.Warning, msg, Messages.HIGH_AVAILABILITY),
+                        using (var dlg = new WarningDialog(msg,
                             ThreeButtonDialog.ButtonYes,
-                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                            {WindowTitle = Messages.HIGH_AVAILABILITY})
                         {
                             r = dlg.ShowDialog(Program.MainWindow);
                         }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,20 +38,18 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 {
     public abstract class HostPlanAction : PlanActionWithSession
     {
-        private readonly Host _currentHost;
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         protected readonly XenRef<Host> HostXenRef;
 
         protected HostPlanAction(Host host)
             : base(host.Connection)
         {
-            _currentHost = host;
+            CurrentHost = host;
             HostXenRef = new XenRef<Host>(host);
         }
 
-        protected internal Host CurrentHost
-        {
-            get { return _currentHost; }
-        }
+        protected Host CurrentHost { get; }
 
         public Host GetResolvedHost()
         {
@@ -70,6 +67,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                 AddProgressStep(string.Format(Messages.UPDATES_WIZARD_ENTERING_MAINTENANCE_MODE, hostObj.Name()));
                 log.DebugFormat("Disabling host {0}", hostObj.Name());
                 Host.disable(session, HostXenRef.opaque_ref);
+                Connection.WaitFor(() => !hostObj.enabled, null);
             }
 
             if (vms.Count > 0)
@@ -98,6 +96,16 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                         if (hostObj.Connection.Cache.Hosts.Any(h=>h.updates_requiring_reboot.Count > 0 && !h.enabled))
                             throw new Exception(string.Format(Messages.PLAN_ACTION_FAILURE_NO_HOSTS_AVAILABLE, hostObj.Name()));
                     }
+
+                    if (f.ErrorDescription.Count > 1 && f.ErrorDescription[0] == Failure.VM_LACKS_FEATURE)
+                    {
+                        log.WarnFormat("Host {0} cannot be evacuated: {1}", hostObj.Name(), f.Message);
+
+                        var vm = hostObj.Connection.Resolve(new XenRef<VM>(f.ErrorDescription[1]));
+                        if (vm != null)
+                            throw new Exception(string.Format(Messages.PLAN_ACTION_FAILURE_VM_LACKS_FEATURE, hostObj.Name(), vm.Name()));
+                    }
+
                     throw;
                 }
             }
@@ -155,8 +163,8 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                         log.DebugFormat("Migrating VM '{0}' back to Host '{1}'", vm.Name(), hostObj.Name());
 
                         PollTaskForResultAndDestroy(Connection, ref session,
-                            VM.async_live_migrate(session, vm.opaque_ref, HostXenRef.opaque_ref),
-                            (vmNumber * 100) / vmCount, ((vmNumber + 1) * 100) / vmCount);
+                            VM.async_pool_migrate(session, vm.opaque_ref, HostXenRef.opaque_ref, new Dictionary<string, string> { ["live"] = "true" }),
+                            vmNumber * 100 / vmCount, (vmNumber + 1) * 100 / vmCount);
 
                         vmNumber++;
                     }
@@ -216,6 +224,53 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                     log.Debug(string.Format("Cannot enable host {0}. Retrying in 5 sec.", hostObj), e);
                 }
             }
+        }
+    }
+
+
+    public class BringBabiesBackAction : HostPlanAction
+    {
+        private readonly List<XenRef<VM>> _vms;
+        private readonly bool _enableOnly;
+
+        public BringBabiesBackAction(List<XenRef<VM>> vms, Host host, bool enableOnly)
+            : base(host)
+        {
+            _vms = vms;
+            _enableOnly = enableOnly;
+        }
+
+        protected override void RunWithSession(ref Session session)
+        {
+            BringBabiesBack(ref session, _vms, _enableOnly);
+        }
+    }
+
+
+    public class EvacuateHostPlanAction : HostPlanAction
+    {
+        public EvacuateHostPlanAction(Host host)
+            : base(host)
+        {
+        }
+
+        protected override void RunWithSession(ref Session session)
+        {
+            EvacuateHost(ref session);
+        }
+    }
+
+
+    public class EnableHostPlanAction : HostPlanAction
+    {
+        public EnableHostPlanAction(Host host)
+            : base(host)
+        {
+        }
+
+        protected override void RunWithSession(ref Session session)
+        {
+            WaitForHostToBecomeEnabled(session, true);
         }
     }
 }

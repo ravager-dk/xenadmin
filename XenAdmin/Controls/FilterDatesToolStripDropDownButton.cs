@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,10 +29,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Dialogs;
 
@@ -90,16 +86,14 @@ namespace XenAdmin.Controls
             return false;
         }
         
-        public bool FilterIsOn
-        {
-            get { return !toolStripMenuItemShowAll.Checked; }
-        }        
+        public bool FilterIsOn => !toolStripMenuItemShowAll.Checked;
 
         protected override void OnDropDownItemClicked(ToolStripItemClickedEventArgs e)
         {
             base.OnDropDownItemClicked(e);
 
-            var menuItem = (ToolStripMenuItem)e.ClickedItem;
+            if (!(e.ClickedItem is ToolStripMenuItem menuItem))
+                return;
             
             //we do not allow unchecking by clicking an already checked item
             if (menuItem.Checked)
@@ -131,8 +125,7 @@ namespace XenAdmin.Controls
 
             foreach (ToolStripItem t in DropDownItems)
             {
-                var mt = t as ToolStripMenuItem;
-                if (mt != null)
+                if (t is ToolStripMenuItem mt)
                     mt.Checked = false;
             }
 

@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,10 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -42,8 +37,6 @@ using XenAPI;
 using XenAdmin.Actions.Wlb;
 using XenAdmin.Core;
 using XenAdmin.Wlb;
-using XenAdmin.Controls;
-
 
 
 namespace XenAdmin.Dialogs.Wlb
@@ -172,13 +165,13 @@ namespace XenAdmin.Dialogs.Wlb
             this.emailCommentRichTextBox.Text = this._subscription.EmailComment;
             this.rpRenderComboBox.SelectedIndex = (int)this._subscription.ReportRenderFormat;
 
-            // convert utc days of week and utc execute time to local days of week and local execute time
-            DateTime localExecuteTime;
+            // convert utc days of week and utc run time to local days of week and local run time
+            DateTime localRunTime;
             WlbScheduledTask.WlbTaskDaysOfWeek localDaysOfWeek;
-            WlbScheduledTask.GetLocalTaskTimes(this._subscription.DaysOfWeek, this._subscription.ExecuteTimeOfDay, out localDaysOfWeek, out localExecuteTime);
+            WlbScheduledTask.GetLocalTaskTimes(this._subscription.DaysOfWeek, this._subscription.RunTimeOfDay, out localDaysOfWeek, out localRunTime);
 
             // subscription run time
-            this.dateTimePickerSubscriptionRunTime.Value = localExecuteTime;
+            this.dateTimePickerSubscriptionRunTime.Value = localRunTime;
 
             // subscription delivery day
             this.schedDeliverComboBox.SelectedValue = (int)localDaysOfWeek;
@@ -246,7 +239,7 @@ namespace XenAdmin.Dialogs.Wlb
             {
                 if (!IsValidControl(ctl))
                 {
-                    HelpersGUI.ShowBalloonMessage(ctl, Messages.INVALID_PARAMETER, InvalidParamToolTip);
+                    HelpersGUI.ShowBalloonMessage(ctl, InvalidParamToolTip, Messages.INVALID_PARAMETER);
                     return false;
                 }
             }
@@ -255,7 +248,7 @@ namespace XenAdmin.Dialogs.Wlb
             {
                 if (!IsValidControl(ctl))
                 {
-                    HelpersGUI.ShowBalloonMessage(ctl, Messages.INVALID_PARAMETER, InvalidParamToolTip);
+                    HelpersGUI.ShowBalloonMessage(ctl, InvalidParamToolTip, Messages.INVALID_PARAMETER);
                     return false;
                 }
             }
@@ -351,10 +344,10 @@ namespace XenAdmin.Dialogs.Wlb
             _subscription.Name = this.subNameTextBox.Text;
             _subscription.Description = this.subNameTextBox.Text;
 
-            DateTime utcExecuteTime;
+            DateTime utcRunTime;
             WlbScheduledTask.WlbTaskDaysOfWeek utcDaysOfWeek;
-            WlbScheduledTask.GetUTCTaskTimes((WlbScheduledTask.WlbTaskDaysOfWeek)this.schedDeliverComboBox.SelectedValue, this.dateTimePickerSubscriptionRunTime.Value, out utcDaysOfWeek, out utcExecuteTime);
-            _subscription.ExecuteTimeOfDay = utcExecuteTime;
+            WlbScheduledTask.GetUTCTaskTimes((WlbScheduledTask.WlbTaskDaysOfWeek)this.schedDeliverComboBox.SelectedValue, this.dateTimePickerSubscriptionRunTime.Value, out utcDaysOfWeek, out utcRunTime);
+            _subscription.RunTimeOfDay = utcRunTime;
             _subscription.DaysOfWeek = utcDaysOfWeek;
             if (_subscription.DaysOfWeek != WlbScheduledTask.WlbTaskDaysOfWeek.All)
             {
@@ -384,8 +377,8 @@ namespace XenAdmin.Dialogs.Wlb
             Dictionary<string, string> rps = new Dictionary<string, string>();
             foreach(string key in this._rpParams.Keys)
             {
-                if (String.Compare(key, WlbReportSubscription.REPORT_NAME, true) == 0)
-                    _subscription.ReportName = this._rpParams[WlbReportSubscription.REPORT_NAME];
+                if (String.Compare(key, WlbReportSubscription.REPORT_NAME_KEY, true) == 0)
+                    _subscription.ReportName = this._rpParams[WlbReportSubscription.REPORT_NAME_KEY];
                 else
                 {
                     //Get start date range
@@ -415,11 +408,7 @@ namespace XenAdmin.Dialogs.Wlb
             }
             else if(!action.Cancelled)
             {
-                using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(
-                       SystemIcons.Error,
-                       String.Format(Messages.WLB_SUBSCRIPTION_ERROR, _subscription.Description),
-                       Messages.XENCENTER)))
+                using (var dlg = new ErrorDialog(string.Format(Messages.WLB_SUBSCRIPTION_ERROR, _subscription.Description)))
                 {
                     dlg.ShowDialog(this);
                 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,58 +38,49 @@ using System.Linq;
 
 namespace XenAdmin.Actions
 {
-    // Run several actions. The outer action is asynchronous, but the subactions are run synchronously within that.
+    /// <summary>
+    /// Run several actions. The outer action is asynchronous, but the sub-actions are run synchronously within it.
+    /// </summary>
     public class MultipleAction : AsyncAction, IDisposable
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        protected readonly List<AsyncAction> subActions;
-        private readonly string endDescription;
-        public bool ShowSubActionsDetails { get; private set; }
+        public List<AsyncAction> SubActions { get; }
+        private readonly string _endDescription;
+        private readonly bool _stopOnFirstException;
+
+        public bool ShowSubActionsDetails { get; }
         public string SubActionTitle { get; private set; }
         public string SubActionDescription { get; private set; }
-        public bool StopOnFirstException { get; private set; }
 
-        public MultipleAction(IXenConnection connection, string title, string startDescription, string endDescription, List<AsyncAction> subActions, bool suppressHistory)
+        public MultipleAction(IXenConnection connection, string title, string startDescription,
+            string endDescription, List<AsyncAction> subActions, bool suppressHistory = false,
+            bool showSubActionsDetails = false, bool stopOnFirstException = false)
             : base(connection, title, startDescription, suppressHistory)
         {
-            this.endDescription = endDescription;
-            this.subActions = subActions;
-            this.Completed += MultipleAction_Completed;
+            _endDescription = endDescription;
+            SubActions = subActions;
+            ShowSubActionsDetails = showSubActionsDetails;
+            _stopOnFirstException = stopOnFirstException;
+            Completed += MultipleAction_Completed;
             RegisterEvents();
         }
 
-        public MultipleAction(IXenConnection connection, string title, string startDescription, string endDescription, List<AsyncAction> subActions)
-            : this(connection, title, startDescription, endDescription, subActions, false)
-        {}
-
-        public MultipleAction(IXenConnection connection, string title, string startDescription, string endDescription,
-            List<AsyncAction> subActions, bool suppressHistory, bool showSubActionsDetails)
-            : this(connection, title, startDescription, endDescription, subActions, suppressHistory)
-        {
-            ShowSubActionsDetails = showSubActionsDetails;
-        }
-
-        public MultipleAction(IXenConnection connection, string title, string startDescription, string endDescription,
-            List<AsyncAction> subActions, bool suppressHistory, bool showSubActionsDetails, bool stopOnFirstException)
-            : this(connection, title, startDescription, endDescription, subActions, suppressHistory, showSubActionsDetails)
-        {
-            StopOnFirstException = stopOnFirstException;
-        }
-
-        // The multiple action gets its ApiMethodsToRoleCheck by accumulating the lists from each of the subactions
+        /// <summary>
+        /// The multiple action gets its ApiMethodsToRoleCheck by accumulating the lists from each of the sub-actions
+        /// </summary>
         public override RbacMethodList GetApiMethodsToRoleCheck
         {
             get
             {
-                RbacMethodList list = new RbacMethodList();
-                foreach (AsyncAction subAction in subActions)
+                var list = new RbacMethodList();
+                foreach (var subAction in SubActions)
                     list.AddRange(subAction.GetApiMethodsToRoleCheck);
                 return list;
             }
         }
         
-        protected override void Run()
+        protected sealed override void Run()
         {
             PercentComplete = 0;
             var exceptions = new List<Exception>();
@@ -98,12 +88,12 @@ namespace XenAdmin.Actions
 
             RunSubActions(exceptions);
 
-            PercentComplete = 100;
-            Description = endDescription;
+            Tick(100, _endDescription);
+
             if (exceptions.Count > 1)
             {
-                foreach (Exception e in exceptions)
-                    log.Error(e);
+                foreach (var e in exceptions)
+                    _log.Error(e);
 
                 Exception = new Exception(Messages.SOME_ERRORS_ENCOUNTERED);
             }
@@ -113,12 +103,12 @@ namespace XenAdmin.Actions
 
         public override void RecomputeCanCancel()
         {
-            CanCancel = !this.IsCompleted && subActions.Any(a => !a.IsCompleted);
+            CanCancel = !IsCompleted && SubActions.Any(a => !a.IsCompleted);
         }
 
         protected override void CancelRelatedTask()
         {
-            foreach (AsyncAction subAction in subActions.Where(a => !a.IsCompleted))
+            foreach (var subAction in SubActions.Where(a => !a.IsCompleted))
             {
                 subAction.Cancel();
             }
@@ -126,20 +116,19 @@ namespace XenAdmin.Actions
 
         private void RegisterEvents()
         {
-            foreach (AsyncAction subAction in subActions)
+            foreach (var subAction in SubActions)
                 subAction.Changed += SubActionChanged;
         }
 
-        private void DeregisterEvents()
+        private void DeRegisterEvents()
         {
-            foreach (AsyncAction subAction in subActions)
+            foreach (var subAction in SubActions)
                 subAction.Changed -= SubActionChanged;
         }
 
         private void SubActionChanged(ActionBase sender)
         {
-            AsyncAction subAction = sender as AsyncAction;
-            if (subAction != null)
+            if (sender is AsyncAction subAction)
             {
                 SubActionTitle = subAction.Title;
                 SubActionDescription = subAction.Description;
@@ -151,35 +140,33 @@ namespace XenAdmin.Actions
         protected virtual void RecalculatePercentComplete()
         {
             int total = 0;
-            int n = subActions.Count;
-            foreach (var action in subActions)
+            int n = SubActions.Count;
+            foreach (var action in SubActions)
                 total += action.PercentComplete;
-            PercentComplete = (int)(total / n);
+            PercentComplete = total / n;
         }
 
         protected virtual void RunSubActions(List<Exception> exceptions)
         {
-            foreach (AsyncAction subAction in subActions)
+            foreach (var subAction in SubActions)
             {
                 if (Cancelling) // don't start any more actions
                     break;
                 try
                 {
                     SubActionTitle = subAction.Title;
-                    subAction.RunExternal(Session);
+                    subAction.RunSync(Session);
                 }
                 catch (Exception e)
                 {
-                    Failure f = e as Failure;
-                    if (f != null && Connection != null && f.ErrorDescription[0] == Failure.RBAC_PERMISSION_DENIED)
-                    {
+                    if (e is Failure f && Connection != null && f.ErrorDescription[0] == Failure.RBAC_PERMISSION_DENIED)
                         Failure.ParseRBACFailure(f, Connection, Session ?? Connection.Session);
-                    }
+
                     exceptions.Add(e);
                     // Record the first exception we come to. Though later if there are more than one we will replace this with non specific one.
                     if (Exception == null)
                         Exception = e;
-                    if (StopOnFirstException)
+                    if (_stopOnFirstException)
                         break;
                 }
             }
@@ -189,9 +176,9 @@ namespace XenAdmin.Actions
         {
             // The MultipleAction can sometimes complete prematurely, for example
             // if the sudo dialog is cancelled, of (less likely) if one of the
-            // subactions throws an exception in its GetApiMethodsToRoleCheck.
-            // In this case, we need to cancel this action's subactions.
-            foreach (AsyncAction subAction in subActions)
+            // sub-actions throws an exception in its GetApiMethodsToRoleCheck.
+            // In this case, we need to cancel this action's sub-actions.
+            foreach (var subAction in SubActions)
             {
                 if (!subAction.IsCompleted)
                     subAction.Cancel();
@@ -202,7 +189,7 @@ namespace XenAdmin.Actions
 
         public void Dispose()
         {
-            DeregisterEvents();
+            DeRegisterEvents();
         }
 
         #endregion

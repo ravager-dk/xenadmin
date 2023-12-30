@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -53,6 +52,7 @@ namespace XenAdmin.SettingsPanels
         public LogDestinationEditPage()
         {
             InitializeComponent();
+            label3.Text = string.Format(label3.Text, BrandManager.ProductBrand);
 
             Text = Messages.LOG_DESTINATION;
 
@@ -68,7 +68,7 @@ namespace XenAdmin.SettingsPanels
 
         #region IVerticalTabs implementation
 
-        public Image Image => Properties.Resources.log_destination_16;
+        public Image Image => Images.StaticImages.log_destination_16;
 
         public string SubText
         {
@@ -141,7 +141,15 @@ namespace XenAdmin.SettingsPanels
         public void ShowLocalValidationMessages()
         {
             if (!_validToSave)
-                HelpersGUI.ShowBalloonMessage(ServerTextBox, Messages.GENERAL_EDIT_INVALID_REMOTE, InvalidParamToolTip);
+                HelpersGUI.ShowBalloonMessage(ServerTextBox, InvalidParamToolTip, Messages.GENERAL_EDIT_INVALID_REMOTE);
+        }
+
+        public void HideLocalValidationMessages()
+        {
+            if (ServerTextBox != null)
+            {
+                InvalidParamToolTip.Hide(ServerTextBox);
+            }
         }
 
         public void Cleanup()

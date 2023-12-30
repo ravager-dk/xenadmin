@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Actions;
 
@@ -41,7 +37,7 @@ namespace XenAdmin.Commands
     class RescanPIFsCommand : Command
     {
         /// <summary>
-        /// Executes a PIF scan on a host
+        /// Runs a PIF scan on a host
         /// </summary>
         public RescanPIFsCommand(IMainWindow mainWindow, Host host)
             : base(mainWindow, host)
@@ -49,12 +45,12 @@ namespace XenAdmin.Commands
 
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.Count == 1 && CanExecute(selection[0].XenObject as Host);
+            return selection.Count == 1 && CanRun(selection[0].XenObject as Host);
         }
 
-        private bool CanExecute(Host host)
+        private bool CanRun(Host host)
         {
             if (host == null)
                 return false;
@@ -62,7 +58,7 @@ namespace XenAdmin.Commands
             return true;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             Host h = selection[0].XenObject as Host;
             RescanPIFsAction action = new RescanPIFsAction(h);

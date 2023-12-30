@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,18 +30,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Commands;
 using XenAdmin.Core;
 using XenAdmin.Wlb;
 using XenAdmin.Dialogs;
-using XenAdmin.Network;
 using XenAPI;
-using System.Drawing;
-using XenAdmin.Actions.VMActions;
-
 using XenAdmin.Actions.HostActions;
+using XenAdmin.Actions.VMActions;
 
 namespace XenAdmin.Actions.Wlb
 {
@@ -58,13 +53,8 @@ namespace XenAdmin.Actions.Wlb
         public WlbOptimizePoolAction(Pool pool, Dictionary<VM, WlbOptimizationRecommendation> vmOptLst, string optId)
             : base(pool.Connection, string.Format(Messages.WLB_OPTIMIZING_POOL, Helpers.GetName(pool).Ellipsise(50)))
         {
-            if (pool == null)
-                throw new ArgumentNullException("pool");
-            if (vmOptLst == null)
-                throw new ArgumentNullException("vmOptLst");
-
-            this.Pool = pool;
-            this.vmOptList = vmOptLst;
+            Pool = pool;
+            vmOptList = vmOptLst ?? throw new ArgumentNullException("vmOptLst");
             this.optId = optId;
 
             #region RBAC Dependencies
@@ -244,11 +234,8 @@ namespace XenAdmin.Actions.Wlb
                     // Tell the user the VM will be started without HA protection.
                     Program.Invoke(Program.MainWindow, delegate()
                     {
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(
-                                SystemIcons.Warning,
-                                String.Format(Messages.HA_INVALID_CONFIG_RESUME, Helpers.GetName(vm).Ellipsise(500)),
-                                Messages.HIGH_AVAILABILITY)))
+                        using (var dlg = new WarningDialog(String.Format(Messages.HA_INVALID_CONFIG_RESUME, Helpers.GetName(vm).Ellipsise(500)))
+                            {WindowTitle = Messages.HIGH_AVAILABILITY})
                         {
                             dlg.ShowDialog(Program.MainWindow);
                         }
@@ -328,11 +315,8 @@ namespace XenAdmin.Actions.Wlb
                         Helpers.GetName(vm).Ellipsise(100));
                     Program.Invoke(Program.MainWindow, delegate()
                     {
-                        using (var dlg = new ThreeButtonDialog(
-                           new ThreeButtonDialog.Details(
-                               SystemIcons.Warning,
-                               msg,
-                               Messages.HIGH_AVAILABILITY)))
+                        using (var dlg = new WarningDialog(msg)
+                            {WindowTitle = Messages.HIGH_AVAILABILITY})
                         {
                             dlg.ShowDialog(Program.MainWindow);
                         }
@@ -347,13 +331,10 @@ namespace XenAdmin.Actions.Wlb
 
                     Program.Invoke(Program.MainWindow, delegate()
                     {
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(
-                               SystemIcons.Warning,
-                               msg,
-                               Messages.HIGH_AVAILABILITY),
+                        using (var dlg = new WarningDialog(msg,
                             ThreeButtonDialog.ButtonYes,
-                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                            {WindowTitle = Messages.HIGH_AVAILABILITY})
                         {
                             DialogResult r = dlg.ShowDialog(Program.MainWindow);
                             if (r != DialogResult.Yes)
@@ -378,7 +359,7 @@ namespace XenAdmin.Actions.Wlb
         /// <param name="recommendationId">recommendation id</param>
         private static void DoAction(AsyncAction action, VM vm, Host host, int start, int end, int recommendationId)
         {
-            action.RelatedTask = XenAPI.VM.async_live_migrate(action.Session, vm.opaque_ref, host.opaque_ref);
+            action.RelatedTask = VM.async_pool_migrate(action.Session, vm.opaque_ref, host.opaque_ref, new Dictionary<string, string> { ["live"] = "true" });
 
             if (recommendationId != 0)
             {
@@ -403,7 +384,7 @@ namespace XenAdmin.Actions.Wlb
         /// <param name="end">progress bar end point</param>
         private static void SetHaProtection(bool protect, AsyncAction action, VM vm, int start, int end)
         {
-        	// Do database sync. Helps to ensure that the change persists over master failover.
+        	// Do database sync. Helps to ensure that the change persists over coordinator failover.
             action.RelatedTask = XenAPI.Pool.async_sync_database(action.Session);
             action.PollToCompletion(start, end);
         }

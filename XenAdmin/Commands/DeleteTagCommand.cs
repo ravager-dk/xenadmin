@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Actions;
 using XenAPI;
 using XenAdmin.Model;
@@ -57,17 +55,17 @@ namespace XenAdmin.Commands
         {
         }
 
-        private static bool CanExecute(GroupingTag groupingTag)
+        private static bool CanRun(GroupingTag groupingTag)
         {
             return groupingTag.Grouping.GroupingName == Messages.TAGS;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<GroupingTag>(CanExecute);
+            return selection.AllItemsAre<GroupingTag>(CanRun);
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actions = new List<AsyncAction>();
             foreach (GroupingTag groupingTag in selection.AsGroupingTags())

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -72,10 +71,7 @@ namespace XenAdmin.Wizards.NewVMWizard
             get { return IncludeConfigDriveCheckBox.Checked ? Messages.VM_CLOUD_CONFIG_DRIVE_INCLUDED : Messages.VM_CLOUD_CONFIG_DRIVE_NOT_INCLUDED; }
         }
 
-        public Image Image
-        {
-            get { return Properties.Resources.coreos_16; }
-        }
+        public Image Image => Images.StaticImages.coreos_16;
 
         public override string PageTitle
         {
@@ -146,7 +142,7 @@ namespace XenAdmin.Wizards.NewVMWizard
             else
                 parameters.Add("vdiuuid", configDrive.uuid);
             
-            var action = new ExecutePluginAction(Connection, Affinity ?? Helpers.GetMaster(Connection),
+            var action = new RunPluginAction(Connection, Affinity ?? Helpers.GetCoordinator(Connection),
                         "xscontainer",//plugin
                         defaultConfig ? "get_config_drive_default" : "get_config_drive_configuration",//function
                         parameters,
@@ -154,7 +150,7 @@ namespace XenAdmin.Wizards.NewVMWizard
 
             try
             {
-                action.RunExternal(Connection.Session);
+                action.RunSync(Connection.Session);
                 var result = action.Result.Replace("\n", Environment.NewLine);
                 ConfigDriveTemplateTextBox.Text = result;
                 existingConfig = result;
@@ -190,7 +186,7 @@ namespace XenAdmin.Wizards.NewVMWizard
         {
             GetDefaultParameters();
             if (errorRetrievingConfigParameters)
-                using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Error, Messages.VM_CLOUD_CONFIG_DRIVE_CANNOT_RETRIEVE_DEFAULT)))
+                using (var dlg = new ErrorDialog(Messages.VM_CLOUD_CONFIG_DRIVE_CANNOT_RETRIEVE_DEFAULT))
                 {
                     dlg.ShowDialog(this);
                 }
@@ -213,7 +209,7 @@ namespace XenAdmin.Wizards.NewVMWizard
             parameters.Add("sruuid", sr.uuid);
             parameters.Add("configuration", ConfigDriveTemplateText.Replace("\r\n", "\n"));
 
-            return new ExecutePluginAction(Connection, vmOrTemplate.Home() ?? Helpers.GetMaster(Connection),
+            return new RunPluginAction(Connection, vmOrTemplate.Home() ?? Helpers.GetCoordinator(Connection),
                                            "xscontainer", //plugin
                                            "create_config_drive", //function
                                            parameters,
@@ -239,6 +235,9 @@ namespace XenAdmin.Wizards.NewVMWizard
         public void ShowLocalValidationMessages()
         {
         }
+
+        public void HideLocalValidationMessages()
+        { }
 
         public void Cleanup()
         {

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Model;
 using XenAPI;
-using XenAdmin.Actions;
 
 
 namespace XenAdmin.Commands
@@ -62,17 +58,17 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             MainWindowCommandInterface.PutSelectedNodeIntoEditMode();
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.ContainsOneItemOfType<Folder>(CanExecute);
+            return selection.ContainsOneItemOfType<Folder>(CanRun);
         }
 
-        private static bool CanExecute(Folder folder)
+        private static bool CanRun(Folder folder)
         {
             return !folder.IsRootFolder;
         }

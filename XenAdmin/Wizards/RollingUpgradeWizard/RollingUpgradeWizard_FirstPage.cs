@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,6 +29,7 @@
  */
 
 using XenAdmin.Controls;
+using XenAdmin.Core;
 
 
 namespace XenAdmin.Wizards.RollingUpgradeWizard
@@ -39,28 +39,14 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
         public RollingUpgradeWizardFirstPage()
         {
             InitializeComponent();
+            label7.Text = string.Format(label7.Text, BrandManager.ProductBrand);
         }
 
-        public override string Text
-        {
-            get
-            {
-                return Messages.BEFORE_YOU_START;
-            }
-        }
+        public override string Text => Messages.BEFORE_YOU_START;
 
-        public override string PageTitle
-        {
-            get
-            {
-                return Messages.BEFORE_YOU_START;
-            }
-        }
+        public override string PageTitle => Messages.BEFORE_YOU_START;
 
-        public override string HelpID
-        {
-            get { return "Beforeyoustart"; }
-        }
+        public override string HelpID => "Beforeyoustart";
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {

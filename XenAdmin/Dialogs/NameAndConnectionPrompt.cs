@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,13 +29,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Dialogs;
 using XenAdmin.Network;
 using XenAPI;
 using XenAdmin.Core;
@@ -67,10 +61,10 @@ namespace XenAdmin.Dialogs
                     continue;
                 }
 
-                Host master = Helpers.GetMaster(connection);
-                if (master != null)
+                Host coordinator = Helpers.GetCoordinator(connection);
+                if (coordinator != null)
                 {
-                    comboBox.Items.Add(master);
+                    comboBox.Items.Add(coordinator);
                     continue;
                 }
             }

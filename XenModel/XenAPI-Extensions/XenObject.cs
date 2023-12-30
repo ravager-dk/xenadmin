@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -141,7 +140,7 @@ namespace XenAPI
             if (server == null && opaque_ref != null)
                 return null;
 
-            if (opaque_ref != null && !server.Locked)
+            if (opaque_ref != null && server != null && !server.Locked)
                 throw new InvalidOperationException("Instance must be locked before calling SaveChanges()");
 
             if (beforeObject == null)
@@ -308,7 +307,7 @@ namespace XenAPI
 
         public virtual string NameWithLocation()
         {
-            return string.Format(Messages.NAME_WITH_LOCATION, Name(), LocationString());
+            return string.Format(Messages.STRING_SPACE_STRING, Name(), LocationString());
         }
 
         internal virtual string LocationString()

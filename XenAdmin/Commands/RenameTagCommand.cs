@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Actions;
 using XenAPI;
 using XenAdmin.Model;
@@ -72,12 +69,12 @@ namespace XenAdmin.Commands
             _newName = newName;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return _oldName != _newName && _newName.Trim().Length > 0;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
 
             DelegatedAsyncAction action = new DelegatedAsyncAction(null,

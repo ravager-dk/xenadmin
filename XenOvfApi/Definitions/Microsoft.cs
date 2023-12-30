@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,14 +30,9 @@
 
 namespace XenOvf.Definitions.VMC
 {
-    using System;
-    using System.Collections;
     using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Diagnostics;
     using System.Xml;
     using System.Xml.Serialization;
-    using System.Xml.Schema;
 
     #region VPC/VMC
     [XmlRoot("preferences")]

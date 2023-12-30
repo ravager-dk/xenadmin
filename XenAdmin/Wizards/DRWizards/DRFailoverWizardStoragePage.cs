@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -38,7 +37,6 @@ using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
-using XenAdmin.Wizards.NewSRWizard_Pages;
 using XenAPI;
 using XenAdmin.Controls;
 
@@ -180,8 +178,8 @@ namespace XenAdmin.Wizards.DRWizards
                     var vdis = sr.Connection.ResolveAll(sr.VDIs);
                     bool poolMetadataDetected = vdis.Any(vdi => vdi.type == vdi_type.metadata);
 
-                    SrRow row;
-                    if (!FindRowByUuid(sr.uuid, out row))
+                    var row = dataGridViewSRs.Rows.Cast<SrRow>().FirstOrDefault(r => r.SrUuid == sr.uuid);
+                    if (row == null)
                     {
                         row = new SrRow(sr, poolMetadataDetected, SelectedSRsUuids.Contains(sr.uuid));
                         dataGridViewSRs.Rows.Add(row);
@@ -193,8 +191,8 @@ namespace XenAdmin.Wizards.DRWizards
                 {
                     foreach (var srInfo in scannedDevice.SRList)
                     {
-                        SrRow row;
-                        if (!FindRowByUuid(srInfo.UUID, out row))
+                        var row = dataGridViewSRs.Rows.Cast<SrRow>().FirstOrDefault(r => r.SrUuid == srInfo.UUID);
+                        if (row == null)
                         {
                             row = new SrRow(srInfo, scannedDevice.Type, srInfo.PoolMetadataDetected,
                                             SelectedSRsUuids.Contains(srInfo.UUID));
@@ -295,22 +293,17 @@ namespace XenAdmin.Wizards.DRWizards
             }
 
             if (srs.Count == 0)
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Information,
-                        Messages.DR_WIZARD_STORAGEPAGE_SCAN_RESULT_NONE,
-                        Messages.XENCENTER)))
-                {
+                using (var dlg = new InformationDialog(Messages.DR_WIZARD_STORAGEPAGE_SCAN_RESULT_NONE))
                     dlg.ShowDialog(this);
-                }
         }
 
         private List<FibreChannelDevice> FiberChannelScan()
         {
-            Host master = Helpers.GetMaster(Connection);
-            if (master == null)
+            Host coordinator = Helpers.GetCoordinator(Connection);
+            if (coordinator == null)
                 return null;
 
-            var action = new FibreChannelProbeAction(master);
+            var action = new FibreChannelProbeAction(coordinator);
             using (var dialog = new ActionProgressDialog(action, ProgressBarStyle.Marquee))
                 dialog.ShowDialog(this); //Will block until dialog closes, action completed
 
@@ -319,12 +312,12 @@ namespace XenAdmin.Wizards.DRWizards
 
         private List<SR.SRInfo> ScanDeviceForSRs(SR.SRTypes type, string deviceId, Dictionary<string, string> dconf)
         {
-            Host master = Helpers.GetMaster(Connection);
-            if (master == null || dconf == null)
+            Host coordinator = Helpers.GetCoordinator(Connection);
+            if (coordinator == null || dconf == null)
                 return null;
 
             // Start probe
-            SrProbeAction srProbeAction = new SrProbeAction(Connection, master, type, dconf,
+            SrProbeAction srProbeAction = new SrProbeAction(Connection, coordinator, type, dconf,
                 new Dictionary<string, string> {{METADATA, "true"}});
             using (var dlg = new ActionProgressDialog(srProbeAction, ProgressBarStyle.Marquee))
                 dlg.ShowDialog(this);
@@ -334,7 +327,7 @@ namespace XenAdmin.Wizards.DRWizards
 
             try
             {
-                var metadataSrs = SR.ParseSRListXML(srProbeAction.Result);
+                var metadataSrs = srProbeAction.SRs ?? new List<SR.SRInfo>();
 
                 if (ScannedDevices.ContainsKey(deviceId))
                 {
@@ -362,8 +355,9 @@ namespace XenAdmin.Wizards.DRWizards
 
             foreach (SR.SRInfo srInfo in metadataSrs)
             {
-                SrRow row;
-                if (!FindRowByUuid(srInfo.UUID, out row))
+                var row = dataGridViewSRs.Rows.Cast<SrRow>().FirstOrDefault(r => r.SrUuid == srInfo.UUID);
+
+                if (row == null)
                 {
                     row = new SrRow(srInfo, type, srInfo.PoolMetadataDetected, srInfo.PoolMetadataDetected);
                     dataGridViewSRs.Rows.Add(row);
@@ -385,10 +379,10 @@ namespace XenAdmin.Wizards.DRWizards
                 return;
             }
 
-            Host master = Connection.Resolve(pool.master);
-            if (master == null)
+            Host coordinator = Connection.Resolve(pool.master);
+            if (coordinator == null)
             {
-                log.Error("New SR Wizard: Master has disappeared");
+                log.Error("New SR Wizard: Coordinator has disappeared");
                 return;
             }
 
@@ -575,7 +569,7 @@ namespace XenAdmin.Wizards.DRWizards
                 var cellTick = new DataGridViewCheckBoxCell { Value = selected };
                 var cellName = new DataGridViewTextBoxCell { Value = srInfo.Name };
                 var cellDesc = new DataGridViewTextBoxCell { Value = srInfo.Description };
-                var cellType = new DataGridViewTextBoxCell { Value = SR.getFriendlyTypeName(type) };
+                var cellType = new DataGridViewTextBoxCell { Value = SR.GetFriendlyTypeName(type) };
                 var cellMetadata = new DataGridViewTextBoxCell { Value = poolMetadataDetected.ToStringI18n() };
                 Cells.AddRange(cellTick, cellName, cellDesc, cellType, cellMetadata);
             }
@@ -622,17 +616,6 @@ namespace XenAdmin.Wizards.DRWizards
                 SelectedSRsUuids.Remove(row.SrUuid);
 
             OnPageUpdated();
-        }
-
-        private bool FindRowByUuid(string uuid, out SrRow row)
-        {
-            row = null;
-            foreach (var srRow in dataGridViewSRs.Rows.Cast<SrRow>().Where(srRow => srRow.SrUuid == uuid))
-            {
-                row = srRow;
-                return true;
-            }
-            return false;
         }
 
         private void buttonSelectAll_Click(object sender, EventArgs e)

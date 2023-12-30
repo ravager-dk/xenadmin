@@ -238,7 +238,7 @@
     <value>0</value>
   </data>
   <data name="label3.Text" xml:space="preserve">
-    <value>In Manual Mode, you must apply the upgrade manually to each server in turn by running the [XenServer] installer from CD-ROM or PXE network boot and following the installer’s on-screen instructions in the server console. This process must be repeated for each server in the pool.</value>
+    <value>In Manual Mode, you must apply the upgrade manually to each server in turn by running the {0} installer from CD-ROM or PXE network boot and following the installer’s on-screen instructions in the server console. This process must be repeated for each server in the pool.</value>
   </data>
   <data name="&gt;&gt;label3.Name" xml:space="preserve">
     <value>label3</value>
@@ -266,15 +266,6 @@
   </data>
   <data name="tableLayoutPanel2.ColumnCount" type="System.Int32, mscorlib">
     <value>2</value>
-  </data>
-  <data name="comboBoxUpgradeMethod.Items" xml:space="preserve">
-    <value>HTTP</value>
-  </data>
-  <data name="comboBoxUpgradeMethod.Items1" xml:space="preserve">
-    <value>NFS</value>
-  </data>
-  <data name="comboBoxUpgradeMethod.Items2" xml:space="preserve">
-    <value>FTP</value>
   </data>
   <data name="comboBoxUpgradeMethod.Location" type="System.Drawing.Point, System.Drawing">
     <value>3, 3</value>

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using XenAdmin.Core;
 using System.Drawing;
-using System.Linq;
 
 namespace XenAdmin.Controls
 {
@@ -59,7 +55,7 @@ namespace XenAdmin.Controls
         {
             int index = e.Index;
 
-            if (index > -1)
+            if (-1 < index && index < Items.Count)
             {
                 e.DrawBackground();
 

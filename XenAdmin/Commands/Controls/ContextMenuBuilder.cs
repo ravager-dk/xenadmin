@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,17 +30,15 @@
 
 using System;
 using System.Collections.Generic;
-using XenAPI;
-using System.Windows.Forms;
-using XenAdmin.Model;
-using XenAdmin.Core;
-using System.Reflection;
-using System.Diagnostics;
 using System.Collections.ObjectModel;
-using System.Drawing;
+using System.Diagnostics;
 using System.Linq;
+using System.Windows.Forms;
+using XenAdmin.Core;
 using XenAdmin.Dialogs;
+using XenAdmin.Model;
 using XenAdmin.Plugins;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -57,22 +54,41 @@ namespace XenAdmin.Commands
 
         static ContextMenuBuilder()
         {
-            List<Builder> list = new List<Builder>();
-
-            foreach (Type type in Assembly.GetCallingAssembly().GetTypes())
+            var list = new List<Builder>
             {
-                if (typeof(Builder).IsAssignableFrom(type) && !type.IsAbstract)
-                {
-                    try
-                    {
-                        list.Add((Builder)Activator.CreateInstance(type));
-                    }
-                    catch (MissingMethodException)
-                    {
+                new MixedPoolsAndStandaloneHosts(),
+                new MultiplePools(),
+                new MultipleDifferentXenObjectTypes(),
+                new MultipleSRs(),
+                new SingleVDI(),
+                new MultipleVDI(),
+                new SingleNetwork(),
+                new DisconnectedHosts(),
+                new MixedVMsAndTemplates(),
+                new MultipleAliveHosts(),
+                new SingleAliveHostInPool(),
+                new SingleAliveStandaloneHost(),
+                new MultipleHostsSomeDeadSomeAlive(),
+                new DeadHosts(),
+                new SinglePool(),
+                new SingleSnapshot(),
+                new SingleTemplate(),
+                new SingleVmAppliance(),
+                new MultipleVmAppliance(),
+                new SingleVM(),
+                new SingleSR(),
+                new SingleFolder(),
+                new MultipleTemplates(),
+                new MultipleSnapshots(),
+                new MultipleVMsInPool(),
+                new MultipleVMsOverMultiplePools(),
+                new MultipleFolders(),
+                new SingleTag(),
+                new MultipleTags(),
+                new SingleDockerContainer(),
+                new MultipleDockerContainers()
+            };
 
-                    }
-                }
-            }
             Builders = new ReadOnlyCollection<Builder>(list);
         }
 
@@ -83,32 +99,8 @@ namespace XenAdmin.Commands
         /// <param name="mainWindow">The main window command interface. This can be found on mainwindow.</param>
         public ContextMenuBuilder(PluginManager pluginManager, IMainWindow mainWindow)
         {
-            Util.ThrowIfParameterNull(pluginManager, "pluginManager");
-            Util.ThrowIfParameterNull(pluginManager, "mainWindow");
-
-            _pluginManager = pluginManager;
-            _mainWindow = mainWindow;
-        }
-
-        /// <summary>
-        /// Shows the context menu for the specified xen object at the current mouse location.
-        /// </summary>
-        /// <param name="xenObject">The xen object for which the context menu is required.</param>
-        public void Show(IXenObject xenObject)
-        {
-            Show(xenObject, Form.MousePosition);
-        }
-
-        /// <summary>
-        /// Shows the context menu for the specified xen object at the specified location.
-        /// </summary>
-        /// <param name="xenObject">The xen object for which the context menu is required.</param>
-        /// <param name="point">The location of the context menu.</param>
-        public void Show(IXenObject xenObject, Point point)
-        {
-            ContextMenuStrip menu = new ContextMenuStrip();
-            menu.Items.AddRange(Build(xenObject));
-            menu.Show(point);
+            _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
+            _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
         }
 
         /// <summary>
@@ -128,7 +120,7 @@ namespace XenAdmin.Commands
         /// <returns>The context menu items.</returns>
         public ToolStripItem[] Build(SelectedItem selection)
         {
-            return Build(new SelectedItem[] { selection });
+            return Build(new[] { selection });
         }
 
         /// <summary>
@@ -138,12 +130,10 @@ namespace XenAdmin.Commands
         /// <returns>The context menu items.</returns>
         public ToolStripItem[] Build(IEnumerable<SelectedItem> selection)
         {
-            Util.ThrowIfParameterNull(selection, "selection");
+            var selectionList = new SelectedItemCollection(selection ?? throw new ArgumentNullException(nameof(selection)));
 
             foreach (Builder builder in Builders)
             {
-                SelectedItemCollection selectionList = new SelectedItemCollection(selection);
-
                 if (builder.IsValid(selectionList))
                 {
                     ContextMenuItemCollection items = new ContextMenuItemCollection(_mainWindow, _pluginManager);
@@ -156,7 +146,7 @@ namespace XenAdmin.Commands
                 }
             }
 
-            return new ToolStripItem[0];
+            return Array.Empty<ToolStripItem>();
         }
 
         [Conditional("DEBUG")]
@@ -185,13 +175,13 @@ namespace XenAdmin.Commands
                            string.Join("\n", usedKeys.Select(kvp => $"{kvp.Key} => {string.Join(", ", kvp.Value)}")));
         }
 
+        #region Nested Classes
+
         private abstract class Builder
         {
             public abstract void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items);
             public abstract bool IsValid(SelectedItemCollection selection);
         }
-
-        #region MixedPoolsAndStandaloneHosts class
 
         private class MixedPoolsAndStandaloneHosts : Builder
         {
@@ -199,6 +189,15 @@ namespace XenAdmin.Commands
             {
                 items.AddIfEnabled(new DisconnectHostsAndPoolsCommand(mainWindow, selection), true);
                 items.AddIfEnabled(new ReconnectHostCommand(mainWindow, selection), true);
+
+                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
+                if (updatesItem.Command.CanRun())
+                {
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
+                    items.Add(updatesItem);
+                }
+
                 items.AddIfEnabled(new EditTagsCommand(mainWindow, selection));
             }
 
@@ -211,14 +210,11 @@ namespace XenAdmin.Commands
                 {
                     foreach (SelectedItem item in selection)
                     {
-                        Pool pool = item.XenObject as Pool;
-                        Host host = item.XenObject as Host;
-
-                        if (pool != null)
+                        if (item.XenObject is Pool)
                         {
                             containsPool = true;
                         }
-                        else if (host != null && item.PoolAncestor == null)
+                        else if (item.XenObject is Host && item.PoolAncestor == null)
                         {
                             containsHost = true;
                         }
@@ -232,15 +228,20 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultiplePools class
-
         private class MultiplePools : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
             {
                 items.AddIfEnabled(new DisconnectPoolCommand(mainWindow, selection), true);
+
+                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
+                if (updatesItem.Command.CanRun())
+                {
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
+                    items.Add(updatesItem);
+                }
+
                 items.AddIfEnabled(new EditTagsCommand(mainWindow, selection));
                 items.AddPluginItems(PluginContextMenu.pool, selection);
             }
@@ -263,10 +264,6 @@ namespace XenAdmin.Commands
                 return false;
             }
         }
-
-        #endregion
-
-        #region MultipleDifferentTypes
 
         private class MultipleDifferentXenObjectTypes : Builder
         {
@@ -310,10 +307,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleSRs
-
         private class MultipleSRs : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -330,10 +323,6 @@ namespace XenAdmin.Commands
                 return selection.Count > 1 && selection.AllItemsAre<SR>();
             }
         }
-
-        #endregion
-
-        #region SingleVDI
 
         private class SingleVDI : Builder
         {
@@ -353,10 +342,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleVDI
-
         private class MultipleVDI : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -373,10 +358,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SingleNetwork
-
         private class SingleNetwork : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -392,10 +373,6 @@ namespace XenAdmin.Commands
                 // HIMN should not be editable
             }
         }
-
-        #endregion
-
-        #region DisconnectedHosts
 
         private class DisconnectedHosts : Builder
         {
@@ -438,10 +415,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MixedVMsSnapshotsTemplates class
-
         private class MixedVMsAndTemplates : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -483,10 +456,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleAliveHosts class
-
         private class MultipleAliveHosts : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -522,20 +491,23 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SingleAliveHostInPool class
-
         private class SingleAliveHostInPool : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
             {
-                Host host = (Host)selection[0].XenObject;
-
                 items.AddIfEnabled(new NewVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new NewSRCommand(mainWindow, selection));
 				items.AddIfEnabled(new ImportCommand(mainWindow, selection));
                 items.AddSeparator();
+
+                var certItem = new CommandToolStripMenuItem(new CertificateCommand(mainWindow, selection), true);
+                if (certItem.Command.CanRun())
+                {
+                    certItem.DropDownItems.Add(new CommandToolStripMenuItem(new InstallCertificateCommand(mainWindow, selection), true));
+                    certItem.DropDownItems.Add(new CommandToolStripMenuItem(new ResetCertificateCommand(mainWindow, selection), true));
+                    items.Add(certItem);
+                }
+
                 items.AddIfEnabled(new HostMaintenanceModeCommand(mainWindow, selection));
                 items.AddSeparator();
 
@@ -547,7 +519,7 @@ namespace XenAdmin.Commands
                 items.AddIfEnabled(new RemoveHostCrashDumpsCommand(mainWindow, selection));
 
                 var cmd = new RemoveHostFromPoolCommand(mainWindow, selection);
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
                     items.AddSeparator();
                     items.Add(cmd);
@@ -570,16 +542,10 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SingleAliveStandaloneHost class
-
         private class SingleAliveStandaloneHost : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
             {
-                Host host = (Host)selection[0].XenObject;
-
                 items.AddIfEnabled(new NewVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new NewSRCommand(mainWindow, selection));
 				items.AddIfEnabled(new ImportCommand(mainWindow, selection));
@@ -587,8 +553,24 @@ namespace XenAdmin.Commands
 
                 items.AddIfEnabled(new AddSelectedHostToPoolToolStripMenuItem(mainWindow, selection, true));
                 items.AddSeparator();
+                
+                var certItem = new CommandToolStripMenuItem(new CertificateCommand(mainWindow, selection), true);
+                if (certItem.Command.CanRun())
+                {
+                    certItem.DropDownItems.Add(new CommandToolStripMenuItem(new InstallCertificateCommand(mainWindow, selection), true));
+                    certItem.DropDownItems.Add(new CommandToolStripMenuItem(new ResetCertificateCommand(mainWindow, selection), true));
+                    items.Add(certItem);
+                }
 
                 items.AddIfEnabled(new HostMaintenanceModeCommand(mainWindow, selection));
+
+                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
+                if (updatesItem.Command.CanRun())
+                {
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
+                    items.Add(updatesItem);
+                }
                 items.AddSeparator();
 
                 items.AddIfEnabled(new RebootHostCommand(mainWindow, selection));
@@ -617,10 +599,6 @@ namespace XenAdmin.Commands
                 return false;
             }
         }
-
-        #endregion
-
-        #region MultipleHostsSomeDeadSomeAlive class
 
         private class MultipleHostsSomeDeadSomeAlive : Builder
         {
@@ -653,10 +631,6 @@ namespace XenAdmin.Commands
                 return foundAlive && foundDead;
             }
         }
-
-        #endregion
-
-        #region DeadHosts class
 
         private class DeadHosts : Builder
         {
@@ -692,10 +666,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SinglePool class
-
         private class SinglePool : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -704,25 +674,37 @@ namespace XenAdmin.Commands
                 items.Add(new NewSRCommand(mainWindow, selection));
 				items.Add(new ImportCommand(mainWindow, selection));
                 items.AddSeparator();
-                if (selection.FirstAsXenObject != null )
-                    items.Add(new HACommand(mainWindow, selection));
+
+                var haItem = new CommandToolStripMenuItem(new HACommand(mainWindow, selection), true);
+                if (haItem.Command.CanRun())
+                {
+                    haItem.DropDownItems.Add(new CommandToolStripMenuItem(new HAConfigureCommand(mainWindow, selection), true));
+                    haItem.DropDownItems.Add(new CommandToolStripMenuItem(new HADisableCommand(mainWindow, selection), true));
+                    items.Add(haItem);
+                }
+
                 items.AddIfEnabled(new VMGroupCommand<VMSS>(mainWindow, selection));
                 items.AddIfEnabled(new VMGroupCommand<VM_appliance>(mainWindow, selection));
 
                 var drItem = new CommandToolStripMenuItem(new DRCommand(mainWindow, selection), true);
-                if (drItem.Command.CanExecute())
+                if (drItem.Command.CanRun())
                 {
-                    drItem.DropDownItems.Add(new CommandToolStripMenuItem(
-                                                 new DRConfigureCommand(mainWindow, selection), true));
-                    drItem.DropDownItems.Add(new CommandToolStripMenuItem(new DisasterRecoveryCommand(mainWindow, selection),
-                                                                          true));
+                    drItem.DropDownItems.Add(new CommandToolStripMenuItem(new DRConfigureCommand(mainWindow, selection), true));
+                    drItem.DropDownItems.Add(new CommandToolStripMenuItem(new DisasterRecoveryCommand(mainWindow, selection), true));
                     items.Add(drItem);
                 }
 
                 items.AddIfEnabled(new LaunchConversionManagerCommand(mainWindow, selection));
 
-                var pool = selection.FirstAsXenObject as Pool;
-                if (pool != null && !pool.IsPoolFullyUpgraded())
+                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
+                if (updatesItem.Command.CanRun())
+                {
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
+                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
+                    items.Add(updatesItem);
+                }
+
+                if (selection.FirstAsXenObject is Pool pool && !pool.IsPoolFullyUpgraded())
                     items.Add(new RollingUpgradeCommand(mainWindow));
 
                 items.AddSeparator();
@@ -740,10 +722,6 @@ namespace XenAdmin.Commands
                 return selection.ContainsOneItemOfType<Pool>();
             }
         }
-
-        #endregion
-
-        #region SingleSnapshot class
 
         private class SingleSnapshot : Builder
         {
@@ -769,10 +747,6 @@ namespace XenAdmin.Commands
                 return false;
             }
         }
-
-        #endregion
-
-        #region SingleTemplate class
 
         private class SingleTemplate : Builder
         {
@@ -809,10 +783,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-		#region SingleVmAppliance class
-
 		private class SingleVmAppliance : Builder
 		{
 			public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -836,10 +806,6 @@ namespace XenAdmin.Commands
 			}
 		}
 
-		#endregion
-
-        #region Multiple VMAppliance class
-
         private class MultipleVmAppliance : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -854,10 +820,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SingleVM class
-
         private class SingleVM : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -868,8 +830,6 @@ namespace XenAdmin.Commands
                 items.AddIfEnabled(new StartVMCommand(mainWindow, selection), vm.power_state == vm_power_state.Halted);
                 items.AddIfEnabled(new ResumeVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new SuspendVMCommand(mainWindow, selection));
-                items.AddIfEnabled(new PauseVMCommand(mainWindow, selection));
-                items.AddIfEnabled(new UnPauseVMCommand(mainWindow, selection));                
                 items.AddIfEnabled(new RebootVMCommand(mainWindow, selection));
                 items.AddSeparator();
 
@@ -895,6 +855,7 @@ namespace XenAdmin.Commands
                 items.AddIfEnabled(new AssignGroupToolStripMenuItem<VM_appliance>(mainWindow, selection, true));
                 items.AddSeparator();
 
+                items.AddIfEnabled(new VtpmCommand(mainWindow, selection));
                 items.AddIfEnabled(new InstallToolsCommand(mainWindow, selection));
                 items.AddSeparator();
 
@@ -916,10 +877,6 @@ namespace XenAdmin.Commands
                 return false;
             }
         }
-
-        #endregion
-
-        #region SingleSR class
 
         private class SingleSR : Builder
         {
@@ -946,10 +903,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SingleFolder class
-
         private class SingleFolder : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -966,10 +919,6 @@ namespace XenAdmin.Commands
                 return selection.ContainsOneItemOfType<Folder>();
             }
         }
-
-        #endregion
-
-        #region MultipleVMs class
 
         private abstract class MultipleVMs : Builder
         {
@@ -992,10 +941,6 @@ namespace XenAdmin.Commands
                 return false;
             }
         }
-
-        #endregion
-
-        #region MultipleTemplates class
 
         private class MultipleTemplates : Builder
         {
@@ -1026,10 +971,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleSnapshots class
-
         private class MultipleSnapshots : Builder
         {
             public override bool IsValid(SelectedItemCollection selection)
@@ -1058,10 +999,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleVMsInPool class
-
         private class MultipleVMsInPool : MultipleVMs
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -1070,8 +1007,6 @@ namespace XenAdmin.Commands
                 items.AddIfEnabled(new StartVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new ResumeVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new SuspendVMCommand(mainWindow, selection));
-                items.AddIfEnabled(new PauseVMCommand(mainWindow, selection));
-                items.AddIfEnabled(new UnPauseVMCommand(mainWindow, selection));                
                 items.AddIfEnabled(new RebootVMCommand(mainWindow, selection));
                 items.AddSeparator();
                 items.AddIfEnabled(new ForceVMShutDownCommand(mainWindow, selection));
@@ -1121,11 +1056,6 @@ namespace XenAdmin.Commands
             }
         }
 
-
-        #endregion
-
-        #region MultipleVMsOverMultiplePools class
-
         private class MultipleVMsOverMultiplePools : MultipleVMs
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -1156,10 +1086,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleFolders class
-
         private class MultipleFolders : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -1174,10 +1100,6 @@ namespace XenAdmin.Commands
                 return selection.AllItemsAre<Folder>() && selection.Count > 1;
             }
         }
-
-        #endregion
-
-        #region SingleTag class
 
         private class SingleTag : Builder
         {
@@ -1198,10 +1120,6 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleTags class
-
         private class MultipleTags : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
@@ -1220,16 +1138,10 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region SingleDockerContainer class
-
         private class SingleDockerContainer : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
             {
-                DockerContainer vm = (DockerContainer)selection[0].XenObject;
-
                 items.AddIfEnabled(new StartDockerContainerCommand(mainWindow, selection));
                 items.AddIfEnabled(new StopDockerContainerCommand(mainWindow, selection));
                 items.AddIfEnabled(new PauseDockerContainerCommand(mainWindow, selection));
@@ -1249,11 +1161,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        #endregion
-
-        #region MultipleDockerContainers class
-
-        private abstract class MultipleDockerContainers : Builder
+        private class MultipleDockerContainers : Builder
         {
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
             {

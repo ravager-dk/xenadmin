@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Network;
 using XenAPI;
 using XenAdmin.Core;
@@ -39,18 +37,20 @@ using XenAdmin.Core;
 
 namespace XenAdmin.Actions
 {
-    public class DestroyPolicyAction: PureAsyncAction
+    public class DestroyPolicyAction: AsyncAction
     {
-        private List<VMSS> _selectedToDelete;
-        public DestroyPolicyAction(IXenConnection connection,List<VMSS> deletePolicies) : base(connection, Messages.DELETE_POLICIES)
+        private readonly List<VMSS> _selectedToDelete;
+        
+        public DestroyPolicyAction(IXenConnection connection,List<VMSS> deletePolicies)
+            : base(connection, Messages.DELETE_POLICIES)
         {
             _selectedToDelete = deletePolicies;
             Pool = Helpers.GetPool(connection);
+            ApiMethodsToRoleCheck.AddRange("VM.set_snapshot_schedule", "VMSS.destroy");
         }
 
         protected override void Run()
         {
-
             foreach (var policy in _selectedToDelete)
             {
                 Description = string.Format(Messages.DELETING_VMSS, policy.Name());
@@ -58,6 +58,7 @@ namespace XenAdmin.Actions
                 {
                     VM.set_snapshot_schedule(Session, vmref.opaque_ref, null);
                 }
+
                 try
                 {
                     VMSS.destroy(Session, policy.opaque_ref);
@@ -68,7 +69,8 @@ namespace XenAdmin.Actions
                         throw e;
                 }
             }
-            Description =Messages.DELETED_VMSS;
+
+            Description = Messages.DELETED_VMSS;
         }
     }
 }

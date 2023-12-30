@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Actions;
@@ -44,7 +42,7 @@ using XenAdmin.Actions.DR;
 
 namespace XenAdmin.Diagnostics.Problems.VmApplianceProblem
 {
-    public class ExistingVmApplianceProblem: VmApplianceProblem
+    public class ExistingVmApplianceProblem : VmApplianceProblem
     {
         private readonly List<VM> vmsToDestroy;
         public ExistingVmApplianceProblem(Check check, VM_appliance vmAppliance, List<VM> vmsToDestroy)
@@ -53,18 +51,9 @@ namespace XenAdmin.Diagnostics.Problems.VmApplianceProblem
             this.vmsToDestroy = vmsToDestroy;
         }
 
-        public override string Description
-        {
-            get
-            {
-                return String.Format(Messages.DR_WIZARD_PROBLEM_EXISTING_APPLIANCE, Helpers.GetPoolOfOne(vmsToDestroy[0].Connection).Name()); 
-            } 
-        }
+        public override string Description => String.Format(Messages.DR_WIZARD_PROBLEM_EXISTING_APPLIANCE, Helpers.GetPoolOfOne(vmsToDestroy[0].Connection).Name());
 
-        public override string HelpMessage
-        {
-            get { return Messages.DR_WIZARD_PROBLEM_EXISTING_APPLIANCE_HELPMESSAGE; } 
-        }
+        public override string HelpMessage => Messages.DR_WIZARD_PROBLEM_EXISTING_APPLIANCE_HELPMESSAGE;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
@@ -72,10 +61,9 @@ namespace XenAdmin.Diagnostics.Problems.VmApplianceProblem
             string vmNames = string.Join(",", (from vm in vmsToDestroy select vm.Name()).ToArray());
 
             DialogResult dialogResult;
-            using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, String.Format(Messages.CONFIRM_DELETE_VMS, vmNames, vmsToDestroy[0].Connection.Name), Messages.ACTION_SHUTDOWN_AND_DESTROY_VMS_TITLE),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+            using (var dlg = new WarningDialog(string.Format(Messages.CONFIRM_DELETE_VMS, vmNames, vmsToDestroy[0].Connection.Name),
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+            { WindowTitle = Messages.ACTION_SHUTDOWN_AND_DESTROY_VMS_TITLE })
             {
                 dialogResult = dlg.ShowDialog();
             }

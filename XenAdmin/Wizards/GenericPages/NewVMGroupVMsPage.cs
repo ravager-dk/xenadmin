@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -82,10 +81,7 @@ namespace XenAdmin.Wizards.GenericPages
             get { return VMGroup<T>.ChooseVMsPage_HelpID; } 
         }
 
-        public override Image Image
-        {
-            get { return Properties.Resources._000_VM_h32bit_16; }
-        }
+        public override Image Image => Images.StaticImages._000_VM_h32bit_16;
 
         public override string PageTitle
         {
@@ -118,7 +114,7 @@ namespace XenAdmin.Wizards.GenericPages
                 dataGridView1.Rows.Clear();
                 foreach (var vm in Pool.Connection.Cache.VMs)
                 {
-                    if (searchTextBox1.Matches(vm.Name()) && vm.is_a_real_vm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs))
+                    if (searchTextBox1.Matches(vm.Name()) && vm.IsRealVm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs))
 						dataGridView1.Rows.Add(new VMDataGridViewRow(SelectedVMs.Contains(vm), vm));
                 }
 
@@ -230,7 +226,7 @@ namespace XenAdmin.Wizards.GenericPages
                 foreach (var vm in Pool.Connection.Cache.VMs)
                 {
                     int index = 0;
-                    if (vm.is_a_real_vm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs))
+                    if (vm.IsRealVm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs))
                     {
                         bool selected = group != null && VMGroup<T>.GroupToVMs(group).Contains(new XenRef<VM>(vm.opaque_ref));
 						index = dataGridView1.Rows.Add(new VMDataGridViewRow(selected, vm));
@@ -335,6 +331,10 @@ namespace XenAdmin.Wizards.GenericPages
 
         public override void ShowLocalValidationMessages()
         {
+        }
+
+        public override void HideLocalValidationMessages()
+        { 
         }
 
         public override void Cleanup()

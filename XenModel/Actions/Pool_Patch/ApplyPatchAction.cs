@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,8 +31,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using XenAPI;
 using XenAdmin.Network;
+using XenCenterLib;
 
 
 namespace XenAdmin.Actions
@@ -41,6 +42,8 @@ namespace XenAdmin.Actions
 
     public abstract class PatchAction : AsyncAction
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public PatchAction(IXenConnection conn, string title) : base(conn, title) { }
         public PatchAction(IXenConnection conn, string title, bool suppress) : base(conn, title, suppress) { }
 
@@ -51,8 +54,6 @@ namespace XenAdmin.Actions
             XenRef<Pool_patch> patch_ref = host.Connection.Cache.FindRef(patch);
             if (patch_ref != null)
                 return patch_ref;
-
-            Description = String.Format(Messages.DOWNLOADING_PATCH_FROM, patch.Connection.Name);
 
             // 1st download patch from the pool that has it (the connection on the xenobject)
 
@@ -65,39 +66,84 @@ namespace XenAdmin.Actions
 
                 try
                 {
-                    HTTPHelper.Get(this, true, filename, patch.Connection.Hostname,
-                        (HTTP_actions.get_sss)HTTP_actions.get_pool_patch_download,
-                        Session.opaque_ref, patch.uuid);
+                    RelatedTask = Task.create(Session, "get_pool_patch_download_task", patch.Connection.Hostname);
+                    log.DebugFormat("HTTP GETTING file from {0} to {1}", patch.Connection.Hostname, filename);
+
+                    HTTP_actions.get_pool_patch_download(
+                        bytes =>
+                        {
+                            Tick((int)(100 * (double)bytes / patch.size),
+                                string.Format(Messages.DOWNLOADING_PATCH_FROM, patch.Connection.Name,
+                                    Util.DiskSizeString(bytes, 1, "F1"), Util.DiskSizeString(patch.size)));
+                        },
+                        () => XenAdminConfigManager.Provider.ForcedExiting || GetCancelling(),
+                        XenAdminConfigManager.Provider.GetProxyTimeout(true),
+                        patch.Connection.Hostname,
+                        XenAdminConfigManager.Provider.GetProxyFromSettings(Connection),
+                        filename, RelatedTask.opaque_ref, Session.opaque_ref, patch.uuid);
+
+                    PollToCompletion();
                 }
                 catch (Exception e)
                 {
-                    throw new PatchDownloadFailedException(string.Format(Messages.PATCH_DOWNLOAD_FAILED, patch.name_label, patch.Connection.Name), e);
+                    PollToCompletion(suppressFailures: true);
+
+                    if (e is WebException && e.InnerException is IOException ioe && Win32.GetHResult(ioe) == Win32.ERROR_DISK_FULL)
+                        throw new PatchDownloadFailedException(string.Format(Messages.PATCH_DOWNLOAD_FAILED, patch.name_label, patch.Connection.Name), e.InnerException);
+
+                    if (e is CancelledException || e is HTTP.CancelledException || e.InnerException is CancelledException)
+                        throw new CancelledException();
+
+                    if (e.InnerException?.Message == "Received error code HTTP/1.1 403 Forbidden\r\n from the server")
+                    {
+                        // RBAC Failure
+                        List<Role> roles = Connection.Session.Roles;
+                        roles.Sort();
+                        throw new Exception(String.Format(Messages.RBAC_HTTP_FAILURE, roles[0].FriendlyName()), e);
+                    }
+
+                    throw new PatchDownloadFailedException(string.Format(Messages.PATCH_DOWNLOAD_FAILED, patch.name_label, patch.Connection.Name), e.InnerException ?? e);
                 }
                 finally
                 {
-                    Connection = null;
                     Session = null;
+                    Connection = null;
                 }
 
                 // Then, put it on the pool that doesn't have it
 
                 Description = String.Format(Messages.UPLOADING_PATCH_TO, host.Name());
-
                 Connection = host.Connection;
                 Session = host.Connection.DuplicateSession();
 
                 try
                 {
-                    string result = HTTPHelper.Put(this, true, filename, host.Connection.Hostname,
-                        (HTTP_actions.put_ss)HTTP_actions.put_pool_patch_upload, Session.opaque_ref);
+                    RelatedTask = Task.create(Session, "put_pool_patch_upload_task", host.Connection.Hostname);
+                    log.DebugFormat("HTTP PUTTING file from {0} to {1}", filename, host.Connection.Hostname);
 
-                    return new XenRef<Pool_patch>(result);
+                    HTTP_actions.put_pool_patch_upload(percent => PercentComplete = percent,
+                        () => XenAdminConfigManager.Provider.ForcedExiting || GetCancelling(),
+                        XenAdminConfigManager.Provider.GetProxyTimeout(true),
+                        host.Connection.Hostname,
+                        XenAdminConfigManager.Provider.GetProxyFromSettings(Connection),
+                        filename, RelatedTask.opaque_ref, Session.opaque_ref);
+
+                    PollToCompletion();
+                    Description = string.Format(Messages.PATCH_UPLOADED, host.Name());
+                    return new XenRef<Pool_patch>(Result);
+                }
+                catch (Exception e)
+                {
+                    PollToCompletion(suppressFailures: true);
+
+                    if (e is CancelledException || e is HTTP.CancelledException || e.InnerException is CancelledException)
+                        throw new CancelledException();
+                    throw;
                 }
                 finally
                 {
-                    Connection = null;
                     Session = null;
-                    Description = String.Format(Messages.PATCH_UPLOADED, host.Name());
+                    Connection = null;
                 }
             }
             finally
@@ -133,8 +179,17 @@ namespace XenAdmin.Actions
             Description = string.Format(Messages.APPLYING_PATCH, patch.Name(), host.Name());
             log.DebugFormat("Applying update '{0}' to server '{1}'", patch.Name(), host.Name());
 
-            RelatedTask = Pool_patch.async_apply(Session, patchRef, host.opaque_ref);
-            PollToCompletion();
+            try
+            {
+                RelatedTask = Pool_patch.async_apply(Session, patchRef, host.opaque_ref);
+                PollToCompletion();
+            }
+            catch (Failure f)
+            {
+                log.ErrorFormat("Failed to apply patch '{0}' on server '{1}': '{2}'",
+                    patch.Name(), host.Name(), string.Join(", ", f.ErrorDescription)); //CA-339237
+                throw;
+            }
 
             log.DebugFormat("Applied update '{0}' to server '{1}'. Result: {2}.", patch.Name(), host.Name(), Result);
             Description = string.Format(Messages.PATCH_APPLIED, patch.Name(), host.Name());

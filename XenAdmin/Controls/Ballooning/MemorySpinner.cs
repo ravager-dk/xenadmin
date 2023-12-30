@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -53,6 +52,7 @@ namespace XenAdmin.Controls.Ballooning
             amount = Util.CorrectRoundingErrors(amount);
 
             Units = static_max <= Util.BINARY_GIGA ? Messages.VAL_MEGB : Messages.VAL_GIGB;
+
             ChangeSpinnerSettings();
             previousUnitsValue = Units;
             Initialize(amount, RoundingBehaviour.None);

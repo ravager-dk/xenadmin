@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 
-using System.Drawing;
 using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAdmin.Dialogs;
@@ -52,18 +50,15 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
         public override bool IsFixable => false;
 
         public override string Description => _shortMessage;
-       
+
         public override string HelpMessage => Messages.MORE_INFO;
 
         protected override Actions.AsyncAction CreateAction(out bool cancelled)
         {
             Program.Invoke(Program.MainWindow, () =>
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Information, _longMessage)))
-                {
+                using (var dlg = new InformationDialog(_longMessage))
                     dlg.ShowDialog();
-                }
             });
 
             cancelled = true;

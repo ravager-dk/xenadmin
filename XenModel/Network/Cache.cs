@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -46,63 +45,68 @@ namespace XenAdmin.Network
     public class Cache : ICache
     {
 #pragma warning disable 0414
+
         // keep sorted please
-        private readonly ChangeableDictionary<XenRef<Bond>, Bond> _bond = new ChangeableDictionary<XenRef<Bond>, Bond>();
         private readonly ChangeableDictionary<XenRef<Blob>, Blob> _blob = new ChangeableDictionary<XenRef<Blob>, Blob>();
-        private readonly ChangeableDictionary<XenRef<Cluster>, Cluster> _cluster = new ChangeableDictionary<XenRef<Cluster>, Cluster>();
+        private readonly ChangeableDictionary<XenRef<Bond>, Bond> _bond = new ChangeableDictionary<XenRef<Bond>, Bond>();
+        private readonly ChangeableDictionary<XenRef<Certificate>, Certificate> _certificates = new ChangeableDictionary<XenRef<Certificate>, Certificate>();
         private readonly ChangeableDictionary<XenRef<Cluster_host>, Cluster_host> _cluster_host = new ChangeableDictionary<XenRef<Cluster_host>, Cluster_host>();
+        private readonly ChangeableDictionary<XenRef<Cluster>, Cluster> _cluster = new ChangeableDictionary<XenRef<Cluster>, Cluster>();
         private readonly ChangeableDictionary<XenRef<XenAPI.Console>, XenAPI.Console> _console = new ChangeableDictionary<XenRef<XenAPI.Console>, XenAPI.Console>();
+        private readonly ChangeableDictionary<XenRef<Crashdump>, Crashdump> _crashdump = new ChangeableDictionary<XenRef<Crashdump>, Crashdump>();
+        private readonly ChangeableDictionary<XenRef<DockerContainer>, DockerContainer> _dockerContainers = new ChangeableDictionary<XenRef<DockerContainer>, DockerContainer>();
         private readonly ChangeableDictionary<XenRef<Feature>, Feature> _feature = new ChangeableDictionary<XenRef<Feature>, Feature>();
         private readonly ChangeableDictionary<XenRef<Folder>, Folder> _folders = new ChangeableDictionary<XenRef<Folder>, Folder>();
-        private readonly ChangeableDictionary<XenRef<DockerContainer>, DockerContainer> _dockerContainers = new ChangeableDictionary<XenRef<DockerContainer>, DockerContainer>();
-
         private readonly ChangeableDictionary<XenRef<GPU_group>, GPU_group> _gpu_groups = new ChangeableDictionary<XenRef<GPU_group>, GPU_group>();
-        private readonly ChangeableDictionary<XenRef<Host>, Host> _host = new ChangeableDictionary<XenRef<Host>, Host>();
         private readonly ChangeableDictionary<XenRef<Host_cpu>, Host_cpu> _host_cpu = new ChangeableDictionary<XenRef<Host_cpu>, Host_cpu>();
         private readonly ChangeableDictionary<XenRef<Host_crashdump>, Host_crashdump> _host_crashdump = new ChangeableDictionary<XenRef<Host_crashdump>, Host_crashdump>();
         private readonly ChangeableDictionary<XenRef<Host_metrics>, Host_metrics> _host_metrics = new ChangeableDictionary<XenRef<Host_metrics>, Host_metrics>();
         private readonly ChangeableDictionary<XenRef<Host_patch>, Host_patch> _host_patch = new ChangeableDictionary<XenRef<Host_patch>, Host_patch>();
+        private readonly ChangeableDictionary<XenRef<Host>, Host> _host = new ChangeableDictionary<XenRef<Host>, Host>();
         private readonly ChangeableDictionary<XenRef<Message>, Message> _message = new ChangeableDictionary<XenRef<Message>, Message>();
+        private readonly ChangeableDictionary<XenRef<Network_sriov>, Network_sriov> _network_sriov = new ChangeableDictionary<XenRef<Network_sriov>, Network_sriov>();
         private readonly ChangeableDictionary<XenRef<XenAPI.Network>, XenAPI.Network> _network = new ChangeableDictionary<XenRef<XenAPI.Network>, XenAPI.Network>();
-        private readonly ChangeableDictionary<XenRef<XenAPI.Network_sriov>, XenAPI.Network_sriov> _network_sriov = new ChangeableDictionary<XenRef<XenAPI.Network_sriov>, XenAPI.Network_sriov>();
         private readonly ChangeableDictionary<XenRef<PBD>, PBD> _pbd = new ChangeableDictionary<XenRef<PBD>, PBD>();
-        private readonly ChangeableDictionary<XenRef<PUSB>, PUSB> _pusb = new ChangeableDictionary<XenRef<PUSB>, PUSB>();
-        private readonly ChangeableDictionary<XenRef<VUSB>, VUSB> _vusb = new ChangeableDictionary<XenRef<VUSB>, VUSB>();
-        private readonly ChangeableDictionary<XenRef<USB_group>, USB_group> _usb_group = new ChangeableDictionary<XenRef<USB_group>, USB_group>();
         private readonly ChangeableDictionary<XenRef<PCI>, PCI> _pcis = new ChangeableDictionary<XenRef<PCI>, PCI>();
         private readonly ChangeableDictionary<XenRef<PGPU>, PGPU> _pgpu = new ChangeableDictionary<XenRef<PGPU>, PGPU>();
-        private readonly ChangeableDictionary<XenRef<PIF>, PIF> _pif = new ChangeableDictionary<XenRef<PIF>, PIF>();
         private readonly ChangeableDictionary<XenRef<PIF_metrics>, PIF_metrics> _pif_metrics = new ChangeableDictionary<XenRef<PIF_metrics>, PIF_metrics>();
-        private readonly ChangeableDictionary<XenRef<Pool>, Pool> _pool = new ChangeableDictionary<XenRef<Pool>, Pool>();
+        private readonly ChangeableDictionary<XenRef<PIF>, PIF> _pif = new ChangeableDictionary<XenRef<PIF>, PIF>();
         private readonly ChangeableDictionary<XenRef<Pool_patch>, Pool_patch> _pool_patch = new ChangeableDictionary<XenRef<Pool_patch>, Pool_patch>();
         private readonly ChangeableDictionary<XenRef<Pool_update>, Pool_update> _pool_update = new ChangeableDictionary<XenRef<Pool_update>, Pool_update>();
+        private readonly ChangeableDictionary<XenRef<Pool>, Pool> _pool = new ChangeableDictionary<XenRef<Pool>, Pool>();
+        private readonly ChangeableDictionary<XenRef<PUSB>, PUSB> _pusb = new ChangeableDictionary<XenRef<PUSB>, PUSB>();
         private readonly ChangeableDictionary<XenRef<PVS_cache_storage>, PVS_cache_storage> _pvs_cache_storage = new ChangeableDictionary<XenRef<PVS_cache_storage>, PVS_cache_storage>();
         private readonly ChangeableDictionary<XenRef<PVS_proxy>, PVS_proxy> _pvs_proxy = new ChangeableDictionary<XenRef<PVS_proxy>, PVS_proxy>();
         private readonly ChangeableDictionary<XenRef<PVS_server>, PVS_server> _pvs_server = new ChangeableDictionary<XenRef<PVS_server>, PVS_server>();
         private readonly ChangeableDictionary<XenRef<PVS_site>, PVS_site> _pvs_site = new ChangeableDictionary<XenRef<PVS_site>, PVS_site>();
+        private readonly ChangeableDictionary<XenRef<Repository>, Repository> _repositories = new ChangeableDictionary<XenRef<Repository>, Repository>();
         private readonly ChangeableDictionary<XenRef<Role>, Role> _role = new ChangeableDictionary<XenRef<Role>, Role>();
         private readonly ChangeableDictionary<XenRef<SM>, SM> _sm = new ChangeableDictionary<XenRef<SM>, SM>();
         private readonly ChangeableDictionary<XenRef<SR>, SR> _sr = new ChangeableDictionary<XenRef<SR>, SR>();
         private readonly ChangeableDictionary<XenRef<Subject>, Subject> _subject = new ChangeableDictionary<XenRef<Subject>, Subject>();
         private readonly ChangeableDictionary<XenRef<Task>, Task> _task = new ChangeableDictionary<XenRef<Task>, Task>();
         private readonly ChangeableDictionary<XenRef<Tunnel>, Tunnel> _tunnel = new ChangeableDictionary<XenRef<Tunnel>, Tunnel>();
-        private readonly ChangeableDictionary<XenRef<VBD>, VBD> _vbd = new ChangeableDictionary<XenRef<VBD>, VBD>();
+        private readonly ChangeableDictionary<XenRef<USB_group>, USB_group> _usb_group = new ChangeableDictionary<XenRef<USB_group>, USB_group>();
         private readonly ChangeableDictionary<XenRef<VBD_metrics>, VBD_metrics> _vbd_metrics = new ChangeableDictionary<XenRef<VBD_metrics>, VBD_metrics>();
+        private readonly ChangeableDictionary<XenRef<VBD>, VBD> _vbd = new ChangeableDictionary<XenRef<VBD>, VBD>();
         private readonly ChangeableDictionary<XenRef<VDI>, VDI> _vdi = new ChangeableDictionary<XenRef<VDI>, VDI>();
-        private readonly ChangeableDictionary<XenRef<VGPU>, VGPU> _vgpu = new ChangeableDictionary<XenRef<VGPU>, VGPU>();
         private readonly ChangeableDictionary<XenRef<VGPU_type>, VGPU_type> _vgpu_types = new ChangeableDictionary<XenRef<VGPU_type>, VGPU_type>();
-        private readonly ChangeableDictionary<XenRef<VIF>, VIF> _vif = new ChangeableDictionary<XenRef<VIF>, VIF>();
+        private readonly ChangeableDictionary<XenRef<VGPU>, VGPU> _vgpu = new ChangeableDictionary<XenRef<VGPU>, VGPU>();
         private readonly ChangeableDictionary<XenRef<VIF_metrics>, VIF_metrics> _vif_metrics = new ChangeableDictionary<XenRef<VIF_metrics>, VIF_metrics>();
+        private readonly ChangeableDictionary<XenRef<VIF>, VIF> _vif = new ChangeableDictionary<XenRef<VIF>, VIF>();
         private readonly ChangeableDictionary<XenRef<VLAN>, VLAN> _vlan = new ChangeableDictionary<XenRef<VLAN>, VLAN>();
-        private readonly ChangeableDictionary<XenRef<VM>, VM> _vm = new ChangeableDictionary<XenRef<VM>, VM>();
-        private readonly ChangeableDictionary<XenRef<VM_metrics>, VM_metrics> _vm_metrics = new ChangeableDictionary<XenRef<VM_metrics>, VM_metrics>();
-        private readonly ChangeableDictionary<XenRef<VM_guest_metrics>, VM_guest_metrics> _vm_guest_metrics = new ChangeableDictionary<XenRef<VM_guest_metrics>, VM_guest_metrics>();
-        private readonly ChangeableDictionary<XenRef<VMSS>, VMSS> _vmss = new ChangeableDictionary<XenRef<VMSS>, VMSS>();
         private readonly ChangeableDictionary<XenRef<VM_appliance>, VM_appliance> _vm_appliance = new ChangeableDictionary<XenRef<VM_appliance>, VM_appliance>();
-        private readonly ChangeableDictionary<XenRef<Crashdump>, Crashdump> _crashdump = new ChangeableDictionary<XenRef<Crashdump>, Crashdump>();
+        private readonly ChangeableDictionary<XenRef<VM_guest_metrics>, VM_guest_metrics> _vm_guest_metrics = new ChangeableDictionary<XenRef<VM_guest_metrics>, VM_guest_metrics>();
+        private readonly ChangeableDictionary<XenRef<VM_metrics>, VM_metrics> _vm_metrics = new ChangeableDictionary<XenRef<VM_metrics>, VM_metrics>();
+        private readonly ChangeableDictionary<XenRef<VM>, VM> _vm = new ChangeableDictionary<XenRef<VM>, VM>();
+        private readonly ChangeableDictionary<XenRef<VMSS>, VMSS> _vmss = new ChangeableDictionary<XenRef<VMSS>, VMSS>();
+        private readonly ChangeableDictionary<XenRef<VTPM>, VTPM> _vtpms = new ChangeableDictionary<XenRef<VTPM>, VTPM>();
+        private readonly ChangeableDictionary<XenRef<VUSB>, VUSB> _vusb = new ChangeableDictionary<XenRef<VUSB>, VUSB>();
 
 #pragma warning restore 0414
 
+        private bool foldersChanged;
+        private bool dockerContainersChanged;
         private readonly Dictionary<Type, IDictionary> dictionaries = new Dictionary<Type, IDictionary>();
 
         public Cache()
@@ -117,206 +121,95 @@ namespace XenAdmin.Network
             }
         }
 
+        #region Properties
 
-        public Bond[] Bonds
-        {
-            get { return contents(_bond); }
-        }
+        public Bond[] Bonds => contents(_bond);
 
-        public VMSS[] VMSSs
-        {
-            get { return contents(_vmss); }
-        }
+        public Certificate[] Certificates => contents(_certificates);
 
-        public VM_appliance[] VM_appliances
-        {
-            get { return contents(_vm_appliance); }
-        }
+        public Cluster[] Clusters => contents(_cluster);
 
-        public Cluster[] Clusters
-        {
-            get { return contents(_cluster); }
-        }
+        public Cluster_host[] Cluster_hosts => contents(_cluster_host);
 
-        public Cluster_host[] Cluster_hosts
-        {
-            get { return contents(_cluster_host); }
-        }
+        public DockerContainer[] DockerContainers => contents(_dockerContainers);
 
-        public Feature[] Features
-        {
-            get { return contents(_feature); }
-        }
+        public Feature[] Features => contents(_feature);
 
-        public Folder[] Folders
-        {
-            get { return contents(_folders); }
-        }
+        public Folder[] Folders => contents(_folders);
 
-        public DockerContainer[] DockerContainers
-        {
-            get { return contents(_dockerContainers); }
-        }
+        public GPU_group[] GPU_groups => contents(_gpu_groups);
 
-        public GPU_group[] GPU_groups
-        {
-            get { return contents(_gpu_groups); }
-        }
-        
-        public Host[] Hosts
-        {
-            get { return contents(_host); }
-        }
+        public Host[] Hosts => contents(_host);
 
-        public int HostCount
-        {
-            get { return _host.Count; }
-        }
+        public Host_cpu[] Host_cpus => contents(_host_cpu);
 
-        public Host_cpu[] Host_cpus
-        {
-            get { return contents(_host_cpu); }
-        }
+        public int HostCount => _host.Count;
 
-        public XenAPI.Message[] Messages
-        {
-            get { return contents(_message); }
-        }
+        public Message[] Messages => contents(_message);
 
-        public XenAPI.Network[] Networks
-        {
-            get { return contents(_network); }
-        }
+        public XenAPI.Network[] Networks => contents(_network);
 
-        public XenAPI.Network_sriov[] Network_sriov
-        {
-            get { return contents(_network_sriov); }
-        }
+        public Network_sriov[] Network_sriov => contents(_network_sriov);
 
-        public PBD[] PBDs
-        {
-            get { return contents(_pbd); }
-        }
+        public PBD[] PBDs => contents(_pbd);
 
-        public PUSB[] PUSBs
-        {
-            get { return contents(_pusb); }
-        }
+        public PCI[] PCIs => contents(_pcis);
 
-        public VUSB[] VUSBs
-        {
-            get { return contents(_vusb); }
-        }
+        public PGPU[] PGPUs => contents(_pgpu);
 
-        public USB_group[] USB_groups
-        {
-            get { return contents(_usb_group); }
-        }
+        public PIF[] PIFs => contents(_pif);
 
-        public PCI[] PCIs
-        {
-            get { return contents(_pcis); }
-        }
+        public Pool[] Pools => contents(_pool);
 
-        public PGPU[] PGPUs
-        {
-            get { return contents(_pgpu); }
-        }
+        public Pool_patch[] Pool_patches => contents(_pool_patch);
 
-        public PIF[] PIFs
-        {
-            get { return contents(_pif); }
-        }
+        public Pool_update[] Pool_updates => contents(_pool_update);
 
-        public Pool[] Pools
-        {
-            get { return contents(_pool); }
-        }
+        public PUSB[] PUSBs => contents(_pusb);
 
-        public Pool_patch[] Pool_patches
-        {
-            get { return contents(_pool_patch); }
-        }
+        public PVS_cache_storage[] PVS_cache_storages => contents(_pvs_cache_storage);
 
-        public Pool_update[] Pool_updates
-        {
-            get { return contents(_pool_update); }
-        }
-        
-        public PVS_site[] PVS_sites
-        {
-            get { return contents(_pvs_site); }
-        }
-        
-        public PVS_server[] PVS_servers
-        {
-            get { return contents(_pvs_server); }
-        }
+        public PVS_proxy[] PVS_proxies => contents(_pvs_proxy);
 
-        public PVS_proxy[] PVS_proxies
-        {
-            get { return contents(_pvs_proxy); }
-        }
+        public PVS_server[] PVS_servers => contents(_pvs_server);
 
-        public PVS_cache_storage[] PVS_cache_storages
-        {
-            get { return contents(_pvs_cache_storage); }
-        }
+        public PVS_site[] PVS_sites => contents(_pvs_site);
 
-        public Role[] Roles
-        {
-            get { return contents(_role); }
-        }
+        public Repository[] Repositories => contents(_repositories);
 
-        public SM[] SMs
-        {
-            get { return contents(_sm); }
-        }
+        public Role[] Roles => contents(_role);
 
-        public SR[] SRs
-        {
-            get { return contents(_sr); }
-        }
+        public SM[] SMs => contents(_sm);
 
-        public Subject[] Subjects
-        {
-            get { return contents(_subject); }
-        }
+        public SR[] SRs => contents(_sr);
 
-        public Tunnel[] Tunnels
-        {
-            get { return contents(_tunnel); }
-        }
+        public Subject[] Subjects => contents(_subject);
 
-        public VBD[] VBDs
-        {
-            get { return contents(_vbd); }
-        }
+        public Tunnel[] Tunnels => contents(_tunnel);
 
-        public VDI[] VDIs
-        {
-            get { return contents(_vdi); }
-        }
+        public USB_group[] USB_groups => contents(_usb_group);
 
-        public VGPU[] VGPUs
-        {
-            get { return contents(_vgpu); }
-        }
+        public VBD[] VBDs => contents(_vbd);
 
-        public VGPU_type[] VGPU_types
-        {
-            get { return contents(_vgpu_types); } }
+        public VDI[] VDIs => contents(_vdi);
 
-        public VIF[] VIFs
-        {
-            get { return contents(_vif); }
-        }
+        public VGPU[] VGPUs => contents(_vgpu);
 
-        public VM[] VMs
-        {
-            get { return contents(_vm); }
-        }
+        public VGPU_type[] VGPU_types => contents(_vgpu_types);
 
+        public VIF[] VIFs => contents(_vif);
+
+        public VM[] VMs => contents(_vm);
+
+        public VM_appliance[] VM_appliances => contents(_vm_appliance);
+
+        public VMSS[] VMSSs => contents(_vmss);
+
+        public VTPM[] VTPMs => contents(_vtpms);
+
+        public VUSB[] VUSBs => contents(_vusb);
+
+        #endregion
 
         private static T[] contents<T>(ChangeableDictionary<XenRef<T>, T> d) where T : XenObject<T>
         {
@@ -398,6 +291,7 @@ namespace XenAdmin.Network
         }
 
         private static MethodInfo ClearMethod = typeof(Cache).GetMethod("Clear_", BindingFlags.NonPublic | BindingFlags.Instance);
+
         public void Clear()
         {
             foreach (IDictionary d in dictionaries.Values)
@@ -611,7 +505,6 @@ namespace XenAdmin.Network
             return d.GetType().GetGenericArguments()[1];
         }
 
-        private bool foldersChanged = false;
         public void AddFolder(XenRef<Folder> path, Folder folder)
         {
             _folders[path] = folder;
@@ -645,7 +538,6 @@ namespace XenAdmin.Network
             }
         }
 
-        private bool dockerContainersChanged = false;
         public void UpdateDockerContainersForVM(IList<DockerContainer> containers, VM vm)
         {
             Trace.Assert(vm != null);

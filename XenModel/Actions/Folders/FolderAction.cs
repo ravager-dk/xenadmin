@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -80,8 +79,8 @@ namespace XenAdmin.Actions
         {
             if (connection != null)
             {
-                ApiMethodsToRoleCheck.Add("pool.remove_from_other_config", Folders.EMPTY_FOLDERS);
-                ApiMethodsToRoleCheck.Add("pool.add_to_other_config", Folders.EMPTY_FOLDERS);
+                ApiMethodsToRoleCheck.AddWithKey("pool.remove_from_other_config", Folders.EMPTY_FOLDERS);
+                ApiMethodsToRoleCheck.AddWithKey("pool.add_to_other_config", Folders.EMPTY_FOLDERS);
             }
         }
         
@@ -329,7 +328,7 @@ namespace XenAdmin.Actions
             string folder_str = string.Join(Folders.EMPTY_FOLDERS_SEPARATOR, folders.ToArray());
             Pool pool = Helpers.GetPoolOfOne(connection);
             if (pool == null)
-                throw new Failure(Failure.INTERNAL_ERROR, Messages.POOL_GONE);
+                throw new Failure(Failure.INTERNAL_ERROR, string.Format(Messages.POOL_GONE, BrandManager.BrandConsole));
             Helpers.SetOtherConfig(GetSession(pool.Connection), pool, Folders.EMPTY_FOLDERS, folder_str);
             WaitForEmptyFoldersCacheChange(pool, folder_str, cancelling);
         }
@@ -432,9 +431,9 @@ namespace XenAdmin.Actions
             this.folder = folder;
             if (obj.GetType() != typeof(Folder))
             {
-                ApiMethodsToRoleCheck.Add(obj.GetType().Name.ToLowerInvariant() + ".remove_from_other_config",
+                ApiMethodsToRoleCheck.AddWithKey(obj.GetType().Name.ToLowerInvariant() + ".remove_from_other_config",
                     Folders.FOLDER);
-                ApiMethodsToRoleCheck.Add(obj.GetType().Name.ToLowerInvariant() + ".add_to_other_config",
+                ApiMethodsToRoleCheck.AddWithKey(obj.GetType().Name.ToLowerInvariant() + ".add_to_other_config",
                     Folders.FOLDER);
             }
 
@@ -474,9 +473,9 @@ namespace XenAdmin.Actions
             objs.Add(obj);
             if (obj.GetType() != typeof(Folder))
             {
-                ApiMethodsToRoleCheck.Add(obj.GetType().Name.ToLowerInvariant() + ".remove_from_other_config",
+                ApiMethodsToRoleCheck.AddWithKey(obj.GetType().Name.ToLowerInvariant() + ".remove_from_other_config",
                     Folders.FOLDER);
-                ApiMethodsToRoleCheck.Add(obj.GetType().Name.ToLowerInvariant() + ".add_to_other_config",
+                ApiMethodsToRoleCheck.AddWithKey(obj.GetType().Name.ToLowerInvariant() + ".add_to_other_config",
                     Folders.FOLDER);
             }
 

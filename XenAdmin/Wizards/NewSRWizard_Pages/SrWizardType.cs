@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using XenAdmin.Actions;
+using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
 
@@ -156,7 +157,10 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         public abstract bool ShowIntroducePrompt { get; }
         public abstract bool ShowReattachWarning { get; }
         public abstract bool AllowToCreateNewSr { get; set; }
-        public virtual bool IsGfs2 { get { return false; } set { } }
+        public virtual bool IsGfs2 {
+            get => false;
+            set => throw new NotSupportedException($"Invalid set call for '{MethodBase.GetCurrentMethod()?.Name}', value: '{value}'");
+        }
 
         public string SrName
         {
@@ -235,7 +239,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
 
         public virtual void ResetSrName(IXenConnection connection)
         {
-            SrName = SrWizardHelpers.DefaultSRName(String.Format(Messages.SRWIZARD_STORAGE_NAME, SR.getFriendlyTypeName(Type)), connection);
+            SrName = SrWizardHelpers.DefaultSRName(String.Format(Messages.SRWIZARD_STORAGE_NAME, SR.GetFriendlyTypeName(Type)), connection);
         }
 
         public virtual IEnumerable<SR.SRTypes> PossibleTypes { get { return new SR.SRTypes[] { Type }; } }
@@ -255,7 +259,11 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         public override string ContentType { get { return SR.Content_Type_ISO; } }
         public override bool ShowIntroducePrompt { get { return false; } }
         public override bool ShowReattachWarning { get { return false; } }
-        public override bool AllowToCreateNewSr { get { return true; } set { } }
+        public override bool AllowToCreateNewSr
+        {
+            get => true;
+            set => throw new NotSupportedException($"Invalid set call for '{MethodBase.GetCurrentMethod()?.Name}', value: '{value}'");
+        }
 
         public override void ResetSrName(IXenConnection connection)
         {
@@ -285,13 +293,13 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
 
     public class SrWizardType_Hba : SrWizardType
     {
-        public override bool IsEnhancedSR { get { return false; } }
-        public override string FrontendBlurb { get { return Messages.NEWSR_LVMOHBA_BLURB; } }
-        public override string FrontendTypeName { get { return Messages.NEWSR_LVMOHBA_TYPE_NAME; } }
-        public override SR.SRTypes Type { get { return IsGfs2 ? SR.SRTypes.gfs2 : SR.SRTypes.lvmohba; } }
-        public override string ContentType { get { return ""; } }
-        public override bool ShowIntroducePrompt { get { return false; } }
-        public override bool ShowReattachWarning { get { return true; } }
+        public override bool IsEnhancedSR => false;
+        public override string FrontendBlurb => string.Format(Messages.NEWSR_LVMOHBA_BLURB, BrandManager.ProductBrand);
+        public override string FrontendTypeName => Messages.NEWSR_LVMOHBA_TYPE_NAME;
+        public override SR.SRTypes Type => IsGfs2 ? SR.SRTypes.gfs2 : SR.SRTypes.lvmohba;
+        public override string ContentType => "";
+        public override bool ShowIntroducePrompt => false;
+        public override bool ShowReattachWarning => true;
         public override bool AllowToCreateNewSr { get; set; }
         public override bool IsGfs2 { get; set; }
 
@@ -339,7 +347,11 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         public override string ContentType { get { return SR.Content_Type_ISO; } }
         public override bool ShowIntroducePrompt { get { return false; } }
         public override bool ShowReattachWarning { get { return false; } }
-        public override bool AllowToCreateNewSr { get { return true; } set { } }
+        public override bool AllowToCreateNewSr
+        {
+            get => true;
+            set => throw new NotSupportedException($"Invalid set call for '{MethodBase.GetCurrentMethod()?.Name}', value: '{value}'");
+        }
 
         public override void ResetSrName(IXenConnection connection)
         {
@@ -361,7 +373,10 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         public override string ContentType { get { return ""; } }
         public override bool ShowIntroducePrompt { get { return false; } }
         public override bool ShowReattachWarning { get { return false; } }
-        public override bool AllowToCreateNewSr { get { return true; } set { } }
+        public override bool AllowToCreateNewSr { 
+            get => true;
+            set => throw new NotSupportedException($"Invalid set call for '{MethodBase.GetCurrentMethod()?.Name}', value: '{value}'");
+        }
 
         public override void ResetSrName(IXenConnection connection)
         {
@@ -369,83 +384,15 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         }
     }
 
-    public class SrWizardType_Cslg : SrWizardType
-    {
-        public override bool IsEnhancedSR { get { return true; } }
-        public override string FrontendBlurb { get { return Messages.NEWSR_CSLG_BLURB; } }
-        public override string FrontendTypeName { get { return Messages.NEWSR_CSLG_TYPE_NAME; } }
-        public override SR.SRTypes Type { get { return SR.SRTypes.cslg; } }
-        public override string ContentType { get { return ""; } }
-        public override bool ShowIntroducePrompt { get { return true; } }
-        public override bool ShowReattachWarning { get { return true; } }
-        public override bool AllowToCreateNewSr { get { return true; } set { } }
-
-        public SrWizardType_NetApp ToNetApp()
-        {
-            var netApp = new SrWizardType_NetApp
-                             {
-                                 SrName = SrName,
-                                 UUID = UUID,
-                                 DeviceConfig = DeviceConfig,
-                                 Description = Description,
-                                 DisasterRecoveryTask = DisasterRecoveryTask,
-                                 AutoDescriptionRequired = AutoDescriptionRequired,
-                                 SrToReattach = SrToReattach,
-                                 AllowToCreateNewSr = AllowToCreateNewSr
-                             };
-            return netApp;
-        }
-
-        public SrWizardType_EqualLogic ToEqualLogic()
-        {
-            var equal = new SrWizardType_EqualLogic
-                            {
-                                SrName = SrName,
-                                UUID = UUID,
-                                DeviceConfig = DeviceConfig,
-                                Description = Description,
-                                DisasterRecoveryTask = DisasterRecoveryTask,
-                                AutoDescriptionRequired = AutoDescriptionRequired,
-                                SrToReattach = SrToReattach,
-                                AllowToCreateNewSr = AllowToCreateNewSr
-                            };
-            return equal;
-        }
-    }
-
-    public class SrWizardType_NetApp : SrWizardType
-    {
-        public override bool IsEnhancedSR { get { return true; } }
-        public override string FrontendBlurb { get { return Messages.NEWSR_NETAPP_BLURB; } }
-        public override string FrontendTypeName { get { return SR.getFriendlyTypeName(Type); } }
-        public override SR.SRTypes Type { get { return SR.SRTypes.netapp; } }
-        public override string ContentType { get { return ""; } }
-        public override bool ShowIntroducePrompt { get { return true; } }
-        public override bool ShowReattachWarning { get { return true; } }
-        public override bool AllowToCreateNewSr { get; set; }
-    }
-
-    public class SrWizardType_EqualLogic : SrWizardType
-    {
-        public override bool IsEnhancedSR { get { return true; } }
-        public override string FrontendBlurb { get { return Messages.NEWSR_EQUAL_LOGIC_BLURB; } }
-        public override string FrontendTypeName { get { return SR.getFriendlyTypeName(Type); } }
-        public override SR.SRTypes Type { get { return SR.SRTypes.equal; } }
-        public override string ContentType { get { return ""; } }
-        public override bool ShowIntroducePrompt { get { return true; } }
-        public override bool ShowReattachWarning { get { return true; } }
-        public override bool AllowToCreateNewSr { get; set; }
-    }
-
     public class SrWizardType_Fcoe : SrWizardType
     {
-        public override bool IsEnhancedSR { get { return false; } }
-        public override string FrontendBlurb { get { return Messages.NEWSR_LVMOFCOE_BLURB; } }
-        public override string FrontendTypeName { get { return Messages.NEWSR_LVMOFCOE_TYPE_NAME; } }
-        public override SR.SRTypes Type { get { return IsGfs2 ? SR.SRTypes.gfs2 : SR.SRTypes.lvmofcoe; } }
-        public override string ContentType { get { return ""; } }
-        public override bool ShowIntroducePrompt { get { return false; } }
-        public override bool ShowReattachWarning { get { return true; } }
+        public override bool IsEnhancedSR => false;
+        public override string FrontendBlurb => string.Format(Messages.NEWSR_LVMOFCOE_BLURB, BrandManager.ProductBrand);
+        public override string FrontendTypeName => Messages.NEWSR_LVMOFCOE_TYPE_NAME;
+        public override SR.SRTypes Type => IsGfs2 ? SR.SRTypes.gfs2 : SR.SRTypes.lvmofcoe;
+        public override string ContentType => "";
+        public override bool ShowIntroducePrompt => false;
+        public override bool ShowReattachWarning => true;
         public override bool AllowToCreateNewSr { get; set; }
         public override bool IsGfs2 { get; set; }
 

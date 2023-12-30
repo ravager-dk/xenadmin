@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -62,21 +58,21 @@ namespace XenAdmin.Commands
 
         }
 
-        private void Execute(VM snapshot)
+        private void Run(VM snapshot)
         {
             if (snapshot != null)
             {
-                new ExportVMCommand(MainWindowCommandInterface, new SelectedItem(snapshot, snapshot.Connection, null, null)).Execute();
+                new ExportVMCommand(MainWindowCommandInterface, new SelectedItem(snapshot, snapshot.Connection, null, null)).Run();
             }
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             VM vm = (VM)selection[0].XenObject;
-            Execute(vm);
+            Run(vm);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {

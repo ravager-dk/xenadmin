@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -45,8 +44,7 @@ namespace XenAdmin.Actions
             VM = vm;
             this.vifDescriptor = vifDescriptor;
 
-            ApiMethodsToRoleCheck.AddRange(DeleteVIFAction.XmlRpcMethods);
-            ApiMethodsToRoleCheck.AddRange(CreateVIFAction.XmlRpcMethods);
+            ApiMethodsToRoleCheck.AddRange("VIF.unplug", "VIF.destroy", "VIF.async_create", "VIF.plug");
         }
 
         public bool RebootRequired { get; private set; }
@@ -55,10 +53,10 @@ namespace XenAdmin.Actions
         {
             Description = Messages.ACTION_VIF_UPDATING;
 
-            new DeleteVIFAction(vif, true).RunExternal(Session);
+            new DeleteVIFAction(vif, true).RunSync(Session);
 
             var createAction = new CreateVIFAction(VM, vifDescriptor, true);
-            createAction.RunExternal(Session);
+            createAction.RunSync(Session);
             RebootRequired = createAction.RebootRequired;
 
             Description = Messages.ACTION_VIF_UPDATED;

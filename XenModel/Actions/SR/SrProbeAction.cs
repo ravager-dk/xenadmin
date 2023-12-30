@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using XenAdmin.Network;
 using XenAPI;
@@ -38,21 +36,20 @@ using XenAdmin.Core;
 
 namespace XenAdmin.Actions
 {
-    public class SrProbeAction : PureAsyncAction
+    public class SrProbeAction : AsyncAction
     {
         private readonly Host host;
-        public readonly SR.SRTypes SrType;
-        private readonly Dictionary<String, String> dconf;
+        private readonly Dictionary<string, string> dconf;
+        private readonly Dictionary<string, string> smconf;
 
-        public List<Probe_result> ProbeExtResult;
-
-        private readonly Dictionary<String, String> smconf;
+        public SR.SRTypes SrType { get; }
+        public List<SR.SRInfo> SRs { get; private set; }
 
         /// <summary>
         /// Won't appear in the program history (SuppressHistory == true).
         /// </summary>
         public SrProbeAction(IXenConnection connection, Host host, SR.SRTypes srType,
-            Dictionary<String, String> dconf, Dictionary<String, String> smconf)
+            Dictionary<string, string> dconf, Dictionary<string, string> smconf = null)
             : base(connection, string.Format(Messages.ACTION_SCANNING_SR_FROM, Helpers.GetName(connection)), null, true)
         {
             this.host = host;
@@ -80,29 +77,59 @@ namespace XenAdmin.Actions
                     break;
             }
 
-            Description = string.Format(Messages.ACTION_SR_SCANNING, SR.getFriendlyTypeName(srType), target);
+            Description = string.Format(Messages.ACTION_SR_SCANNING, SR.GetFriendlyTypeName(srType), target);
 
-            this.smconf = smconf;
-        }
+            this.smconf = smconf ?? new Dictionary<string, string>();
 
-        public SrProbeAction(IXenConnection connection, Host host, SR.SRTypes srType, Dictionary<String, String> dconf)
-            : this(connection, host, srType, dconf, new Dictionary<string, string>())
-        {
+            #region RBAC Dependencies
+
+            if (SrType == SR.SRTypes.gfs2)
+            {
+                ApiMethodsToRoleCheck.Add("sr.probe_ext");
+            }
+            else
+            {
+                ApiMethodsToRoleCheck.Add("sr.probe");
+                ApiMethodsToRoleCheck.AddRange(Role.CommonTaskApiList);
+            }
+
+            #endregion
         }
 
         protected override void Run()
         {
             if (SrType != SR.SRTypes.gfs2)
             {
-                RelatedTask = SR.async_probe(this.Session, host.opaque_ref,
+                RelatedTask = SR.async_probe(Session, host.opaque_ref,
                     dconf, SrType.ToString().ToLowerInvariant(), smconf);
                 PollToCompletion();
+                SRs = SR.ParseSRListXML(Result);
             }
             else
             {
-                ProbeExtResult = SR.probe_ext(this.Session, host.opaque_ref,
-                    dconf, SrType.ToString().ToLowerInvariant(), smconf);
+                try
+                {
+                    var result = SR.probe_ext(this.Session, host.opaque_ref,
+                        dconf, SrType.ToString().ToLowerInvariant(), smconf);
+                    SRs = SR.ParseSRList(result);
+                }
+                catch (Failure f)
+                {
+                    if (f.ErrorDescription.Count > 1 && f.ErrorDescription[0].StartsWith("SR_BACKEND_FAILURE") &&
+                        f.ErrorDescription[1] == "DeviceNotFoundException")
+                    {
+                        //Ignore: special treatment of case where gfs2 cannot see the same devices as lvmohba (CA-335356)
+                    }
+                    else if (f.ErrorDescription.Count > 1 && f.ErrorDescription[0] == "ISCSILogin" &&
+                             dconf.ContainsKey("chapuser") && dconf.ContainsKey("chappassword"))
+                    {
+                        //Ignore: special treatment of gfs2 chap authentication failure (CA-337280)
+                    }
+                    else
+                        throw;
+                }
             }
+
             Description = Messages.ACTION_SR_SCAN_SUCCESSFUL;
         }
     }

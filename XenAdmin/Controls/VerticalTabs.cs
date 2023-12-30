@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -48,24 +45,13 @@ namespace XenAdmin.Controls
             string SubText { get; }
             Image Image { get; }
         }
-
         public VerticalTabs()
         {
-            base.ItemHeight = 40;
-            IntegralHeight = false; 
-            DrawMode = DrawMode.OwnerDrawFixed;
+            IntegralHeight = false;
         }
 
-        public override int ItemHeight
-        {
-            get
-            {
-                return base.ItemHeight;
-            }
-            set
-            {
-            }
-        }
+        public override int ItemHeight => 40;
+        public override DrawMode DrawMode => DrawMode.OwnerDrawFixed;
 
         public Func<Rectangle, Rectangle> AdjustItemTextBounds;
 

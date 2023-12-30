@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,6 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using XenOvf.Definitions;
 using XenOvf.Utilities;
@@ -40,6 +40,9 @@ namespace XenOvf
 {
     public partial class OVF
     {
+        //TODO: does it need to be configurabe by XenAdmin?
+        private const int DEFAULT_VALIDATION_FLAGS = 63;
+
         /// <summary>
         /// Binary flags describing things to validate
         /// </summary>
@@ -78,6 +81,39 @@ namespace XenOvf
             /// Validate the OVF XML against the Schema
             /// </summary>
             Schema = 64
+        }
+
+        private static readonly string[] KnownFileExtensions =
+        {
+            ".vhd", ".pvp", ".vmdk", ".mf", ".cert", ".xva", ".ovf", ".wim", ".vdi", ".sdi", ".iso", ".gz"
+        };
+
+        private static readonly string[] KnownVirtualSystemTypes =
+        {
+            "xen-3.0-unknown",
+            "xen-3.0-x32",
+            "xen-3.0-x86",
+            "xen-3.0-x64",
+            "hvm-3.0-unknown",
+            "hvm-3.0-x32",
+            "hvm-3.0-x86",
+            "hvm-3.0-x64",
+            "hvm-3.0-hvm",
+            "301",
+            "vmx-4",
+            "vmx-04",
+            "vmx-6",
+            "vmx-06",
+            "vmx-7",
+            "vmx-07",
+            "DMTF:xen:pv",
+            "DMTF:xen:hvm",
+            "virtualbox-2.2"
+        };
+
+        private static readonly string[] KnownVersions =
+        {
+            "0.9", "1.0", "1.0.0", "1.0.0a", "1.0.0.b", "1.0.0c", "1.0.0d", "1.0.1", "1.0.0e"
         };
 
 
@@ -94,12 +130,34 @@ namespace XenOvf
 
             log.InfoFormat("Started validation of package {0}", package.Name);
 
-            var validationFlags = (ValidationFlags)Properties.Settings.Default.RequiredValidations;
+            var validationFlags = (ValidationFlags)DEFAULT_VALIDATION_FLAGS;
 
             if (validationFlags.HasFlag(ValidationFlags.Version))
                 ValidateVersion(ovfEnv, ref warnings);
             if (validationFlags.HasFlag(ValidationFlags.Schema))
                 ValidateSchema(package.DescriptorXml, ref warnings);
+
+            var files = package.OvfEnvelope?.References?.File ?? new File_Type[0];
+
+            if (validationFlags.HasFlag(ValidationFlags.Files))
+            {
+                foreach (File_Type file in files)
+                {
+                    string ext = Path.GetExtension(file.href).ToLower();
+                    if (ext == Package.MANIFEST_EXT || ext == Package.CERTIFICATE_EXT)
+                        continue;
+
+                    if (!package.HasFile(file.href))
+                    {
+                        warnings.Add(string.Format(Messages.VALIDATION_FILE_NOT_FOUND, file.href));
+                        log.Error($"Failed to find file {file.href} listed in the reference section.");
+                        return false;
+                    }
+                    
+                    if (!KnownFileExtensions.Contains(ext))
+                        warnings.Add(string.Format(Messages.VALIDATION_FILE_UNSUPPORTED_EXTENSION, file.href));
+                }
+            }
 
             VirtualDiskDesc_Type[] disks = null;
             NetworkSection_TypeNetwork[] networks = null;
@@ -127,6 +185,8 @@ namespace XenOvf
                     break;
             }
 
+            var linkedFiles = new List<File_Type>();
+
             foreach (var system in systems)
             {
                 foreach (var section in system.Items)
@@ -135,7 +195,7 @@ namespace XenOvf
                         continue;
 
                     var hardwareType = vhs.System?.VirtualSystemType?.Value;
-                    if (hardwareType != null && !Properties.Settings.Default.knownVirtualSystemTypes.Contains(hardwareType))
+                    if (hardwareType != null && !KnownVirtualSystemTypes.Contains(hardwareType))
                     {
                         log.Warn($"Found unexpected virtual hardware type {hardwareType}.");
                         warnings.Add(string.Format(Messages.VALIDATION_UNKNOWN_HARDWARE_TYPE, hardwareType));
@@ -143,11 +203,13 @@ namespace XenOvf
 
                     RASD_Type[] rasds = vhs.Item;
 
-                    if (validationFlags.HasFlag(ValidationFlags.Files) && !ValidateDisks(package, disks, rasds, ref warnings))
-                        return false;
-
                     foreach (RASD_Type rasd in rasds)
                     {
+                        if ((rasd.ResourceType.Value == 17 || rasd.ResourceType.Value == 19 ||
+                             rasd.ResourceType.Value == 20 || rasd.ResourceType.Value == 21) &&
+                            validationFlags.HasFlag(ValidationFlags.Files))
+                            ValidateDisks(rasd, files, disks, ref linkedFiles, ref warnings);
+
                         if (rasd.ResourceType.Value == 3 && validationFlags.HasFlag(ValidationFlags.Cpu))
                             ValidateCpu(rasd, ref warnings);
 
@@ -160,6 +222,15 @@ namespace XenOvf
                         if (validationFlags.HasFlag(ValidationFlags.Capability))
                             ValidateCapability(rasd, ref warnings);
                     }
+                }
+            }
+
+            foreach (File_Type file in files)
+            {
+                if (!linkedFiles.Contains(file))
+                {
+                    log.WarnFormat("Disk linkage (file to RASD) does not exist for {0}", file.href);
+                    warnings.Add(string.Format(Messages.VALIDATION_FILE_INVALID_LINKAGE, file.href));
                 }
             }
 
@@ -190,77 +261,30 @@ namespace XenOvf
                 warnings.Add(string.Format(Messages.VALIDATION_VERSION_UNSET, ovfEnv.version));
                 ovfEnv.version = "1.0.0";
             }
-            else if (!Properties.Settings.Default.Versions.Contains(ovfEnv.version))
+            else if (!KnownVersions.Contains(ovfEnv.version))
             {
                 warnings.Add(string.Format(Messages.VALIDATION_VERSION_INVALID, ovfEnv.version));
                 log.WarnFormat($"OVF version {ovfEnv.version} is not supported.");
             }
         }
 
-        private static bool ValidateDisks(Package package, VirtualDiskDesc_Type[] disks, RASD_Type[] rasds, ref List<string> warnings)
+        private static void ValidateDisks(RASD_Type rasd, File_Type[] files, VirtualDiskDesc_Type[] disks,
+            ref List<File_Type> linkedFiles, ref List<string> warnings)
         {
             log.Info("Validating disks");
 
-            bool isValid = true;
-            File_Type[] files = package.OvfEnvelope?.References?.File ?? new File_Type[0];
+            VirtualDiskDesc_Type disk;
+            if (rasd.HostResource != null && rasd.HostResource.Length > 0)
+                disk = disks.FirstOrDefault(d => rasd.HostResource[0].Value.Contains(d.diskId));
+            else
+                disk = disks.FirstOrDefault(d => rasd.InstanceID.Value == d.diskId);
 
-            foreach (File_Type file in files)
-            {
-				string ext = Path.GetExtension(file.href).ToLower();
-				if (ext == Properties.Settings.Default.manifestFileExtension || ext == Properties.Settings.Default.certificateFileExtension)
-					continue;
+            File_Type file = null;
+            if (disk != null)
+                file = files.FirstOrDefault(f => f.id == disk.fileRef);
 
-                if (package.HasFile(file.href))
-                {
-                    if (!Properties.Settings.Default.knownFileExtensions.ToLower().Contains(ext))
-                    {
-                        warnings.Add(string.Format(Messages.VALIDATION_FILE_UNSUPPORTED_EXTENSION, file.href));
-                        continue;
-                    }
-
-                    bool validlink = false;
-                    foreach (VirtualDiskDesc_Type disk in disks)
-                    {
-                        if (file.id == disk.fileRef)
-                        {
-                            foreach (RASD_Type rasd in rasds)
-                            {
-                                if (rasd.ResourceType.Value == 17 || rasd.ResourceType.Value == 19 ||
-                                    rasd.ResourceType.Value == 20 || rasd.ResourceType.Value == 21)
-                                {
-                                    if (rasd.HostResource != null && rasd.HostResource.Length > 0)
-                                    {
-                                        if (rasd.HostResource[0].Value.Contains(disk.diskId))
-                                        {
-                                            validlink = true;
-                                            break;
-                                        }
-                                    }
-                                    else if (disk.diskId == rasd.InstanceID.Value)
-                                    {
-                                        validlink = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (!validlink)
-                    {
-                        log.WarnFormat("Disk linkage (file to RASD) does not exist for {0}", file.href);
-                        warnings.Add(string.Format(Messages.VALIDATION_FILE_INVALID_LINKAGE, file.href));
-                    }
-                }
-                else
-                {
-                    warnings.Add(string.Format(Messages.VALIDATION_FILE_NOT_FOUND, file.href));
-                    log.Error($"Failed to find file {file.href} listed in the reference section.");
-                    isValid = false;
-                }
-            }
-
-            return isValid;
+            if (file != null && !linkedFiles.Contains(file))
+                linkedFiles.Add(file);
         }
 
         private static void ValidateCpu(RASD_Type rasd, ref List<string> warnings)

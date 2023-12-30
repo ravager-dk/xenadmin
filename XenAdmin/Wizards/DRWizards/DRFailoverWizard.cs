@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -61,11 +60,8 @@ namespace XenAdmin.Wizards.DRWizards
         private DRWizardType WizardType;
         private SummaryReport SummaryReport = new SummaryReport();
 
-        public DRFailoverWizard(Pool pool)
-            : this(pool, DRWizardType.Unknown)
-        { }
-         
-        public DRFailoverWizard(Pool pool, DRWizardType wizardType)
+
+        public DRFailoverWizard(Pool pool, DRWizardType wizardType = DRWizardType.Unknown)
             : base(pool.Connection)
         {
             InitializeComponent();
@@ -83,17 +79,14 @@ namespace XenAdmin.Wizards.DRWizards
             WizardType = wizardType; 
 
             #region RBAC Warning Page Checks
-            if (Pool.Connection.Session.IsLocalSuperuser || Helpers.GetMaster(Pool.Connection).external_auth_type == Auth.AUTH_TYPE_NONE)
+
+            if (Helpers.ConnectionRequiresRbac(Pool.Connection))
             {
-            }
-            else
-            {
-                RBACWarningPage.WizardPermissionCheck check = new RBACWarningPage.WizardPermissionCheck(Messages.RBAC_DR_WIZARD_MESSAGE);
-                check.AddApiCheck("DR_task.async_create");
-                check.Blocking = true;
-                RBACWarningPage.AddPermissionChecks(xenConnection, check);
+                RBACWarningPage.SetPermissionChecks(Pool.Connection,
+                    new WizardRbacCheck(Messages.RBAC_DR_WIZARD_MESSAGE, "DR_task.async_create") {Blocking = true});
                 AddPage(RBACWarningPage, 0);
             }
+
             #endregion
 
             DRFailoverWizardReportPage1.SummaryRetreiver = GetSummaryReport;
@@ -170,10 +163,10 @@ namespace XenAdmin.Wizards.DRWizards
             IntroducedSrs.AddRange(drTask.introduced_SRs);
         }
 
-        private bool cleanupExecuted = false;
+        private bool cleanupRan = false;
         private void DoFinalCleanup()
         {
-            if (cleanupExecuted)
+            if (cleanupRan)
                 return;
 
             SummaryReport.AddLine("");
@@ -196,7 +189,7 @@ namespace XenAdmin.Wizards.DRWizards
                 foreach (var subAction in DRFailoverWizardPrecheckPage1.RevertActions)
                     SummaryReport.AddActionResult(subAction);
             }
-            cleanupExecuted = true;
+            cleanupRan = true;
         }
 
         private void DestroyDrTasks()
@@ -265,7 +258,7 @@ namespace XenAdmin.Wizards.DRWizards
             List<AsyncAction> actions = new List<AsyncAction>();
             foreach (SR sr in srs)
             {
-                actions.Add(new SrAction(SrActionKind.Forget, sr));
+                actions.Add(new ForgetSrAction(sr));
             }
 
             if (actions.Count == 0)
@@ -370,18 +363,18 @@ namespace XenAdmin.Wizards.DRWizards
             {
                 case DRWizardType.Failover:
                     Text = string.Format(Messages.DR_WIZARD_FAILOVER_TITLE, xenConnection.Name);
-                    pictureBoxWizard.Image = Properties.Resources._000_Failover_h32bit_32;
+                    pictureBoxWizard.Image = Images.StaticImages._000_Failover_h32bit_32;
                     break;
                 case DRWizardType.Failback:
                     Text = string.Format(Messages.DR_WIZARD_FAILBACK_TITLE, xenConnection.Name);
-                    pictureBoxWizard.Image = Properties.Resources._000_Failback_h32bit_32;
+                    pictureBoxWizard.Image = Images.StaticImages._000_Failback_h32bit_32;
                     break;
                 case DRWizardType.Dryrun:
                     Text = string.Format(Messages.DR_WIZARD_DRYRUN_TITLE, xenConnection.Name);
-                    pictureBoxWizard.Image = Properties.Resources._000_TestFailover_h32bit_32;
+                    pictureBoxWizard.Image = Images.StaticImages._000_TestFailover_h32bit_32;
                     break;
                 default:
-                    pictureBoxWizard.Image = Properties.Resources._000_DisasterRecovery_h32bit_32;
+                    pictureBoxWizard.Image = Images.StaticImages._000_DisasterRecovery_h32bit_32;
                     break;
             }
 

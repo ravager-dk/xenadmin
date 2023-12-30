@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using XenAdmin.Core;
 using XenAPI;
 
 
@@ -43,52 +40,48 @@ namespace XenAdmin.Actions.VMActions
         private string _namedescription;
 
         public VMCopyAction(VM vm, Host host, SR sr, string nameLabel, string description)
-            : base(vm.Connection, string.Format(Messages.ACTION_VM_COPYING_TITLE, vm.Name(), nameLabel, sr.NameWithoutHost()))
+            : base(vm.Connection, string.Format(Messages.ACTION_VM_COPYING_TITLE, vm.NameWithLocation(), nameLabel, sr.NameWithLocation()))
         {
-            this.Description = Messages.ACTION_PREPARING;
-            this.VM = vm;
-            this.Host = host;
-            this.Pool = Core.Helpers.GetPool(vm.Connection);
-            this.SR = sr;
+            VM = vm;
+            Host = host;
+            Pool = Core.Helpers.GetPool(vm.Connection);
+            SR = sr;
             _nameLabel = nameLabel;
             if (vm.is_a_template)
-                this.Template = vm;
+                Template = vm;
             _namedescription = description;
-            SetRBACPermissions();
 
+            ApiMethodsToRoleCheck.AddRange(StaticRBACDependencies);
         }
 
-        private void SetRBACPermissions()
+        public static RbacMethodList StaticRBACDependencies
         {
-            ApiMethodsToRoleCheck.AddRange(Role.CommonSessionApiList);
-            ApiMethodsToRoleCheck.AddRange(Role.CommonTaskApiList);
-
-            ApiMethodsToRoleCheck.Add("vm.copy");
-            ApiMethodsToRoleCheck.Add("vm.set_name_description");
-
+            get
+            {
+                var list = new RbacMethodList("VM.copy", "VM.set_name_description");
+                list.AddRange(Role.CommonSessionApiList);
+                list.AddRange(Role.CommonTaskApiList);
+                return list;
+            }
         }
 
         protected override void Run()
         {
-
-            this.Description = Messages.ACTION_VM_COPYING;
-            RelatedTask = XenAPI.VM.async_copy(Session, VM.opaque_ref, _nameLabel, this.SR.opaque_ref);
+            RelatedTask = VM.async_copy(Session, VM.opaque_ref, _nameLabel, SR.opaque_ref);
             try
             {
                 PollToCompletion();
             }
             catch (CancelledException)
             {
-                this.Description = string.Format(Messages.COPY_TO_SHARED_CANCELLED, VM.Name());
+                Description = string.Format(Messages.COPY_TO_SHARED_CANCELLED, VM.NameWithLocation());
                 throw;
             }
             {
                 VM created = Connection.WaitForCache(new XenRef<VM>(Result));
-                XenAPI.VM.set_name_description(Session, created.opaque_ref, _namedescription);
+                VM.set_name_description(Session, created.opaque_ref, _namedescription);
             }
-            this.Description = Messages.ACTION_VM_COPIED;
-
-
+            Description = Messages.ACTION_VM_COPIED;
         }
     }
 }

@@ -30,63 +30,63 @@ namespace XenAdmin.Dialogs.OptionsPages
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UpdatesOptionsPage));
             this.UpdatesTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.XenCenterGroupBox = new XenAdmin.Controls.DecentGroupBox();
-            this.AllowXenCenterUpdatesCheckBox = new System.Windows.Forms.CheckBox();
-            this.XenServerGroupBox = new XenAdmin.Controls.DecentGroupBox();
-            this.AllowXenServerUpdatesCheckBox = new System.Windows.Forms.CheckBox();
-            this.AllowXenServerPatchesCheckBox = new System.Windows.Forms.CheckBox();
-            this.UpdatesBlurb = new System.Windows.Forms.Label();
+            this._checkBoxClientUpdates = new System.Windows.Forms.CheckBox();
+            this.labelClientUpdates = new System.Windows.Forms.Label();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.labelInfoCdn = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.linkLabelConfigUpdates = new System.Windows.Forms.LinkLabel();
             this.UpdatesTableLayoutPanel.SuspendLayout();
-            this.XenCenterGroupBox.SuspendLayout();
-            this.XenServerGroupBox.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // UpdatesTableLayoutPanel
             // 
             resources.ApplyResources(this.UpdatesTableLayoutPanel, "UpdatesTableLayoutPanel");
             this.UpdatesTableLayoutPanel.BackColor = System.Drawing.Color.Transparent;
-            this.UpdatesTableLayoutPanel.Controls.Add(this.XenCenterGroupBox, 0, 2);
-            this.UpdatesTableLayoutPanel.Controls.Add(this.XenServerGroupBox, 0, 1);
-            this.UpdatesTableLayoutPanel.Controls.Add(this.UpdatesBlurb, 0, 0);
+            this.UpdatesTableLayoutPanel.Controls.Add(this._checkBoxClientUpdates, 0, 1);
+            this.UpdatesTableLayoutPanel.Controls.Add(this.labelClientUpdates, 0, 0);
+            this.UpdatesTableLayoutPanel.Controls.Add(this.tableLayoutPanel3, 0, 2);
             this.UpdatesTableLayoutPanel.Name = "UpdatesTableLayoutPanel";
             // 
-            // XenCenterGroupBox
+            // _checkBoxClientUpdates
             // 
-            resources.ApplyResources(this.XenCenterGroupBox, "XenCenterGroupBox");
-            this.XenCenterGroupBox.Controls.Add(this.AllowXenCenterUpdatesCheckBox);
-            this.XenCenterGroupBox.Name = "XenCenterGroupBox";
-            this.XenCenterGroupBox.TabStop = false;
+            resources.ApplyResources(this._checkBoxClientUpdates, "_checkBoxClientUpdates");
+            this._checkBoxClientUpdates.Name = "_checkBoxClientUpdates";
+            this._checkBoxClientUpdates.UseVisualStyleBackColor = true;
             // 
-            // AllowXenCenterUpdatesCheckBox
+            // labelClientUpdates
             // 
-            resources.ApplyResources(this.AllowXenCenterUpdatesCheckBox, "AllowXenCenterUpdatesCheckBox");
-            this.AllowXenCenterUpdatesCheckBox.Name = "AllowXenCenterUpdatesCheckBox";
-            this.AllowXenCenterUpdatesCheckBox.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.labelClientUpdates, "labelClientUpdates");
+            this.labelClientUpdates.Name = "labelClientUpdates";
             // 
-            // XenServerGroupBox
+            // tableLayoutPanel3
             // 
-            resources.ApplyResources(this.XenServerGroupBox, "XenServerGroupBox");
-            this.XenServerGroupBox.Controls.Add(this.AllowXenServerUpdatesCheckBox);
-            this.XenServerGroupBox.Controls.Add(this.AllowXenServerPatchesCheckBox);
-            this.XenServerGroupBox.Name = "XenServerGroupBox";
-            this.XenServerGroupBox.TabStop = false;
+            resources.ApplyResources(this.tableLayoutPanel3, "tableLayoutPanel3");
+            this.tableLayoutPanel3.Controls.Add(this.labelInfoCdn, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.pictureBox1, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.linkLabelConfigUpdates, 2, 0);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             // 
-            // AllowXenServerUpdatesCheckBox
+            // labelInfoCdn
             // 
-            resources.ApplyResources(this.AllowXenServerUpdatesCheckBox, "AllowXenServerUpdatesCheckBox");
-            this.AllowXenServerUpdatesCheckBox.Name = "AllowXenServerUpdatesCheckBox";
-            this.AllowXenServerUpdatesCheckBox.UseVisualStyleBackColor = true;
+            resources.ApplyResources(this.labelInfoCdn, "labelInfoCdn");
+            this.labelInfoCdn.Name = "labelInfoCdn";
             // 
-            // AllowXenServerPatchesCheckBox
+            // pictureBox1
             // 
-            resources.ApplyResources(this.AllowXenServerPatchesCheckBox, "AllowXenServerPatchesCheckBox");
-            this.AllowXenServerPatchesCheckBox.Name = "AllowXenServerPatchesCheckBox";
-            this.AllowXenServerPatchesCheckBox.UseVisualStyleBackColor = true;
+            this.pictureBox1.Image = global::XenAdmin.Properties.Resources._000_Info3_h32bit_16;
+            resources.ApplyResources(this.pictureBox1, "pictureBox1");
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.TabStop = false;
             // 
-            // UpdatesBlurb
+            // linkLabelConfigUpdates
             // 
-            resources.ApplyResources(this.UpdatesBlurb, "UpdatesBlurb");
-            this.UpdatesBlurb.Name = "UpdatesBlurb";
+            resources.ApplyResources(this.linkLabelConfigUpdates, "linkLabelConfigUpdates");
+            this.linkLabelConfigUpdates.Name = "linkLabelConfigUpdates";
+            this.linkLabelConfigUpdates.TabStop = true;
+            this.linkLabelConfigUpdates.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelConfigUpdates_LinkClicked);
             // 
             // UpdatesOptionsPage
             // 
@@ -96,10 +96,9 @@ namespace XenAdmin.Dialogs.OptionsPages
             this.Name = "UpdatesOptionsPage";
             this.UpdatesTableLayoutPanel.ResumeLayout(false);
             this.UpdatesTableLayoutPanel.PerformLayout();
-            this.XenCenterGroupBox.ResumeLayout(false);
-            this.XenCenterGroupBox.PerformLayout();
-            this.XenServerGroupBox.ResumeLayout(false);
-            this.XenServerGroupBox.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -108,11 +107,11 @@ namespace XenAdmin.Dialogs.OptionsPages
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel UpdatesTableLayoutPanel;
-        private XenAdmin.Controls.DecentGroupBox XenCenterGroupBox;
-        private System.Windows.Forms.CheckBox AllowXenCenterUpdatesCheckBox;
-        private XenAdmin.Controls.DecentGroupBox XenServerGroupBox;
-        private System.Windows.Forms.CheckBox AllowXenServerUpdatesCheckBox;
-        private System.Windows.Forms.CheckBox AllowXenServerPatchesCheckBox;
-        private System.Windows.Forms.Label UpdatesBlurb;
+        private System.Windows.Forms.Label labelInfoCdn;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.CheckBox _checkBoxClientUpdates;
+        private System.Windows.Forms.Label labelClientUpdates;
+        private System.Windows.Forms.LinkLabel linkLabelConfigUpdates;
     }
 }

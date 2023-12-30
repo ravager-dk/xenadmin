@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -46,29 +45,15 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
             this.host = host;
         }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.UPDATES_WIZARD_PRECHECK_FAILED, Helpers.GetName(host).Ellipsise(30), FriendlyErrorNames.LICENCE_RESTRICTION); }
-        }
+        public override string Description => string.Format(Messages.STRING_COLON_SPACE_STRING,
+            Helpers.GetName(host).Ellipsise(30), FriendlyErrorNames.LICENCE_RESTRICTION);
 
-        public override string Title
-        {
-            get { return Description; }
-        }
+        public override string Title => Description;
 
-        public override string LinkText
-        {
-            get { return Messages.LICENSE_MANAGER_BUY_LICENSE_LINK_TEXT; }
-        }
+        public override string LinkText => Messages.LICENSE_MANAGER_BUY_LICENSE_LINK_TEXT;
 
-        public override string HelpMessage
-        {
-            get { return LinkText; }
-        }
+        public override string HelpMessage => LinkText;
 
-        public override Uri UriToLaunch
-        {
-            get { return new Uri(InvisibleMessages.UPSELL_SA); }
-        }
+        public override Uri UriToLaunch => new Uri(InvisibleMessages.LICENSE_BUY_URL);
     }
 }

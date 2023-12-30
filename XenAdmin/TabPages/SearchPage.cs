@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -229,16 +228,16 @@ namespace XenAdmin.TabPages
             foreach (Search search in customSearches)
             {
                 customItems.Add(new ToolStripMenuItem(search.Name.EscapeAmpersands(),
-                                                 Properties.Resources._000_Search_h32bit_16,
-                                                 applySavedSearch_Click) { Tag = search });
+                    Images.StaticImages._000_Search_h32bit_16,
+                    applySavedSearch_Click) {Tag = search});
             }
 
             var defaultItems = new List<ToolStripMenuItem>();
             foreach (Search search in defaultSearches)
             {
                 defaultItems.Add(new ToolStripMenuItem(search.Name.EscapeAmpersands(),
-                                                       Properties.Resources._000_defaultSpyglass_h32bit_16,
-                                                       applySavedSearch_Click) { Tag = search });
+                    Images.StaticImages._000_defaultSpyglass_h32bit_16,
+                    applySavedSearch_Click) {Tag = search});
             }
 
             contextMenuStripSearches.Items.Clear();
@@ -257,8 +256,8 @@ namespace XenAdmin.TabPages
                 foreach (Search search in customSearches)
                 {
                     deleteableItems.Add(new ToolStripMenuItem(search.Name.EscapeAmpersands(),
-                                                              Properties.Resources._000_Search_h32bit_16,
-                                                              deleteSavedSearch_Click) { Tag = search });
+                        Images.StaticImages._000_Search_h32bit_16,
+                        deleteSavedSearch_Click) {Tag = search});
                 }
                 deleteItem.DropDownItems.AddRange(deleteableItems.ToArray());
             }
@@ -317,7 +316,7 @@ namespace XenAdmin.TabPages
 
         private void buttonImport_Click(object sender, EventArgs e)
         {
-            new ImportSearchCommand(Program.MainWindow).Execute();
+            new ImportSearchCommand(Program.MainWindow).Run();
         }
 
         private void applySavedSearch_Click(object sender, EventArgs e)
@@ -343,12 +342,9 @@ namespace XenAdmin.TabPages
             if (search == null)
                 return;
 
-            using (var dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning,
-                        String.Format(Messages.DELETE_SEARCH_PROMPT, search.Name),
-                        String.Format(Messages.DELETE_SEARCH, search.Name)),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+            using (var dlog = new WarningDialog(String.Format(Messages.DELETE_SEARCH_PROMPT, search.Name),
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                {WindowTitle = String.Format(Messages.DELETE_SEARCH, search.Name)})
             {
                 if (dlog.ShowDialog(this) == DialogResult.Yes)
                     new SearchAction(search, SearchAction.Operation.delete).RunAsync();

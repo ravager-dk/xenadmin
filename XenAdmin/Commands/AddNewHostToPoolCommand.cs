@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using XenAdmin.Properties;
 using XenAPI;
 using XenAdmin.Network;
 using XenAdmin.Core;
@@ -57,7 +55,7 @@ namespace XenAdmin.Commands
             _pool = pool;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             AddServerDialog dialog = new AddServerDialog(null, false);
             dialog.CachePopulated += dialog_CachePopulated;
@@ -87,7 +85,7 @@ namespace XenAdmin.Commands
         private void dialog_CachePopulated(IXenConnection conn)
         {
             // A new connection was successfully made: add the new server to its destination pool.
-            Host hostToAdd = Helpers.GetMaster(conn);
+            Host hostToAdd = Helpers.GetCoordinator(conn);
             if (hostToAdd == null)
             {
                 log.Debug("hostToAdd is null while joining host to pool in AddNewHostToPoolCommand: this should never happen!");
@@ -102,16 +100,13 @@ namespace XenAdmin.Commands
                 if (hostPool != null)
                 {
                     string text = String.Format(Messages.HOST_ALREADY_IN_POOL, hostToAdd.Name(), _pool.Name(), hostPool.Name());
-                    string caption = Messages.POOL_JOIN_IMPOSSIBLE;
 
-                    using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Exclamation, text, caption)))
-                    {
+                    using (var dlg = new WarningDialog(text) {WindowTitle = Messages.POOL_JOIN_IMPOSSIBLE})
                         dlg.ShowDialog(Program.MainWindow);
-                    }
                 }
                 else
                 {
-                    new AddHostToPoolCommand(MainWindowCommandInterface, new Host[] { hostToAdd }, _pool, false).Execute();
+                    new AddHostToPoolCommand(MainWindowCommandInterface, new Host[] { hostToAdd }, _pool, false).Run();
                 }
             });
         }

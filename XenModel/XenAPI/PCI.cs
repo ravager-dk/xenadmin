@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -88,66 +88,25 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new PCI from a Proxy_PCI.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public PCI(Proxy_PCI proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given PCI.
         /// </summary>
-        public override void UpdateFrom(PCI update)
+        public override void UpdateFrom(PCI record)
         {
-            uuid = update.uuid;
-            class_name = update.class_name;
-            vendor_name = update.vendor_name;
-            device_name = update.device_name;
-            host = update.host;
-            pci_id = update.pci_id;
-            dependencies = update.dependencies;
-            other_config = update.other_config;
-            subsystem_vendor_name = update.subsystem_vendor_name;
-            subsystem_device_name = update.subsystem_device_name;
-            driver_name = update.driver_name;
-        }
-
-        internal void UpdateFrom(Proxy_PCI proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            class_name = proxy.class_name == null ? null : proxy.class_name;
-            vendor_name = proxy.vendor_name == null ? null : proxy.vendor_name;
-            device_name = proxy.device_name == null ? null : proxy.device_name;
-            host = proxy.host == null ? null : XenRef<Host>.Create(proxy.host);
-            pci_id = proxy.pci_id == null ? null : proxy.pci_id;
-            dependencies = proxy.dependencies == null ? null : XenRef<PCI>.Create(proxy.dependencies);
-            other_config = proxy.other_config == null ? null : Maps.convert_from_proxy_string_string(proxy.other_config);
-            subsystem_vendor_name = proxy.subsystem_vendor_name == null ? null : proxy.subsystem_vendor_name;
-            subsystem_device_name = proxy.subsystem_device_name == null ? null : proxy.subsystem_device_name;
-            driver_name = proxy.driver_name == null ? null : proxy.driver_name;
-        }
-
-        public Proxy_PCI ToProxy()
-        {
-            Proxy_PCI result_ = new Proxy_PCI();
-            result_.uuid = uuid ?? "";
-            result_.class_name = class_name ?? "";
-            result_.vendor_name = vendor_name ?? "";
-            result_.device_name = device_name ?? "";
-            result_.host = host ?? "";
-            result_.pci_id = pci_id ?? "";
-            result_.dependencies = dependencies == null ? new string[] {} : Helper.RefListToStringArray(dependencies);
-            result_.other_config = Maps.convert_to_proxy_string_string(other_config);
-            result_.subsystem_vendor_name = subsystem_vendor_name ?? "";
-            result_.subsystem_device_name = subsystem_device_name ?? "";
-            result_.driver_name = driver_name ?? "";
-            return result_;
+            uuid = record.uuid;
+            class_name = record.class_name;
+            vendor_name = record.vendor_name;
+            device_name = record.device_name;
+            host = record.host;
+            pci_id = record.pci_id;
+            dependencies = record.dependencies;
+            other_config = record.other_config;
+            subsystem_vendor_name = record.subsystem_vendor_name;
+            subsystem_device_name = record.subsystem_device_name;
+            driver_name = record.driver_name;
         }
 
         /// <summary>
@@ -173,7 +132,7 @@ namespace XenAPI
             if (table.ContainsKey("dependencies"))
                 dependencies = Marshalling.ParseSetRef<PCI>(table, "dependencies");
             if (table.ContainsKey("other_config"))
-                other_config = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "other_config"));
+                other_config = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "other_config"));
             if (table.ContainsKey("subsystem_vendor_name"))
                 subsystem_vendor_name = Marshalling.ParseString(table, "subsystem_vendor_name");
             if (table.ContainsKey("subsystem_device_name"))
@@ -189,26 +148,17 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._class_name, other._class_name) &&
-                Helper.AreEqual2(this._vendor_name, other._vendor_name) &&
-                Helper.AreEqual2(this._device_name, other._device_name) &&
-                Helper.AreEqual2(this._host, other._host) &&
-                Helper.AreEqual2(this._pci_id, other._pci_id) &&
-                Helper.AreEqual2(this._dependencies, other._dependencies) &&
-                Helper.AreEqual2(this._other_config, other._other_config) &&
-                Helper.AreEqual2(this._subsystem_vendor_name, other._subsystem_vendor_name) &&
-                Helper.AreEqual2(this._subsystem_device_name, other._subsystem_device_name) &&
-                Helper.AreEqual2(this._driver_name, other._driver_name);
-        }
-
-        internal static List<PCI> ProxyArrayToObjectList(Proxy_PCI[] input)
-        {
-            var result = new List<PCI>();
-            foreach (var item in input)
-                result.Add(new PCI(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_class_name, other._class_name) &&
+                Helper.AreEqual2(_vendor_name, other._vendor_name) &&
+                Helper.AreEqual2(_device_name, other._device_name) &&
+                Helper.AreEqual2(_host, other._host) &&
+                Helper.AreEqual2(_pci_id, other._pci_id) &&
+                Helper.AreEqual2(_dependencies, other._dependencies) &&
+                Helper.AreEqual2(_other_config, other._other_config) &&
+                Helper.AreEqual2(_subsystem_vendor_name, other._subsystem_vendor_name) &&
+                Helper.AreEqual2(_subsystem_device_name, other._subsystem_device_name) &&
+                Helper.AreEqual2(_driver_name, other._driver_name);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, PCI server)
@@ -228,6 +178,7 @@ namespace XenAPI
                 return null;
             }
         }
+
         /// <summary>
         /// Get a record containing the current state of the given PCI.
         /// First published in XenServer 6.0.
@@ -236,10 +187,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static PCI get_record(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_record(session.opaque_ref, _pci);
-            else
-                return new PCI(session.XmlRpcProxy.pci_get_record(session.opaque_ref, _pci ?? "").parse());
+            return session.JsonRpcClient.pci_get_record(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -250,10 +198,7 @@ namespace XenAPI
         /// <param name="_uuid">UUID of object to return</param>
         public static XenRef<PCI> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<PCI>.Create(session.XmlRpcProxy.pci_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.pci_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -264,10 +209,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_uuid(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_uuid(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_uuid(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_uuid(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -278,10 +220,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_class_name(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_class_name(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_class_name(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_class_name(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -292,10 +231,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_vendor_name(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_vendor_name(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_vendor_name(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_vendor_name(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -306,10 +242,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_device_name(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_device_name(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_device_name(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_device_name(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -320,10 +253,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static XenRef<Host> get_host(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_host(session.opaque_ref, _pci);
-            else
-                return XenRef<Host>.Create(session.XmlRpcProxy.pci_get_host(session.opaque_ref, _pci ?? "").parse());
+            return session.JsonRpcClient.pci_get_host(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -334,10 +264,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_pci_id(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_pci_id(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_pci_id(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_pci_id(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -348,10 +275,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static List<XenRef<PCI>> get_dependencies(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_dependencies(session.opaque_ref, _pci);
-            else
-                return XenRef<PCI>.Create(session.XmlRpcProxy.pci_get_dependencies(session.opaque_ref, _pci ?? "").parse());
+            return session.JsonRpcClient.pci_get_dependencies(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -362,10 +286,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static Dictionary<string, string> get_other_config(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_other_config(session.opaque_ref, _pci);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.pci_get_other_config(session.opaque_ref, _pci ?? "").parse());
+            return session.JsonRpcClient.pci_get_other_config(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -376,10 +297,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_subsystem_vendor_name(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_subsystem_vendor_name(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_subsystem_vendor_name(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_subsystem_vendor_name(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -390,10 +308,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_subsystem_device_name(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_subsystem_device_name(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_subsystem_device_name(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_subsystem_device_name(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -404,10 +319,7 @@ namespace XenAPI
         /// <param name="_pci">The opaque_ref of the given pci</param>
         public static string get_driver_name(Session session, string _pci)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_driver_name(session.opaque_ref, _pci);
-            else
-                return session.XmlRpcProxy.pci_get_driver_name(session.opaque_ref, _pci ?? "").parse();
+            return session.JsonRpcClient.pci_get_driver_name(session.opaque_ref, _pci);
         }
 
         /// <summary>
@@ -419,10 +331,7 @@ namespace XenAPI
         /// <param name="_other_config">New value to set</param>
         public static void set_other_config(Session session, string _pci, Dictionary<string, string> _other_config)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.pci_set_other_config(session.opaque_ref, _pci, _other_config);
-            else
-                session.XmlRpcProxy.pci_set_other_config(session.opaque_ref, _pci ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse();
+            session.JsonRpcClient.pci_set_other_config(session.opaque_ref, _pci, _other_config);
         }
 
         /// <summary>
@@ -435,10 +344,7 @@ namespace XenAPI
         /// <param name="_value">Value to add</param>
         public static void add_to_other_config(Session session, string _pci, string _key, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.pci_add_to_other_config(session.opaque_ref, _pci, _key, _value);
-            else
-                session.XmlRpcProxy.pci_add_to_other_config(session.opaque_ref, _pci ?? "", _key ?? "", _value ?? "").parse();
+            session.JsonRpcClient.pci_add_to_other_config(session.opaque_ref, _pci, _key, _value);
         }
 
         /// <summary>
@@ -450,10 +356,7 @@ namespace XenAPI
         /// <param name="_key">Key to remove</param>
         public static void remove_from_other_config(Session session, string _pci, string _key)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.pci_remove_from_other_config(session.opaque_ref, _pci, _key);
-            else
-                session.XmlRpcProxy.pci_remove_from_other_config(session.opaque_ref, _pci ?? "", _key ?? "").parse();
+            session.JsonRpcClient.pci_remove_from_other_config(session.opaque_ref, _pci, _key);
         }
 
         /// <summary>
@@ -463,10 +366,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<PCI>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_all(session.opaque_ref);
-            else
-                return XenRef<PCI>.Create(session.XmlRpcProxy.pci_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.pci_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -476,10 +376,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<PCI>, PCI> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.pci_get_all_records(session.opaque_ref);
-            else
-                return XenRef<PCI>.Create<Proxy_PCI>(session.XmlRpcProxy.pci_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.pci_get_all_records(session.opaque_ref);
         }
 
         /// <summary>

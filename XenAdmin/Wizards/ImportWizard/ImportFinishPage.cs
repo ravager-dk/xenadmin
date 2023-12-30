@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -88,10 +87,17 @@ namespace XenAdmin.Wizards.ImportWizard
 
         public Func<IEnumerable<KeyValuePair<string, string>>> SummaryRetriever { private get; set; }
 
+        private bool _canStartVmsAutomatically = true;
+        public bool CanStartVmsAutomatically
+        {
+            get => _canStartVmsAutomatically;
+            set => _canStartVmsAutomatically = m_checkBoxStartVms.Enabled = m_checkBoxStartVms.Checked = value;
+        }
+
         /// <summary>
 		/// Do the action described after the import/export has finished?
 		/// </summary>
-		public bool StartVmsAutomatically => m_checkBoxStartVms.Visible && m_checkBoxStartVms.Checked;
+		public bool StartVmsAutomatically => CanStartVmsAutomatically && m_checkBoxStartVms.Visible && m_checkBoxStartVms.Checked;
 
         public bool ShowStartVmsGroupBox
         {

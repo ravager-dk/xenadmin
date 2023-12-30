@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,11 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
 
@@ -206,15 +207,15 @@ namespace XenAdmin.Dialogs
                 if (freeCount == 0 || freeCount < xenObject.Connection.Cache.Hosts.Length)
                     return false;
 
-                var expiryGroups = from Host h in xenObject.Connection.Cache.Hosts
+                var expiryGroups = (from Host h in xenObject.Connection.Cache.Hosts
                                    let exp = h.LicenseExpiryUTC()
                                    group h by exp
                                    into g
-                                   select new { ExpiryDate = g.Key, Hosts = g };
+                                   select new { ExpiryDate = g.Key, Hosts = g }).ToList();
 
-                if(expiryGroups.Count() > 1)
+                if (expiryGroups.Count > 1)
                 {
-                    expiryGroups.OrderBy(g => g.ExpiryDate);
+                    expiryGroups = expiryGroups.OrderBy(g => g.ExpiryDate).ToList();
                     if ((expiryGroups.ElementAt(1).ExpiryDate - expiryGroups.ElementAt(0).ExpiryDate).TotalDays > 30)
                         return true;
                 }
@@ -331,31 +332,50 @@ namespace XenAdmin.Dialogs
         {
             get
             {
+                var hosts = XenObject.Connection.Cache.Hosts;
+                var entitlements = new List<string>();
+                string supportLevel = null;
                 if (CurrentState == HostState.Licensed)
                 {
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.EnterpriseFeaturesEnabled()))
-                        return Messages.LICENSE_SUPPORT_AND_ENTERPRISE_FEATURES_ENABLED;
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.DesktopPlusFeaturesEnabled()))
-                        return Messages.LICENSE_SUPPORT_AND_DESKTOP_PLUS_FEATURES_ENABLED;
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.DesktopFeaturesEnabled()))
-                        return Messages.LICENSE_SUPPORT_AND_DESKTOP_FEATURES_ENABLED;
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.DesktopCloudFeaturesEnabled()))
-                        return Messages.LICENSE_SUPPORT_AND_DESKTOP_CLOUD_FEATURES_ENABLED;
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.PremiumFeaturesEnabled()))
-                        return Messages.LICENSE_SUPPORT_AND_PREMIUM_FEATURES_ENABLED;
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.StandardFeaturesEnabled()))
-                        return Messages.LICENSE_SUPPORT_AND_STANDARD_FEATURES_ENABLED;
-                    if (XenObject.Connection.Cache.Hosts.All(h => h.EligibleForSupport()))
-                        return Messages.LICENSE_SUPPORT_AND_STANDARD_FEATURES_ENABLED;
-                    return Messages.LICENSE_NOT_ELIGIBLE_FOR_SUPPORT;
-                }
+                    if (hosts.All(h => h.EnterpriseFeaturesEnabled()))
+                        supportLevel = Messages.LICENSE_ENTERPRISE_FEATURES_ENABLED;
+                    else if (hosts.All(h => h.DesktopPlusFeaturesEnabled()))
+                        supportLevel = string.Format(Messages.LICENSE_DESKTOP_PLUS_FEATURES_ENABLED, BrandManager.CompanyNameLegacy);
+                    else if (hosts.All(h => h.DesktopFeaturesEnabled()))
+                        supportLevel = string.Format(Messages.LICENSE_DESKTOP_FEATURES_ENABLED, BrandManager.CompanyNameLegacy);
+                    else if (hosts.All(h => h.DesktopCloudFeaturesEnabled()))
+                        supportLevel = string.Format(Messages.LICENSE_DESKTOP_CLOUD_FEATURES_ENABLED, BrandManager.CompanyNameLegacy);
+                    else if (hosts.All(h => h.PremiumFeaturesEnabled()))
+                        supportLevel = Messages.LICENSE_PREMIUM_FEATURES_ENABLED;
+                    else if (hosts.All(h => h.StandardFeaturesEnabled()))
+                        supportLevel = Messages.LICENSE_STANDARD_FEATURES_ENABLED;
+                    else if (hosts.All(h => h.EligibleForSupport()))
+                        supportLevel = Messages.LICENSE_STANDARD_FEATURES_ENABLED;
 
-                if (CurrentState == HostState.Free)
+                    if (supportLevel != null)
+                    {
+                        entitlements.Add(hosts.Any(Helpers.NileOrGreater) ? Messages.LICENSE_MANAGER_LICENSED : Messages.LICENSE_ELIGIBLE_FOR_SUPPORT);
+                        entitlements.Add(supportLevel);
+                    }
+                } 
+                
+                if (CurrentState == HostState.Free || string.IsNullOrEmpty(supportLevel))
                 {
-                    return Messages.LICENSE_NOT_ELIGIBLE_FOR_SUPPORT;
+                    if (hosts.Any(Helpers.NileOrGreater))
+                    {
+                        // CP-43000: for hosts in preview we show "Licensed" even though they're not
+                        entitlements.Add(hosts.Any(a => a.IsInPreviewRelease()) ? $"{Messages.LICENSE_MANAGER_LICENSED}{Environment.NewLine}{Messages.LICENSE_MANAGER_TRIAL_EDITION}" : Messages.LICENSE_MANAGER_TRIAL_LICENSE);
+                    }
+                    else
+                    {
+                        entitlements.Add(Messages.LICENSE_NOT_ELIGIBLE_FOR_SUPPORT);
+                    }
                 }
 
-                return Messages.UNKNOWN;
+                if (hosts.Any(h => h.CanShowTrialEditionUpsell()))
+                    entitlements.Add(Messages.TRIAL_EDITION_UPSELLING_MESSAGE);
+
+                return entitlements.Count == 0 ? Messages.UNKNOWN : string.Join(Environment.NewLine, entitlements);
             }
         }
 

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -52,21 +51,21 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             ManualUpgrade = true;
         }
 
-        private void AddEventHandlersToMasters()
+        private void AddEventHandlersToCoordinators()
         {
-            foreach (Host master in SelectedMasters)
+            foreach (var c in SelectedCoordinators.Select(c => c.Connection))
             {
-                master.Connection.ConnectionStateChanged += connection_ConnectionChanged;
-                master.Connection.CachePopulated += connection_CachePopulated;
+                c.ConnectionStateChanged += connection_ConnectionChanged;
+                c.CachePopulated += connection_CachePopulated;
             }
         }
 
-        private void RemoveEventHandlersToMasters()
+        private void RemoveEventHandlersToCoordinators()
         {
-            foreach (Host master in SelectedMasters)
+            foreach (var c in SelectedCoordinators.Select(c => c.Connection))
             {
-                master.Connection.ConnectionStateChanged -= connection_ConnectionChanged;
-                master.Connection.CachePopulated -= connection_CachePopulated;
+                c.ConnectionStateChanged -= connection_ConnectionChanged;
+                c.CachePopulated -= connection_CachePopulated;
             }
         }
 
@@ -87,29 +86,28 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
                 RefreshRechecks();
                 return;
             }
-            var selectedMasters = new List<Host>(SelectedMasters);
-            RemoveEventHandlersToMasters();
+            var selectedCoordinators = new List<Host>(SelectedCoordinators);
+            RemoveEventHandlersToCoordinators();
             SelectedServers.Clear();
-            foreach (Host selectedMaster in selectedMasters)
+            foreach (var selectedCoordinator in selectedCoordinators)
             {
-                Host master = selectedMaster;
-                if (master != null)
+                if (selectedCoordinator != null)
                 {
-                    Pool pool = Helpers.GetPoolOfOne(master.Connection);
+                    var pool = Helpers.GetPoolOfOne(selectedCoordinator.Connection);
                     if (pool != null)
                         SelectedServers.AddRange(pool.HostsToUpgrade());
                     else
-                        SelectedServers.Add(master);
+                        SelectedServers.Add(selectedCoordinator);
                 }
             }
-            AddEventHandlersToMasters();
+            AddEventHandlersToCoordinators();
             labelPrechecksFirstLine.Text = Messages.ROLLINGUPGRADE_PRECHECKS;
             RefreshRechecks();
         }
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
         {
-            RemoveEventHandlersToMasters();
+            RemoveEventHandlersToCoordinators();
         }
 
         public override void PageCancelled(ref bool cancel)
@@ -117,41 +115,26 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             base.PageCancelled(ref cancel);
             if (cancel)
                 return;
-            RemoveEventHandlersToMasters();
+            RemoveEventHandlersToCoordinators();
         }
 
-        public override string PageTitle
-        {
-            get
-            {
-                return Messages.UPGRADE_PRECHECKS_TITLE;
-            }
-        }
+        public override string PageTitle => Messages.UPGRADE_PRECHECKS_TITLE;
 
-        public override string Text
-        {
-            get
-            {
-                return Messages.UPGRADE_PRECHECKS_TEXT;
-            }
-        }
+        public override string Text => Messages.UPGRADE_PRECHECKS_TEXT;
 
-        public override string HelpID
-        {
-            get { return "Upgradeprechecks"; }
-        }
+        public override string HelpID => "Upgradeprechecks";
 
         public override string NextText(bool isLastPage)
         {
             return Messages.START_UPGRADE;
         }
 
-        protected override List<CheckGroup> GenerateChecks(Pool_patch patch)
+        protected override List<CheckGroup> GenerateChecks()
         {
             var groups = new List<CheckGroup>();
 
-            List<Host> hostsToUpgrade = new List<Host>();
-            List<Host> hostsToUpgradeOrUpdate = new List<Host>();
+            var hostsToUpgrade = new List<Host>();
+            var hostsToUpgradeOrUpdate = new List<Host>();
             foreach (var pool in SelectedPools)
             {
                 var poolHostsToUpgrade = pool.HostsToUpgrade();
@@ -166,12 +149,13 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             if (latestCrVersion != null &&
                 hostsToUpgradeOrUpdate.Any(host => new Version(Helpers.HostProductVersion(host)) < latestCrVersion.Version))
             {
-                groups.Add(new CheckGroup(Messages.CHECKING_XENCENTER_VERSION, new List<Check> {new XenCenterVersionCheck(null)}));
+                groups.Add(new CheckGroup(string.Format(Messages.CHECKING_XENCENTER_VERSION, BrandManager.BrandConsole),
+                    new List<Check> {new ClientVersionCheck(null)}));
             }
 
             //HostMaintenanceModeCheck checks - for hosts that will be upgraded or updated
             var livenessChecks = new List<Check>();
-            foreach (Host host in hostsToUpgradeOrUpdate)
+            foreach (var host in hostsToUpgradeOrUpdate)
                 livenessChecks.Add(new HostLivenessCheck(host, hostsToUpgrade.Contains(host)));
             groups.Add(new CheckGroup(Messages.CHECKING_HOST_LIVENESS_STATUS, livenessChecks));
 
@@ -179,79 +163,156 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             var hotfixChecks = new List<Check>();
             foreach (var host in hostsToUpgrade)
             {
-                if (new HotfixFactory().IsHotfixRequired(host) && !ManualUpgrade)
+                if (HotfixFactory.IsHotfixRequired(host) && !ManualUpgrade)
                     hotfixChecks.Add(new HostHasHotfixCheck(host));
             }
             if (hotfixChecks.Count > 0)
                 groups.Add(new CheckGroup(Messages.CHECKING_UPGRADE_HOTFIX_STATUS, hotfixChecks));
 
-            //SafeToUpgrade- and PrepareToUpgrade- checks - in automatic mode only, for hosts that will be upgraded
+            //Checks used in automatic mode only, for hosts that will be upgraded
             if (!ManualUpgrade)
             {
-                var prepareToUpgradeChecks = new List<Check>();
-                foreach (var host in hostsToUpgrade)
-                    prepareToUpgradeChecks.Add(new PrepareToUpgradeCheck(host, InstallMethodConfig));
-                groups.Add(new CheckGroup(Messages.CHECKING_PREPARE_TO_UPGRADE, prepareToUpgradeChecks));
+                var prepareToUpgradeChecks = (from Host host in hostsToUpgrade
+                    select new PrepareToUpgradeCheck(host, InstallMethodConfig) as Check).ToList();
 
-                var safeToUpgradeChecks = new List<Check>();
-                foreach (var host in hostsToUpgrade)
-                    safeToUpgradeChecks.Add(new SafeToUpgradeCheck(host));
-                groups.Add(new CheckGroup(Messages.CHECKING_SAFE_TO_UPGRADE, safeToUpgradeChecks));
+                if (prepareToUpgradeChecks.Count > 0)
+                    groups.Add(new CheckGroup(Messages.CHECKING_PREPARE_TO_UPGRADE, prepareToUpgradeChecks));
+
+                // EUA check
+                var euaCheck = GetPermanentCheck("EUA",
+                new UpgradeRequiresEua(this, hostsToUpgrade, InstallMethodConfig));
+                if (euaCheck.CanRun())
+                {
+                    var euaChecks = new List<Check> { euaCheck };
+                    groups.Add(new CheckGroup(Messages.ACCEPT_EUA_CHECK_GROUP_NAME, euaChecks));
+                }
+
+                var safeToUpgradeChecks = (from Host host in hostsToUpgrade
+                    let check = new SafeToUpgradeCheck(host, InstallMethodConfig)
+                    where check.CanRun()
+                    select check as Check).ToList();
+
+                if (safeToUpgradeChecks.Count > 0)
+                    groups.Add(new CheckGroup(Messages.CHECKING_SAFE_TO_UPGRADE, safeToUpgradeChecks));
             }
 
-            //HA checks - for each pool
-            var haChecks = (from Host server in SelectedMasters
-                select new HAOffCheck(server) as Check).ToList();
-            groups.Add(new CheckGroup(Messages.CHECKING_HA_STATUS, haChecks));
+            //vSwitch controller check - for each pool
+            var vSwitchChecks = (from Host server in SelectedCoordinators
+                let check = new VSwitchControllerCheck(server, InstallMethodConfig, ManualUpgrade)
+                where check.CanRun()
+                select check as Check).ToList();
 
-            //Checking can evacuate host - for hosts that will be upgraded or updated
-            var evacuateChecks = new List<Check>();
-            foreach (Host host in hostsToUpgradeOrUpdate)
-                evacuateChecks.Add(new AssertCanEvacuateUpgradeCheck(host));
-            groups.Add(new CheckGroup(Messages.CHECKING_CANEVACUATE_STATUS, evacuateChecks));
+            if (vSwitchChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_VSWITCH_CONTROLLER_GROUP, vSwitchChecks));
 
-            //PBDsPluggedCheck -  for hosts that will be upgraded or updated
-            var pbdChecks = new List<Check>();
-            foreach (Host host in hostsToUpgradeOrUpdate)
-                pbdChecks.Add(new PBDsPluggedCheck(host));
-            groups.Add(new CheckGroup(Messages.CHECKING_STORAGE_CONNECTIONS_STATUS, pbdChecks));
+            //Health Check check - for each pool
+            var hcChecks = (from Pool pool in SelectedPools
+                let check = new HealthCheckServiceCheck(pool, InstallMethodConfig)
+                where check.CanRun()
+                select check as Check).ToList();
 
-            //HostMemoryPostUpgradeCheck - for hosts that will be upgraded
-            var mostMemoryPostUpgradeChecks = new List<Check>();
-            foreach (var host in hostsToUpgrade)
-            {
-                mostMemoryPostUpgradeChecks.Add(new HostMemoryPostUpgradeCheck(host, InstallMethodConfig));
-            }
-            if (mostMemoryPostUpgradeChecks.Count > 0)
-                groups.Add(new CheckGroup(Messages.CHECKING_HOST_MEMORY_POST_UPGRADE, mostMemoryPostUpgradeChecks));
-          
-            var gfs2Checks = new List<Check>();
-            foreach (Pool pool in SelectedPools.Where(p =>
-                Helpers.KolkataOrGreater(p.Connection) && !Helpers.LimaOrGreater(p.Connection)))
-            {
-                Host host = pool.Connection.Resolve(pool.master);
-                gfs2Checks.Add(new PoolHasGFS2SR(host));
-            }
+            if (hcChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_HEALTH_CHECK_SERVICE, hcChecks));
 
-            if (gfs2Checks.Count > 0)
-            {
-                groups.Add(new CheckGroup(Messages.CHECKING_CLUSTERING_STATUS, gfs2Checks));
-            }
+            //protocol check - for each pool
+            var sslChecks = (from Host server in SelectedCoordinators
+                let check = new PoolLegacySslCheck(server, InstallMethodConfig, ManualUpgrade)
+                where check.CanRun()
+                select check as Check).ToList();
+
+            if (sslChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_SECURITY_PROTOCOL_GROUP, sslChecks));
+
+            //certificate key length - for each host
+            var certKeyLengthChecks = (from Host server in hostsToUpgradeOrUpdate
+                let check = new CertificateKeyLengthCheck(server, ManualUpgrade, InstallMethodConfig)
+                where check.CanRun()
+                select check as Check).ToList();
+
+            if (certKeyLengthChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CERTIFICATE_KEY_LENGTH_CHECK_GROUP, certKeyLengthChecks));
+
+            //power on mode check - for each host
+            var iloChecks = (from Host server in hostsToUpgradeOrUpdate
+                let check = new PowerOniLoCheck(server, InstallMethodConfig, ManualUpgrade)
+                where check.CanRun()
+                select check as Check).ToList();
+
+            if (iloChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_POWER_ON_MODE_GROUP, iloChecks));
+
+            //container management check - for each pool
+            var dockerChecks = (from Host server in SelectedCoordinators
+                                let check = new PoolContainerManagementCheck(server, InstallMethodConfig, ManualUpgrade)
+                where check.CanRun()
+                select check as Check).ToList();
+
+            if (dockerChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_CONTAINER_MANAGEMENT_GROUP, dockerChecks));
 
             //Checking PV guests - for hosts that have any PV guests and warn the user before the upgrade.
-            var pvChecks = new List<Check>();
-            foreach (Pool pool in SelectedPools.Where(p => !Helpers.QuebecOrGreater(p.Connection)))
-            {
-                if (pool.Connection.Resolve(pool.master) != null)
-                    pvChecks.Add(new PVGuestsCheck(pool, true, InstallMethodConfig, ManualUpgrade)); 
-            }
+            var pvChecks = (from Host server in SelectedCoordinators
+                let check = new PVGuestsCheck(server, ManualUpgrade, InstallMethodConfig)
+                where check.CanRun()
+                select check as Check).ToList();
+
             if (pvChecks.Count > 0)
                 groups.Add(new CheckGroup(Messages.CHECKING_PV_GUESTS, pvChecks));
+
+            //HA and WLB checks - for each pool
+            var haWlbChecks = new List<Check>();
+            foreach (var pool in SelectedPools)
+            {
+                haWlbChecks.Add(new HaOffCheck(pool));
+                haWlbChecks.Add(new WlbOffCheck(pool));
+            }
+
+            if (haWlbChecks.Count > 0) 
+                groups.Add(new CheckGroup(Messages.CHECKING_HA_AND_WLB_STATUS, haWlbChecks));
+
+            //Checking can evacuate host - for hosts that will be upgraded or updated
+            var evacuateChecks = (from Host host in hostsToUpgradeOrUpdate
+                select new AssertCanEvacuateUpgradeCheck(host) as Check).ToList();
+
+            if (evacuateChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_CANEVACUATE_STATUS, evacuateChecks));
+
+            //PBDsPluggedCheck -  for hosts that will be upgraded or updated
+            var pbdChecks = (from Host host in hostsToUpgradeOrUpdate
+                select new PBDsPluggedCheck(host) as Check).ToList();
+
+            if(pbdChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_STORAGE_CONNECTIONS_STATUS, pbdChecks));
+
+            //HostMemoryPostUpgradeCheck - for hosts that will be upgraded
+            var mostMemoryPostUpgradeChecks = (from Host host in hostsToUpgrade
+                select new HostMemoryPostUpgradeCheck(host, InstallMethodConfig) as Check).ToList();
+
+            if (mostMemoryPostUpgradeChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_HOST_MEMORY_POST_UPGRADE, mostMemoryPostUpgradeChecks));
+
+            //PoolHasGFS2SR checks 
+            var gfs2Checks = (from Host host in SelectedCoordinators
+                let check = new PoolHasGFS2SR(host)
+                where check.CanRun()
+                select check as Check).ToList();
+
+            if (gfs2Checks.Count > 0) 
+                groups.Add(new CheckGroup(Messages.CHECKING_CLUSTERING_STATUS, gfs2Checks));
+
+            //Deprecated SRs checks 
+            var deprecatedSRsChecks = (from Host host in SelectedCoordinators
+                let check = new PoolHasDeprecatedSrsCheck(host, InstallMethodConfig, ManualUpgrade)
+                where check.CanRun()
+                select check as Check).ToList();
+
+            if (deprecatedSRsChecks.Count > 0)
+                groups.Add(new CheckGroup(Messages.CHECKING_DEPRECATED_SRS, deprecatedSRsChecks));
 
             //Checking automated updates are possible if apply updates checkbox is ticked
             if (ApplyUpdatesToNewVersion)
             {
-                var automatedUpdateChecks = (from Host server in SelectedMasters
+                var automatedUpdateChecks = (from Host server in SelectedCoordinators
                     select new AutomatedUpdatesLicenseCheck(server) as Check).ToList();
 
                 automatedUpdateChecks.Add(new CfuAvailabilityCheck());
@@ -263,7 +324,7 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             return groups;
         }
 
-        public IEnumerable<Host> SelectedMasters { private get; set; }
+        public IEnumerable<Host> SelectedCoordinators { private get; set; }
         public bool ManualUpgrade { set; private get; }
 
         public Dictionary<string, string> InstallMethodConfig { private get; set; }
@@ -276,20 +337,20 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard
             if (pool == null)
                 return result;
 
-            var master = Helpers.GetMaster(pool);
-            if (master == null)
+            var coordinator = Helpers.GetCoordinator(pool);
+            if (coordinator == null)
                 return result;
 
-            if (pool.IsMasterUpgraded())
+            if (pool.IsCoordinatorUpgraded())
             {
                 foreach (var h in pool.Connection.Cache.Hosts)
                 {
-                    if (h.LongProductVersion() != master.LongProductVersion()) // host needs to be upgraded
+                    if (h.LongProductVersion() != coordinator.LongProductVersion()) // host needs to be upgraded
                         result.Add(h); // host 
                     else
                     {
                         //check update sequence for already-upgraded hosts
-                        var us = Updates.GetPatchSequenceForHost(h, Updates.GetMinimalPatches(master));
+                        var us = Updates.GetPatchSequenceForHost(h, Updates.GetMinimalPatches(coordinator));
                         if (us != null && us.Count > 0)
                         {
                             result.Add(h);

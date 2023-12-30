@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using XenAdmin.Core;
 using XenAdmin.Wizards;
@@ -61,18 +59,18 @@ namespace XenAdmin.Commands
         {
         }
 
-        private void Execute(SR sr)
+        private void Run(SR sr)
         {
             if (CanReattachSR(sr))
                 MainWindowCommandInterface.ShowPerConnectionWizard(sr.Connection, new NewSRWizard(sr.Connection, sr));
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            Execute((SR)selection[0].XenObject);
+            Run((SR)selection[0].XenObject);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return selection.Count == 1 && CanReattachSR(selection[0].XenObject as SR);
         }

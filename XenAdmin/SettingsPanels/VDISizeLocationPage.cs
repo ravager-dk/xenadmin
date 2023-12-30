@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -53,13 +52,13 @@ namespace XenAdmin.SettingsPanels
         {
             get
             {
-                return string.Format(Messages.SIZE_LOCATION_SUB,
+                return string.Format(Messages.STRING_COMMA_SPACE_STRING,
                     Util.DiskSizeString(diskSpinner1.CanResize ? diskSpinner1.SelectedSize : vdi.virtual_size, 2),
                     vdi.Connection.Resolve<SR>(vdi.SR));
             }
         }
 
-        public Image Image => Properties.Resources._000_VirtualStorage_h32bit_16;
+        public Image Image => Images.StaticImages._000_VirtualStorage_h32bit_16;
 
         public bool ValidToSave => _validToSave;
 
@@ -86,6 +85,9 @@ namespace XenAdmin.SettingsPanels
         public void ShowLocalValidationMessages()
         {
         }
+
+        public void HideLocalValidationMessages()
+        { }
 
         public void Cleanup()
         {

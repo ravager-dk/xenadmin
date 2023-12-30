@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -128,6 +127,8 @@ namespace XenAPI
                     return "2.15";
                 case API_Version.API_2_16:
                     return "2.16";
+                case API_Version.API_2_20:
+                    return "2.20";
                 default:
                     return "Unknown";
             }

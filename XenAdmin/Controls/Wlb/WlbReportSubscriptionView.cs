@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,40 +38,28 @@ using XenAdmin.Dialogs.Wlb;
 using XenAPI;
 
 
-
 namespace XenAdmin.Controls.Wlb
 {
     public partial class WlbReportSubscriptionView : UserControl
     {
         #region Variables
 
-        public event CustomRefreshEventHandler OnChangeOK;
+        public event EventHandler OnChangeOK;
         public event EventHandler Close;
         public event EventHandler PoolConnectionLost;
 
         private WlbReportSubscription _subscription;
-        private Pool _pool;
 
         #endregion
 
         #region Properties
 
-        public Pool Pool
-        {
-            get { return _pool; }
-            set { _pool = value; }
-        }
+        public Pool Pool { get; set; }
 
         public WlbReportSubscription ReportSubscription
         {
-            get
-            {
-                if (_subscription == null)
-                    return new WlbReportSubscription(String.Empty);
-                else
-                    return _subscription;
-            }
-            set { _subscription = value; }
+            get => _subscription ?? new WlbReportSubscription(string.Empty);
+            set => _subscription = value;
         }
 
         #endregion
@@ -88,10 +75,7 @@ namespace XenAdmin.Controls.Wlb
 
         #region Public Methods
 
-        /// <summary>
-        /// Rebuilds the panel contents
-        /// </summary>
-        public void BuildPanel()
+        private void BuildPanel()
         {
             // Subscription section
             if (_subscription != null)
@@ -122,9 +106,9 @@ namespace XenAdmin.Controls.Wlb
                 // Schedule Options
                 pdSectionSchedule.ClearData();
 
-                DateTime localExecuteTime;
+                DateTime localRunTime;
                 WlbScheduledTask.WlbTaskDaysOfWeek localDaysOfWeek;
-                WlbScheduledTask.GetLocalTaskTimes(this._subscription.DaysOfWeek, this._subscription.ExecuteTimeOfDay, out localDaysOfWeek, out localExecuteTime);
+                WlbScheduledTask.GetLocalTaskTimes(this._subscription.DaysOfWeek, this._subscription.RunTimeOfDay, out localDaysOfWeek, out localRunTime);
                 if (_subscription.DaysOfWeek == WlbScheduledTask.WlbTaskDaysOfWeek.All)
                 {
                     pdSectionSchedule.AddEntry(Messages.WLB_SUBSCRIPTION_DELIVERON, Messages.WLB_REPORT_EVERYDAY);
@@ -134,7 +118,7 @@ namespace XenAdmin.Controls.Wlb
                     pdSectionSchedule.AddEntry(Messages.WLB_SUBSCRIPTION_DELIVERON, WlbScheduledTask.DaysOfWeekL10N(localDaysOfWeek));
                 }
 
-                pdSectionSchedule.AddEntry(Messages.WLB_SUBSCRIPTION_RUNAT, HelpersGUI.DateTimeToString(localExecuteTime, Messages.DATEFORMAT_HMS, true));
+                pdSectionSchedule.AddEntry(Messages.WLB_SUBSCRIPTION_RUNAT, HelpersGUI.DateTimeToString(localRunTime, Messages.DATEFORMAT_HMS, true));
                 pdSectionSchedule.AddEntry(Messages.WLB_SUBSCRIPTION_STARTING, HelpersGUI.DateTimeToString(_subscription.EnableDate.ToLocalTime(), Messages.DATEFORMAT_DMY_LONG, true));
                 pdSectionSchedule.AddEntry(Messages.WLB_SUBSCRIPTION_ENDING, (_subscription.DisableDate == DateTime.MinValue ? Messages.WLB_REPORT_NEVER : HelpersGUI.DateTimeToString(_subscription.DisableDate.ToLocalTime(), Messages.DATEFORMAT_DMY_LONG, true)));
                 //pdSectionSchedule.Expand();
@@ -173,14 +157,11 @@ namespace XenAdmin.Controls.Wlb
             return range;
         }
 
-        /// <summary>
-        /// Reset subscription view
-        /// </summary>
-        public void ResetSubscriptionView(WlbReportSubscription subscription)
+        public void RefreshSubscriptionView(WlbReportSubscription subscription = null)
         {
-            this.ReportSubscription = subscription;
-            this.BuildPanel();
-            this.Visible = true;
+            if (subscription != null)
+                ReportSubscription = subscription;
+            BuildPanel();
         }
         
         #endregion
@@ -189,7 +170,7 @@ namespace XenAdmin.Controls.Wlb
 
         private void DeleteReportSubscription(object sender, EventArgs e)
         {
-            SendWlbConfigurationAction action = new SendWlbConfigurationAction(_pool, this._subscription.ToDictionary(), SendWlbConfigurationKind.DeleteReportSubscription);
+            SendWlbConfigurationAction action = new SendWlbConfigurationAction(Pool, this._subscription.ToDictionary(), SendWlbConfigurationKind.DeleteReportSubscription);
             using (var dialog = new ActionProgressDialog(action, ProgressBarStyle.Blocks))
             {
                 dialog.ShowCancel = true;
@@ -197,16 +178,12 @@ namespace XenAdmin.Controls.Wlb
             }
 
             if (action.Succeeded)
-            {
-                // Update treeView
-                OnChangeOK(this, e);
-            }
+                OnChangeOK?.Invoke(this, e);
         }
         #endregion
 
         #region Event Handlers
 
-        // Load report subscription view
         private void ReportSubscriptionView_Load(object sender, EventArgs e)
         {
             BuildPanel();
@@ -214,57 +191,37 @@ namespace XenAdmin.Controls.Wlb
 
         private void btnChange_Click(object sender, EventArgs e)
         {
-            // Make sure the pool is okay
-            if (!_pool.Connection.IsConnected)
+            if (!Pool.Connection.IsConnected)
             {
-                PoolConnectionLost(this, EventArgs.Empty);
+                PoolConnectionLost?.Invoke(this, EventArgs.Empty);
+                return;
             }
-            else
-            {
 
-                WlbReportSubscriptionDialog rpSubDialog = new WlbReportSubscriptionDialog(this._subscription.ReportDisplayName, _subscription, _pool);
-                DialogResult dr = rpSubDialog.ShowDialog();
-                if (dr == DialogResult.OK)
-                {
-                    // Update treeView
-                    OnChangeOK(this, e);
-                }
-            }
+            using (var rpSubDialog = new WlbReportSubscriptionDialog(_subscription.ReportDisplayName, _subscription, Pool))
+                if (rpSubDialog.ShowDialog() == DialogResult.OK)
+                    OnChangeOK?.Invoke(this, e);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-
-            // Make sure the pool is okay
-            if (!_pool.Connection.IsConnected)
+            if (!Pool.Connection.IsConnected)
             {
-                PoolConnectionLost(this, EventArgs.Empty);
+                PoolConnectionLost?.Invoke(this, EventArgs.Empty);
+                return;
             }
-            else
-            {
 
-                // Show "Are you sure..." dialog
-                DialogResult dr = new WlbDeleteReportSubscriptionDialog(string.Format(Messages.WLB_REPORT_DELETE_SUBSCRIPTION_QUERY, this._subscription.ReportDisplayName)).ShowDialog(this);
-                
-                // Do the deletion
-                if (dr == DialogResult.Yes)
-                {
+            using (var dr = new WarningDialog(
+                string.Format(Messages.WLB_REPORT_DELETE_SUBSCRIPTION_QUERY, _subscription.ReportDisplayName),
+                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
+            {
+                if (dr.ShowDialog(this) == DialogResult.Yes)
                     DeleteReportSubscription(this, e);
-                }
             }
         }
 
-        /// <summary>
-        /// Close button
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnClose_Click(object sender, EventArgs e)
         {
-            if (Close != null)
-            {
-                Close(this, e);
-            }
+            Close?.Invoke(this, e);
         }
 
         #endregion

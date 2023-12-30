@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using XenAdmin;
-using XenAdmin.Core;
 
 
 namespace XenAPI
@@ -75,10 +73,10 @@ namespace XenAPI
                 VLAN vlan = Connection.Resolve(VLAN_master_of);
                 if (vlan == null)
                     return "";
-                PIF slave = Connection.Resolve(vlan.tagged_PIF);
-                if (slave == null)
+                PIF member = Connection.Resolve(vlan.tagged_PIF);
+                if (member == null)
                     return "";
-                return slave.Name();
+                return member.Name();
             }
         }
 
@@ -114,21 +112,21 @@ namespace XenAPI
                 if (Connection == null)
                     return device;
 
-                List<PIF> slaves = new List<PIF>();
+                List<PIF> members = new List<PIF>();
                 foreach (Bond bond in Connection.ResolveAll(bond_master_of))
                 {
-                    slaves.AddRange(Connection.ResolveAll(bond.slaves));
+                    members.AddRange(Connection.ResolveAll(bond.slaves));
                 }
-                return BondSuffix(slaves);
+                return BondSuffix(members);
             }
         }
 
-        public static string BondSuffix(List<PIF> slaves)
+        public static string BondSuffix(List<PIF> members)
         {
             List<string> ids = new List<string>();
-            foreach (PIF slave in slaves)
+            foreach (PIF member in members)
             {
-                ids.Add(slave.device.Replace("eth", ""));
+                ids.Add(member.device.Replace("eth", ""));
             }
             ids.Sort();
             return string.Join("+", ids.ToArray());
@@ -213,23 +211,23 @@ namespace XenAPI
             return string.IsNullOrEmpty(managementPurpose) ? Messages.NETWORKING_PROPERTIES_PURPOSE_UNKNOWN : managementPurpose;
         }
 
-        public bool IsBondSlave()
+        public bool IsBondMember()
         {
-            return BondSlaveOf() != null;
+            return BondMemberOf() != null;
         }
 
         /// <summary>
-        /// Whether this is a bond slave, and the bond master is plugged.
+        /// Whether this is a bond member, and the bond interface is plugged.
         /// </summary>
-        public bool IsInUseBondSlave()
+        public bool IsInUseBondMember()
         {
-            Bond bond = BondSlaveOf();
+            Bond bond = BondMemberOf();
             if (bond == null)
                 return false;
-            PIF master = bond.Connection.Resolve(bond.master);
-            if (master == null)
+            PIF bondInterface = bond.Connection.Resolve(bond.master);
+            if (bondInterface == null)
                 return false;
-            return master.currently_attached;
+            return bondInterface.currently_attached;
         }
 
         public bool IsUsedByClustering()
@@ -238,17 +236,17 @@ namespace XenAPI
         }
 
         /// <summary>
-        /// Returns the Bond of which this PIF is a slave, or null if it is not so.
+        /// Returns the Bond of which this PIF is a member, or null if it is not so.
         /// </summary>
-        public Bond BondSlaveOf()
+        public Bond BondMemberOf()
         {
             return Connection == null ? null : Connection.Resolve(bond_slave_of);
         }
 
         /// <summary>
-        /// Returns the Bond of which this PIF is a master, or null if it is not so.
+        /// Returns the Bond of which this PIF is an interface, or null if it is not so.
         /// </summary>
-        public Bond BondMasterOf()
+        public Bond BondInterfaceOf()
         {
             return Connection == null || bond_master_of.Count == 0 ? null : Connection.Resolve(bond_master_of[0]);
         }
@@ -364,7 +362,7 @@ namespace XenAPI
             switch (ip_configuration_mode)
             {
                 case ip_configuration_mode.None:
-                    return Messages.PIF_NONE;
+                    return Messages.NONE_UPPER;
                 case ip_configuration_mode.DHCP:
                     return Messages.PIF_DHCP;
                 case ip_configuration_mode.Static:

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,6 +28,7 @@
  * SUCH DAMAGE.
  */
 
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using XenAPI;
@@ -40,6 +40,9 @@ namespace XenAdmin.Controls
     public partial class LoggedInLabel : UserControl
     {
         private IXenConnection connection;
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IXenConnection Connection
         {
             get
@@ -101,7 +104,7 @@ namespace XenAdmin.Controls
             labelLoggedInAs.Visible = true;
 
             // get the logged in username from the session to update the logged in label
-            if (connection.Session.IsLocalSuperuser || XenAdmin.Core.Helpers.GetMaster(connection).external_auth_type != Auth.AUTH_TYPE_AD)
+            if (connection.Session.IsLocalSuperuser || XenAdmin.Core.Helpers.GetCoordinator(connection).external_auth_type != Auth.AUTH_TYPE_AD)
             {
                 labelUsername.Text = connection.Session.UserFriendlyName();
             }

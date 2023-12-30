@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -44,8 +43,29 @@ namespace XenCenterLib.Compression
         /// </summary>
         public enum Type
         {
-            Gz,
-            Bz2
+            Gz
+        }
+
+        public static string StringOf(this Type t)
+        {
+            switch (t)
+            {
+                case Type.Gz:
+                    return "Gzip";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(t), t, null);
+            }
+        }
+
+        public static string FileExtension(this Type t)
+        {
+            switch (t)
+            {
+                case Type.Gz:
+                    return ".gz";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(t), t, null);
+            }
         }
 
         /// <summary>
@@ -58,10 +78,7 @@ namespace XenCenterLib.Compression
         public static CompressionStream Reader(Type compressionType, Stream compressedDataSource)
         {
             if (compressionType == Type.Gz)
-                return new DotNetZipGZipInputStream(compressedDataSource);
-
-            if (compressionType == Type.Bz2)
-                return new DotNetZipBZip2InputStream(compressedDataSource);
+                return new GZipInputStream(compressedDataSource);
 
             throw new NotSupportedException(String.Format("Type: {0} is not supported by CompressionStream Reader", compressionType));
         }
@@ -76,12 +93,43 @@ namespace XenCenterLib.Compression
         public static CompressionStream Writer(Type compressionType, Stream compressedDataTarget)
         {
             if (compressionType == Type.Gz)
-                return new DotNetZipGZipOutputStream(compressedDataTarget);
-
-            if (compressionType == Type.Bz2)
-                return new DotNetZipBZip2OutputStream(compressedDataTarget);
+                return new GZipOutputStream(compressedDataTarget);
 
             throw new NotSupportedException(String.Format("Type: {0} is not supported by CompressionStream Writer", compressionType));
+        }
+
+        public static void UncompressFile(string inputFile, string outputFile, Type method, Action cancellingDelegate = null)
+        {
+            using (var inputStream = new FileStream(inputFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            using (var outputStream = new FileStream(outputFile, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
+            {
+                using (var uncompressedStream = Reader(method, inputStream))
+                    StreamCopy(uncompressedStream, outputStream, cancellingDelegate);
+            }
+        }
+
+        public static void CompressFile(string inputFile, string outputFile, Type method, Action cancellingDelegate = null)
+        {
+            using (var inputStream = new FileStream(inputFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            using (var outputStream = new FileStream(outputFile, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None))
+            {
+                using (var compressedStream = Writer(method, outputStream))
+                    StreamCopy(inputStream, compressedStream, cancellingDelegate);
+            }
+        }
+
+        private static void StreamCopy(Stream input, Stream output, Action cancellingDelegate = null)
+        {
+            byte[] block = new byte[2 * 1024 * 1024];
+
+            int n;
+            while ((n = input.Read(block, 0, block.Length)) > 0)
+            {
+                cancellingDelegate?.Invoke();
+                output.Write(block, 0, n);
+            }
+
+            output.Flush();
         }
     }
 }

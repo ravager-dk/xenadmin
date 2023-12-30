@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -56,31 +55,32 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
             radioButtonFibreChannel.Tag = new SrWizardType_Hba();
             radioButtonNfsIso.Tag = new SrWizardType_NfsIso();
             radioButtonCifsIso.Tag = new SrWizardType_CifsIso();
-            radioButtonCslg.Tag = new SrWizardType_Cslg();
             radioButtonCifs.Tag = new SrWizardType_Cifs();
             radioButtonFcoe.Tag = new SrWizardType_Fcoe();
 
             _radioButtons = new[]
             {
                 radioButtonNfs, radioButtonIscsi, radioButtonFibreChannel,
-                radioButtonCslg, radioButtonCifs, radioButtonFcoe,
+                radioButtonCifs, radioButtonFcoe,
                 radioButtonNfsIso, radioButtonCifsIso
             };
-
         }
 
-        private void SetupDeprecationBanner(bool visible)
+        private void SetupDeprecationBanner(SrWizardType srWizardType)
         {
-            if(visible)
+            if (srWizardType is SrWizardType_Fcoe)
             {
-                deprecationBanner.AppliesToVersion = string.Format(Messages.XENSERVER_6_5, BrandManager.ProductVersion65);
-                deprecationBanner.BannerType = DeprecationBanner.Type.Removal;
-                deprecationBanner.FeatureName = Messages.ISL_SR;
-                deprecationBanner.LinkUri = HiddenFeatures.LinkLabelHidden ? null : new Uri(InvisibleMessages.ISL_DEPRECATION_URL);
+                deprecationBanner.AppliesToVersion = string.Format(Messages.STRING_SPACE_STRING,
+                    BrandManager.ProductBrand, BrandManager.ProductVersionPost82);
+                deprecationBanner.BannerType = DeprecationBanner.Type.Deprecation;
+                deprecationBanner.FeatureName = Messages.SOFTWARE_FCOE_STORAGE_REPOSITORIES;
+                deprecationBanner.LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
                 deprecationBanner.Visible = !HiddenFeatures.LinkLabelHidden;
             }
             else
+            {
                 deprecationBanner.Visible = false;
+            }
         }
 
         #region XenTabPage overrides
@@ -93,18 +93,21 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
 
         public override void PopulatePage()
         {
-            //Hide iSL radio button for Creedence or higher (StorageLink is not supported)
-            radioButtonCslg.Visible = false;
-
             radioButtonCifs.Visible = !Helpers.FeatureForbidden(Connection, Host.RestrictCifs);
 
-            radioButtonFcoe.Visible = Helpers.DundeeOrGreater(Connection);
+            radioButtonFcoe.Visible = true;
 
             foreach (var radioButton in _radioButtons)
             {
                 var frontend = (SrWizardType)radioButton.Tag;
                 frontend.ResetSrName(Connection);
-                frontend.AllowToCreateNewSr = SrToReattach == null && !DisasterRecoveryTask;
+
+                // these SR types have a blocked setter
+                if (!(frontend is SrWizardType_CifsIso || frontend is SrWizardType_NfsIso || frontend is SrWizardType_Cifs))
+                {
+                    frontend.AllowToCreateNewSr = SrToReattach == null && !DisasterRecoveryTask;
+                }
+
                 frontend.DisasterRecoveryTask = DisasterRecoveryTask;
                 frontend.SrToReattach = SrToReattach;
             }
@@ -113,8 +116,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
 
             if (Connection == null)
             {
-                // disable all except CSLG
-                Array.ForEach(_radioButtons, r => r.Enabled = r.Checked = ((SrWizardType)r.Tag).Type == SR.SRTypes.cslg);
+                Array.ForEach(_radioButtons, r => r.Enabled = r.Checked = false);
                 _matchingFrontends = 1;
                 return;
             }
@@ -155,18 +157,6 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
 
                     if (sm == null)
                         radioButton.Visible = false;
-                    else if (radioButton == radioButtonCslg && SrToReattach.type == SR.SRTypes.netapp.ToString())
-                    {
-                        _matchingFrontends++;
-                        radioButtonCslg.Checked = true;
-                        radioButtonCslg.Tag = ((SrWizardType_Cslg)radioButtonCslg.Tag).ToNetApp();
-                    }
-                    else if (radioButton == radioButtonCslg && SrToReattach.type == SR.SRTypes.equal.ToString())
-                    {
-                        _matchingFrontends++;
-                        radioButtonCslg.Checked = true;
-                        radioButtonCslg.Tag = ((SrWizardType_Cslg)radioButtonCslg.Tag).ToEqualLogic();
-                    }
                     else if (wizardType.PossibleTypes.Contains(SrToReattach.GetSRType(true)))
 
                     {
@@ -198,7 +188,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
             }
 
             labelVirtualDiskStorage.Visible = radioButtonNfs.Visible || radioButtonIscsi.Visible ||
-                                             radioButtonFibreChannel.Visible || radioButtonCslg.Visible ||
+                                             radioButtonFibreChannel.Visible ||
                                              radioButtonCifs.Visible || radioButtonFcoe.Visible;
 
             labelISOlibrary.Visible = radioButtonNfsIso.Visible || radioButtonCifsIso.Visible;
@@ -244,9 +234,9 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
                 foreach (RadioButton rb in _radioButtons)
                     rb.Checked = rb == radioButton;
 
-                SrWizardType frontend = (SrWizardType)radioButton.Tag;
+                var frontend = (SrWizardType)radioButton.Tag;
 
-                SetupDeprecationBanner(frontend is SrWizardType_Cslg);
+                SetupDeprecationBanner(frontend);
 
                 if (frontend.IsEnhancedSR && Helpers.FeatureForbidden(Connection, Host.RestrictStorageChoices))
                 {
@@ -254,7 +244,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
                     selectedStoreTypeLabel.Text = string.Empty;
                     SRBlurb.Visible = false;
                     upsellPage1.Visible = true;
-                    upsellPage1.SetAllTexts(Messages.UPSELL_BLURB_ENHANCEDSR, InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL);
+                    upsellPage1.BlurbText = Messages.UPSELL_BLURB_ENHANCEDSR;
                     m_allowNext = false;
                 }
                 else
@@ -273,18 +263,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         private SM GetSmForRadioButton(RadioButton radioButton)
         {
             SrWizardType wizardType = (SrWizardType)radioButton.Tag;
-            SM sm = SM.GetByType(Connection, wizardType.Type.ToString());
-
-            //check also for Netapp and EqualLogic because these don't have dedicated buttons
-            if (radioButton == radioButtonCslg)
-            {
-                if (sm == null)
-                    sm = SM.GetByType(Connection, SR.SRTypes.netapp.ToString());
-                if (sm == null)
-                    sm = SM.GetByType(Connection, SR.SRTypes.equal.ToString());
-            }
-            return sm;
+            return SM.GetByType(Connection, wizardType.Type.ToString());
         }
-
     }
 }

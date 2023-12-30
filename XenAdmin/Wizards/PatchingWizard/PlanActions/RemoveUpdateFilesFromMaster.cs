@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -38,18 +37,20 @@ using System;
 
 namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 {
-    class RemoveUpdateFileFromMasterPlanAction : PlanActionWithSession
+    class RemoveUpdateFileFromCoordinatorPlanAction : PlanActionWithSession
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly List<HostUpdateMapping> patchMappings = new List<HostUpdateMapping>();
         private readonly XenServerPatch xenServerPatch;
-        private readonly Host master;
+        private readonly Host coordinator;
 
-        public RemoveUpdateFileFromMasterPlanAction(Host master, List<HostUpdateMapping> patchMappings, XenServerPatch xenServerPatch)
-            : base(master.Connection)
+        public RemoveUpdateFileFromCoordinatorPlanAction(Host coordinator, List<HostUpdateMapping> patchMappings, XenServerPatch xenServerPatch)
+            : base(coordinator.Connection)
         {
             this.patchMappings = patchMappings;
             this.xenServerPatch = xenServerPatch;
-            this.master = master;
+            this.coordinator = coordinator;
         }
 
         protected override void RunWithSession(ref Session session)
@@ -58,7 +59,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             {
                 var existing = (from HostUpdateMapping hum in patchMappings
                     let xpm = hum as XenServerPatchMapping
-                    where xpm != null && xpm.Matches(master, xenServerPatch)
+                    where xpm != null && xpm.Matches(coordinator, xenServerPatch)
                     select xpm).FirstOrDefault();
 
                 if (!Helpers.ElyOrGreater(session.Connection))
@@ -75,7 +76,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                         poolPatch = session.Connection.Cache.Pool_patches.FirstOrDefault(pp => string.Equals(pp.uuid, xenServerPatch.Uuid, StringComparison.InvariantCultureIgnoreCase));
                     }
 
-                    if (poolPatch != null && poolPatch.opaque_ref != null)
+                    if (mapping != null && poolPatch != null && poolPatch.opaque_ref != null)
                     {
                         AddProgressStep(string.Format(Messages.UPDATES_WIZARD_REMOVING_UPDATES_FROM_POOL, poolPatch.Name()));
                         var task = Pool_patch.async_pool_clean(session, mapping.Pool_patch.opaque_ref);

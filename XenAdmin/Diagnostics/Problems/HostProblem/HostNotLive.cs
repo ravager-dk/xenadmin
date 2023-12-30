@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -45,15 +44,9 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
         {
         }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.UPDATES_WIZARD_HOST_NOT_LIVE, ServerName); }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_HOST_NOT_LIVE, ServerName);
 
-        public override string HelpMessage
-        {
-            get { return CanStartHost() ? Messages.START_HOST : string.Empty; }
-        }
+        public override string HelpMessage => CanStartHost() ? Messages.START_HOST : string.Empty;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
@@ -69,7 +62,7 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
             Program.Invoke(Program.MainWindow, delegate
                {
                    var powerOnCommand = new PowerOnHostCommand(Program.MainWindow, Server);
-                   canStartHost = powerOnCommand.CanExecute();
+                   canStartHost = powerOnCommand.CanRun();
                });
             return canStartHost;
         }
@@ -85,17 +78,8 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
             this.host = host;
         }
 
-        public override string Title
-        {
-            get { return Check.Description; }
-        }
+        public override string Title => Check.Description;
 
-        public override string Description
-        {
-            get
-            {
-                return string.Format(Messages.UPDATES_WIZARD_HOST_NOT_LIVE_WARNING, host);
-            }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_HOST_NOT_LIVE_WARNING, host);
     }
 }

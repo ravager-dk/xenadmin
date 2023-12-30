@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,30 +28,26 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Core;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class HAUnprotectVMAction : PureAsyncAction
+    public class HAUnprotectVMAction : AsyncAction
     {
 
         public HAUnprotectVMAction(VM vm)
             : base(vm.Connection, string.Format(Messages.ACTION_HA_UNPROTECT_VM_TITLE, Helpers.GetName(vm),
-            Helpers.RestartPriorityI18n(XenAPI.VM.HA_Restart_Priority.DoNotRestart)), Messages.ACTION_HA_UNPROTECT_VM_DESCRIPTION)
+            Helpers.RestartPriorityI18n(VM.HaRestartPriority.DoNotRestart)), Messages.ACTION_HA_UNPROTECT_VM_DESCRIPTION)
         {
             VM = vm;
-
+            ApiMethodsToRoleCheck.Add("VM.set_ha_restart_priority");
         }
-
 
         protected override void Run()
         {
-            XenAPI.VM.set_ha_restart_priority(Session, VM.opaque_ref, XenAPI.VM.RESTART_PRIORITY_DO_NOT_RESTART);
+            VM.set_ha_restart_priority(Session, VM.opaque_ref, VM.RESTART_PRIORITY_DO_NOT_RESTART);
             Description = Messages.COMPLETED;
         }
     }

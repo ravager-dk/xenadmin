@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Controls;
 using XenAPI;
-using XenAdmin.Core;
-using System.Collections.ObjectModel;
 using System.Windows.Forms;
 
 namespace XenAdmin.Commands
@@ -47,21 +42,21 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecuteCore()
+        protected override bool CanRunCore()
         {
             List<Host> draggedHosts = GetDraggedItemsAsXenObjects<Host>();
 
             // user must drag to XenCenter Node
             if (draggedHosts.Count > 0 && TargetNode != null && TargetNode.Tag == null)
             {
-                return new RemoveHostFromPoolCommand(MainWindowCommandInterface, draggedHosts).CanExecute();
+                return new RemoveHostFromPoolCommand(MainWindowCommandInterface, draggedHosts).CanRun();
             }
             return false;
         }
 
-        protected override void ExecuteCore()
+        protected override void RunCore()
         {
-            new RemoveHostFromPoolCommand(MainWindowCommandInterface, GetDraggedItemsAsXenObjects<Host>()).Execute();
+            new RemoveHostFromPoolCommand(MainWindowCommandInterface, GetDraggedItemsAsXenObjects<Host>()).Run();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -70,10 +69,10 @@ namespace XenAdmin.Commands
         public NewFolderCommand(IMainWindow mainWindow, Folder folder, Control parent)
             : base(mainWindow, folder)
         {
-            SetParent(parent);
+            Parent = parent;
         }
 
-        private void Execute(Folder folder, IWin32Window ownerWindow)
+        private void Run(Folder folder, IWin32Window ownerWindow)
         {
             IXenConnection connection;
             String name;
@@ -137,11 +136,9 @@ namespace XenAdmin.Commands
         {
             sender.Completed -= Action_Completed;
 
-            var action = sender as CreateFolderAction;
-            if (action != null && action.Succeeded)
+            if (sender is CreateFolderAction action && action.Succeeded)
             {
-                if (FoldersCreated != null)
-                    FoldersCreated(action.NewPaths);
+                FoldersCreated?.Invoke(action.NewPaths);
 
                 Program.MainWindow.TrySelectNewNode(delegate(object o)
                 {
@@ -151,12 +148,12 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            Execute((Folder)selection[0].XenObject, Parent);
+            Run((Folder)selection[0].XenObject, Parent);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return (selection.ContainsOneItemOfType<Folder>()
                     || selection.ContainsOneItemOfType<GroupingTag>(t => t.Grouping is OrganizationViewFolders))
@@ -173,25 +170,13 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.NEW_FOLDER;
-            }
-        }
+        public override string MenuText => Messages.NEW_FOLDER;
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return Images.StaticImages._000_Folder_open_h32bit_16;
-            }
-        }
+        public override Image MenuImage => Images.StaticImages._000_Folder_open_h32bit_16;
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
-            return ConnectionAvailable() ? base.GetCantExecuteReasonCore(item) : Messages.FOLDER_NO_CONNECTION;
+            return ConnectionAvailable() ? base.GetCantRunReasonCore(item) : Messages.FOLDER_NO_CONNECTION;
         }
     }
 }

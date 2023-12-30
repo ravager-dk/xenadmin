@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -46,24 +45,28 @@ namespace XenAdmin.Dialogs.VMDialogs
         {
             InitializeComponent();
             this.vm = vm;
-            srPicker1.DoubleClickOnRow += srPicker1_DoubleClickOnRow;
-            Host affinity = vm.Home();
-            srPicker1.Usage = SrPicker.SRPickerType.MoveOrCopy;
-            //this has to be set after ImportTemplate, otherwise the usage will be reset to VM
-            var vdis = (from VBD vbd in vm.Connection.ResolveAll(vm.VBDs)
-                                           where vbd.GetIsOwner()
-                                           let vdi = vm.Connection.Resolve(vbd.VDI)
-                                           where vdi != null
-                                           select vdi).ToArray();
-            srPicker1.SetExistingVDIs(vdis);
-            srPicker1.Connection = vm.Connection;
-            srPicker1.DiskSize = vm.TotalVMSize();
-            srPicker1.SetAffinity(affinity);
-            srPicker1.Invalidate();
-            srPicker1.selectDefaultSROrAny();
-
-            EnableMoveButton();
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            EnableMoveButton();
+
+            var vdis = (from VBD vbd in vm.Connection.ResolveAll(vm.VBDs)
+                where vbd.GetIsOwner() && vbd.type != vbd_type.CD
+                let vdi = vm.Connection.Resolve(vbd.VDI)
+                where vdi != null
+                select vdi).ToArray();
+
+            srPicker1.Populate(SrPicker.SRPickerType.Move, vm.Connection, vm.Home(), null, vdis);
+        }
+
+        private void EnableMoveButton()
+        {
+            buttonMove.Enabled = srPicker1.SR != null;
+        }
+
+        #region Control event handlers
 
         private void srPicker1_DoubleClickOnRow(object sender, EventArgs e)
         {
@@ -71,16 +74,22 @@ namespace XenAdmin.Dialogs.VMDialogs
                 buttonMove.PerformClick();
         }
 
+        private void buttonRescan_Click(object sender, EventArgs e)
+        {
+            srPicker1.ScanSRs();
+        }
+
         private void buttonMove_Click(object sender, EventArgs e)
         {
-            var action = new VMMoveAction(vm, srPicker1.SR, vm.GetStorageHost(false), vm.Name());
+            var action = new VMMoveAction(vm, srPicker1.SR, vm.GetStorageHost(false));
             action.RunAsync();
             Close();
         }
 
-        private void EnableMoveButton()
+        private void srPicker1_CanBeScannedChanged()
         {
-            buttonMove.Enabled = srPicker1.SR != null;
+            buttonRescan.Enabled = srPicker1.CanBeScanned;
+            EnableMoveButton();
         }
 
         private void srPicker1_SelectedIndexChanged(object sender, EventArgs e)
@@ -92,5 +101,7 @@ namespace XenAdmin.Dialogs.VMDialogs
         {
             Close();
         }
+
+        #endregion
     }
 }

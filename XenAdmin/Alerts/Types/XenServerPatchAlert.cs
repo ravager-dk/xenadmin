@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using XenAdmin.Network;
-using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAPI;
 using System.Text;
@@ -43,8 +41,10 @@ namespace XenAdmin.Alerts
 {
     public class XenServerPatchAlert : XenServerUpdateAlert
     {
-        public XenServerPatch Patch;
-        public XenServerVersion NewServerVersion;
+        public const string IgnorePatchKey = "XenCenter.IgnorePatches";
+
+        public readonly XenServerPatch Patch;
+        public readonly XenServerVersion NewServerVersion;
        
         /// <summary>
         /// Can we apply this alert. Calling this sets the CannotApplyReason where applicable
@@ -57,13 +57,13 @@ namespace XenAdmin.Alerts
 
                 if (distinctHosts != null)
                 {
-                    if (distinctHosts.All(IsHostLicenseRestricted))
+                    if (distinctHosts.All(h => Helpers.FeatureForbidden(h, Host.RestrictHotfixApply)))
                     {
                         CannotApplyReason = Messages.MANUAL_CHECK_FOR_UPDATES_UNLICENSED_INFO;
                         return false;
                     }
 
-                    if (distinctHosts.Any(IsHostLicenseRestricted))
+                    if (distinctHosts.Any(h => Helpers.FeatureForbidden(h, Host.RestrictHotfixApply)))
                     {
                         CannotApplyReason = Messages.MANUAL_CHECK_FOR_UPDATES_PARTIAL_UNLICENSED_INFO;
                         return true;
@@ -77,14 +77,6 @@ namespace XenAdmin.Alerts
 
         public string CannotApplyReason { get; set; }
 
-        private bool IsHostLicenseRestricted(Host host)
-        {
-            if(host == null)
-                return false;
-            
-            return !host.CanApplyHotfixes();
-        }
-
         /// <summary>
         /// Creates a patch alert
         ///  </summary>
@@ -95,18 +87,12 @@ namespace XenAdmin.Alerts
             Patch = patch;
             NewServerVersion = newServerVersion;
             if (NewServerVersion != null)
-                RequiredXenCenterVersion = Updates.GetRequiredXenCenterVersion(NewServerVersion);
+                RequiredClientVersion = Updates.GetRequiredClientVersion(NewServerVersion);
             _priority = patch.Priority;
             _timestamp = Patch.TimeStamp;
         }
 
-        public override string WebPageLabel
-        {
-            get
-            {
-                return Patch.Url;
-            }
-        }
+        public override string WebPageLabel => Patch.Url;
 
         public override AlertPriority Priority
         {
@@ -130,10 +116,10 @@ namespace XenAdmin.Alerts
                     sb.AppendLine();
                     sb.AppendFormat(Messages.PATCH_INSTALLATION_SIZE, Util.DiskSizeString(Patch.InstallationSize));
                 }
-                if (RequiredXenCenterVersion != null)
+                if (RequiredClientVersion != null)
                 {
                     sb.AppendLine();
-                    sb.AppendFormat(Messages.PATCH_NEEDS_NEW_XENCENTER, RequiredXenCenterVersion.Version);
+                    sb.AppendFormat(Messages.PATCH_NEEDS_NEW_XENCENTER, BrandManager.BrandConsole, RequiredClientVersion.Version);
                 }
                 return sb.ToString();
             }
@@ -154,21 +140,9 @@ namespace XenAdmin.Alerts
             get { return () => Program.OpenURL(Patch.Url); }
         }
 
-        public override string FixLinkText
-        {
-            get
-            {
-                return Messages.ALERT_NEW_PATCH_DOWNLOAD;
-            }
-        }
+        public override string FixLinkText => Messages.ALERT_NEW_PATCH_DOWNLOAD;
 
-        public override string HelpID
-        {
-            get
-            {
-                return "XenServerPatchAlert";
-            }
-        }
+        public override string HelpID => "XenServerPatchAlert";
 
         public override string Title
         {
@@ -188,30 +162,40 @@ namespace XenAdmin.Alerts
 
             Dictionary<string, string> other_config = pool.other_config;
 
-            if (other_config.ContainsKey(Updates.IgnorePatchKey))
+            if (other_config.ContainsKey(IgnorePatchKey))
             {
-                List<string> current = new List<string>(other_config[Updates.IgnorePatchKey].Split(','));
+                List<string> current = new List<string>(other_config[IgnorePatchKey].Split(','));
                 if (current.Contains(Patch.Uuid, StringComparer.OrdinalIgnoreCase))
                     return true;
             }
             return false;
         }
 
+        protected override void Dismiss(Dictionary<string, string> otherConfig)
+        {
+            if (otherConfig.ContainsKey(IgnorePatchKey))
+            {
+                var current = new List<string>(otherConfig[IgnorePatchKey].Split(','));
+                if (current.Contains(Patch.Uuid, StringComparer.OrdinalIgnoreCase))
+                    return;
+
+                current.Add(Patch.Uuid);
+                otherConfig[IgnorePatchKey] = string.Join(",", current.ToArray());
+            }
+            else
+            {
+                otherConfig.Add(IgnorePatchKey, Patch.Uuid);
+            }
+        }
+
         public override bool Equals(Alert other)
         {
-            if (other is XenServerPatchAlert)
-            {
-                return string.Equals(Patch.Uuid, ((XenServerPatchAlert)other).Patch.Uuid, StringComparison.OrdinalIgnoreCase);
-            }
+            if (other is XenServerPatchAlert patchAlert)
+                return string.Equals(Patch.Uuid, patchAlert.Patch.Uuid, StringComparison.OrdinalIgnoreCase);
+
             return base.Equals(other);
         }
 
-        public bool ShowAsNewVersion
-        {
-            get
-            {
-                return NewServerVersion != null && !NewServerVersion.PresentAsUpdate;
-            }
-        }
+        public bool ShowAsNewVersion => NewServerVersion != null && !NewServerVersion.PresentAsUpdate;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,21 +32,21 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class EjectHostFromPoolAction:PureAsyncAction
+    public class EjectHostFromPoolAction : AsyncAction
     {
-        public EjectHostFromPoolAction(Pool pool,Host hostToEject) : base(pool.Connection, string.Format(Messages.REMOVING_SERVER_FROM_POOL, hostToEject.Name(), pool.Name()))
+        public EjectHostFromPoolAction(Pool pool, Host hostToEject) : base(pool.Connection, string.Format(Messages.REMOVING_SERVER_FROM_POOL, hostToEject.Name(), pool.Name()))
         {
-            this.Pool = pool;
-            this.Host = hostToEject;
-            this.Description = Messages.WAITING;
+            Pool = pool;
+            Host = hostToEject;
+            Description = Messages.WAITING;
+            ApiMethodsToRoleCheck.Add("pool.eject");
         }
 
         protected override void Run()
         {
-            this.Description = Messages.POOLCREATE_REMOVING;
-            XenAPI.Pool.eject(this.Session, this.Host.opaque_ref);
-            this.Description = Messages.POOLCREATE_REMOVED;
+            Description = Messages.POOLCREATE_REMOVING;
+            Pool.eject(Session, Host.opaque_ref);
+            Description = Messages.POOLCREATE_REMOVED;
         }
-
     }
 }

@@ -238,7 +238,7 @@
     <value>4</value>
   </data>
   <data name="label3.Text" xml:space="preserve">
-    <value>手動モードでは、CD-ROM または PXE ブート サーバー上の [XenServer] インストーラーの指示に従って、各サーバーを順番にアップグレードする必要があります。管理者は、プール内のすべてのサーバーについてこの操作を繰り返す必要があります。</value>
+    <value>手動モードでは、CD-ROM または PXE ブート サーバー上の {0} インストーラーの指示に従って、各サーバーを順番にアップグレードする必要があります。管理者は、プール内のすべてのサーバーについてこの操作を繰り返す必要があります。</value>
   </data>
   <data name="&gt;&gt;label3.Name" xml:space="preserve">
     <value>label3</value>
@@ -266,15 +266,6 @@
   </data>
   <data name="tableLayoutPanel2.ColumnCount" type="System.Int32, mscorlib">
     <value>2</value>
-  </data>
-  <data name="comboBoxUpgradeMethod.Items" xml:space="preserve">
-    <value>HTTP</value>
-  </data>
-  <data name="comboBoxUpgradeMethod.Items1" xml:space="preserve">
-    <value>NFS</value>
-  </data>
-  <data name="comboBoxUpgradeMethod.Items2" xml:space="preserve">
-    <value>FTP</value>
   </data>
   <data name="comboBoxUpgradeMethod.Location" type="System.Drawing.Point, System.Drawing">
     <value>3, 3</value>

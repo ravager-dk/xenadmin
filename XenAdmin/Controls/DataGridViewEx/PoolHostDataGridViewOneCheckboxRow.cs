@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Core;
-using XenAdmin.Properties;
 using XenAPI;
-using System.ComponentModel;
 
 namespace XenAdmin.Controls.DataGridViewEx
 {
@@ -93,7 +89,9 @@ namespace XenAdmin.Controls.DataGridViewEx
                 }
             }
         }
-        
+
+        private readonly IXenObject _xenObject;
+
         /// <summary>
         /// If the row is either a pool row or else a stanadlone host row
         /// </summary>
@@ -131,7 +129,7 @@ namespace XenAdmin.Controls.DataGridViewEx
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return _xenObject?.GetHashCode() ?? 0;
         }
 
         public CheckState Checked
@@ -146,11 +144,10 @@ namespace XenAdmin.Controls.DataGridViewEx
             }
         }
 
-        protected PoolHostDataGridViewOneCheckboxRow(){}
-
         protected PoolHostDataGridViewOneCheckboxRow(Pool pool)
             : base(pool)
         {
+            _xenObject = pool;
             SetupCells();
         }
 
@@ -162,6 +159,7 @@ namespace XenAdmin.Controls.DataGridViewEx
         protected PoolHostDataGridViewOneCheckboxRow(Host host, bool hasPool)
             : base(host, hasPool)
         {
+            _xenObject = host;
             SetupCells();
         }
 
@@ -191,12 +189,12 @@ namespace XenAdmin.Controls.DataGridViewEx
             if (Tag is Pool)
             {
                 Pool pool = (Pool)Tag;
-                Host master = pool.Connection.Resolve(pool.master);
+                Host coordinator = pool.Connection.Resolve(pool.master);
                 if( _poolCheckBoxCell.Value == null )
                     Checked = CheckState.Unchecked;
                 SetCollapseIcon();
                 _nameCell.Value = pool;
-                UpdateAdditionalDetailsForPool(pool, master);
+                UpdateAdditionalDetailsForPool(pool, coordinator);
 
             }
             else if (Tag is Host)
@@ -211,7 +209,7 @@ namespace XenAdmin.Controls.DataGridViewEx
             }
         }
 
-        protected virtual void UpdateAdditionalDetailsForPool(Pool pool, Host master) { }
+        protected virtual void UpdateAdditionalDetailsForPool(Pool pool, Host coordinator) { }
 
         protected virtual void UpdateAdditionalDetailsForHost(Host host) { }
     }

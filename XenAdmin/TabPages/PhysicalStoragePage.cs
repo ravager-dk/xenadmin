@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,8 +34,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing;
-
-using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
@@ -65,6 +62,8 @@ namespace XenAdmin.TabPages
             base.Text = Messages.STORAGE_TAB_TITLE;
             PBD_CollectionChangedWithInvoke=Program.ProgramInvokeHandler(PBD_CollectionChanged);
 
+            trimButton.Command = new TrimSRCommand();
+            newSRButton.Command = new NewSRCommand();
         }
 
         public override string HelpID => "TabPageStorage";

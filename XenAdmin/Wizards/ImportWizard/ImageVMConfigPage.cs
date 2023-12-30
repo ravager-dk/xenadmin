@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,41 +30,43 @@
 
 using System;
 using XenAdmin.Controls;
-using XenCenterLib;
-
+using XenAPI;
+using XenModel;
 
 namespace XenAdmin.Wizards.ImportWizard
 {
-	internal partial class ImageVMConfigPage : XenTabPage
-	{
-		private const ulong KB = 1024;
-		private const ulong MB = (KB * 1024);
-		private const ulong GB = (MB * 1024);
-        
+    internal partial class ImageVMConfigPage : XenTabPage
+    {
+        private const ulong KB = 1024;
+        private const ulong MB = (KB * 1024);
+        private const ulong GB = (MB * 1024);
+
         private bool m_buttonNextEnabled;
 
-		public ImageVMConfigPage()
-		{
-			InitializeComponent();
+        public ImageVMConfigPage()
+        {
+            InitializeComponent();
+            m_upDownMemory.Minimum = m_upDownMemory.Increment = (decimal)VM.DEFAULT_MEM_MIN_IMG_IMPORT / Util.BINARY_MEGA;
+            m_upDownMemory.Maximum = (decimal)VM.DEFAULT_MEM_ALLOWED / Util.BINARY_MEGA;
             m_ctrlError.HideError();
-		}
+        }
 
-		#region Base class (XenTabPage) overrides
+        #region Base class (XenTabPage) overrides
 
-		/// <summary>
-		/// Gets the page's title (headline)
-		/// </summary>
-		public override string PageTitle { get { return Messages.IMAGE_DEFINITION_PAGE_TITLE; } }
+        /// <summary>
+        /// Gets the page's title (headline)
+        /// </summary>
+        public override string PageTitle => Messages.IMAGE_DEFINITION_PAGE_TITLE;
 
-		/// <summary>
-		/// Gets the page's label in the (left hand side) wizard progress panel
-		/// </summary>
-		public override string Text { get { return Messages.IMAGE_DEFINITION_PAGE_TEXT; } }
+        /// <summary>
+        /// Gets the page's label in the (left hand side) wizard progress panel
+        /// </summary>
+        public override string Text => Messages.IMAGE_DEFINITION_PAGE_TEXT;
 
-		/// <summary>
-		/// Gets the value by which the help files section for this page is identified
-		/// </summary>
-		public override string HelpID { get { return "VMConfig"; } }
+        /// <summary>
+        /// Gets the value by which the help files section for this page is identified
+        /// </summary>
+        public override string HelpID => "VMConfig";
 
         protected override bool ImplementsIsDirty()
         {
@@ -73,15 +74,15 @@ namespace XenAdmin.Wizards.ImportWizard
         }
 
         public override void PopulatePage()
-		{
-			//CA-61385: remove wim support for Boston
-			m_groupBoxAddSpace.Visible = false;
-			m_groupBoxAddSpace.Enabled = IsWim;
-			m_textBoxVMName.Text = string.Empty;
-			m_upDownMemory.Value = m_upDownMemory.Minimum;
-			m_upDownCpuCount.Value = m_upDownCpuCount.Minimum;
-			m_upDownAddSpace.Value = m_upDownAddSpace.Minimum;
-		}
+        {
+            //CA-61385: remove wim support for Boston
+            m_groupBoxAddSpace.Visible = false;
+            m_groupBoxAddSpace.Enabled = IsWim;
+            m_textBoxVMName.Text = string.Empty;
+            m_upDownMemory.Value = m_upDownMemory.Minimum;
+            m_upDownCpuCount.Value = m_upDownCpuCount.Minimum;
+            m_upDownAddSpace.Value = m_upDownAddSpace.Minimum;
+        }
 
         public override void SelectDefaultControl()
         {
@@ -93,65 +94,66 @@ namespace XenAdmin.Wizards.ImportWizard
             return m_buttonNextEnabled;
         }
 
-		#endregion
+        #endregion
 
-		#region Accessors
+        #region Accessors
 
-		public bool IsWim { private get; set; }
+        public bool IsWim { internal get; set; }
 
-		public string VmName { get { return m_textBoxVMName.Text; } }
+        public string VmName => m_textBoxVMName.Text;
 
-		public ulong CpuCount { get { return (ulong)m_upDownCpuCount.Value; } }
+        public ulong CpuCount => (ulong)m_upDownCpuCount.Value;
 
-		public ulong Memory { get { return (ulong)m_upDownMemory.Value; } }
+        public ulong Memory => (ulong)m_upDownMemory.Value;
 
-		public ulong AdditionalSpace { get { return m_groupBoxAddSpace.Enabled ? (ulong)m_upDownAddSpace.Value * GB : 0; } }
-        
-		#endregion
+        public ulong AdditionalSpace => m_groupBoxAddSpace.Visible && m_groupBoxAddSpace.Enabled ? (ulong)m_upDownAddSpace.Value * GB : 0;
 
-		#region Private Methods
+        #endregion
+
+        #region Private Methods
 
         private bool CheckVmNameValid(string name, out string error)
-		{
-			error = string.Empty;
+        {
+            error = string.Empty;
 
-			if (String.IsNullOrEmpty(name))
-				return false;
+            if (String.IsNullOrEmpty(name))
+                return false;
 
-			if (!PathValidator.IsFileNameValid(name))
-			{
-				error = Messages.IMPORT_SELECT_APPLIANCE_PAGE_ERROR_INVALID_PATH;
-				return false;
-			}
-			return true;
-		}
 
-		#endregion
+            if (!PathValidator.IsFileNameValid(name, out string invalidNameMsg))
+            {
+                error = invalidNameMsg;
+                return false;
+            }
+            return true;
+        }
 
-		#region Control event handlers
+        #endregion
 
-		private void m_textBoxVMName_TextChanged(object sender, EventArgs e)
-		{
+        #region Control event handlers
+
+        private void m_textBoxVMName_TextChanged(object sender, EventArgs e)
+        {
             m_buttonNextEnabled = m_ctrlError.PerformCheck((out string error) => CheckVmNameValid(m_textBoxVMName.Text, out error));
             OnPageUpdated();
-			IsDirty = true;
-		}
-		
-		private void m_upDownMemory_ValueChanged(object sender, EventArgs e)
-		{
-			IsDirty = true;
-		}
+            IsDirty = true;
+        }
 
-		private void m_upDownCpuCount_ValueChanged(object sender, EventArgs e)
-		{
-			IsDirty = true;
-		}
+        private void m_upDownMemory_ValueChanged(object sender, EventArgs e)
+        {
+            IsDirty = true;
+        }
 
-		private void m_upDownAddSpace_ValueChanged(object sender, EventArgs e)
-		{
-			IsDirty = true;
-		}
+        private void m_upDownCpuCount_ValueChanged(object sender, EventArgs e)
+        {
+            IsDirty = true;
+        }
 
-		#endregion
+        private void m_upDownAddSpace_ValueChanged(object sender, EventArgs e)
+        {
+            IsDirty = true;
+        }
+
+        #endregion
     }
 }

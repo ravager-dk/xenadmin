@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,6 +67,10 @@ namespace XenAPI
         /// VDI
         /// </summary>
         VDI,
+        /// <summary>
+        /// Certificate
+        /// </summary>
+        Certificate,
         unknown
     }
 
@@ -101,6 +104,8 @@ namespace XenAPI
                     return "PVS_proxy";
                 case cls.VDI:
                     return "VDI";
+                case cls.Certificate:
+                    return "Certificate";
                 default:
                     return "unknown";
             }

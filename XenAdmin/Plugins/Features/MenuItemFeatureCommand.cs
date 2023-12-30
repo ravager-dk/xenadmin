@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,19 +28,15 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using XenAPI;
 using XenAdmin.Actions;
 using XenAdmin.Model;
-using XenAdmin.Network;
-using XenAdmin.Core;
 using XenAdmin.XenSearch;
 using System.Windows.Forms;
-using System.Diagnostics;
 using XenAdmin.Commands;
+
 
 namespace XenAdmin.Plugins
 {
@@ -63,7 +58,7 @@ namespace XenAdmin.Plugins
             _serialization = serialization;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (!_menuItemFeature.Enabled)
             {
@@ -110,7 +105,7 @@ namespace XenAdmin.Plugins
             return selection.Count > 0;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             if (_serialization == PluginSerializationLevel.global && !GlobalPlugins.Contains(_menuItemFeature))
             {
@@ -224,12 +219,8 @@ namespace XenAdmin.Plugins
             }
         }
 
-        public override string ToolTipText
-        {
-            get
-            {
-                return _menuItemFeature.Tooltip ?? string.Empty;
-            }
-        }
+        public override string EnabledToolTipText => _menuItemFeature.Tooltip;
+
+        public override string DisabledToolTipText => _menuItemFeature.Tooltip;
     }
 }

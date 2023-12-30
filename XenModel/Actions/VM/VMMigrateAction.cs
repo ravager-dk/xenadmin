@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,37 +29,36 @@
  */
 
 using System;
+using System.Collections.Generic;
 using XenAPI;
 using XenAdmin.Core;
 
 
 namespace XenAdmin.Actions.VMActions
 {
-    public class VMMigrateAction : PureAsyncAction
+    public class VMMigrateAction : AsyncAction
     {
 
         public VMMigrateAction(VM vm, Host destinationHost)
-            : base(vm.Connection, GetTitle(vm, destinationHost))
+            : base(vm.Connection, "")
         {
-            this.Description = Messages.ACTION_PREPARING;
-            this.VM = vm;
-            this.Host = destinationHost;
-            this.Pool = Core.Helpers.GetPool(vm.Connection);
-        }
+            VM = vm;
+            Host = destinationHost;
+            Pool = Helpers.GetPool(vm.Connection);
 
-        private static string GetTitle(VM vm, Host toHost)
-        {
-            Host residentOn = vm.Connection.Resolve(vm.resident_on);
-            
-            return residentOn == null
-                ? string.Format(Messages.ACTION_VM_MIGRATING_NON_RESIDENT, vm.Name(), toHost.Name())
-                : string.Format(Messages.ACTION_VM_MIGRATING_RESIDENT, vm.Name(), Helpers.GetName(residentOn), toHost.Name());
+            var residentOn = vm.Connection.Resolve(vm.resident_on);
+
+            Title = residentOn == null
+                ? string.Format(Messages.ACTION_VM_MIGRATING_NON_RESIDENT, vm.NameWithLocation(), Host.NameWithLocation())
+                : string.Format(Messages.ACTION_VM_MIGRATING_RESIDENT, vm.Name(), residentOn.NameWithLocation(), Host.NameWithLocation());
+
+            ApiMethodsToRoleCheck.Add("VM.async_pool_migrate");
         }
 
         protected override void Run()
         {
-            this.Description = Messages.ACTION_VM_MIGRATING;
-            RelatedTask = XenAPI.VM.async_live_migrate(Session, VM.opaque_ref, Host.opaque_ref);
+            RelatedTask = VM.async_pool_migrate(Session, VM.opaque_ref, Host.opaque_ref, new Dictionary<string, string> { ["live"] = "true" });
+
             try
             {
                 PollToCompletion();
@@ -68,17 +66,15 @@ namespace XenAdmin.Actions.VMActions
             catch (Failure f)
             {
                 if (f.ErrorDescription.Count >= 5 && f.ErrorDescription[0] == "VM_MIGRATE_FAILED"
-                    && f.ErrorDescription[4].Contains("VDI_MISSING"))
+                                                  && f.ErrorDescription[4].Contains("VDI_MISSING"))
                 {
                     throw new Exception(Messages.MIGRATE_EJECT_TOOLS_ON_UPGRADE);
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
-            this.Description = Messages.ACTION_VM_MIGRATED;
+            Description = Messages.ACTION_VM_MIGRATED;
         }
     }
 }

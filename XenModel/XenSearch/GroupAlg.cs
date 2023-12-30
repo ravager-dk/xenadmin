@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,6 +33,7 @@ using System.Collections.Generic;
 using XenAdmin.Model;
 using XenAdmin.Network;
 using System.Collections;
+using System.Linq;
 using XenAPI;
 using XenAdmin.Core;
 using XenCenterLib;
@@ -108,11 +108,14 @@ namespace XenAdmin.XenSearch
             if (XenAdminConfigManager.Provider.ObjectIsHidden(o.opaque_ref))
                 return true;
 
-            if (o is VM)
+            if (o is VM vm)
             {
-                VM vm = o as VM;
-                if (vm.is_control_domain
-                    || !vm.Show(XenAdminConfigManager.Provider.ShowHiddenVMs))
+                if (vm.Connection.Cache.Hosts.Any(Host.RestrictVtpm) &&
+                    vm.is_a_template &&
+                    vm.platform.TryGetValue("vtpm", out var result) && result.ToLower() == "true")
+                    return true;
+
+                if (vm.is_control_domain || !vm.Show(XenAdminConfigManager.Provider.ShowHiddenVMs))
                     return true;
 
                 // Hide VMs on non-live hosts
@@ -120,9 +123,8 @@ namespace XenAdmin.XenSearch
                 if (host != null && !host.IsLive())
                     return true;
             }
-            else if (o is SR)
+            else if (o is SR sr)
             {
-                SR sr = o as SR;
                 if (!sr.Show(XenAdminConfigManager.Provider.ShowHiddenVMs) || sr.IsToolsSR())
                     return true;
 
@@ -131,16 +133,13 @@ namespace XenAdmin.XenSearch
                 if (host != null && !host.IsLive())
                     return true;
             }
-            else if (o is XenAPI.Network)
+            else if (o is XenAPI.Network network)
             {
-                XenAPI.Network network = o as XenAPI.Network;
-
                 return !network.Show(XenAdminConfigManager.Provider.ShowHiddenVMs);
             }
-            else if (o is Folder)
+            else if (o is Folder folder)
             {
                 // Hide the root folder
-                Folder folder = o as Folder;
                 return folder.IsRootFolder;
             }
 
@@ -167,7 +166,7 @@ namespace XenAdmin.XenSearch
                 return -1;
             if (other == null)
                 return 1;
-            return Compare(one.key, other.key);
+            return Compare(one.Key, other.Key);
         }
 
         /// <summary>
@@ -265,7 +264,7 @@ namespace XenAdmin.XenSearch
             if (o is Host)
                 return "30";
             VM vm = o as VM;
-            if (vm != null && vm.is_a_real_vm())
+            if (vm != null && vm.IsRealVm())
                 return "40";
             return o.GetType().ToString();
         }
@@ -294,29 +293,28 @@ namespace XenAdmin.XenSearch
 
     public class GroupKey : IEquatable<GroupKey>
     {
-        public Grouping grouping;
-        public object key;
+        public readonly Grouping Grouping;
+        public readonly object Key;
 
         public GroupKey(Grouping grouping, object key)
         {
-            this.grouping = grouping;
-            this.key = key;
+            Grouping = grouping;
+            Key = key;
         }
 
         public override int GetHashCode()
         {
-            return key.GetHashCode();
+            return Key.GetHashCode();
         }
 
         public bool Equals(GroupKey other)
         {
-            return other != null && grouping.Equals(other.grouping) && key.Equals(other.key);
+            return other != null && Grouping.Equals(other.Grouping) && Key.Equals(other.Key);
         }
 
         public override bool Equals(object obj)
         {
-            GroupKey other = obj as GroupKey;
-            return other != null && Equals(other);
+            return obj is GroupKey other && Equals(other);
         }
     }
 
@@ -350,7 +348,7 @@ namespace XenAdmin.XenSearch
 
             foreach (GroupKey group in groups)
             {
-                IAcceptGroups subAdapter = adapter.Add(group.grouping, group.key, indent);
+                IAcceptGroups subAdapter = adapter.Add(group.Grouping, group.Key, indent);
 
                 if (subAdapter == null)
                     continue;

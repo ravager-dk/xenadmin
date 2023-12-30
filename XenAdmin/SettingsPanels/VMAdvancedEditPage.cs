@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,15 +29,9 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-
 using XenAdmin.Core;
-
 using XenAPI;
 using XenAdmin.Actions;
 using System.Globalization;
@@ -58,6 +51,7 @@ namespace XenAdmin.SettingsPanels
         {
             InitializeComponent();
 
+            CPSOptimizationRadioButton.Text = string.Format(CPSOptimizationRadioButton.Text, BrandManager.CompanyNameLegacy);
             Text = Messages.ADVANCED_OPTIONS;
 
             m_invalidParamToolTip = new ToolTip
@@ -86,13 +80,7 @@ namespace XenAdmin.SettingsPanels
             }
         }
 
-        public Image Image
-        {
-            get
-            {
-                return Properties.Resources._002_Configure_h32bit_16;
-            }
-        }
+        public Image Image => Images.StaticImages._002_Configure_h32bit_16;
 
         public void SetXenObjects(IXenObject orig, IXenObject clone)
         {
@@ -155,9 +143,16 @@ namespace XenAdmin.SettingsPanels
             if (!ValidToSave)
             {
                 HelpersGUI.ShowBalloonMessage(ShadowMultiplierTextBox,
-                   Messages.SHADOW_MEMORY_MULTIPLIER_VALUE,
-                   m_invalidParamToolTip);
+                   m_invalidParamToolTip, Messages.SHADOW_MEMORY_MULTIPLIER_VALUE);
             }
+        }
+
+        public void HideLocalValidationMessages()
+        {
+            if (ShadowMultiplierTextBox != null)
+            {
+                m_invalidParamToolTip.Hide(ShadowMultiplierTextBox);
+            }        
         }
 
         public void Cleanup()

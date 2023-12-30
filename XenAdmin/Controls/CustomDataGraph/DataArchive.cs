@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using XenAPI;
 
 namespace XenAdmin.Controls.CustomDataGraph
@@ -71,7 +68,7 @@ namespace XenAdmin.Controls.CustomDataGraph
 
             set.Points.Sort();
 
-            var other = Sets.FirstOrDefault(s => s.Uuid == set.Uuid);
+            var other = Sets.FirstOrDefault(s => s.Id == set.Id);
 
             if (other == null)
             {
@@ -104,16 +101,15 @@ namespace XenAdmin.Controls.CustomDataGraph
         /// <summary>
         /// Asserts off the event thread, for use when copying off the updater thread. Invokes onto event thread to update the sets safely.
         /// </summary>
-        /// <param name="SetsAdded"></param>
-        internal void CopyLoad(List<DataSet> SetsAdded)
+        internal void CopyLoad(List<DataSet> setsAdded, List<Data_source> datasources)
         {
             Program.AssertOffEventThread();
-            if (SetsAdded == null)
+            if (setsAdded == null)
                 return;
-            foreach (DataSet set in SetsAdded)
+            foreach (DataSet set in setsAdded)
             {
                 Palette.LoadSetColor(set);
-                DataSet copy = DataSet.Create(set.Uuid, set.XenObject, set.Show, set.TypeString);
+                DataSet copy = new DataSet(set.XenObject, set.Hide, set.DataSourceName, datasources);
                 foreach (DataPoint p in set.Points)
                     copy.AddPoint(new DataPoint(p.X,p.Y));
 

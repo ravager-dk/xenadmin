@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAdmin.Wizards.NewVMWizard;
-using XenAdmin.Properties;
 using System.Drawing;
-using System.Collections.ObjectModel;
 using System.Windows.Forms;
 
 
@@ -68,7 +63,7 @@ namespace XenAdmin.Commands
 
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             VM template = null;
 
@@ -95,15 +90,15 @@ namespace XenAdmin.Commands
                 host = selection[0].HostAncestor;
             }
 
-            Execute(connection, host, template);
+            Run(connection, host, template);
         }
 
-        private void Execute(IXenConnection connection, Host DefaultAffinity, VM DefaultTemplate)
+        private void Run(IXenConnection connection, Host DefaultAffinity, VM DefaultTemplate)
         {
             MainWindowCommandInterface.ShowPerConnectionWizard(connection, new NewVMWizard(connection, DefaultTemplate, DefaultAffinity));
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             Host hostAncestor = selection.HostAncestor;
             Pool poolAncestor = selection.PoolAncestor;

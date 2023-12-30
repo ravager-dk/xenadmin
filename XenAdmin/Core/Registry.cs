@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -106,12 +105,12 @@ namespace XenAdmin.Core
 
             try
             {
-                using (var masterKey = baseKey.OpenSubKey(subKey))
+                using (var mainKey = baseKey.OpenSubKey(subKey))
                 {
-                    if (masterKey == null)
+                    if (mainKey == null)
                         return null;
 
-                    var v = masterKey.GetValue(k);
+                    var v = mainKey.GetValue(k);
                     if (v != null)
                         return v.ToString();
                 }
@@ -143,29 +142,120 @@ namespace XenAdmin.Core
         /// Reads a string value k under XENCENTER_LOCAL_KEYS, targeting the 32-bit
         /// registry view, and trying CurrentUser first and then LocalMachine
         /// </summary>
-        private static string ReadInstalledKey(string k)
+        private static string ReadInstalledKey(string k, RegistryView rView = RegistryView.Default)
         {
-            return ReadRegistryValue(RegistryHive.CurrentUser, XENCENTER_LOCAL_KEYS, k, RegistryView.Registry32) ??
-                   ReadRegistryValue(RegistryHive.LocalMachine, XENCENTER_LOCAL_KEYS, k, RegistryView.Registry32);
+            var val = ReadRegistryValue(RegistryHive.CurrentUser, XENCENTER_LOCAL_KEYS, k, rView);
+
+            if (string.IsNullOrEmpty(val))
+                val = ReadRegistryValue(RegistryHive.LocalMachine, XENCENTER_LOCAL_KEYS, k, rView);
+
+            return string.IsNullOrEmpty(val) ? null : val;
         }
 
-        public static string HealthCheckIdentityTokenDomainName => ReadString(HEALTH_CHECK_IDENTITY_TOKEN_DOMAIN_NAME);
+        public static string HiddenFeatures => ReadInstalledKey(HIDDEN_FEATURES, RegistryView.Registry32);
 
-        public static string HealthCheckUploadTokenDomainName => ReadString(HEALTH_CHECK_UPLOAD_TOKEN_DOMAIN_NAME);
+        public static string AdditionalFeatures => ReadInstalledKey(ADDITIONAL_FEATURES, RegistryView.Registry32);
 
-        public static string HealthCheckUploadGrantTokenDomainName => ReadString(HEALTH_CHECK_UPLOAD_GRANT_TOKEN_DOMAIN_NAME);
+        internal static bool ShowExtraYumRepos
+        {
+            get
+            {
+                var str = ReadInstalledKey(SHOW_EXTRA_YUM_REPOS);
+                return !string.IsNullOrEmpty(str) && str.Trim() == "1";
+            }
+        }
 
-        public static string HealthCheckUploadDomainName => ReadString(HEALTH_CHECK_UPLOAD_DOMAIN_NAME);
+        public static string GetCustomClientUpdatesXmlLocation()
+        {
+            return ReadInstalledKey(CUSTOM_CLIENT_UPDATES_XML_LOCATION);
+        }
 
-        public static string HealthCheckDiagnosticDomainName => ReadString(HEALTH_CHECK_DIAGNOSTIC_DOMAIN_NAME);
+        public static string GetCustomCfuLocation()
+        {
+            return ReadInstalledKey(CUSTOM_CFU_LOCATION);
+        }
 
-        public static string HealthCheckProductKey => ReadString(HEALTH_CHECK_PRODUCT_KEY);
+        public static string GetClientUpdatesQueryParam()
+        {
+            return ReadInstalledKey(CLIENT_UPDATES_QUERY_PARAM);
+        }
 
-        public static string HiddenFeatures => ReadInstalledKey(HIDDEN_FEATURES);
+        public static string GetCustomFileServicePrefix()
+        {
+            return ReadInstalledKey(CUSTOM_FILESERVICE_PREFIX);
+        }
 
-        public static string AdditionalFeatures => ReadInstalledKey(ADDITIONAL_FEATURES);
+        public static string GetCustomClientIdUrl()
+        {
+            return ReadInstalledKey(CUSTOM_CLIENT_ID_URL);
+        }
 
-        public static string CustomUpdatesXmlLocation => ReadString(CUSTOM_UPDATES_XML_LOCATION);
+        public static string GetCustomTokenUrl()
+        {
+            return ReadInstalledKey(CUSTOM_TOKEN_URL);
+        }
+
+        public static string GetYumRepoBaseBin()
+        {
+            return ReadInstalledKey(YUM_REPO_BASE_BIN);
+        }
+
+        public static string GetYumRepoBaseSource()
+        {
+            return ReadInstalledKey(YUM_REPO_BASE_SRC);
+        }
+
+        public static string GetYumRepoEarlyAccessBin()
+        {
+            return ReadInstalledKey(YUM_REPO_EARLY_ACCESS_BIN);
+        }
+
+        public static string GetYumRepoEarlyAccessSource()
+        {
+            return ReadInstalledKey(YUM_REPO_EARLY_ACCESS_SRC);
+        }
+
+        public static string GetYumRepoNormalBin()
+        {
+            return ReadInstalledKey(YUM_REPO_NORMAL_BIN);
+        }
+
+        public static string GetYumRepoNormalSource()
+        {
+            return ReadInstalledKey(YUM_REPO_NORMAL_SRC);
+        }
+
+        public static string GetYumRepoInternalBin()
+        {
+            return ReadInstalledKey(YUM_REPO_INTERNAL_BIN);
+        }
+
+        public static string GetYumRepoInternalSource()
+        {
+            return ReadInstalledKey(YUM_REPO_INTERNAL_SRC);
+        }
+
+        public static string GetYumRepoDevTeamBin()
+        {
+            return ReadInstalledKey(YUM_REPO_DEV_TEAM_BIN);
+        }
+
+        public static string GetYumRepoDevTeamSource()
+        {
+            return ReadInstalledKey(YUM_REPO_DEV_TEAM_SRC);
+        }
+
+        private const string YUM_REPO_BASE_BIN = "YumRepoBaseBinOverride";
+        private const string YUM_REPO_BASE_SRC = "YumRepoBaseSourceOverride";
+        private const string YUM_REPO_EARLY_ACCESS_BIN = "YumRepoEarlyAccessBinOverride";
+        private const string YUM_REPO_EARLY_ACCESS_SRC = "YumRepoEarlyAccessSourceOverride";
+        private const string YUM_REPO_NORMAL_BIN = "YumRepoNormalBinOverride";
+        private const string YUM_REPO_NORMAL_SRC = "YumRepoNormalSourceOverride";
+        private const string YUM_REPO_DEV_TEAM_BIN = "YumRepoDevTeamBin";
+        private const string YUM_REPO_DEV_TEAM_SRC = "YumRepoDevTeamSource";
+        private const string YUM_REPO_INTERNAL_BIN = "YumRepoInternalBin";
+        private const string YUM_REPO_INTERNAL_SRC = "YumRepoInternalSource";
+        private const string SHOW_EXTRA_YUM_REPOS = "ShowExtraYumRepos";
 
         public static string CustomHelpUrl => ReadString(HELP_URL_OVERRIDE);
 
@@ -176,20 +266,19 @@ namespace XenAdmin.Core
         private const string FORCE_SYSTEM_FONTS = "ForceSystemFonts";
         private const string DISABLE_PLUGINS = "DisablePlugins";
         private const string DONT_SUDO = "DontSudo";
-        private const string XENCENTER_LOCAL_KEYS = @"SOFTWARE\" + BrandManager.COMPANY_NAME_SHORT + @"\" + BrandManager.BRAND_CONSOLE;
+        private static readonly string XENCENTER_LOCAL_KEYS = $"SOFTWARE\\{BrandManager.ProductBrand}\\{BrandManager.BrandConsole}";
         private const string PSExecutionPolicyKey = @"Software\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell";
         private const string PSExecutionPolicyName = "ExecutionPolicy";
         private const string PowerShellKey = @"Software\Microsoft\PowerShell\1";
         private const string PowerShellStamp = "Install";
-        private const string HEALTH_CHECK_IDENTITY_TOKEN_DOMAIN_NAME = "HealthCheckIdentityTokenDomainName";
-        private const string HEALTH_CHECK_UPLOAD_TOKEN_DOMAIN_NAME = "HealthCheckUploadTokenDomainName";
-        private const string HEALTH_CHECK_UPLOAD_GRANT_TOKEN_DOMAIN_NAME = "HealthCheckUploadGrantTokenDomainName";
-        private const string HEALTH_CHECK_UPLOAD_DOMAIN_NAME = "HealthCheckUploadDomainName";
-        private const string HEALTH_CHECK_DIAGNOSTIC_DOMAIN_NAME = "HealthCheckDiagnosticDomainName";
-        private const string HEALTH_CHECK_PRODUCT_KEY = "HealthCheckProductKey";
         private const string HIDDEN_FEATURES = "HiddenFeatures";
         private const string ADDITIONAL_FEATURES = "AdditionalFeatures";
-        private const string CUSTOM_UPDATES_XML_LOCATION = "CheckForUpdatesXmlLocationOverride";
+        private const string CUSTOM_CLIENT_UPDATES_XML_LOCATION = "ClientUpdatesXmlLocationOverride";
+        private const string CUSTOM_CFU_LOCATION = "CfuLocationOverride";
+        private const string CLIENT_UPDATES_QUERY_PARAM = "ClientUpdatesQueryParam";
+        private const string CUSTOM_FILESERVICE_PREFIX = "PatchUrlPrefixOverride";
+        private const string CUSTOM_CLIENT_ID_URL = "ClientIdUrlOverride";
+        private const string CUSTOM_TOKEN_URL = "TokenUrlOverride";
         private const string HELP_URL_OVERRIDE = "HelpUrlOverride";
     }
 

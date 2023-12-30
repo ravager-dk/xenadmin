@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,6 +28,8 @@
  * SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
+using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAdmin.Diagnostics.Problems;
 using XenAdmin.Diagnostics.Problems.UtilityProblem;
@@ -42,11 +43,12 @@ namespace XenAdmin.Diagnostics.Checks
 
         protected override Problem RunCheck()
         {
-            var action = Updates.CreateDownloadUpdatesXmlAction(Updates.CheckForUpdatesUrl);
+            var action = new DownloadCfuAction(true, true, Updates.UserAgent,
+                XenAdminConfigManager.Provider.GetCustomCfuLocation() ?? BrandManager.CfuUrl, true);
 
             try
             {
-                action.RunExternal(action.Session);
+                action.RunSync(action.Session);
             }
             catch
             {
@@ -56,17 +58,8 @@ namespace XenAdmin.Diagnostics.Checks
             return action.Succeeded ? null : new CfuNotAvailableProblem(this);
         }
 
-        public override string Description
-        {
-            get
-            {
-                return Messages.CFU_STATUS_CHECK_DESCRIPTION;
-            }
-        }
+        public override string Description => Messages.CFU_STATUS_CHECK_DESCRIPTION;
 
-        public override IXenObject XenObject
-        {
-            get { return null; }
-        }
+        public override IList<IXenObject> XenObjects => null;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using XenAdmin.Properties;
+
 
 namespace XenAdmin.Controls
 {
@@ -59,11 +58,11 @@ namespace XenAdmin.Controls
         private int shadowMargin = 2;
 
         // static for good perfomance 
-        private static Image shadowDownRight = Resources.tshadowdownright;
-        static Image shadowDownLeft = Resources.tshadowdownleft;
-        static Image shadowDown = Resources.tshadowdown;
-        static Image shadowRight = Resources.tshadowright;
-        static Image shadowTopRight = Resources.tshadowtopright;
+        private static Image shadowDownRight = Images.StaticImages.tshadowdownright;
+        private static Image shadowDownLeft = Images.StaticImages.tshadowdownleft;
+        private static Image shadowDown = Images.StaticImages.tshadowdown;
+        private static Image shadowRight = Images.StaticImages.tshadowright;
+        private static Image shadowTopRight = Images.StaticImages.tshadowtopright;
 
         public ShadowPanel()
         {

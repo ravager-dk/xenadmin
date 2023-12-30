@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,18 +33,6 @@
 //                providers.
 // ============================================================================
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Security;
-using System.Threading;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Xml.Schema;
-using System.Text;
 
 namespace XenOvf.Definitions
 {

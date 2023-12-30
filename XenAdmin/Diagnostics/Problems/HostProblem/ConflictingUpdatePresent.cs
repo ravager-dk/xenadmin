@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -45,17 +44,8 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
             this.conflictingUpdates = conflictingUpdates;
         }
 
-        public override string Description
-        {
-            get 
-            {
-                return string.Format(Messages.UPDATES_WIZARD_PRECHECK_FAILED_CONFLICTING_UPDATE, ServerName, conflictingUpdates);
-            }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_PRECHECK_FAILED_CONFLICTING_UPDATE, ServerName, conflictingUpdates);
 
-        public override string HelpMessage
-        {
-            get { return string.Empty; }
-        }
+        public override string HelpMessage => string.Empty;
     }
 }

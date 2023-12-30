@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -139,11 +138,8 @@ namespace XenAdmin.Controls.XenSearch
         public void Populate(Search search)
         {
             ClearItems();
-            if (search != null && search.Query != null)
-                scope = search.Query.QueryScope;
-            else
-                scope = null;
-            search.PopulateAdapters(this);
+            scope = search?.Query?.QueryScope;
+            search?.PopulateAdapters(this);
         }
     }
 }

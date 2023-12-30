@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -90,7 +88,7 @@ namespace XenAdmin.Dialogs
 
             Host =connection.Resolve(pool.master);
             if (Host == null)
-                throw new Failure(Failure.INTERNAL_ERROR, "Could not resolve master");
+                throw new Failure(Failure.INTERNAL_ERROR, "Could not resolve coordinator");
 
             BlurbLabel.Text = string.Format(Messages.NETWORKING_PROPERTIES_BLURB_POOL, ObjectName);
 
@@ -251,7 +249,7 @@ namespace XenAdmin.Dialogs
                     if (connection.ResolveAll(network.PIFs).Find(p => !p.IsTunnelAccessPIF()) == null)  // no PIFs, or all the PIFs are tunnel access PIFs so the network is a CHIN
                         continue;
                     PIF pif = FindPIFForThisHost(network.PIFs);
-                    if (pif != null && pif.IsInUseBondSlave())
+                    if (pif != null && pif.IsInUseBondMember())
                         continue;
                     if (!inusemap.ContainsKey(network))
                         inusemap[network] = null;
@@ -442,14 +440,8 @@ namespace XenAdmin.Dialogs
             }
             catch (Failure)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Warning,
-                        Messages.NETWORK_RECONFIG_CONNECTION_LOST,
-                        Messages.XENCENTER)))
-                {
+                using (var dlg = new WarningDialog(Messages.NETWORK_RECONFIG_CONNECTION_LOST))
                     dlg.ShowDialog(this);
-                }
                 this.Close();
                 return;
             }
@@ -495,15 +487,15 @@ namespace XenAdmin.Dialogs
             {
                 if (displayWarning)
                 {
-                    string title = Pool == null ? Messages.NETWORKING_PROPERTIES_WARNING_CHANGING_MANAGEMENT_HOST 
-                        : Messages.NETWORKING_PROPERTIES_WARNING_CHANGING_MANAGEMENT_POOL;
+                    string title = string.Format(Pool == null
+                            ? Messages.NETWORKING_PROPERTIES_WARNING_CHANGING_MANAGEMENT_HOST
+                            : Messages.NETWORKING_PROPERTIES_WARNING_CHANGING_MANAGEMENT_POOL,
+                        BrandManager.BrandConsole);
 
                     DialogResult dialogResult;
-                    using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(SystemIcons.Warning, title),
-                            "NetworkingPropertiesPMIWarning",
+                    using (var dlg = new WarningDialog(title,
                             new ThreeButtonDialog.TBDButton(Messages.NETWORKING_PROPERTIES_CHANGING_MANAGEMENT_CONTINUE, DialogResult.OK),
-                            ThreeButtonDialog.ButtonCancel))
+                            ThreeButtonDialog.ButtonCancel){HelpNameSetter = "NetworkingPropertiesPMIWarning"})
                     {
                         dialogResult = dlg.ShowDialog(this);
                     }
@@ -635,16 +627,6 @@ namespace XenAdmin.Dialogs
             return (XenAPI.Network)((NetworkingPropertiesPage)verticalTabs.Items[0]).NetworkComboBox.SelectedItem;
         }
 
-        private void NetworkingProperties_HelpButtonClicked(object sender, CancelEventArgs e)
-        {
-            HelpManager.Launch("NetworkingProperties");
-        }
-
-        private void NetworkingProperties_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            HelpManager.Launch("NetworkingProperties");
-        }
-
         private void splitContainer_Panel1_Resize(object sender, EventArgs e)
         {
             ResizeVerticalTabs(verticalTabs.Items.Count);
@@ -668,7 +650,7 @@ namespace XenAdmin.Dialogs
             Rectangle b = e.Bounds;
 
             // draw Delete icon
-            Image deleteIcon = Properties.Resources._000_Abort_h32bit_16;
+            Image deleteIcon = Images.StaticImages._000_Abort_h32bit_16;
             if (deleteIcon != null)
             {
                 page.DeleteIconBounds = new Rectangle(b.Right - deleteIcon.Width - ((32 - deleteIcon.Width) / 2),

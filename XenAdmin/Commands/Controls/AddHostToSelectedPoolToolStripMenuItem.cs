@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,7 +35,6 @@ using XenAdmin.Network;
 using XenAdmin.Core;
 using System.Windows.Forms;
 using XenAPI;
-using XenAdmin.Properties;
 
 
 namespace XenAdmin.Commands
@@ -77,7 +75,7 @@ namespace XenAdmin.Commands
             {
                 if (Helpers.GetPool(c) == null)
                 {
-                    Host host = Helpers.GetMaster(c);
+                    Host host = Helpers.GetCoordinator(c);
 
                     if (host != null)
                     {
@@ -141,7 +139,7 @@ namespace XenAdmin.Commands
             {
             }
 
-            protected override bool CanExecuteCore(SelectedItemCollection selection)
+            protected override bool CanRunCore(SelectedItemCollection selection)
             {
                 if (selection.Count == 1)
                 {

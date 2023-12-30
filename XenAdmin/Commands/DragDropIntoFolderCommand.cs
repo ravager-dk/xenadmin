@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAdmin.Controls;
 using XenAdmin.Model;
 using XenAPI;
@@ -49,7 +46,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecuteCore()
+        protected override bool CanRunCore()
         {
             Folder targetFolder = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Folder>();
 
@@ -58,13 +55,7 @@ namespace XenAdmin.Commands
                 DraggedObjectsAreValid();
         }
 
-        public override VirtualTreeNode HighlightNode
-        {
-            get
-            {
-                return GetTargetNodeAncestor<Folder>();
-            }
-        }
+        public override VirtualTreeNode HighlightNode => GetTargetNodeAncestor<Folder>();
 
         private bool DraggedObjectsAreValid()
         {
@@ -159,7 +150,7 @@ namespace XenAdmin.Commands
             return output;
         }
 
-        protected override void ExecuteCore()
+        protected override void RunCore()
         {
             Folder targetFolder = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Folder>();
 

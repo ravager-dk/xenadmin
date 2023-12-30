@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,79 +31,64 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using XenAPI;
 using System.IO;
 using System.Xml;
 using XenAdmin.Core;
 using System.Diagnostics;
 using System.Net;
-using System.Text;
+using System.Net.Cache;
 
 
 namespace XenAdmin.Actions
 {
-    public class DownloadUpdatesXmlAction : AsyncAction
+    public class DownloadClientUpdatesXmlAction : DownloadUpdatesXmlAction
     {
-        private const string XenCenterVersionsNode = "xencenterversions";
-        private const string XenServerVersionsNode = "serverversions";
-        private const string PatchesNode = "patches";
-        private const string ConflictingPatchesNode = "conflictingpatches";
-        private const string RequiredPatchesNode = "requiredpatches";
-        private const string ConflictingPatchNode = "conflictingpatch";
-        private const string RequiredPatchNode = "requiredpatch";
-
-
-        public List<XenCenterVersion> XenCenterVersions { get; private set; }
-        public List<XenServerVersion> XenServerVersions { get; private set; }
-        public List<XenServerPatch> XenServerPatches { get; private set; }
-
-        public List<XenServerVersion> XenServerVersionsForAutoCheck
-        {
-            get
-            {
-                if(_checkForServerVersion)
-                {
-                    return XenServerVersions;
-                }
-                return new List<XenServerVersion>();
-            }
-        }
+        private const string ClientVersionsNode = "versions";
 
         private readonly bool _checkForXenCenter;
-        private readonly bool _checkForServerVersion;
-        private readonly bool _checkForPatches;
-        private readonly string _checkForUpdatesUrl;
-        private readonly string _userAgent;
-        private readonly string _userAgentId;
 
-        public DownloadUpdatesXmlAction(bool checkForXenCenter, bool checkForServerVersion, bool checkForPatches, string userAgent, string userAgentId, string checkForUpdatesUrl)
-            : base(null, "_get_updates", "_get_updates", true)
+        public DownloadClientUpdatesXmlAction(bool checkForXenCenter, string userAgent, string xmlLocationUrl, bool suppressHistory)
+            : base(userAgent, xmlLocationUrl, suppressHistory)
         {
-            Debug.Assert(checkForUpdatesUrl != null, "Parameter checkForUpdatesUrl should not be null. This class does not default its value anymore.");
-            Debug.Assert(!string.IsNullOrWhiteSpace(userAgent) && !string.IsNullOrWhiteSpace(userAgentId));
-
-            XenServerPatches = new List<XenServerPatch>();
-            XenServerVersions = new List<XenServerVersion>();
-            XenCenterVersions = new List<XenCenterVersion>();
-
             _checkForXenCenter = checkForXenCenter;
-            _checkForServerVersion = checkForServerVersion;
-            _checkForPatches = checkForPatches;
-            _checkForUpdatesUrl = checkForUpdatesUrl;
-            _userAgent = userAgent;
-            _userAgentId = userAgentId;
+            Title = Description = string.Format(Messages.AVAILABLE_UPDATES_CHECKING, BrandManager.BrandConsole);
         }
+
+        public List<ClientVersion> ClientVersions { get; } = new List<ClientVersion>();
 
         protected override void Run()
         {
-            this.Description = Messages.AVAILABLE_UPDATES_SEARCHING;
+            try
+            {
+                XmlDocument xdoc = FetchCheckForUpdatesXml();
 
-            XmlDocument xdoc = FetchCheckForUpdatesXml(_checkForUpdatesUrl);
+                GetXenCenterVersions(xdoc);
 
-            GetXenCenterVersions(xdoc);
-            GetXenServerPatches(xdoc);
-            GetXenServerVersions(xdoc);
+                Description = Messages.COMPLETED;
+            }
+            catch (Exception e)
+            {
+                if (e is System.Net.Sockets.SocketException)
+                {
+                    Description = Messages.AVAILABLE_UPDATES_NETWORK_ERROR;
+                }
+                else if (!string.IsNullOrWhiteSpace(e.Message))
+                {
+                    string errorText = e.Message.Trim();
+                    errorText = System.Text.RegularExpressions.Regex.Replace(errorText, @"\r\n+", "");
+                    Description = string.Format(Messages.AVAILABLE_UPDATES_ERROR, errorText);
+                }
+                else
+                {
+                    Description = Messages.AVAILABLE_UPDATES_INTERNAL_ERROR;
+                }
 
+                //if we had originally wanted it to be hidden, make it visible now so the error is shown
+                if (SuppressHistory)
+                    SuppressHistory = false;
+
+                throw;
+            }
         }
 
         private void GetXenCenterVersions(XmlDocument xdoc)
@@ -112,35 +96,105 @@ namespace XenAdmin.Actions
             if (!_checkForXenCenter)
                 return;
 
-            foreach (XmlNode versions in xdoc.GetElementsByTagName(XenCenterVersionsNode))
+            foreach (XmlNode versions in xdoc.GetElementsByTagName(ClientVersionsNode))
             {
                 foreach (XmlNode version in versions.ChildNodes)
                 {
-                    string version_lang = "";
-                    string name = "";
+                    string versionLang = string.Empty;
+                    string name = string.Empty;
                     bool latest = false;
-                    bool latest_cr = false;
-                    string url = "";
-                    string timestamp = "";
+                    bool latestCr = false;
+                    string url = string.Empty;
+                    string sourceUrl = string.Empty;
+                    string timestamp = string.Empty;
+                    string checksum = string.Empty;
 
                     foreach (XmlAttribute attrib in version.Attributes)
                     {
                         if (attrib.Name == "value")
-                            version_lang = attrib.Value;
+                            versionLang = attrib.Value;
                         else if (attrib.Name == "name")
                             name = attrib.Value;
                         else if (attrib.Name == "latest")
                             latest = attrib.Value.ToUpperInvariant() == bool.TrueString.ToUpperInvariant();
                         else if (attrib.Name == "latestcr")
-                            latest_cr = attrib.Value.ToUpperInvariant() == bool.TrueString.ToUpperInvariant();
+                            latestCr = attrib.Value.ToUpperInvariant() == bool.TrueString.ToUpperInvariant();
                         else if (attrib.Name == "url")
                             url = attrib.Value;
+                        else if (attrib.Name == "sourceUrl")
+                            sourceUrl = attrib.Value;
                         else if (attrib.Name == "timestamp")
                             timestamp = attrib.Value;
+                        else if (attrib.Name == "checksum")
+                            checksum = attrib.Value;
                     }
 
-                    XenCenterVersions.Add(new XenCenterVersion(version_lang, name, latest, latest_cr, url, timestamp));
+                    ClientVersions.Add(new ClientVersion(versionLang, name, latest, latestCr, url, timestamp, checksum, sourceUrl));
                 }
+            }
+        }
+    }
+
+
+    public class DownloadCfuAction : DownloadUpdatesXmlAction
+    {
+        private const string XenServerVersionsNode = "serverversions";
+        private const string PatchesNode = "patches";
+        private const string ConflictingPatchesNode = "conflictingpatches";
+        private const string RequiredPatchesNode = "requiredpatches";
+        private const string ConflictingPatchNode = "conflictingpatch";
+        private const string RequiredPatchNode = "requiredpatch";
+
+        private readonly bool _checkForServerVersion;
+        private readonly bool _checkForPatches;
+
+        public DownloadCfuAction(bool checkForServerVersion, bool checkForPatches, string userAgent, string xmlLocationUrl, bool suppressHistory)
+            : base(userAgent, xmlLocationUrl, suppressHistory)
+        {
+            _checkForServerVersion = checkForServerVersion;
+            _checkForPatches = checkForPatches;
+            Title = Description = string.Format(Messages.AVAILABLE_UPDATES_CHECKING, BrandManager.ProductBrand);
+        }
+
+        public List<XenServerVersion> XenServerVersions { get; } = new List<XenServerVersion>();
+        public List<XenServerPatch> XenServerPatches { get; } = new List<XenServerPatch>();
+
+        public List<XenServerVersion> XenServerVersionsForAutoCheck =>
+            _checkForServerVersion ? XenServerVersions : new List<XenServerVersion>();
+
+        protected override void Run()
+        {
+            try
+            {
+                XmlDocument xdoc = FetchCheckForUpdatesXml();
+
+                GetXenServerPatches(xdoc);
+                GetXenServerVersions(xdoc);
+
+                Description = Messages.COMPLETED;
+            }
+            catch (Exception e)
+            {
+                if (e is System.Net.Sockets.SocketException)
+                {
+                    Description = Messages.AVAILABLE_UPDATES_NETWORK_ERROR;
+                }
+                else if (!string.IsNullOrWhiteSpace(e.Message))
+                {
+                    string errorText = e.Message.Trim();
+                    errorText = System.Text.RegularExpressions.Regex.Replace(errorText, @"\r\n+", "");
+                    Description = string.Format(Messages.AVAILABLE_UPDATES_ERROR, errorText);
+                }
+                else
+                {
+                    Description = Messages.AVAILABLE_UPDATES_INTERNAL_ERROR;
+                }
+
+                //if we had originally wanted it to be hidden, make it visible now so the error is shown
+                if (SuppressHistory)
+                    SuppressHistory = false;
+
+                throw;
             }
         }
 
@@ -200,7 +254,7 @@ namespace XenAdmin.Actions
                     var conflictingPatches = GetPatchDependencies(version, ConflictingPatchesNode, ConflictingPatchNode);
                     var requiredPatches = GetPatchDependencies(version, RequiredPatchesNode, RequiredPatchNode);
 
-					XenServerPatches.Add(new XenServerPatch(uuid, name, description, guidance, guidance_mandatory, patchVersion, url,
+                    XenServerPatches.Add(new XenServerPatch(uuid, name, description, guidance, guidance_mandatory, patchVersion, url,
                                                             patchUrl, timestamp, priority, installationSize, downloadSize, containsLivepatch, conflictingPatches, requiredPatches));
                 }
             }
@@ -216,7 +270,7 @@ namespace XenAdmin.Actions
         //    </requiredgpatch>
         // </requiredpatches>
         private static List<string> GetPatchDependencies(XmlNode patchsNode, string dependenciesNodeName, string dependencyNodeName)
-                    {
+        {
             var dependenciesNode = patchsNode.ChildNodes.Cast<XmlNode>().FirstOrDefault(childNode => childNode.Name == dependenciesNodeName);
 
             if (dependenciesNode == null)
@@ -326,34 +380,51 @@ namespace XenAdmin.Actions
                 }
             }
         }
+    }
 
-        protected virtual XmlDocument FetchCheckForUpdatesXml(string location)
+
+    public abstract class DownloadUpdatesXmlAction : AsyncAction
+    {
+        private readonly string _userAgent;
+        private readonly string _checkForUpdatesUrl;
+
+        protected DownloadUpdatesXmlAction(string userAgent, string xmlLocationUrl, bool suppressHistory)
+            : base(null, string.Empty, string.Empty, suppressHistory)
         {
-            var xdoc = new XmlDocument();
-            var uri = new Uri(location);
-            var proxy = XenAdminConfigManager.Provider.GetProxyFromSettings(Connection, false);
-            
+            Debug.Assert(!string.IsNullOrWhiteSpace(userAgent));
+            _userAgent = userAgent;
+            _checkForUpdatesUrl = xmlLocationUrl;
+        }
+
+        protected XmlDocument FetchCheckForUpdatesXml()
+        {
+            var checkForUpdatesXml = new XmlDocument();
+            var uriBuilder = new UriBuilder(_checkForUpdatesUrl);
+
+            var uri = uriBuilder.Uri;
             if (uri.IsFile)
             {
-                xdoc.Load(location);
+                checkForUpdatesXml.Load(_checkForUpdatesUrl);
             }
             else
             {
+                var authToken = XenAdminConfigManager.Provider.GetClientUpdatesQueryParam();
+                uriBuilder.Query = Helpers.AddAuthTokenToQueryString(authToken, uriBuilder.Query);
+
+                var proxy = XenAdminConfigManager.Provider.GetProxyFromSettings(Connection, false);
+
                 using (var webClient = new WebClient())
                 {
+                    webClient.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
+
                     webClient.Proxy = proxy;
                     webClient.Headers.Add("User-Agent", _userAgent);
-                    webClient.Headers.Add("X-User-Agent-Id", _userAgentId);
-
-                    using (var stream = new MemoryStream(webClient.DownloadData(uri)))
-                    {
-                        xdoc.Load(stream);
-                    }
+                    using (var stream = new MemoryStream(webClient.DownloadData(uriBuilder.Uri)))
+                        checkForUpdatesXml.Load(stream);
                 }
             }
 
-            return xdoc;
+            return checkForUpdatesXml;
         }
-
     }
 }

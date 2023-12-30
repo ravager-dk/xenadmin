@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using XenAdmin.Actions;
-
-
 namespace XenAdmin.Actions
 {
-    public class UnplugVIFAction : PureAsyncAction
+    public class UnplugVIFAction : AsyncAction
     {
         private XenAPI.VIF _vif;
         public UnplugVIFAction(XenAPI.VIF vif)
@@ -42,17 +38,21 @@ namespace XenAdmin.Actions
         {
             VM = vif.Connection.Resolve(vif.VM);
             _vif = vif;
+
+            if (VM.power_state == XenAPI.vm_power_state.Running)
+                ApiMethodsToRoleCheck.AddRange("VIF.get_allowed_operations", "VIF.unplug");
         }
 
         protected override void Run()
         {
             Description = Messages.ACTION_VIF_UNPLUGGING;
 
-            if (VM.power_state == XenAPI.vm_power_state.Running
-              && XenAPI.VIF.get_allowed_operations(Session, _vif.opaque_ref).Contains(XenAPI.vif_operations.unplug))
+            if (VM.power_state == XenAPI.vm_power_state.Running &&
+                XenAPI.VIF.get_allowed_operations(Session, _vif.opaque_ref).Contains(XenAPI.vif_operations.unplug))
             {
                 XenAPI.VIF.unplug(Session, _vif.opaque_ref);
             }
+
             Description = Messages.ACTION_VIF_UNPLUGGED;
         }
     }

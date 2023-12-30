@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,14 +29,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
+using System.Linq;
 using XenAdmin.Core;
 using XenAdmin.Network;
-using XenAdmin.TestResources;
 using XenCenterLib;
 
 namespace XenAdmin.Dialogs
@@ -61,45 +56,16 @@ namespace XenAdmin.Dialogs
 
             InitializeComponent();
 
-            PopulateXenServerHosts();
+            var history = Settings.GetServerHistory().ToArray();
+            Array.Sort(history, StringUtility.NaturalCompare);
+            ServerNameComboBox.Items.AddRange(history.Where(s => s != null).Cast<object>().ToArray());
+
             if (connection != null)
             {
                 ServerNameComboBox.Text = connection.HostnameWithPort;
                 UsernameTextBox.Text = connection.Username;
                 PasswordTextBox.Text = connection.Password ?? "";
             }
-
-            // we have an inner table layout panel due to the group box. Align the columns by examining lables sizes
-            Label[] labels = { UsernameLabel, PasswordLabel, ServerNameLabel };
-            int biggest = 0;
-            foreach (Label l in labels)
-            {
-                if (l.Width > biggest)
-                    biggest = l.Width;
-            }
-            // set the minimum size of one label from each table which will make sure the columns line up
-            UsernameLabel.MinimumSize = new Size(biggest, UsernameLabel.Height);
-            ServerNameLabel.MinimumSize = new Size(biggest, ServerNameLabel.Height);
-
-        }
-
-        private void PopulateXenServerHosts()
-        {
-            AutoCompleteStringCollection history = Settings.GetServerHistory();
-
-            string[] historyArray = new string[history.Count];
-            history.CopyTo(historyArray, 0);
-            Array.Sort(historyArray, StringUtility.NaturalCompare);
-            foreach (string serverName in historyArray)
-            {
-                if (serverName != null)
-                    ServerNameComboBox.Items.Add(serverName);
-            }
-
-            // Use a clone as the auto-complete source because of CA-38715
-            AutoCompleteStringCollection historyClone = new AutoCompleteStringCollection();
-            historyClone.AddRange(historyArray);
-            ServerNameComboBox.AutoCompleteCustomSource = historyClone;
         }
 
         private void OnCachePopulated(IXenConnection conn)
@@ -137,7 +103,9 @@ namespace XenAdmin.Dialogs
                 ServerNameComboBox.Enabled = true;
                 AddButton.Text = Messages.ADD;
             }
-            if (_changedPass && connection.Password == null)
+            else if (!_changedPass)
+                return;
+            else if (connection.Password == null)
             {
                 Text = Messages.CONNECT_TO_SERVER;
                 labelInstructions.Text = Messages.CONNECT_TO_SERVER_BLURB;
@@ -145,62 +113,50 @@ namespace XenAdmin.Dialogs
                 ServerNameComboBox.Enabled = false;
                 AddButton.Text = Messages.CONNECT;
             }
-            else if (_changedPass && connection.ExpectPasswordIsCorrect)
+            else if (connection.ExpectPasswordIsCorrect)
             {
                 // This situation should be rare, it normally comes from logging in a new session after an existing one has been made
                 // We now use duplicate sessions instead most of the time which don't log in again.
                 Text = Messages.CONNECT_TO_SERVER;
-                labelInstructions.Text = Messages.ADDSERVER_PASS_NEW;
+                labelInstructions.Text = string.Format(Messages.ADDSERVER_PASS_NEW, BrandManager.BrandConsole);
                 labelError.Text = "";
                 ServerNameComboBox.Enabled = false;
                 AddButton.Text = Messages.OK;
             }
-            else if (_changedPass) // the password probably hasnt actually changed but we do know the user has typed it in wrong
+            else  // the password probably hasn't actually changed but we do know the user has typed it in wrong
             {
                 Text = Messages.CONNECT_TO_SERVER;
-                labelInstructions.Text = Messages.ERROR_CONNECTING_BLURB;
+                labelInstructions.Text = string.Format(Messages.ERROR_CONNECTING_BLURB, BrandManager.BrandConsole);
                 labelError.Text = Messages.ADD_NEW_INCORRECT;
                 ServerNameComboBox.Enabled = false;
                 AddButton.Text = Messages.CONNECT;
             }
+
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            string hostnameAndPort = ServerNameComboBox.Text.Trim();
+            string serverInput = ServerNameComboBox.Text.Trim();
             string username = UsernameTextBox.Text.Trim();
             string password = PasswordTextBox.Text;
 
-            string[] multipleHosts;
+            var servers = serverInput.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (TryGetMultipleHosts(hostnameAndPort, out multipleHosts))
-            {
-                foreach (string h in multipleHosts)
-                {
-                    ConnectToServer(null, h, ConnectionsManager.DEFAULT_XEN_PORT, username, password, comboBoxClouds.SelectedItem != null ? comboBoxClouds.SelectedItem.ToString() : string.Empty);
-                }
-            }
-            else
-            {
-                string hostname;
-                int port;
+            IXenConnection conn = null;
+            if (servers.Length == 1)
+                conn = connection;
 
-                if (!StringUtility.TryParseHostname(hostnameAndPort, ConnectionsManager.DEFAULT_XEN_PORT, out hostname, out port))
-                {
-                    hostname = hostnameAndPort;
-                    port = ConnectionsManager.DEFAULT_XEN_PORT;
-                }
-                ConnectToServer(connection, hostname, port, username, password, comboBoxClouds.SelectedItem != null ? comboBoxClouds.SelectedItem.ToString() : string.Empty);
-            }
+            foreach (var server in servers)
+                ConnectToServer(conn, server, username, password);
 
             Close();
         }
 
-        private void ConnectToServer(IXenConnection conn, string hostname, int port, string username, string password, string version)
+        private void ConnectToServer(IXenConnection conn, string server, string username, string password)
         {
             if (conn == null)
             {
-                conn = new XenConnection {fromDialog = true};
+                conn = new XenConnection { fromDialog = true };
                 conn.CachePopulated += conn_CachePopulated;
             }
             else if (!_changedPass)
@@ -208,15 +164,27 @@ namespace XenAdmin.Dialogs
                 conn.EndConnect(); // in case we're already connected
             }
 
-            conn.Hostname = hostname;
-            conn.Port = port;
             conn.Username = username;
             conn.Password = password;
             conn.ExpectPasswordIsCorrect = false;
-            conn.Version = version;
 
-            if (!_changedPass)
+            if (File.Exists(server))
+            {
+                conn.Hostname = server;
+                conn.Port = ConnectionsManager.DEFAULT_XEN_PORT;
+                XenConnectionUI.ConnectToXapiDatabase(conn, Owner);
+            }
+            else if (!_changedPass)
+            {
+                StringUtility.ParseHostnamePort(server, out var hostname, out var port);
+
+                if (port == 0)
+                    port = ConnectionsManager.DEFAULT_XEN_PORT;
+                
+                conn.Hostname = hostname;
+                conn.Port = port;
                 XenConnectionUI.BeginConnect(conn, true, Owner, false);
+            }
         }
 
         private void conn_CachePopulated(IXenConnection conn)
@@ -243,90 +211,6 @@ namespace XenAdmin.Dialogs
         private bool OKButtonEnabled()
         {
             return ServerNameComboBox.Text.Trim().Length > 0 && UsernameTextBox.Text.Trim().Length > 0;
-        }
-
-        private void CancelButton2_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Control || e.Alt)
-            {
-                switch (e.KeyCode)
-                {
-                    case Keys.D1:
-                        Launch(TestResource.Resource.InterestingProduction);
-                        break;
-                    case Keys.D2:
-                        Launch(TestResource.Resource.InterestingDevelopment);
-                        break;
-                    case Keys.D3:
-                        Launch(TestResource.Resource.InterestingXenApp);
-                        break;
-                    case Keys.D4:
-                        Launch(TestResource.Resource.Credits);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        private void Launch(TestResource.Resource r)
-        {
-            ServerNameComboBox.Text = TestResource.Location(r);
-            AddButton_Click(this, null);
-        }
-
-        /// <summary>
-        /// Used for testing. Parses text for a semi-colon separated list of files that are loaded by DbProxy.
-        /// </summary>
-        /// <param name="text">The text to be parsed</param>
-        /// <param name="hosts">The parse results</param>
-        /// <returns>A value indicating whether the operation succeeded.</returns>
-        private static bool TryGetMultipleHosts(string text, out string[] hosts)
-        {
-            hosts = new string[0];
-            string[] splitStr = text.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            if (splitStr.Length > 0)
-            {
-                List<string> hostList = new List<string>();
-                foreach (string element in splitStr)
-                {
-                    string host = element.Trim();
-                    if (string.IsNullOrEmpty(host))
-                        // ignore "empty" entry
-                        continue;
-
-                    if (Regex.IsMatch(host, @"^[A-Za-z]\:\\") && File.Exists(host))
-                    {
-                        // is a file
-                        hostList.Add(host);
-                        continue;
-                    }
-                    if (Regex.IsMatch(host, @"^http\:|^[A-Za-z]\:"))
-                    {
-                        Uri uri;
-                        if (Uri.TryCreate(host, UriKind.Absolute, out uri))
-                        {
-                            hostList.Add(host);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        // some sort of ip address or hostname, just add
-                        hostList.Add(host);
-                    }
-                }
-
-                if (hostList.Count < 2)
-                {
-                    return false;
-                }
-
-                hosts = hostList.ToArray();
-                return true;
-            }
-
-            return false;
         }
 
         private void labelError_TextChanged(object sender, EventArgs e)

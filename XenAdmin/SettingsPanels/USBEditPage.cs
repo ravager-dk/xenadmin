@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,7 +36,6 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Controls;
-using XenAdmin.Properties;
 using XenAdmin.Dialogs;
 using XenAdmin.Controls.DataGridViewEx;
 using XenAdmin.Core;
@@ -48,7 +46,7 @@ namespace XenAdmin.SettingsPanels
     public partial class USBEditPage : XenTabPage, IEditPage
     {
         private VM _vm;
-        public VM.HA_Restart_Priority SelectedPriority { private get; set; }
+        public VM.HaRestartPriority SelectedPriority { private get; set; }
 
         public USBEditPage()
         {
@@ -91,10 +89,7 @@ namespace XenAdmin.SettingsPanels
             }
         }
 
-        public Image Image
-        {
-            get { return Resources.usb_16; }
-        }
+        public Image Image => Images.StaticImages.usb_16;
 
         public AsyncAction SaveSettings()
         {
@@ -183,6 +178,9 @@ namespace XenAdmin.SettingsPanels
 
         }
 
+        public void HideLocalValidationMessages()
+        { }
+
         public void Cleanup()
         {
             _vm.PropertyChanged -= Vm_PropertyChanged;
@@ -234,10 +232,10 @@ namespace XenAdmin.SettingsPanels
             if ((selectedRow != null) && (_vm != null))
             {
                 bool confirmed = false;
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.ACTION_VUSB_DETACH_CONFIRM, Messages.ACTION_VUSB_DETACH),
+                using (var dlg = new NoIconDialog(Messages.ACTION_VUSB_DETACH_CONFIRM,
                     ThreeButtonDialog.ButtonYes,
-                    new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                    new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                    {WindowTitle = Messages.ACTION_VUSB_DETACH})
                 {
                     if (dlg.ShowDialog(Program.MainWindow) == DialogResult.Yes)
                     {

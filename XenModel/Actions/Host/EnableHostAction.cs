@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -42,12 +41,10 @@ namespace XenAdmin.Actions
         private readonly bool _resumeVMs;
 
         public EnableHostAction(Host host, bool resumeVMs,Func<Pool, Host, long, long, bool> acceptNTolChangesOnEnable)
-            : base(host.Connection, Messages.HOST_ENABLE, Messages.WAITING, null, acceptNTolChangesOnEnable)
+            : base(host?.Connection, Messages.HOST_ENABLE, Messages.WAITING, null, acceptNTolChangesOnEnable)
         {
-            if (host == null)
-                throw new ArgumentNullException("host");
+            Host = host ?? throw new ArgumentNullException("host");
             _resumeVMs = resumeVMs;
-            this.Host = host;
             AddCommonAPIMethodsToRoleCheck();
             ApiMethodsToRoleCheck.Add("pool.ha_compute_hypothetical_max_host_failures_to_tolerate");
             ApiMethodsToRoleCheck.Add("pool.set_ha_host_failures_to_tolerate");
@@ -82,21 +79,21 @@ namespace XenAdmin.Actions
 
                     foreach (VM vm in migratedVMs)
                     {
-                        RelatedTask = XenAPI.VM.async_live_migrate(Session, vm.opaque_ref, Host.opaque_ref);
+                        RelatedTask = VM.async_pool_migrate(Session, vm.opaque_ref, Host.opaque_ref, new Dictionary<string, string> { ["live"] = "true" });
                         PollToCompletion(start, start + each);
                         start += each;
                     }
 
                     foreach (VM vm in haltedVMs)
                     {
-                        RelatedTask = XenAPI.VM.async_start_on(Session, vm.opaque_ref, Host.opaque_ref, false, false);
+                        RelatedTask = VM.async_start_on(Session, vm.opaque_ref, Host.opaque_ref, false, false);
                         PollToCompletion(start, start + each);
                         start += each;
                     }
 
                     foreach (VM vm in suspendedVMs)
                     {
-                        RelatedTask = XenAPI.VM.async_resume_on(Session, vm.opaque_ref, Host.opaque_ref, false, false);
+                        RelatedTask = VM.async_resume_on(Session, vm.opaque_ref, Host.opaque_ref, false, false);
                         PollToCompletion(start, start + each);
                         start += each;
                     }

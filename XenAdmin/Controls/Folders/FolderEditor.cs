@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,12 +31,6 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using XenAdmin.Model;
-using XenAPI;
-using System.Collections.Generic;
-using XenAdmin.Core;
-using XenAdmin.Network;
-using XenAdmin.Actions;
 
 namespace XenAdmin.Controls
 {

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Drawing;
+using System.Linq;
 using System.Net;
 using System.Windows.Forms;
 using XenAdmin.Actions;
@@ -40,7 +39,6 @@ using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Network;
 using XenAdmin.Plugins;
-using XenAdmin.ServerDBs;
 using XenAPI;
 using XenCenterLib;
 
@@ -48,15 +46,18 @@ namespace XenAdmin
 {
     public class WinformsXenAdminConfigProvider : IXenAdminConfigProvider
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public Func<List<Role>, IXenConnection, string, AsyncAction.SudoElevationResult> SudoDialogDelegate => SudoDialog;
+        private static readonly List<string> HiddenObjects = new List<string>();
+        private static readonly object HiddenObjectsLock = new object();
+
+        public Func<List<Role>, IXenConnection, string, AsyncAction.SudoElevationResult> ElevatedSessionDelegate => GetElevatedSession;
 
         public int ConnectionTimeout => Properties.Settings.Default.ConnectionTimeout;
 
         public Session CreateActionSession(Session session, IXenConnection connection)
         {
-            return SessionFactory.DuplicateSession(session, connection, ConnectionTimeout);
+            return new Session(session, connection) { Timeout = ConnectionTimeout };
         }
 
         public bool Exiting => Program.Exiting;
@@ -76,30 +77,48 @@ namespace XenAdmin
         {
             try
             {
-                if (connection != null && connection.Session != null && connection.Session.opaque_ref == "dummy")
-                    return new XenAdminSimulatorWebProxy(DbProxy.proxys[connection]);
-
-                switch ((HTTPHelper.ProxyStyle)XenAdmin.Properties.Settings.Default.ProxySetting)
+                switch ((HTTPHelper.ProxyStyle)Properties.Settings.Default.ProxySetting)
                 {
                     case HTTPHelper.ProxyStyle.SpecifiedProxy:
                         if (isForXenServer && Properties.Settings.Default.BypassProxyForServers)
                             return null;
 
                         string address = string.Format("http://{0}:{1}",
-                            XenAdmin.Properties.Settings.Default.ProxyAddress,
-                            XenAdmin.Properties.Settings.Default.ProxyPort);
+                            Properties.Settings.Default.ProxyAddress,
+                            Properties.Settings.Default.ProxyPort);
 
-                        if (XenAdmin.Properties.Settings.Default.ProvideProxyAuthentication)
+                        if (Properties.Settings.Default.ProvideProxyAuthentication)
                         {
-                            string protectedUsername = XenAdmin.Properties.Settings.Default.ProxyUsername;
-                            string protectedPassword = XenAdmin.Properties.Settings.Default.ProxyPassword;
-                            return new WebProxy(address, false, null, new NetworkCredential(
-                                // checks for empty default username/password which starts out unencrypted
-                                string.IsNullOrEmpty(protectedUsername) ? "" : EncryptionUtils.Unprotect(protectedUsername),
-                                string.IsNullOrEmpty(protectedPassword) ? "" : EncryptionUtils.Unprotect(protectedPassword)));
+                            // checks for empty default username/password which starts out unencrypted
+
+                            string username = string.Empty;
+                            try
+                            {
+                                string protectedUsername = Properties.Settings.Default.ProxyUsername;
+                                if (!string.IsNullOrEmpty(protectedUsername))
+                                    username = EncryptionUtils.Unprotect(protectedUsername);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Warn("Could not unprotect internet proxy username.", e);
+                            }
+
+                            string password = string.Empty;
+                            try
+                            {
+                                string protectedPassword = Properties.Settings.Default.ProxyPassword;
+                                if (!string.IsNullOrEmpty(protectedPassword))
+                                    password = EncryptionUtils.Unprotect(protectedPassword);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Warn("Could not unprotect internet proxy password.", e);
+                            }
+
+                            return new WebProxy(address, false, null, new NetworkCredential(username, password));
                         }
-                        else
-                            return new WebProxy(address, false);
+                        
+                        return new WebProxy(address, false);
 
                     case HTTPHelper.ProxyStyle.SystemProxy:
                         return WebRequest.GetSystemWebProxy();
@@ -110,10 +129,9 @@ namespace XenAdmin
             }
             catch (ConfigurationErrorsException e)
             {
-                log.Error("Error parsing 'ProxySetting' from settings - settings file deemed corrupt", e);
-                using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Error,
-                    string.Format(Messages.MESSAGEBOX_LOAD_CORRUPTED, Settings.GetUserConfigPath()),
-                    Messages.MESSAGEBOX_LOAD_CORRUPTED_TITLE)))
+                Log.Error("Error parsing 'ProxySetting' from settings - settings file deemed corrupt", e);
+                using (var dlg = new ErrorDialog(string.Format(Messages.MESSAGEBOX_LOAD_CORRUPTED, Settings.GetUserConfigPath()))
+                    {WindowTitle = Messages.MESSAGEBOX_LOAD_CORRUPTED_TITLE})
                 {
                     dlg.ShowDialog();
                 }
@@ -125,22 +143,29 @@ namespace XenAdmin
 
         public int GetProxyTimeout(bool timeout)
         {
-            return timeout ? XenAdmin.Properties.Settings.Default.HttpTimeout : 0;
+            return timeout ? Properties.Settings.Default.HttpTimeout : 0;
         }
 
-        public void ShowObject(string newVMRef)
+        public void ShowObject(string opaqueRef)
         {
-            Program.ShowObject(newVMRef);
+            lock (HiddenObjectsLock)
+                HiddenObjects.Remove(opaqueRef);
+
+            Program.MainWindow?.RequestRefreshTreeView();
         }
 
-        public void HideObject(string newVMRef)
+        public void HideObject(string opaqueRef)
         {
-            Program.HideObject(newVMRef);
+            lock (HiddenObjectsLock)
+                HiddenObjects.Add(opaqueRef);
+
+            Program.MainWindow?.RequestRefreshTreeView();
         }
 
         public bool ObjectIsHidden(string opaqueRef)
         {
-            return Program.ObjectIsHidden(opaqueRef);
+            lock (HiddenObjectsLock)
+                return HiddenObjects.Contains(opaqueRef);
         }
 
         public string GetLogFile()
@@ -155,33 +180,72 @@ namespace XenAdmin
 
         public void SaveSettingsIfRequired()
         {
-            Settings.SaveIfRequired();
+            Settings.SaveServerList();
         }
 
-        private AsyncAction.SudoElevationResult SudoDialog(List<Role> rolesAbleToCompleteAction,
+        private AsyncAction.SudoElevationResult GetElevatedSession(List<Role> allowedRoles,
             IXenConnection connection, string actionTitle)
         {
-            var d = new Dialogs.RoleElevationDialog(connection, connection.Session, rolesAbleToCompleteAction,
-                                                    actionTitle);
+            AsyncAction.SudoElevationResult result = null;
 
-            DialogResult result = DialogResult.None;
-            Program.Invoke(Program.MainWindow, delegate
-                                                   {
-                                                       result = d.ShowDialog(Program.MainWindow);
-                                                   });
+            Program.Invoke(Program.MainWindow, () =>
+            {
+                Form owner;
+                try
+                {
+                    //CA-337323: make an attempt to find the right owning form
+                    //most likely it will be the last one opened
+                    owner = Application.OpenForms.Cast<Form>().Last();
+                }
+                catch
+                {
+                    owner = Program.MainWindow;
+                }
 
-            return new AsyncAction.SudoElevationResult(result == DialogResult.OK, d.elevatedUsername, 
-                                                                 d.elevatedPassword, d.elevatedSession);
+                using (var d = new RoleElevationDialog(connection, connection.Session, allowedRoles, actionTitle))
+                    if (d.ShowDialog(owner) == DialogResult.OK)
+                        result = new AsyncAction.SudoElevationResult(d.elevatedUsername, d.elevatedPassword, d.elevatedSession);
+            });
 
+            return result;
         }
 
         public bool ShowHiddenVMs => Properties.Settings.Default.ShowHiddenVMs;
 
         public PluginManager PluginManager;
 
-        public string GetXenCenterMetadata(bool isForXenCenter)
+        public string GetXenCenterMetadata()
         {
-            return Metadata.Generate(PluginManager, isForXenCenter);
-        }      
+            return Metadata.Generate(PluginManager);
+        }
+
+        public string GetCustomClientUpdatesXmlLocation()
+        {
+            return Registry.GetCustomClientUpdatesXmlLocation();
+        }
+
+        public string GetCustomCfuLocation()
+        {
+            return Registry.GetCustomCfuLocation();
+        }
+
+        public string GetClientUpdatesQueryParam()
+        {
+            return Registry.GetClientUpdatesQueryParam();
+        }
+
+        public string GetCustomFileServicePrefix()
+        {
+            return Registry.GetCustomFileServicePrefix();
+        }
+
+        public string GetCustomTokenUrl()
+        {
+            return Registry.GetCustomTokenUrl();
+        }
+
+        public string FileServiceUsername => EncryptionUtils.Unprotect(Properties.Settings.Default.FileServiceUsername);
+
+        public string FileServiceClientId => EncryptionUtils.Unprotect(Properties.Settings.Default.FileServiceClientId);
     }
 }

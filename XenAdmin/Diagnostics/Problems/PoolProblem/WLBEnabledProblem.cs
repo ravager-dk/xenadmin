@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System.Threading;
 using XenAdmin.Actions;
 using XenAdmin.Actions.Wlb;
-using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
 
@@ -46,58 +43,31 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
         {
         }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.CHECK_WLB_ENABLED, Pool); }
-        }
+        public override string Description => string.Format(Messages.CHECK_WLB_ENABLED, Pool);
 
-        public override string HelpMessage
-        {
-            get { return Messages.HELP_MESSAGE_DISABLE_WLB; }
-        }
+        public override string HelpMessage => Messages.HELP_MESSAGE_DISABLE_WLB;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
             cancelled = false;
-            return new DelegatedAsyncAction(Pool.Connection, Messages.HELP_MESSAGE_DISABLE_WLB, "", "",
-                                            ss =>
-                                                {
-                                                    var action = new DisableWLBAction(Pool, false);
-                                                    action.RunExternal(ss);
-                                                    int count = 0;
-                                                    while (Helpers.WlbEnabled(Pool.Connection) && count < 10)
-                                                    {
-                                                        Thread.Sleep(500);
-                                                        count++;
-                                                    }
-                                                }, true);
-
-        }
-    }
-
-    class WLBEnabledWarning : Warning
-    {
-        private readonly Pool pool;
-        private readonly Host host;
-
-        public WLBEnabledWarning(Check check, Pool pool, Host host)
-            : base(check)
-        {
-            this.pool = pool;
-            this.host = host;
+            return new DisableWLBAction(Pool, false);
         }
 
-        public override string Title
+        public override AsyncAction CreateUnwindChangesAction()
         {
-            get { return Check.Description; }
-        }
+            var pool = Pool.Connection.Resolve(new XenRef<Pool>(Pool.opaque_ref));
 
-        public override string Description
-        {
-            get
+            if (pool == null)
             {
-                return string.Format(Messages.UPDATES_WIZARD_WLB_ON_WARNING, host, pool);
+                foreach (var xenConnection in ConnectionsManager.XenConnectionsCopy)
+                {
+                    pool = xenConnection.Resolve(new XenRef<Pool>(Pool.opaque_ref));
+                    if (pool != null)
+                        break;
+                }
             }
+
+            return pool == null ? null : new EnableWLBAction(pool);
         }
     }
 }

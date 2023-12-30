@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -44,15 +43,9 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
         public InvalidVCPUConfiguration(Check check, VM vm)
             : base(check, vm) { }
 
-        public override string Description
-        {
-            get { return String.Format(Messages.UPGRADEWIZARD_PROBLEM_INVALID_VCPU_SETTINGS, ServerName, VM.Name()); }
-        }
+        public override string Description => String.Format(Messages.UPGRADEWIZARD_PROBLEM_INVALID_VCPU_SETTINGS, ServerName, VM.Name());
 
-        public override string HelpMessage
-        {
-            get { return Messages.UPGRADEWIZARD_PROBLEM_INVALID_VCPU_SETTINGS_HELPMESSAGE; }
-        }
+        public override string HelpMessage => Messages.UPGRADEWIZARD_PROBLEM_INVALID_VCPU_SETTINGS_HELPMESSAGE;
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
@@ -73,7 +66,7 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
                         action = ee.Action;
                     }
                 };
-                
+
                 propertiesDialog.ShowDialog(Program.MainWindow);
                 if (propertiesDialog.DialogResult != DialogResult.Yes || action == null)
                     cancelled = true;

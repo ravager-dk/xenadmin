@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Xml;
 using System.Windows.Forms;
 using XenAdmin.Actions;
@@ -62,6 +62,8 @@ namespace XenAdmin.TabPages
 
         public override string HelpID => "TabPageDockerProcess";
 
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DockerContainer DockerContainer
         {
             get
@@ -102,7 +104,7 @@ namespace XenAdmin.TabPages
             args["vmuuid"] = parentVM.uuid;
             args["object"] = container.Name();
 
-            var action = new ExecuteContainerPluginAction(container, host,
+            var action = new RunContainerPluginAction(container, host,
                         "xscontainer", "get_top", args, true); 
 
             action.Completed += action_Completed;
@@ -111,8 +113,7 @@ namespace XenAdmin.TabPages
 
         private void action_Completed(ActionBase sender)
         {
-            var action = sender as ExecuteContainerPluginAction;
-            if (action == null || action.Container != container)
+            if (!(sender is RunContainerPluginAction action) || action.Container != container)
                 return;
             Program.Invoke(Program.MainWindow, () =>
             {

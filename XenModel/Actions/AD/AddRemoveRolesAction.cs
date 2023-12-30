@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,6 +29,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
@@ -37,15 +37,15 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class AddRemoveRolesAction : PureAsyncAction
+    public class AddRemoveRolesAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly List<Role> toAdd;
-        private readonly List<Role> toRemove;
+        private readonly List<Role> _toAdd;
+        private readonly List<Role> _toRemove;
         private readonly Subject subject;
 
-        public AddRemoveRolesAction(IXenConnection connection, Subject subject, List<Role> toAdd, List<Role> toRemove)
+        public AddRemoveRolesAction(IXenConnection connection, Subject subject, List<Role> newRoles)
             : base(connection,
                 string.Format(Messages.AD_ADDING_REMOVING_ROLES_ON, (subject.DisplayName ?? subject.SubjectName ?? subject.subject_identifier).Ellipsise(50)),
                 Messages.AD_ADDING_REMOVING_ROLES,
@@ -55,33 +55,47 @@ namespace XenAdmin.Actions
             if (pool != null)
                 Pool = pool;
             else
-                Host = Helpers.GetMaster(connection);
-            this.toAdd = toAdd;
-            this.toRemove = toRemove;
+                Host = Helpers.GetCoordinator(connection);
+
             this.subject = subject;
+
+            var serverRoles = Connection.Cache.Roles
+                .Where(r => (!Helpers.CloudOrGreater(Connection) || !Helpers.XapiEqualOrGreater_22_5_0(Connection) || !r.is_internal) && r.subroles.Count > 0)
+                .ToList();
+
+            _toAdd = serverRoles.Where(role => newRoles.Contains(role) &&
+                                               !subject.roles.Contains(new XenRef<Role>(role.opaque_ref))).ToList();
+
+            _toRemove = serverRoles.Where(role => !newRoles.Contains(role) &&
+                                                  subject.roles.Contains(new XenRef<Role>(role.opaque_ref))).ToList();
+
+            if (_toAdd.Count > 0)
+                ApiMethodsToRoleCheck.Add("subject.add_to_roles");
+
+            if (_toRemove.Count > 0)
+                ApiMethodsToRoleCheck.Add("subject.remove_from_roles");
         }
 
         protected override void Run()
         {
-            int count = toAdd.Count + toRemove.Count;
+            int count = _toAdd.Count + _toRemove.Count;
             int done = 0;
             var subj = subject.DisplayName ?? subject.SubjectName ?? subject.subject_identifier;
 
-            log.DebugFormat("Adding {0} roles on subject '{1}'.", toAdd.Count, subj);
-            foreach (Role r in toAdd)
+            foreach (Role r in _toAdd)
             {
+                log.DebugFormat("Adding role {0} to subject '{1}'.", r.FriendlyName(), subj);
                 Subject.add_to_roles(Session, subject.opaque_ref, r.opaque_ref);
-                done++;
-                PercentComplete = (100 * done) / count;  
+                PercentComplete = 100 * ++done / count;
             }
 
-            log.DebugFormat("Removing {0} roles on subject '{1}'.", toRemove.Count, subj);
-            foreach (Role r in toRemove)
+            foreach (Role r in _toRemove)
             {
+                log.DebugFormat("Removing role {0} from subject '{1}'.", r.FriendlyName(), subj);
                 Subject.remove_from_roles(Session, subject.opaque_ref, r.opaque_ref);
-                done++;
-                PercentComplete = (100 * done) / count;
+                PercentComplete = 100 * ++done / count;
             }
+
             Description = Messages.COMPLETED;
         }
     }

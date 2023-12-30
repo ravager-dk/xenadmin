@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,22 +30,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Threading;
-
 using XenAPI;
-
-using XenAdmin;
-using XenAdmin.Core;
 using XenAdmin.Actions;
-using XenAdmin.Network;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using XenAdmin.Core;
 
 
 namespace XenAdmin.Dialogs
@@ -54,7 +45,6 @@ namespace XenAdmin.Dialogs
     public partial class RepairSRDialog : DialogWithProgress
     {
         private readonly ReadOnlyCollection<SR> _srList;
-        private readonly List<AsyncAction> _repairActions = new List<AsyncAction>();
         private AsyncAction _repairAction;
         private Font BoldFont;
         private readonly CollectionChangeEventHandler Host_CollectionChangedWithInvoke;
@@ -84,13 +74,13 @@ namespace XenAdmin.Dialogs
         /// <param name="runAction"></param>
         public RepairSRDialog(IEnumerable<SR> srs, bool runAction = true)
         {
-            Util.ThrowIfEnumerableParameterNullOrEmpty(srs, "srs");
             this.runAction = runAction;
             BoldFont = new Font(Font, FontStyle.Bold);
             List<SR> srList = new List<SR>(srs);
             srList.Sort();
             _srList = new ReadOnlyCollection<SR>(srList);
             InitializeComponent();
+            label1.Text = string.Format(label1.Text, BrandManager.BrandConsole);
 
             if (_srList.Count == 1)
             {

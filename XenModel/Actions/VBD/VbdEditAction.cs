@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class VbdEditAction : PureAsyncAction
+    public class VbdEditAction : AsyncAction
     {
         private readonly VBD _vbd;
         private readonly vbd_mode _vbdMode;
@@ -47,13 +45,20 @@ namespace XenAdmin.Actions
         public VbdEditAction(VBD vbd, vbd_mode vbdMode, int priority, bool changeDevicePosition, VBD other, string devicePosition, bool suppressHistory)
             : base(vbd.Connection, string.Format(Messages.ACTION_SAVE_SETTINGS, vbd.Connection.Resolve(vbd.VDI)), string.Format(Messages.ACTION_SAVE_SETTINGS, vbd.Connection.Resolve(vbd.VDI)), suppressHistory)
         {
-            this._vbd = vbd;
+            _vbd = vbd;
             _priority = priority;
             VM = vbd.Connection.Resolve(vbd.VM);
-            this._vbdMode = vbdMode;
-            this._changeDevicePosition = changeDevicePosition;
-            this._other = other;
-            this._devicePosition = devicePosition;
+            _vbdMode = vbdMode;
+            _changeDevicePosition = changeDevicePosition;
+            _other = other;
+            _devicePosition = devicePosition;
+
+            ApiMethodsToRoleCheck.AddRange(
+                "VBD.set_mode",
+                "VBD.set_qos_algorithm_params",
+                "VBD.set_userdevice",
+                "VBD.plug",
+                "VBD.unplug");
         }
 
         protected override void Run()
@@ -86,20 +91,8 @@ namespace XenAdmin.Actions
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="session"></param>
-        /// <param name="vm"></param>
-        /// <param name="vbd"></param>
-        /// <param name="userdevice"></param>
-        /// <param name="plug"></param>
-        /// <returns>True if it warned the user, so you don't warn twice</returns>
-        private static void SetUserDevice(Session session, VM vm, VBD vbd, String userdevice, bool plug)
+        private static void SetUserDevice(Session session, VM vm, VBD vbd, string userdevice, bool plug)
         {
-            //Program.AssertOffEventThread();
-
-
             if (vm.power_state == vm_power_state.Running &&
                 vbd.currently_attached &&
                 vbd.allowed_operations.Contains(vbd_operations.unplug))
@@ -113,7 +106,6 @@ namespace XenAdmin.Actions
             {
                 VBD.plug(session, vbd.opaque_ref);
             }
-
         }
     }
 }

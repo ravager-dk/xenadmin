@@ -19,7 +19,7 @@ namespace XenAdmin {
     // -Klasse über ein Tool wie ResGen oder Visual Studio automatisch generiert.
     // Um einen Member hinzuzufügen oder zu entfernen, bearbeiten Sie die .ResX-Datei und führen dann ResGen
     // mit der /str-Option erneut aus, oder Sie erstellen Ihr VS-Projekt neu.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class InvisibleMessages {
@@ -61,56 +61,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die https://docs.xenserver.com/en-us/ ähnelt.
         /// </summary>
-        public static string ACTIVATION_FORM_URL {
+        public static string DOCS_URL {
             get {
-                return ResourceManager.GetString("ACTIVATION_FORM_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string ACTIVATION_SERVER {
-            get {
-                return ResourceManager.GetString("ACTIVATION_SERVER", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string ACTIVATION_URL {
-            get {
-                return ResourceManager.GetString("ACTIVATION_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die https://xcp-ng.org ähnelt.
-        /// </summary>
-        public static string COMMUNITY_URL {
-            get {
-                return ResourceManager.GetString("COMMUNITY_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string DEPRECATION_URL {
-            get {
-                return ResourceManager.GetString("DEPRECATION_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string HEALTH_CHECK_PRIVACY_STATEMENT_URL {
-            get {
-                return ResourceManager.GetString("HEALTH_CHECK_PRIVACY_STATEMENT_URL", resourceCulture);
+                return ResourceManager.GetString("DOCS_URL", resourceCulture);
             }
         }
         
@@ -124,29 +79,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string HELP_URL_QUERY {
-            get {
-                return ResourceManager.GetString("HELP_URL_QUERY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die https://xcp-ng.org ähnelt.
         /// </summary>
         public static string HOMEPAGE {
             get {
                 return ResourceManager.GetString("HOMEPAGE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die HomePage.mht ähnelt.
-        /// </summary>
-        public static string HOMEPAGE_FILENAME {
-            get {
-                return ResourceManager.GetString("HOMEPAGE_FILENAME", resourceCulture);
             }
         }
         
@@ -160,20 +97,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die https://xenserver.com/buy ähnelt.
         /// </summary>
-        public static string ISL_DEPRECATION_URL {
+        public static string LICENSE_BUY_URL {
             get {
-                return ResourceManager.GetString("ISL_DEPRECATION_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die iso ähnelt.
-        /// </summary>
-        public static string ISO_UPDATE {
-            get {
-                return ResourceManager.GetString("ISO_UPDATE", resourceCulture);
+                return ResourceManager.GetString("LICENSE_BUY_URL", resourceCulture);
             }
         }
         
@@ -183,6 +111,15 @@ namespace XenAdmin {
         public static string LICENSE_EXPIRY_WEBPAGE {
             get {
                 return ResourceManager.GetString("LICENSE_EXPIRY_WEBPAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die https://docs.citrix.com/en-us/licensing/current-release/license-server-getting-started.html ähnelt.
+        /// </summary>
+        public static string LICENSE_SERVER_DOCS_LINK {
+            get {
+                return ResourceManager.GetString("LICENSE_SERVER_DOCS_LINK", resourceCulture);
             }
         }
         
@@ -205,42 +142,6 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die [XenCenter].log ähnelt.
-        /// </summary>
-        public static string LOG_FILENAME {
-            get {
-                return ResourceManager.GetString("LOG_FILENAME", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Home.htm ähnelt.
-        /// </summary>
-        public static string MAINWINDOW_HOME_PATH {
-            get {
-                return ResourceManager.GetString("MAINWINDOW_HOME_PATH", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string OUT_OF_DATE_WEBSITE {
-            get {
-                return ResourceManager.GetString("OUT_OF_DATE_WEBSITE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string PARTNEROFFERS_URL {
-            get {
-                return ResourceManager.GetString("PARTNEROFFERS_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die https://xcp-ng.org ähnelt.
         /// </summary>
         public static string PLUGINS_URL {
@@ -250,20 +151,11 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die https://docs.xenserver.com/en-us/xencenter/current-release/whats-new.html ähnelt.
         /// </summary>
-        public static string PRIVACY {
+        public static string RELEASE_NOTES_URL {
             get {
-                return ResourceManager.GetString("PRIVACY", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string PV_GUESTS_CHECK_URL {
-            get {
-                return ResourceManager.GetString("PV_GUESTS_CHECK_URL", resourceCulture);
+                return ResourceManager.GetString("RELEASE_NOTES_URL", resourceCulture);
             }
         }
         
@@ -291,42 +183,6 @@ namespace XenAdmin {
         public static string UPSELL_SA {
             get {
                 return ResourceManager.GetString("UPSELL_SA", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die xensearch ähnelt.
-        /// </summary>
-        public static string XEN_SEARCH {
-            get {
-                return ResourceManager.GetString("XEN_SEARCH", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die xsupdate ähnelt.
-        /// </summary>
-        public static string XEN_UPDATE {
-            get {
-                return ResourceManager.GetString("XEN_UPDATE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string XENDESKTOP_URL {
-            get {
-                return ResourceManager.GetString("XENDESKTOP_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die  ähnelt.
-        /// </summary>
-        public static string XENSERVER_UPDATE_URL {
-            get {
-                return ResourceManager.GetString("XENSERVER_UPDATE_URL", resourceCulture);
             }
         }
     }

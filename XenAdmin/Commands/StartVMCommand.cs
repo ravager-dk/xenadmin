@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,19 +28,16 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAdmin.Actions;
-using XenAdmin.Core;
-using XenAPI;
-using XenAdmin.Network;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Collections.ObjectModel;
-using XenAdmin.Properties;
-using XenAdmin.Dialogs;
 using XenAdmin.Actions.VMActions;
+using XenAdmin.Actions;
+using XenAdmin.Core;
+using XenAdmin.Dialogs;
+using XenAdmin.Network;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -74,7 +70,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void Execute(List<VM> vms)
+        protected override void Run(List<VM> vms)
         {
             Dictionary<VM, List<VBD>> brokenCDs = new Dictionary<VM, List<VBD>>();
             foreach (VM vm in vms)
@@ -87,7 +83,7 @@ namespace XenAdmin.Commands
                         SR sr = null;
                         if (vdi != null)
                             sr = vm.Connection.Resolve<SR>(vdi.SR);
-                        if (vdi == null || sr.IsBroken(true) || sr.IsDetached())
+                        if (vdi == null || sr.IsBroken() || sr.IsDetached())
                         {
                             if (!brokenCDs.ContainsKey(vm))
                             {
@@ -102,11 +98,11 @@ namespace XenAdmin.Commands
             if (brokenCDs.Count > 0)
             {
                 DialogResult d;
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(null, Messages.EJECT_BEFORE_VM_START_MESSAGE_BOX, vms.Count > 1 ? Messages.STARTING_VMS_MESSAGEBOX_TITLE : Messages.STARTING_VM_MESSAGEBOX_TITLE), 
-                    new ThreeButtonDialog.TBDButton(Messages.EJECT_BUTTON_LABEL, DialogResult.OK, ThreeButtonDialog.ButtonType.ACCEPT, true), 
+                using (var dlg = new NoIconDialog(Messages.EJECT_BEFORE_VM_START_MESSAGE_BOX, 
+                    new ThreeButtonDialog.TBDButton(Messages.EJECT_BUTTON_LABEL, DialogResult.OK, selected: true), 
                     new ThreeButtonDialog.TBDButton(Messages.IGNORE_BUTTON_LABEL, DialogResult.Ignore), 
-                    ThreeButtonDialog.ButtonCancel))
+                    ThreeButtonDialog.ButtonCancel)
+                    {WindowTitle = vms.Count > 1 ? Messages.STARTING_VMS_MESSAGEBOX_TITLE : Messages.STARTING_VM_MESSAGEBOX_TITLE})
                 {
                     d = dlg.ShowDialog(MainWindowCommandInterface.Form);
                 }
@@ -118,7 +114,7 @@ namespace XenAdmin.Commands
             RunAction(vms, Messages.ACTION_VMS_STARTING_ON_TITLE, Messages.ACTION_VMS_STARTING_ON_TITLE, Messages.ACTION_VM_STARTED, brokenCDs);
         }
 
-        protected override bool CanExecute(VM vm)
+        protected override bool CanRun(VM vm)
         {
             ReadOnlyCollection<SelectedItem> selection = GetSelection();
 
@@ -136,76 +132,28 @@ namespace XenAdmin.Commands
             return Helpers.EnabledTargetExists(host, connection);
         }
 
-        protected override string EnabledToolTipText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_TOOLBAR_STARTVM;
-            }
-        }
+        public override string EnabledToolTipText => Messages.MAINWINDOW_TOOLBAR_STARTVM;
 
-        public override Image ToolBarImage
-        {
-            get
-            {
-                return Images.StaticImages._001_PowerOn_h32bit_24;
-            }
-        }
+        public override Image ToolBarImage => Images.StaticImages._001_PowerOn_h32bit_24;
 
-        public override string ToolBarText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_TOOLBAR_START;
-            }
-        }
+        public override string ToolBarText => Messages.MAINWINDOW_TOOLBAR_START;
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return Images.StaticImages._001_PowerOn_h32bit_16;
-            }
-        }
+        public override Image MenuImage => Images.StaticImages._001_PowerOn_h32bit_16;
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_START;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_START;
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_START_CONTEXT_MENU;
-            }
-        }
+        public override string ContextMenuText => Messages.MAINWINDOW_START_CONTEXT_MENU;
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
             // a start-vm-diagnostic-dialog is shown by VmAction if VMs cant be started.
 
             return null;
         }
 
-        public override Keys ShortcutKeys
-        {
-            get
-            {
-                return Keys.Control | Keys.B;
-            }
-        }
+        public override Keys ShortcutKeys => Keys.Control | Keys.B;
 
-        public override string ShortcutKeyDisplayString
-        {
-            get
-            {
-                return Messages.MAINWINDOW_CTRL_B;
-            }
-        }
+        public override string ShortcutKeyDisplayString => Messages.MAINWINDOW_CTRL_B;
 
         protected override AsyncAction BuildAction(VM vm)
         {

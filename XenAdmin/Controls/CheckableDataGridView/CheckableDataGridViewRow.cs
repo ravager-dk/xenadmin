@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -79,9 +78,13 @@ namespace XenAdmin.Controls.CheckableDataGridView
 
         public bool LockDisabledState { get; set; }
 
-        public abstract bool WarningRequired { get; }
+        public abstract bool LicenseWarningRequired { get; }
 
-        public abstract string WarningText { get; }
+        public abstract string LicenseWarningText { get; }
+
+        public abstract bool SupportWarningRequired { get; }
+
+        public abstract string SupportWarningText { get; }
 
         /// <summary>
         /// Override this if you cells data is loaded after it is first drawn

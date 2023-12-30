@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -70,7 +69,7 @@ namespace XenAdmin.Wizards
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="pool">May be null.</param>
-        /// <param name="host">Never null. In the case of a pool, "host" is set to the master.</param>
+        /// <param name="host">Never null. In the case of a pool, "host" is set to the coordinator.</param>
         public NewNetworkWizard(Network.IXenConnection connection, Pool pool, Host host)
             : base(connection)
         {
@@ -230,11 +229,8 @@ namespace XenAdmin.Wizards
                 nic = pageNetworkDetails.SelectedHostNic;
             }
 
-
-            long vlan = pageNetworkDetails.VLAN;
-
             NetworkAction action = pageNetworkType.SelectedNetworkType == NetworkTypes.External
-                                       ? new NetworkAction(xenConnection, network, nic, vlan)
+                                       ? new NetworkAction(xenConnection, network, nic, pageNetworkDetails.VLAN)
                                        : new NetworkAction(xenConnection, network, true);
             action.RunAsync();
         }
@@ -251,14 +247,18 @@ namespace XenAdmin.Wizards
             var autoPlug = pageNetworkType.SelectedNetworkType == NetworkTypes.CHIN
                 ? pageChinDetails.isAutomaticAddNicToVM
                 : pageNetworkType.SelectedNetworkType == NetworkTypes.SRIOV
-                    ? pageSriovDetails.isAutomaticAddNicToVM
-                    : pageNetworkDetails.isAutomaticAddNicToVM;
+                    ? pageSriovDetails.AddNicToVmsAutomatically
+                    : pageNetworkDetails.AddNicToVmsAutomatically;
             result.SetAutoPlug(autoPlug);
             
             if (pageNetworkType.SelectedNetworkType == NetworkTypes.CHIN)
                 result.MTU = pageChinDetails.MTU;
-            else if (pageNetworkDetails.MTU.HasValue) //Custom MTU may not be allowed if we are making a virtual network or something
-                result.MTU = pageNetworkDetails.MTU.Value;
+            else
+            {
+                int mtu = pageNetworkDetails.MTU;
+                if (mtu != -1) //Custom MTU may not be allowed if we are making a virtual network or something
+                    result.MTU = mtu;
+            }
 
             return result;
         }

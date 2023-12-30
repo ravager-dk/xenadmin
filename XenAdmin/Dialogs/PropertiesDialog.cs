@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -50,7 +49,7 @@ namespace XenAdmin.Dialogs
     public partial class PropertiesDialog : VerticallyTabbedDialog
     {
         #region Tabs
-        private CPUMemoryEditPage VCpuMemoryEditPage;
+        private CpuMemoryEditPage VCpuMemoryEditPage;
         private HostMultipathPage hostMultipathPage1;
         private CustomFieldsDisplayPage CustomFieldsEditPage;
         private LogDestinationEditPage LogDestinationEditPage;
@@ -66,7 +65,6 @@ namespace XenAdmin.Dialogs
         private UpsellPage PerfmonAlertOptionsUpsellEditPage;
         private PerfmonAlertOptionsPage PerfmonAlertOptionsEditPage;
         private HostPowerONEditPage HostPowerONEditPage;
-        private PoolPowerONEditPage PoolPowerONEditPage;
         private NewPolicySnapshotFrequencyPage newPolicySnapshotFrequencyPage1;
         private NewPolicySnapshotTypePage newPolicyVMSSTypePage1;
         private NewVMGroupVMsPage<VMSS> newVMSSVMsPage1;
@@ -82,9 +80,12 @@ namespace XenAdmin.Dialogs
         private USBEditPage usbEditPage;
         private NetworkOptionsEditPage NetworkOptionsEditPage;
         private ClusteringEditPage ClusteringEditPage;
+        private SrReadCachingEditPage SrReadCachingEditPage;
+        private PoolAdvancedEditPage _poolAdvancedEditPage;
+        private NRPEEditPage NRPEEditPage;
         #endregion
 
-        private IXenObject xenObject, xenObjectBefore, xenObjectCopy;
+        private readonly IXenObject _xenObjectBefore, _xenObjectCopy;
         private AsyncAction _action;
         private bool _startAction = true;
         private System.Timers.Timer timer = new System.Timers.Timer();
@@ -99,12 +100,11 @@ namespace XenAdmin.Dialogs
 
             InitializeComponent();
 
-            this.xenObject = xenObject;
-            xenObjectBefore = xenObject.Clone();
-            xenObjectCopy = xenObject.Clone();
+            _xenObjectBefore = xenObject;
+            _xenObjectCopy = xenObject.Clone();
 
-            Name = String.Format("Edit{0}GeneralSettingsDialog", xenObject.GetType().Name);
-            Text = String.Format(Messages.PROPERTIES_DIALOG_TITLE, Helpers.GetName(xenObject));
+            Name = string.Format("Edit{0}GeneralSettingsDialog", xenObject.GetType().Name);
+            Text = string.Format(Messages.PROPERTIES_DIALOG_TITLE, Helpers.GetName(xenObject));
 
             if (!Application.RenderWithVisualStyles)
                 ContentPanel.BackColor = SystemColors.Control;
@@ -116,25 +116,15 @@ namespace XenAdmin.Dialogs
         {
             var pool = Helpers.GetPoolOfOne(connection);
 
-            bool is_host = xenObjectCopy is Host;
-            bool is_vm = xenObjectCopy is VM && !((VM)xenObjectCopy).is_a_snapshot;
-            bool is_sr = xenObjectCopy is SR;
-
-            bool is_pool = xenObjectCopy is Pool;
-            bool is_vdi = xenObjectCopy is VDI;
-            bool is_network = xenObjectCopy is XenAPI.Network;
-
-            bool is_hvm = is_vm && ((VM)xenObjectCopy).IsHVM();
-            bool is_template = is_vm && ((VM)xenObjectCopy).is_a_template;
-            bool is_in_pool = Helpers.GetPool(xenObjectCopy.Connection) != null;
-
-            bool is_pool_or_standalone = is_pool || (is_host && !is_in_pool);
-
-            bool wlb_enabled = (Helpers.WlbEnabledAndConfigured(xenObjectCopy.Connection));
-
-            bool is_VM_appliance = xenObjectCopy is VM_appliance;
-
-            bool is_VMSS = xenObjectCopy is VMSS;
+            bool isHost = _xenObjectCopy is Host;
+            bool isVm = _xenObjectCopy is VM vm && !vm.is_a_snapshot;
+            bool isSr = _xenObjectCopy is SR;
+            bool isPool = _xenObjectCopy is Pool;
+            bool isVdi = _xenObjectCopy is VDI;
+            bool isNetwork = _xenObjectCopy is XenAPI.Network;
+            bool isPoolOrStandalone = isPool || (isHost && Helpers.GetPool(_xenObjectCopy.Connection) == null);
+            bool isVmAppliance = _xenObjectCopy is VM_appliance;
+            bool isVmss = _xenObjectCopy is VMSS;
 
             ContentPanel.SuspendLayout();
             verticalTabs.BeginUpdate();
@@ -145,25 +135,29 @@ namespace XenAdmin.Dialogs
 
                 ShowTab(GeneralEditPage = new GeneralEditPage());
 
-                if (!is_VM_appliance)
+                if (!isVmAppliance && !isVmss)
                     ShowTab(CustomFieldsEditPage = new CustomFieldsDisplayPage {AutoScroll = true});
 
-                if (is_vm)
+                if (isVm)
                 {
-                    ShowTab(VCpuMemoryEditPage = new CPUMemoryEditPage());
+                    ShowTab(VCpuMemoryEditPage = new CpuMemoryEditPage());
                     ShowTab(StartupOptionsEditPage = new BootOptionsEditPage());
                     VMHAEditPage = new VMHAEditPage();
                     VMHAEditPage.Populated += EditPage_Populated;
                     ShowTab(VMHAEditPage);
                 }
 
-                if (is_vm || is_host || is_sr)
+                if (isVm || isHost || isSr)
                 {
-                    if (Helpers.FeatureForbidden(xenObjectCopy, Host.RestrictAlerts))
+                    if (Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictAlerts))
                     {
-                        PerfmonAlertUpsellEditPage = new UpsellPage {Image = Properties.Resources._000_Alert2_h32bit_16, Text = Messages.ALERTS};
-                        PerfmonAlertUpsellEditPage.SetAllTexts(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_ALERTS : Messages.UPSELL_BLURB_ALERTS + Messages.UPSELL_BLURB_TRIAL, 
-                                                                InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL);
+                        PerfmonAlertUpsellEditPage = new UpsellPage
+                        {
+                            Image = Images.StaticImages._000_Alert2_h32bit_16,
+                            Text = Messages.ALERTS,
+                            BlurbText = Messages.UPSELL_BLURB_ALERTS
+                        };
+
                         ShowTab(PerfmonAlertUpsellEditPage);
                     }
                     else
@@ -172,13 +166,16 @@ namespace XenAdmin.Dialogs
                     }
                 }
 
-                if (is_pool_or_standalone)
+                if (isPoolOrStandalone)
                 {
-                    if (Helpers.FeatureForbidden(xenObjectCopy, Host.RestrictAlerts))
+                    if (Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictAlerts))
                     {
-                        PerfmonAlertOptionsUpsellEditPage = new UpsellPage {Image = Properties.Resources._000_Email_h32bit_16, Text = Messages.EMAIL_OPTIONS};
-                        PerfmonAlertOptionsUpsellEditPage.SetAllTexts(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_ALERTS : Messages.UPSELL_BLURB_ALERTS + Messages.UPSELL_BLURB_TRIAL,
-                                                                        InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL);
+                        PerfmonAlertOptionsUpsellEditPage = new UpsellPage
+                        {
+                            Image = Images.StaticImages._000_Email_h32bit_16,
+                            Text = Messages.EMAIL_OPTIONS,
+                            BlurbText = Messages.UPSELL_BLURB_ALERTS
+                        };
                         ShowTab(PerfmonAlertOptionsUpsellEditPage);
                     }
                     else
@@ -187,75 +184,89 @@ namespace XenAdmin.Dialogs
                     }
                 }
 
-                if (is_host)
+                if (isHost)
                 {
                     ShowTab(hostMultipathPage1 = new HostMultipathPage());
-                    ShowTab(HostPowerONEditPage = new HostPowerONEditPage());
                     ShowTab(LogDestinationEditPage = new LogDestinationEditPage());
                 }
-                
-                if (is_pool)
-                    ShowTab(PoolPowerONEditPage = new PoolPowerONEditPage());
 
-                if ((is_pool_or_standalone && Helpers.VGpuCapability(xenObjectCopy.Connection))
-                    || (is_host && ((Host)xenObjectCopy).CanEnableDisableIntegratedGpu()))
+                if (isHost || isPool)
+                    ShowTab(HostPowerONEditPage = new HostPowerONEditPage());
+
+                if ((isPoolOrStandalone && Helpers.VGpuCapability(_xenObjectCopy.Connection))
+                    || (isHost && ((Host)_xenObjectCopy).CanEnableDisableIntegratedGpu()))
                 {
                     ShowTab(PoolGpuEditPage = new PoolGpuEditPage());
                 }
 
-                if (is_pool_or_standalone && !Helpers.FeatureForbidden(xenObject.Connection, Host.RestrictSslLegacySwitch))
+                if (isPoolOrStandalone && !Helpers.FeatureForbidden(_xenObjectCopy.Connection, Host.RestrictSslLegacySwitch) && !Helpers.StockholmOrGreater(connection))
                     ShowTab(SecurityEditPage = new SecurityEditPage());
 
-                if (is_pool_or_standalone && !Helpers.FeatureForbidden(xenObject.Connection, Host.RestrictLivePatching))
+                if (isPoolOrStandalone && !Helpers.FeatureForbidden(_xenObjectCopy.Connection, Host.RestrictLivePatching) && !Helpers.CloudOrGreater(connection))
                     ShowTab(LivePatchingEditPage = new LivePatchingEditPage());
 
-                if (is_pool_or_standalone && !Helpers.FeatureForbidden(xenObject.Connection, Host.RestrictIGMPSnooping) && Helpers.GetMaster(pool).vSwitchNetworkBackend())
+                if (isPoolOrStandalone && !Helpers.FeatureForbidden(_xenObjectCopy.Connection, Host.RestrictIGMPSnooping) && Helpers.GetCoordinator(pool).vSwitchNetworkBackend())
                     ShowTab(NetworkOptionsEditPage = new NetworkOptionsEditPage());
 
-                if (is_pool_or_standalone && !Helpers.FeatureForbidden(xenObject.Connection, Host.RestrictCorosync))
+                if (isPoolOrStandalone && !Helpers.FeatureForbidden(_xenObjectCopy.Connection, Host.RestrictCorosync))
                     ShowTab(ClusteringEditPage = new ClusteringEditPage());
 
-                if (is_network)
+                if (isPool && Helpers.CloudOrGreater(_xenObjectCopy.Connection) && Helpers.XapiEqualOrGreater_22_33_0(_xenObjectCopy.Connection))
+                    ShowTab(_poolAdvancedEditPage = new PoolAdvancedEditPage());
+
+                if (isNetwork)
                     ShowTab(editNetworkPage = new EditNetworkPage());
 
-                if (is_vm && !wlb_enabled)
-                    ShowTab(HomeServerPage = new HomeServerEditPage());
-
-                if (is_vm && ((VM)xenObjectCopy).CanHaveGpu())
+                if (isVm)
                 {
-                    if (Helpers.FeatureForbidden(xenObjectCopy, Host.RestrictGpu))
+                    var theVm = (VM)_xenObjectCopy;
+
+                    if (!Helpers.WlbEnabledAndConfigured(_xenObjectCopy.Connection))
+                        ShowTab(HomeServerPage = new HomeServerEditPage());
+
+                    if (theVm.CanHaveGpu())
                     {
-                        GpuUpsellEditPage = new UpsellPage { Image = Properties.Resources._000_GetMemoryInfo_h32bit_16, Text = Messages.GPU };
-                        GpuUpsellEditPage.SetAllTexts(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_GPU : Messages.UPSELL_BLURB_GPU + Messages.UPSELL_BLURB_TRIAL,
-                                                        InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL);
-                        ShowTab(GpuUpsellEditPage);
+                        if (Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictGpu))
+                        {
+                            GpuUpsellEditPage = new UpsellPage
+                            {
+                                Image = Images.StaticImages._000_GetMemoryInfo_h32bit_16,
+                                Text = Messages.GPU,
+                                BlurbText = Messages.UPSELL_BLURB_GPU
+                            };
+                            ShowTab(GpuUpsellEditPage);
+                        }
+                        else
+                        {
+                            if(Helpers.GpusAvailable(connection))
+                                ShowTab(GpuEditPage = new GpuEditPage());
+                        }
                     }
-                    else
+
+                    if (theVm.IsHVM())
                     {
-                        ShowTab(GpuEditPage = new GpuEditPage());
+                        if (!theVm.is_a_template && !Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictUsbPassthrough) &&
+                            pool.Connection.Cache.Hosts.Any(host => host.PUSBs.Count > 0))
+                        {
+                            usbEditPage = new USBEditPage();
+                            usbEditPage.Populated += EditPage_Populated;
+                            ShowTab(usbEditPage);
+                        }
+
+                        ShowTab(VMAdvancedEditPage = new VMAdvancedEditPage());
+                    }
+
+                    if (Helpers.ContainerCapability(_xenObjectCopy.Connection))
+                    {
+                        if (theVm.CanBeEnlightened())
+                            ShowTab(VMEnlightenmentEditPage = new VMEnlightenmentEditPage());
+
+                        if (theVm.CanHaveCloudConfigDrive())
+                            ShowTab(CloudConfigParametersPage = new Page_CloudConfigParameters());
                     }
                 }
 
-                if (is_hvm && !is_template && !Helpers.FeatureForbidden(xenObjectCopy, Host.RestrictUsbPassthrough) &&
-                    pool.Connection.Cache.Hosts.Any(host => host.PUSBs.Count > 0))
-                {
-                    usbEditPage = new USBEditPage();
-                    usbEditPage.Populated += EditPage_Populated;
-                    ShowTab(usbEditPage);
-                }
-
-                if (is_hvm)
-                {
-                    ShowTab(VMAdvancedEditPage = new VMAdvancedEditPage());
-                }
-
-                if (is_vm && Helpers.ContainerCapability(xenObject.Connection) && ((VM)xenObjectCopy).CanBeEnlightened())
-                    ShowTab(VMEnlightenmentEditPage = new VMEnlightenmentEditPage());
-
-                if (is_vm && Helpers.ContainerCapability(xenObject.Connection) && ((VM)xenObjectCopy).CanHaveCloudConfigDrive())
-                    ShowTab(CloudConfigParametersPage = new Page_CloudConfigParameters());
-
-                if(is_VMSS)
+                if (isVmss)
                 {
                     ShowTab(newVMSSVMsPage1 = new NewVMGroupVMsPage<VMSS> {Pool = pool});
                     ShowTab(newPolicyVMSSTypePage1 = new NewPolicySnapshotTypePage());
@@ -264,49 +275,54 @@ namespace XenAdmin.Dialogs
                     ShowTab(newPolicySnapshotFrequencyPage1);
                 }
 
-                if (is_VM_appliance)
+                if (isVmAppliance)
                 {
                     ShowTab(newVMApplianceVMsPage1 = new NewVMGroupVMsPage<VM_appliance> { Pool = pool });
                     ShowTab(newVmApplianceVmOrderAndDelaysPage1 = new NewVMApplianceVMOrderAndDelaysPage { Pool = pool });
                 }
 
-                //
-                // Now add one tab per VBD (for VDIs only)
-                //
+                if (isSr && ((SR)_xenObjectCopy).SupportsReadCaching() && !Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictReadCaching))
+                    ShowTab(SrReadCachingEditPage = new SrReadCachingEditPage());
 
-                if (!is_vdi)
-                    return;
-
-                ShowTab(vdiSizeLocation = new VDISizeLocationPage());
-
-                VDI vdi = xenObjectCopy as VDI;
-
-                List<VBDEditPage> vbdEditPages = new List<VBDEditPage>();
-
-                foreach (VBD vbd in vdi.Connection.ResolveAll(vdi.VBDs))
+                if (isVdi)
                 {
-                    VBDEditPage editPage = new VBDEditPage();
+                    ShowTab(vdiSizeLocation = new VDISizeLocationPage());
 
-                    editPage.SetXenObjects(null, vbd);
-                    vbdEditPages.Add(editPage);
-                    ShowTab(editPage);
+                    VDI vdi = _xenObjectCopy as VDI;
+
+                    List<VBDEditPage> vbdEditPages = new List<VBDEditPage>();
+
+                    foreach (VBD vbd in vdi.Connection.ResolveAll(vdi.VBDs))
+                    {
+                        VBDEditPage editPage = new VBDEditPage();
+
+                        editPage.SetXenObjects(null, vbd);
+                        vbdEditPages.Add(editPage);
+                        ShowTab(editPage);
+                    }
+
+                    if (vbdEditPages.Count <= 0)
+                        return;
+
+                    using (var dialog = new ActionProgressDialog(
+                               new DelegatedAsyncAction(vdi.Connection, Messages.DEVICE_POSITION_SCANNING,
+                                   Messages.DEVICE_POSITION_SCANNING, Messages.DEVICE_POSITION_SCANNED,
+                                   delegate(Session session)
+                                   {
+                                       foreach (VBDEditPage page in vbdEditPages)
+                                           page.UpdateDevicePositions(session);
+                                   }),
+                               ProgressBarStyle.Continuous))
+                    {
+                        dialog.ShowCancel = true;
+                        dialog.ShowDialog(Program.MainWindow);
+                    }
                 }
-
-                if (vbdEditPages.Count <= 0)
-                    return;
-
-                using (var dialog = new ActionProgressDialog(
-                    new DelegatedAsyncAction(vdi.Connection, Messages.DEVICE_POSITION_SCANNING,
-                        Messages.DEVICE_POSITION_SCANNING, Messages.DEVICE_POSITION_SCANNED,
-                        delegate(Session session)
-                        {
-                            foreach (VBDEditPage page in vbdEditPages)
-                                page.UpdateDevicePositions(session);
-                        }),
-                    ProgressBarStyle.Continuous))
+                if (isPoolOrStandalone && Helpers.XapiEqualOrGreater_23_27_0(connection)
+                    && (connection.Session.IsLocalSuperuser || connection.Session.Roles.Any(r => r.name_label == Role.MR_ROLE_POOL_ADMIN)))
                 {
-                    dialog.ShowCancel = true;
-                    dialog.ShowDialog(Program.MainWindow);
+                    NRPEEditPage = new NRPEEditPage();
+                    ShowTab(NRPEEditPage);
                 }
             }
             finally
@@ -324,7 +340,7 @@ namespace XenAdmin.Dialogs
             pageAsControl.BackColor = Color.Transparent;
             pageAsControl.Dock = DockStyle.Fill;
 
-            editPage.SetXenObjects(xenObject, xenObjectCopy);
+            editPage.SetXenObjects(_xenObjectBefore, _xenObjectCopy);
             verticalTabs.Items.Add(editPage);
         }
 
@@ -335,16 +351,24 @@ namespace XenAdmin.Dialogs
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            if (!ValidToSave)
+            var changedPageExists = false;
+
+            foreach (IEditPage editPage in verticalTabs.Items)
             {
-                // Keep dialog open and allow user to correct the error as
-                // indicated by the balloon tooltip.
-                DialogResult = DialogResult.None;
-                return;
+                if (!editPage.ValidToSave)
+                {
+                    SelectPage(editPage);
+
+                    editPage.ShowLocalValidationMessages();
+                    DialogResult = DialogResult.None;
+                    return;
+                }
+
+                if (editPage.HasChanged)
+                    changedPageExists = true;
             }
 
-            // Have any of the fields in the tab pages changed?
-            if (!HasChanged)
+            if (!changedPageExists)
             {
                 Close();
                 return;
@@ -353,29 +377,18 @@ namespace XenAdmin.Dialogs
             // Yes, save to the LocalXenObject.
             List<AsyncAction> actions = SaveSettings();
 
-            Program.Invoke(Program.MainWindow.GeneralPage, Program.MainWindow.GeneralPage.EnableDisableEdit);
+            Program.Invoke(Program.MainWindow.GeneralPage, Program.MainWindow.GeneralPage.UpdateButtons);
 
             // Add a save changes on the beginning of the actions to enact the alterations that were just changes to the xenObjectCopy.
             // Must come first because some pages' SaveChanges() rely on modifying the object via the xenObjectCopy before their actions are run.
 
-            if(xenObjectBefore is VMSS)
-            {
-                XenAPI.VMSS VMSSObj = xenObjectBefore as XenAPI.VMSS;
-                if (VMSSObj.type == vmss_type.snapshot_with_quiesce)
-                {
-                    actions.Insert(0, new SaveChangesAction(xenObjectCopy, xenObjectBefore, true));
-                }
-                else
-                {
-                    actions.Insert(actions.Count, new SaveChangesAction(xenObjectCopy, xenObjectBefore, true));
-                }
-            }
-            else
-            {
-                actions.Insert(0, new SaveChangesAction(xenObjectCopy, xenObjectBefore, true)); 
-            }
+            int index = 0;
+            if (_xenObjectBefore is VMSS vmss && vmss.type != vmss_type.snapshot_with_quiesce)
+                index = actions.Count;
 
-            var objName = Helpers.GetName(xenObject).Ellipsise(50);
+            actions.Insert(index, new SaveChangesAction(_xenObjectCopy, true, _xenObjectBefore));
+
+            var objName = Helpers.GetName(_xenObjectBefore).Ellipsise(50);
             _action = new MultipleAction(
                 connection,
                 string.Format(Messages.UPDATE_PROPERTIES, objName),
@@ -383,67 +396,28 @@ namespace XenAdmin.Dialogs
                 string.Format(Messages.UPDATED_PROPERTIES, objName),
                 actions);
 
-            _action.SetObject(xenObjectCopy);
+            _action.SetObject(_xenObjectCopy);
             
             _action.Completed += action_Completed;
             Close();
 
             if (_startAction)
             {
+                _xenObjectBefore.Locked = true;
                 _action.RunAsync();
             }
         }
 
         private void action_Completed(ActionBase sender)
         {
-            Program.Invoke(Program.MainWindow.GeneralPage, Program.MainWindow.GeneralPage.EnableDisableEdit);
+            _xenObjectBefore.Locked = false;
+            Program.Invoke(Program.MainWindow.GeneralPage, Program.MainWindow.GeneralPage.UpdateButtons);
         }
 
-        /*
-         * Iterates through all of the tab pages checking for changes and
-         * return the status.
-         */
-        private bool HasChanged
-        {
-            get
-            {
-                foreach (IEditPage editPage in verticalTabs.Items)
-                    if (editPage.HasChanged)
-                        return true;
-
-                return false;
-            }
-        }
-
-        /*
-         * Iterate through all tab pages looking for local validation errors.  If
-         * we encounter a local validation error on a TabPage, then make the TabPage
-         * the selected, and have the inner control show one or more balloon tips.  Keep
-         * the dialog open.
-         */
-        private bool ValidToSave
-        {
-            get
-            {
-                foreach (IEditPage editPage in verticalTabs.Items)
-                    if (!editPage.ValidToSave)
-                    {
-                        SelectPage(editPage);
-
-                        // Show local validation balloon message for this tab page.
-                        editPage.ShowLocalValidationMessages();
-
-                        return false;
-                    }
-
-                return true;
-            }
-        }
-
-        /* 
-         * Iterates through all of the tab pages, saving changes to their cloned XenObjects,
-         * and accumulating and returning their Actions for further processing.
-         */
+        /// <summary>
+        /// Iterates through all of the tab pages, saving changes to their cloned XenObjects,
+        /// and accumulating and returning their Actions for further processing.
+        /// </summary>
         private List<AsyncAction> SaveSettings()
         {
             List<AsyncAction> actions = new List<AsyncAction>();
@@ -501,7 +475,6 @@ namespace XenAdmin.Dialogs
 
         private void verticalTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
             var snapshotTypePage = verticalTabs.SelectedItem as NewPolicySnapshotTypePage;
             if (snapshotTypePage != null)
             {
@@ -540,6 +513,27 @@ namespace XenAdmin.Dialogs
                 usbEditPage.ShowHideWarnings();
                 return;
             }
+
+            if (verticalTabs.SelectedItem == HostPowerONEditPage)
+            {
+                HostPowerONEditPage.LoadPowerOnMode();
+                return;
+            }
+
+            HideToolTips();
+        }
+
+        private void HideToolTips()
+        {
+            foreach (IEditPage page in verticalTabs.Items)
+            {
+                page.HideLocalValidationMessages();
+            }
+        }
+
+        private void PropertiesDialog_Move(object sender, EventArgs e)
+        {
+            HideToolTips();
         }
 
         private void PropertiesDialog_FormClosed(object sender, FormClosedEventArgs e)

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Commands;
@@ -51,8 +49,6 @@ namespace XenAdmin.Dialogs
         public ControlDomainMemoryDialog(Host host)
             : base(host.Connection)
         {
-            if (host == null) throw new ArgumentNullException("host");
-
             InitializeComponent();
             this.host = host;
             this.host.PropertyChanged += Server_PropertyChanged;
@@ -111,10 +107,8 @@ namespace XenAdmin.Dialogs
             var mem = memorySpinner.Value;
 
             DialogResult dialogResult;
-            using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.CONFIRM_CHANGE_CONTROL_DOMAIN_MEMORY, Messages.XENCENTER),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+            using (var dlg = new WarningDialog(Messages.CONFIRM_CHANGE_CONTROL_DOMAIN_MEMORY,
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
             {
                 dialogResult = dlg.ShowDialog(this);
             }
@@ -159,7 +153,7 @@ namespace XenAdmin.Dialogs
 
         private void maintenanceModeLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            new HostMaintenanceModeCommand(Program.MainWindow, host, HostMaintenanceModeCommandParameter.Enter).Execute();
+            new HostMaintenanceModeCommand(Program.MainWindow, host, HostMaintenanceModeCommandParameter.Enter).Run();
         }
 
         private void ControlDomainMemoryDialog_FormClosing(object sender, FormClosingEventArgs e)

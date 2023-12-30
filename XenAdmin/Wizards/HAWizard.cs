@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,10 +32,11 @@ using System;
 using System.Collections.Generic;
 using XenAdmin.Actions;
 using XenAdmin.Controls;
+using XenAdmin.Core;
 using XenAdmin.Dialogs;
+using XenAdmin.Wizards.GenericPages;
 using XenAdmin.Wizards.HAWizard_Pages;
 using XenAPI;
-using System.Drawing;
 
 
 namespace XenAdmin.Wizards
@@ -44,10 +44,12 @@ namespace XenAdmin.Wizards
     public partial class HAWizard : XenWizardBase
     {
         private readonly Intro xenTabPageIntro;
+        private readonly RBACWarningPage m_pageRbac;
         private readonly AssignPriorities xenTabPageAssignPriorities;
         private readonly ChooseSR xenTabPageChooseSR;
         private readonly HAFinishPage xenTabPageHaFinish;
-        
+
+        private readonly bool _rbacNeeded;
         private readonly Pool pool;
 
         public HAWizard(Pool pool)
@@ -56,18 +58,37 @@ namespace XenAdmin.Wizards
             InitializeComponent();
 
             xenTabPageIntro = new Intro();
+            m_pageRbac = new RBACWarningPage();
             xenTabPageAssignPriorities = new AssignPriorities();
             xenTabPageChooseSR = new ChooseSR();
             xenTabPageHaFinish = new HAFinishPage();
 
             this.pool = pool;
+            _rbacNeeded = Helpers.ConnectionRequiresRbac(pool.Connection);
 
             AddPage(xenTabPageIntro);
+
+            if (_rbacNeeded)
+            {
+                var methodsToCheck = new RbacMethodList(
+                    "vm.set_ha_restart_priority",
+                    "vm.set_order",
+                    "vm.set_start_delay",
+                    "pool.sync_database",
+                    "pool.ha_compute_hypothetical_max_host_failures_to_tolerate",
+                    "pool.set_ha_host_failures_to_tolerate",
+                    "pool.enable_ha",
+                    "sr.assert_can_host_ha_statefile");
+                m_pageRbac.SetPermissionChecks(xenConnection,
+                    new WizardRbacCheck(Messages.RBAC_HA_ENABLE_WARNING, methodsToCheck) {Blocking = true});
+                AddPage(m_pageRbac);
+            }
+
             AddPage(xenTabPageChooseSR);
             xenTabPageChooseSR.Pool = pool;
             AddPage(xenTabPageAssignPriorities);
             xenTabPageAssignPriorities.ProtectVmsByDefault = true;
-            xenTabPageAssignPriorities.Connection = pool.Connection;//set the connection again after the pafe has been added
+            xenTabPageAssignPriorities.Connection = pool.Connection;//set the connection again after the page has been added
             AddPage(xenTabPageHaFinish);
         }
 
@@ -85,11 +106,8 @@ namespace XenAdmin.Wizards
 
             if (brokenSRs.Count > 0)
             {
-                using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(
-                        SystemIcons.Warning,
-                        String.Format(Messages.HA_SRS_BROKEN_WARNING, String.Join("\n", brokenSRs.ToArray())),
-                        Messages.HIGH_AVAILABILITY)))
+                using (var dlg = new WarningDialog(String.Format(Messages.HA_SRS_BROKEN_WARNING, String.Join("\n", brokenSRs.ToArray())))
+                    {WindowTitle = Messages.HIGH_AVAILABILITY})
                 {
                     dlg.ShowDialog(this);
                 }
@@ -106,21 +124,21 @@ namespace XenAdmin.Wizards
                 xenTabPageHaFinish.Ntol = xenTabPageAssignPriorities.Ntol;
 
                 int alwaysRestartHighPriority = 0, alwaysRestart = 0, bestEffort = 0, doNotRestart = 0;
-                foreach (VM.HA_Restart_Priority priority in xenTabPageAssignPriorities.CurrentSettings.Values)
+                foreach (VM.HaRestartPriority priority in xenTabPageAssignPriorities.CurrentSettings.Values)
                 {
                     switch (priority)
                     {
-                        case VM.HA_Restart_Priority.AlwaysRestartHighPriority:
+                        case VM.HaRestartPriority.AlwaysRestartHighPriority:
                             alwaysRestartHighPriority++;
                             break;
-                        case VM.HA_Restart_Priority.AlwaysRestart:
-                        case VM.HA_Restart_Priority.Restart:
+                        case VM.HaRestartPriority.AlwaysRestart:
+                        case VM.HaRestartPriority.Restart:
                             alwaysRestart++;
                             break;
-                        case VM.HA_Restart_Priority.BestEffort:
+                        case VM.HaRestartPriority.BestEffort:
                             bestEffort++;
                             break;
-                        case VM.HA_Restart_Priority.DoNotRestart:
+                        case VM.HaRestartPriority.DoNotRestart:
                             doNotRestart++;
                             break;
                     }
@@ -135,7 +153,9 @@ namespace XenAdmin.Wizards
 
         protected override bool RunNextPagePrecheck(XenTabPage senderPage)
         {
-            if (senderPage.GetType() == typeof(Intro))
+            var pageType = senderPage.GetType();
+
+            if (pageType == typeof(Intro) && !_rbacNeeded || pageType == typeof(RBACWarningPage))
             {
                 // Start HB SR scan
                 // If scan finds no suitable SRs ChooseSR will show sensible text and disallow progress.

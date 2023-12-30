@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,11 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
-using XenAdmin.Model;
 using XenAdmin.Network;
 using XenAPI;
 
@@ -64,7 +58,7 @@ namespace XenAdmin.Commands
             return result;
         }
 
-        protected sealed override void ExecuteCore(SelectedItemCollection selection)
+        protected sealed override void RunCore(SelectedItemCollection selection)
         {
             //It only supports one item selected for now
             Trace.Assert(selection.Count==1);
@@ -92,25 +86,24 @@ namespace XenAdmin.Commands
                 Pool pool = Helpers.GetPool(network.Connection);
                 if (pool != null && pool.ha_enabled)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Error,
-                            string.Format(Messages.BOND_DELETE_HA_ENABLED, pif.Name(), pool.Name()),
-                            Messages.DELETE_BOND)))
+                    using (var dlg = new ErrorDialog(string.Format(Messages.BOND_DELETE_HA_ENABLED, pif.Name(), pool.Name()))
+                        {WindowTitle = Messages.DELETE_BOND})
                     {
                         dlg.ShowDialog(Parent);
                     }
                     return;
                 }
 
-                string message = string.Format(will_disturb_secondary ? Messages.BOND_DELETE_WILL_DISTURB_BOTH : Messages.BOND_DELETE_WILL_DISTURB_PRIMARY, msg);
+                string message = string.Format(will_disturb_secondary ? Messages.BOND_DELETE_WILL_DISTURB_BOTH : Messages.BOND_DELETE_WILL_DISTURB_PRIMARY, msg, BrandManager.BrandConsole);
 
                 DialogResult result;
-                using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(SystemIcons.Warning, message, Messages.DELETE_BOND),
-                            "NetworkingConfigWarning",
+                using (var dlg = new WarningDialog(message,
                             new ThreeButtonDialog.TBDButton(Messages.BOND_DELETE_CONTINUE, DialogResult.OK),
-                            ThreeButtonDialog.ButtonCancel))
+                            ThreeButtonDialog.ButtonCancel)
+                {
+                    HelpNameSetter = "NetworkingConfigWarning",
+                    WindowTitle = Messages.DELETE_BOND
+                })
                 {
                     result = dlg.ShowDialog(Parent);
                 }
@@ -120,8 +113,7 @@ namespace XenAdmin.Commands
             else if (will_disturb_secondary)
             {
                 DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, string.Format(Messages.BOND_DELETE_WILL_DISTURB_SECONDARY, msg), Messages.XENCENTER),
+                using (var dlg = new WarningDialog(string.Format(Messages.BOND_DELETE_WILL_DISTURB_SECONDARY, msg),
                         ThreeButtonDialog.ButtonOK,
                         ThreeButtonDialog.ButtonCancel))
                 {
@@ -133,9 +125,8 @@ namespace XenAdmin.Commands
             else
             {
                 DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, msg, Messages.XENCENTER),
-                        new ThreeButtonDialog.TBDButton(Messages.OK, DialogResult.OK, ThreeButtonDialog.ButtonType.ACCEPT, true),
+                using (var dlg = new WarningDialog(msg,
+                        new ThreeButtonDialog.TBDButton(Messages.OK, DialogResult.OK, selected: true),
                         ThreeButtonDialog.ButtonCancel))
                 {
                     dialogResult = dlg.ShowDialog(Parent);
@@ -146,7 +137,7 @@ namespace XenAdmin.Commands
 
             // The UI shouldn't offer deleting a bond in this case, but let's make sure we've
             // done the right thing and that the bond hasn't been deleted in the meantime. (CA-27436).
-            Bond bond = pif.BondMasterOf();
+            Bond bond = pif.BondInterfaceOf();
             if (bond != null)
                 new Actions.DestroyBondAction(bond).RunAsync();
         }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -78,7 +77,7 @@ namespace XenAdmin.Network
                     }
                     else if (!Properties.Settings.Default.WarnChangedCertificate && Registry.SSLCertificateTypes == SSLCertificateTypes.None)
                     {
-                        Settings.ReplaceCertificate(kvp.Key, certificate);
+                        Settings.ReplaceCertificate(kvp.Key, certificate.GetCertHashString());
                         log.Debug("Updating cert silently");
                         return true;
                     }
@@ -101,7 +100,7 @@ namespace XenAdmin.Network
                 if (!Properties.Settings.Default.WarnUnrecognizedCertificate && Registry.SSLCertificateTypes != SSLCertificateTypes.All)
                 {
                     // user has chosen to ignore new certificates
-                    Settings.AddCertificate(certificate, webreq.Address.Host);
+                    Settings.AddCertificate(certificate.GetCertHashString(), webreq.Address.Host);
                     log.Debug("Adding new cert silently");
                     return true;
                 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -908,7 +907,7 @@ namespace XenAdmin.Plugins
                 request.Method = "POST";
                 request.ContentType = "xml";
                 request.ContentLength = Encoding.UTF8.GetBytes(jsCallbackAndData[1]).Length;
-                request.UserAgent = BrandManager.BRAND_CONSOLE + "\\Plugin";
+                request.UserAgent = BrandManager.BrandConsole + "\\Plugin";
                 request.Proxy = XenAdminConfigManager.Provider.GetProxyFromSettings(connection, true);
 
                 using (var req = request.GetRequestStream())
@@ -943,7 +942,7 @@ namespace XenAdmin.Plugins
                     }
                     else if (browser.ObjectForScripting != this)
                     {
-                        // If you don't do this, you can get old data re-entering the javascript execution after you have switched to a new object
+                        // If you don't do this, you can get old data re-entering the javascript running after you have switched to a new object
                         log.Debug("Scripting object has been changed, discarding message to plugin.");
                     }
                     else if (browser.Document != null)

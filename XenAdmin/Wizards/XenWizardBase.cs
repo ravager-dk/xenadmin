@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -61,7 +60,6 @@ namespace XenAdmin.Wizards
         protected XenWizardBase()
         {
             InitializeComponent();
-            Icon = Properties.Resources.AppIcon;
         }
 
         protected XenWizardBase(IXenConnection connection)
@@ -335,25 +333,19 @@ namespace XenAdmin.Wizards
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public XenTabPage CurrentStepTabPage
-        {
-            get
-            {
-                return wizardProgress.CurrentStepTabPage;
-            }
-        }
+        public XenTabPage CurrentStepTabPage => wizardProgress.CurrentStepTabPage;
 
-        public void NextStep()
+        protected void NextStep()
         {
             wizardProgress.NextStep();
         }
 
-        public void PreviousStep()
+        protected void PreviousStep()
         {
             wizardProgress.PreviousStep();
         }
 
-        public bool IsFirstPage()
+        protected bool IsFirstPage()
         {
             return wizardProgress.IsFirstStep;
         }
@@ -368,7 +360,7 @@ namespace XenAdmin.Wizards
             labelWizard.Text = wizardProgress.CurrentStepTabPage.PageTitle;
         }
 
-        protected void UpdateWizard()
+        private void UpdateWizard()
         {
             buttonPrevious.Enabled = !wizardProgress.IsFirstStep && wizardProgress.CurrentStepTabPage.EnablePrevious();
 
@@ -385,16 +377,6 @@ namespace XenAdmin.Wizards
         private void page_StatusChanged(XenTabPage sender)
         {
             UpdateWizard();
-        }
-
-        internal void DisablePage(XenTabPage wizardTabPage, bool disable)
-        {
-            foreach (XenTabPage p in wizardProgress.Steps)
-                if (p == wizardTabPage)
-                {
-                    p.DisableStep = disable;
-                    return;
-                }
         }
 
         protected virtual IEnumerable<KeyValuePair<string, string>> GetSummary()

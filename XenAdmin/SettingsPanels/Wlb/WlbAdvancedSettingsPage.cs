@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,10 +30,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 using XenAdmin.Actions;
@@ -312,7 +308,7 @@ namespace XenAdmin.SettingsPanels
         {
             if (!this.ValidToSave)
             {
-                HelpersGUI.ShowBalloonMessage(textBoxSMTPServer, Messages.INVALID_PARAMETER, InvalidParamToolTip);
+                HelpersGUI.ShowBalloonMessage(textBoxSMTPServer, InvalidParamToolTip, Messages.INVALID_PARAMETER);
             }
             //BL: Disable it for now, will enable it after adding the port to WLB side
             /*
@@ -321,6 +317,14 @@ namespace XenAdmin.SettingsPanels
                 Dialogs.EditVIFDialog.ShowBalloonMessage(TextBoxSMTPServerPort, Messages.INVALID_PARAMETER, InvalidParamToolTip);
             }
             */
+        }
+
+        public void HideLocalValidationMessages()
+        {
+            if (textBoxSMTPServer != null)
+            {
+                InvalidParamToolTip.Hide(textBoxSMTPServer);
+            }
         }
 
         public void Cleanup()
@@ -334,10 +338,9 @@ namespace XenAdmin.SettingsPanels
 
         #region IVerticalTab Members
 
-
         public string SubText => Messages.WLB_ADVANCED_CONFIGURATION_SUBTEXT;
 
-        public Image Image => Properties.Resources._002_Configure_h32bit_16;
+        public Image Image => Images.StaticImages._002_Configure_h32bit_16;
 
         #endregion
     }

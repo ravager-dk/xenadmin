@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,6 +47,46 @@ namespace XenAPI
         /// Indicates this pool is in the process of creating a cluster
         /// </summary>
         cluster_create,
+        /// <summary>
+        /// Indicates this pool is in the process of changing master
+        /// </summary>
+        designate_new_master,
+        /// <summary>
+        /// Indicates this pool is in the process of configuring repositories
+        /// </summary>
+        configure_repositories,
+        /// <summary>
+        /// Indicates this pool is in the process of syncing updates
+        /// </summary>
+        sync_updates,
+        /// <summary>
+        /// Indicates this pool is in the process of getting updates
+        /// </summary>
+        get_updates,
+        /// <summary>
+        /// Indicates this pool is in the process of applying updates
+        /// </summary>
+        apply_updates,
+        /// <summary>
+        /// Indicates this pool is in the process of enabling TLS verification
+        /// </summary>
+        tls_verification_enable,
+        /// <summary>
+        /// A certificate refresh and distribution is in progress
+        /// </summary>
+        cert_refresh,
+        /// <summary>
+        /// Indicates this pool is exchanging internal certificates with a new joiner
+        /// </summary>
+        exchange_certificates_on_join,
+        /// <summary>
+        /// Indicates this pool is exchanging ca certificates with a new joiner
+        /// </summary>
+        exchange_ca_certificates_on_join,
+        /// <summary>
+        /// Indicates the primary host is sending its certificates to another host
+        /// </summary>
+        copy_primary_host_certs,
         unknown
     }
 
@@ -71,6 +110,26 @@ namespace XenAPI
                     return "ha_disable";
                 case pool_allowed_operations.cluster_create:
                     return "cluster_create";
+                case pool_allowed_operations.designate_new_master:
+                    return "designate_new_master";
+                case pool_allowed_operations.configure_repositories:
+                    return "configure_repositories";
+                case pool_allowed_operations.sync_updates:
+                    return "sync_updates";
+                case pool_allowed_operations.get_updates:
+                    return "get_updates";
+                case pool_allowed_operations.apply_updates:
+                    return "apply_updates";
+                case pool_allowed_operations.tls_verification_enable:
+                    return "tls_verification_enable";
+                case pool_allowed_operations.cert_refresh:
+                    return "cert_refresh";
+                case pool_allowed_operations.exchange_certificates_on_join:
+                    return "exchange_certificates_on_join";
+                case pool_allowed_operations.exchange_ca_certificates_on_join:
+                    return "exchange_ca_certificates_on_join";
+                case pool_allowed_operations.copy_primary_host_certs:
+                    return "copy_primary_host_certs";
                 default:
                     return "unknown";
             }

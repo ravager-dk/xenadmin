@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,8 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-using XenAdmin.Controls;
+using XenAdmin.Actions.OvfActions;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAdmin.Wizards.GenericPages;
@@ -52,12 +50,16 @@ namespace XenAdmin.Wizards.ImportWizard
         private List<Xen_ConfigurationSettingData_Type> vgpuSettings = new List<Xen_ConfigurationSettingData_Type>();
         private List<Xen_ConfigurationSettingData_Type> hardwarePlatformSettings = new List<Xen_ConfigurationSettingData_Type>();
         private List<Xen_ConfigurationSettingData_Type> vendorDeviceSettings = new List<Xen_ConfigurationSettingData_Type>();
-
+        private int _ovfMaxVCpusCount;
+        private long _ovfMemory;
+        private readonly List<long> _ovfVCpusCount;
         public event Action<IXenConnection> ConnectionSelectionChanged;
 
         public ImportSelectHostPage()
         {
+            InitializeText();
             ShowWarning(null);
+            _ovfVCpusCount = new List<long>();
         }
 
         #region XenTabPage overrides
@@ -65,12 +67,12 @@ namespace XenAdmin.Wizards.ImportWizard
         /// <summary>
         /// Gets the page's title (headline)
         /// </summary>
-        public override string PageTitle { get { return Messages.IMPORT_SELECT_HOST_PAGE_TITLE; } }
+        public override string PageTitle => Messages.IMPORT_SELECT_HOST_PAGE_TITLE;
 
-		/// <summary>
-		/// Gets the page's label in the (left hand side) wizard progress panel
-		/// </summary>
-		public override string Text { get { return Messages.NEWSR_LOCATION; } }
+        /// <summary>
+        /// Gets the page's label in the (left hand side) wizard progress panel
+        /// </summary>
+        public override string Text => Messages.NEWSR_LOCATION;
 
         protected override bool ImplementsIsDirty()
         {
@@ -88,20 +90,75 @@ namespace XenAdmin.Wizards.ImportWizard
             set
             {
                 _selectedOvfEnvelope = value;
-                
+
                 vgpuSettings.Clear();
                 hardwarePlatformSettings.Clear();
                 vendorDeviceSettings.Clear();
 
                 if (_selectedOvfEnvelope == null)
                     return;
-                
-                foreach (var vsType in ((VirtualSystemCollection_Type)SelectedOvfEnvelope.Item).Content)
+
+                var vsColl = SelectedOvfEnvelope.Item as VirtualSystemCollection_Type;
+
+                if (vsColl == null && SelectedOvfEnvelope.Item is VirtualSystemCollection_Type)
+                    vsColl = new VirtualSystemCollection_Type {Content = new[] {SelectedOvfEnvelope.Item}};
+
+                if (vsColl == null)
+                    return;
+
+                _ovfVCpusCount.Clear();
+                _ovfMaxVCpusCount = 0;
+                foreach (var vsType in vsColl.Content)
                 {
                     var vhs = OVF.FindVirtualHardwareSectionByAffinity(SelectedOvfEnvelope, vsType.id, "xen");
                     var data = vhs.VirtualSystemOtherConfigurationData;
                     if (data == null)
                         continue;
+
+                    foreach (var rasdType in vhs.Item)
+                    {
+                        // Processor
+                        if (rasdType.ResourceType.Value == 3 &&
+                            int.TryParse(rasdType.VirtualQuantity.Value.ToString(), out var vCpusCount))
+                        {
+                            _ovfVCpusCount.Add(vCpusCount);
+                            if (_ovfMaxVCpusCount < vCpusCount)
+                            {
+                                _ovfMaxVCpusCount = vCpusCount;
+                            }
+                        }
+                        // Memory
+                        if (rasdType.ResourceType.Value == 4 && double.TryParse(rasdType.VirtualQuantity.Value.ToString(), out var memory))
+                        {
+                            //The default memory unit is MB (2^20), however, the RASD may contain a different
+                            //one with format byte*memoryBase^memoryPower (byte being a literal string)
+
+                            double memoryBase = 2.0;
+                            double memoryPower = 20.0;
+
+                            if (rasdType.AllocationUnits.Value.ToLower().StartsWith("byte"))
+                            {
+                                string[] a1 = rasdType.AllocationUnits.Value.Split('*', '^');
+
+                                if (a1.Length == 3)
+                                {
+                                    if (!double.TryParse(a1[1].Trim(), out memoryBase))
+                                        memoryBase = 2.0;
+                                    if (!double.TryParse(a1[2].Trim(), out memoryPower))
+                                        memoryPower = 20.0;
+                                }
+                            }
+
+                            double memoryMultiplier = Math.Pow(memoryBase, memoryPower);
+                            memory *= memoryMultiplier;
+
+                            if (memory > long.MaxValue)
+                                memory = long.MaxValue;
+
+                            if (_ovfMemory < memory)
+                                _ovfMemory = (long)memory;
+                        }
+                    }
 
                     foreach (var s in data)
                     {
@@ -116,17 +173,17 @@ namespace XenAdmin.Wizards.ImportWizard
             }
         }
 
-        protected override string InstructionText { get { return Messages.IMPORT_WIZARD_DESTINATION_INSTRUCTIONS; } }
+        protected override string InstructionText => Messages.IMPORT_WIZARD_DESTINATION_INSTRUCTIONS;
 
-        protected override string TargetServerText { get { return Messages.IMPORT_WIZARD_DESTINATION_DESTINATION; } }
+        protected override string TargetPoolText => Messages.IMPORT_WIZARD_DESTINATION_DESTINATION;
 
-        protected override string TargetServerSelectionIntroText { get { return Messages.IMPORT_WIZARD_DESTINATION_TABLE_INTRO; } }
+        protected override string TargetServerSelectionIntroText => Messages.IMPORT_WIZARD_DESTINATION_TABLE_INTRO;
 
-        protected override void OnChosenItemChanged()
+        protected override void OnSelectedTargetPoolChanged()
         {
             var warnings = new List<string>();
 
-            if (ChosenItem != null)
+            if (SelectedTargetPool != null)
             {
                 if (!CheckDestinationSupportsVendorDevice())
                 {
@@ -145,12 +202,36 @@ namespace XenAdmin.Wizards.ImportWizard
                     else if (VmMappings.Count > 1)
                         warnings.Add(Messages.IMPORT_VM_WITH_VGPU_WARNING_MANY);
                 }
+
+                var ovfCountsAboveLimit = _ovfVCpusCount.Count(vCpusCount => vCpusCount > VM.MAX_VCPUS_FOR_NON_TRUSTED_VMS);
+                if (ovfCountsAboveLimit > 0)
+                {
+                    warnings.Add(string.Format(Messages.IMPORT_VM_CPUS_COUNT_UNTRUSTED_WARNING, ovfCountsAboveLimit, VM.MAX_VCPUS_FOR_NON_TRUSTED_VMS, BrandManager.BrandConsole));
+                }
             }
 
-            ShowWarning(string.Join("\n", warnings));
+            ApplianceCanBeStarted = true;
 
-            if (ConnectionSelectionChanged != null)
-                ConnectionSelectionChanged(ChosenItem != null ? ChosenItem.Connection : null);
+            if (!CheckDestinationHasEnoughPhysicalCpus(out var physicalCpusWarningMessage, out var applianceCanBeStarted))
+            {
+                warnings.Add(physicalCpusWarningMessage);
+                ApplianceCanBeStarted = applianceCanBeStarted;
+            }
+
+            if (!CheckDestinationHasEnoughMemory(out var memoryWarningMessage))
+            {
+                warnings.Add(memoryWarningMessage);
+                ApplianceCanBeStarted = false;
+            }
+
+            ShowWarning(string.Join("\n\n", warnings));
+
+            ConnectionSelectionChanged?.Invoke(SelectedTargetPool?.Connection);
+        }
+
+        protected override void OnSelectedTargetChanged()
+        {
+            OnSelectedTargetPoolChanged();
         }
 
         protected override DelayLoadingOptionComboBoxItem CreateDelayLoadingOptionComboBoxItem(IXenObject xenItem)
@@ -162,12 +243,12 @@ namespace XenAdmin.Wizards.ImportWizard
             return new DelayLoadingOptionComboBoxItem(xenItem, filters);
         }
 
-        protected override List<ReasoningFilter> CreateTargetServerFilterList(IEnableableXenObjectComboBoxItem item, List<string> vmOpaqueRefs)
+        protected override List<ReasoningFilter> CreateTargetServerFilterList(IXenObject xenObject, List<string> vmOpaqueRefs)
         {
             var filters = new List<ReasoningFilter>();
 
-            if (item != null)
-                filters.Add(new HardwareCompatibilityFilter(item.Item, hardwarePlatformSettings));
+            if (xenObject != null)
+                filters.Add(new HardwareCompatibilityFilter(xenObject, hardwarePlatformSettings));
 
             return filters;
         }
@@ -176,13 +257,13 @@ namespace XenAdmin.Wizards.ImportWizard
         {
             foreach (var vgpuSetting in vgpuSettings)
             {
-                Match m = XenOvfTransport.Import.VGPU_REGEX.Match(vgpuSetting.Value.Value);
+                Match m = ImportApplianceAction.VGPU_REGEX.Match(vgpuSetting.Value.Value);
                 if (!m.Success)
                     continue;
 
                 var types = m.Groups[1].Value.Split(';');
 
-                var gpuGroup = ChosenItem.Connection.Cache.GPU_groups.FirstOrDefault(g =>
+                var gpuGroup = SelectedTargetPool.Connection.Cache.GPU_groups.FirstOrDefault(g =>
                     g.GPU_types.Length == types.Length &&
                     g.GPU_types.Intersect(types).Count() == types.Length);
 
@@ -192,7 +273,7 @@ namespace XenAdmin.Wizards.ImportWizard
                 string vendorName = m.Groups[2].Value;
                 string modelName = m.Groups[3].Value;
 
-                var vgpuType = ChosenItem.Connection.Cache.VGPU_types.FirstOrDefault(v =>
+                var vgpuType = SelectedTargetPool.Connection.Cache.VGPU_types.FirstOrDefault(v =>
                     v.vendor_name == vendorName && v.model_name == modelName);
 
                 if (vgpuType == null)
@@ -202,14 +283,151 @@ namespace XenAdmin.Wizards.ImportWizard
             return true;
         }
 
+        /// <summary>
+        /// Check if the appliance can be started on the selected host or pool. Note that if the user selects
+        /// a shared SR in other pages, the VM could still start. The check considers both vCPU count and memory requirements
+        /// of the appliance.
+        /// </summary>
+        public bool ApplianceCanBeStarted { get; private set; } = true;
+
+        private bool CheckDestinationHasEnoughPhysicalCpus(out string warningMessage, out bool applianceCanBeStarted)
+        {
+            warningMessage = string.Empty;
+            applianceCanBeStarted = false;
+            
+            // check if the current host selection
+            // can accomodate the VMs in the appliance
+            if (AllSelectedTargets.Count > 0)
+            {
+                var physicalCpus = AllSelectedTargets.Select(GetPhysicalCpus).ToList();
+                var minPhysicalCpus = physicalCpus.Min();
+                var maxPhysicalCpus = physicalCpus.Max();
+               
+                if (maxPhysicalCpus < _ovfMaxVCpusCount)
+                {
+                    // there are no hosts that can accomodate the VM with the largest amount of vCPUs
+                    warningMessage = string.Format(Messages.IMPORT_WIZARD_CPUS_COUNT_MISMATCH_HOST_ALL, _ovfMaxVCpusCount, maxPhysicalCpus);
+                    return false;
+                }
+
+                applianceCanBeStarted = true;
+                if (minPhysicalCpus < _ovfMaxVCpusCount)
+                {
+                    // there is a host that cannot accomodate the VM with the largest amount of vCPUs
+                    // we ask the user to make sure that the mapping they are picking is correct
+                    warningMessage = string.Format(Messages.IMPORT_WIZARD_CPUS_COUNT_MISMATCH_HOST, _ovfMaxVCpusCount, minPhysicalCpus);
+                    return false;
+                }
+            }
+
+            // there is no host selection, check the pool
+            var poolPhysicalCpus = GetPhysicalCpus(SelectedTargetPool);
+
+            if (poolPhysicalCpus < 0 || poolPhysicalCpus >= _ovfMaxVCpusCount)
+            {
+                applianceCanBeStarted = true;
+                return true;
+            }
+            
+            warningMessage = string.Format(Messages.IMPORT_WIZARD_CPUS_COUNT_MISMATCH_POOL, _ovfMaxVCpusCount, poolPhysicalCpus);
+            return false;
+        }
+
+       
+        private bool CheckDestinationHasEnoughMemory(out string warningMessage)
+        {
+            warningMessage = string.Empty;
+
+            var selectedTarget = SelectedTarget ?? SelectedTargetPool;
+            var memory = GetFreeMemory(selectedTarget);
+
+            if (memory >= _ovfMemory)
+                return true;
+
+            if (selectedTarget is Pool)
+                warningMessage = string.Format(Messages.IMPORT_WIZARD_INSUFFICIENT_MEMORY_POOL, Util.MemorySizeStringSuitableUnits(_ovfMemory, true), Util.MemorySizeStringSuitableUnits(memory, true));
+            else if (selectedTarget is Host)
+                warningMessage = string.Format(Messages.IMPORT_WIZARD_INSUFFICIENT_MEMORY_HOST, Util.MemorySizeStringSuitableUnits(_ovfMemory, true), Util.MemorySizeStringSuitableUnits(memory, true));
+            else
+                return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns the number of physical CPUs on the specified <paramref name="xenObject"/> (<see cref="Host"/> or <see cref="Pool"/>) or -1 if the value cannot be determined.
+        /// </summary>
+        /// <param name="xenObject">The XenObject for which to determine the number of physical CPUs.</param>
+        /// <returns>The number of physical CPUs on the specified <paramref name="xenObject"/> or -1 if the value cannot be determined.</returns>
+        private int GetPhysicalCpus(IXenObject xenObject)
+        {
+            var physicalCpusCount = -1;
+
+            switch (xenObject)
+            {
+                case Host host:
+                {
+                    var hostCpuCount = host.CpuCount();
+                    if(hostCpuCount > 0)
+                        physicalCpusCount = hostCpuCount;
+                    break;
+                }
+                case Pool pool:
+                {
+                    var hosts = pool.Connection.Cache.Hosts;
+                    var maxCpuCounts = hosts
+                        .Select(h => h.CpuCount())
+                        .ToList();
+                    if (maxCpuCounts.Count > 0)
+                    {
+                        physicalCpusCount = maxCpuCounts.Max();
+                    }
+
+                    break;
+                }
+            }
+
+            return physicalCpusCount;
+        }
+
+        private long GetFreeMemory(IXenObject xenObject)
+        {
+            long memory = 0;
+
+            switch (xenObject)
+            {
+                case Host host:
+                {
+                    var hostMemory = host.memory_available_calc();
+                    if (hostMemory > 0)
+                        memory = hostMemory;
+                    break;
+                }
+                case Pool pool:
+                {
+                    var hosts = pool.Connection.Cache.Hosts;
+                    var maxMemories = hosts
+                        .Select(h => h.memory_available_calc())
+                        .ToList();
+                    if (maxMemories.Count > 0)
+                    {
+                        memory = maxMemories.Max();
+                    }
+
+                    break;
+                }
+            }
+
+            return memory;
+        }
+
         private bool CheckDestinationSupportsVendorDevice()
         {
-            var dundeeOrNewerHosts = Helpers.DundeeOrGreater(ChosenItem.Connection) ? ChosenItem.Connection.Cache.Hosts : new Host[] {};
+            var dundeeOrNewerHosts = SelectedTargetPool.Connection.Cache.Hosts;
 
             foreach (var setting in vendorDeviceSettings)
             {
-                bool hasVendorDevice;
-                if (!bool.TryParse(setting.Value.Value, out hasVendorDevice))
+                if (!bool.TryParse(setting.Value.Value, out var hasVendorDevice))
                     continue;
                 
                 if (hasVendorDevice && dundeeOrNewerHosts.Length == 0)

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Dialogs;
 using System.Windows.Forms;
@@ -72,7 +69,7 @@ namespace XenAdmin.Commands
             _VM = vm;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {
@@ -82,17 +79,27 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
+            Program.AssertOnEventThread();
+
             VM vm = (VM)selection[0].XenObject;
+            var snapshotAllowed = vm.allowed_operations.Contains(vm_operations.snapshot);
 
-            Program.Invoke(Program.MainWindow, () => Program.MainWindow.ConsolePanel.setCurrentSource(vm));
+            Program.MainWindow.ConsolePanel.SetCurrentSource(vm);
 
-            RevertDialog dialog = new RevertDialog(vm, _snapshot.Name());
-
-            if (dialog.ShowDialog() == DialogResult.Yes)
+            using (var dialog = new WarningDialog(string.Format(Messages.SNAPSHOT_REVERT_BLURB, _snapshot.Name()),
+                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
             {
-                if (dialog.TakeSnapshot)
+                ShowCheckbox = snapshotAllowed,
+                IsCheckBoxChecked = snapshotAllowed,
+                CheckboxCaption = Messages.SNAPSHOT_REVERT_NEW_SNAPSHOT
+            })
+            {
+                if (dialog.ShowDialog() != DialogResult.Yes)
+                    return;
+
+                if (dialog.IsCheckBoxChecked)
                 {
                     TakeSnapshotCommand command = new TakeSnapshotCommand(MainWindowCommandInterface, vm);
                     var action = command.GetCreateSnapshotAction();
@@ -102,19 +109,19 @@ namespace XenAdmin.Commands
                         action.Completed += delegate
                         {
                             if (action.Succeeded)
-                                ExecuteRevertAction();
+                                RunRevertAction();
                         };
                         action.RunAsync();
-                    } 
+                    }
                 }
                 else
                 {
-                    ExecuteRevertAction();
+                    RunRevertAction();
                 }
             }
         }
 
-        private void ExecuteRevertAction()
+        private void RunRevertAction()
         {
             var action = new VMSnapshotRevertAction(_snapshot);
             action.RunAsync();

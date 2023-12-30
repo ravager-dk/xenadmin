@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,7 +42,7 @@ namespace XenAdmin.Alerts
         private readonly List<IXenConnection> connections = new List<IXenConnection>();
         private readonly List<Host> hosts = new List<Host>();
 
-        public XenCenterVersion RequiredXenCenterVersion;
+        public ClientVersion RequiredClientVersion;
 
         private readonly object connectionsLock = new object();
         private readonly object hostsLock = new object();
@@ -147,6 +146,50 @@ namespace XenAdmin.Alerts
             }
         }
 
+        private bool AllowedToDismiss(IXenConnection connection)
+        {
+            if (connection == null)
+                return true;
+
+            // if we are disconnected do not dismiss as the alert will disappear soon
+            if (connection.Session == null)
+                return false;
+
+            // prevent dismissal if the alert is not relevant to the current connection
+            if (!Connections.Contains(connection) && DistinctHosts.All(h => h.Connection != connection))
+                return false;
+
+            if (connection.Session.IsLocalSuperuser)
+                return true;
+
+            var allowedRoles = Role.ValidRoleList("pool.set_other_config", connection);
+            return allowedRoles.Any(r => connection.Session.Roles.Contains(r));
+        }
+
+        public override bool AllowedToDismiss()
+        {
+            return !Dismissing && ConnectionsManager.XenConnectionsCopy.Any(AllowedToDismiss);
+        }
+
+        public override void Dismiss()
+        {
+            foreach (IXenConnection connection in ConnectionsManager.XenConnectionsCopy)
+            {
+                if (!AllowedToDismiss(connection))
+                    continue;
+
+                Pool pool = Helpers.GetPoolOfOne(connection);
+                if (pool == null)
+                    continue;
+
+                var otherConfig = pool.other_config;
+                Dismiss(otherConfig);
+                Pool.set_other_config(connection.Session, pool.opaque_ref, otherConfig);
+            }
+
+            Updates.RemoveUpdate(this);
+        }
+        
         public override bool IsDismissed()
         {
             lock (connectionsLock)
@@ -154,6 +197,8 @@ namespace XenAdmin.Alerts
                 return connections.Any(IsDismissed);
             }
         }
+
+        protected abstract void Dismiss(Dictionary<string, string> otherConfig);
 
         protected abstract bool IsDismissed(IXenConnection connection);
     }

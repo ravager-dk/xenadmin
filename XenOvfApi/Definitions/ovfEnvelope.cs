@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,18 +42,11 @@
 namespace XenOvf.Definitions
 {
     using System;
-    using System.Collections;
     using System.ComponentModel;
     using System.Diagnostics;
-    using System.Xml;
     using System.Xml.Schema;
     using System.Xml.Serialization;
 
-    using XenOvf.Definitions.WSSE;
-    using XenOvf.Definitions.WSU;
-    using XenOvf.Definitions.XENC;
-    using XenOvf.Definitions.XDIGSIG;
-    
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Xsd2Code", "1.0.3177.19956")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -1376,7 +1368,7 @@ namespace XenOvf.Definitions
         }
 
 
-        #region IComparable Members (ADDED By Citrix Systems, Inc.)
+        #region IComparable Members (ADDED By Cloud Software Group, Inc.)
 
         public int CompareTo(object obj)
         {

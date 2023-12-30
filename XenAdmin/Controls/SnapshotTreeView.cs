@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Security.Permissions;
@@ -155,9 +153,6 @@ namespace XenAdmin.Controls
 
         }
 
-        [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters",
-            MessageId = "System.InvalidOperationException.#ctor(System.String)",
-            Justification = "Indicates a programming error - not user facing")]
         internal ListViewItem AddSnapshot(SnapshotIcon snapshot)
         {
             if (snapshot == null)
@@ -339,17 +334,6 @@ namespace XenAdmin.Controls
 
         [DllImport("user32.dll")]
         internal static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, ref Win32.POINT pt);
-
-
-
-        public override Size GetPreferredSize(Size proposedSize)
-        {
-            if (root == null && Parent != null)
-            {
-                return DefaultSize;
-            }
-            return new Size(root.SubtreeWidth, root.SubtreeHeight);
-        }
 
         #endregion
 
@@ -562,19 +546,9 @@ namespace XenAdmin.Controls
             _spinningMessage = message;
             foreach (var item in Items)
             {
-                SnapshotIcon snapshotIcon = item as SnapshotIcon;
-
-                if (snapshotIcon != null && (snapshotIcon.ImageIndex == SnapshotIcon.VMImageIndex || snapshotIcon.ImageIndex > SnapshotIcon.UnknownImage))
+                if (item is SnapshotIcon snapshotIcon && (snapshotIcon.ImageIndex == SnapshotIcon.VMImageIndex || snapshotIcon.ImageIndex > SnapshotIcon.UnknownImage))
                 {
-                    if (string.IsNullOrEmpty(message))
-                    {
-                        
-                        snapshotIcon.ChangeSpinningIcon(p, _spinningMessage);
-                    }
-                    else
-                    {
-                        snapshotIcon.ChangeSpinningIcon(p, _spinningMessage);
-                    }
+                    snapshotIcon.ChangeSpinningIcon(p, _spinningMessage);
                     return;
                 }
             }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -58,7 +57,7 @@ namespace XenAdmin.Controls.Wlb
        
         #region Variables
 
-        public event CustomRefreshEventHandler OnChangeOK;
+        public event EventHandler OnChangeOK;
         public event DrillthroughEventHandler ReportDrilledThrough;
         public event EventHandler Close;
         public event EventHandler PoolConnectionLost;
@@ -151,9 +150,9 @@ namespace XenAdmin.Controls.Wlb
             ToolStripDropDownButton exportButton = (ToolStripDropDownButton)toolStrip.Items["export"];
 
             //Internally Microsoft ReportViewer populates "Export" ToolStripDropDownButton on DropDownOpening event.
-            //That means DropDownOpening has two event hanlders including ours below. Although they'll be executed in the order they were added
+            //That means DropDownOpening has two event hanlders including ours below. Although they'll be run in the order they were added
             //for now -- so these localized Texts will replace old Texts -- the .NET Framework specification doesn't say anything about the
-            //order of execution of event handlers. So although highly unlikely, the order may not be proper in the future.
+            //order of running of event handlers. So although highly unlikely, the order may not be proper in the future.
             exportButton.DropDownOpening += (sender, e) =>
             {
                 if (exportButton.DropDownItems.Count == 2)
@@ -446,7 +445,7 @@ namespace XenAdmin.Controls.Wlb
         /// <summary>
         /// Run report
         /// </summary>
-        public void ExecuteReport()
+        public void RunReport()
         {
             try
             {
@@ -457,11 +456,8 @@ namespace XenAdmin.Controls.Wlb
                 }
                 else if (StartDatePicker.Value.CompareTo(EndDatePicker.Value) > 0)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                       new ThreeButtonDialog.Details(
-                           SystemIcons.Warning,
-                           Messages.WLB_REPORT_DATE_ORDERING_MESSAGE,
-                           Messages.WLB_REPORT_DATE_ORDERING_CAPTION)))
+                    using (var dlg = new WarningDialog(Messages.WLB_REPORT_DATE_ORDERING_MESSAGE)
+                        {WindowTitle = Messages.WLB_REPORT_DATE_ORDERING_CAPTION})
                     {
                         dlg.ShowDialog(this);
                     }
@@ -479,7 +475,7 @@ namespace XenAdmin.Controls.Wlb
                     _localReport = this.reportViewer1.LocalReport;
                     _localReport.DisplayName = _reportInfo.ReportName;
 
-                    RunReport();
+                    StartRunReport();
 
                     if (!_bDisplayedError)
                         this.reportViewer1.RefreshReport();
@@ -490,14 +486,8 @@ namespace XenAdmin.Controls.Wlb
             catch (Exception ex)
             {
                 log.Debug(ex, ex);
-                using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(
-                       SystemIcons.Error,
-                       ex.Message,
-                       Messages.XENCENTER)))
-                {
+                using (var dlg = new ErrorDialog(ex.Message))
                     dlg.ShowDialog(this);
-                }
             }
         }
 
@@ -506,7 +496,7 @@ namespace XenAdmin.Controls.Wlb
         /// Reset reportViewer after reportInfo is changed
         /// </summary>
         /// <param name="reportInfo">ReportInfo instance</param>
-        public void SynchReportViewer(WlbReportInfo reportInfo)
+        public void RefreshReportViewer(WlbReportInfo reportInfo)
         {
             if(reportInfo.ReportFile.StartsWith("pool_audit_history"))
             {
@@ -629,9 +619,6 @@ namespace XenAdmin.Controls.Wlb
                 // Objects dropdown does not need to be displayed
                 this.panelObjects.Visible = false;
             }
-
-
-            this.Visible = true;
         }
         #endregion
 
@@ -941,7 +928,7 @@ namespace XenAdmin.Controls.Wlb
 
 
         /// <summary>
-        /// Invokes and executes a call to the Kirkwood database via Xapi to obtain report data.
+        /// Invokes and runs a call to the Kirkwood database via Xapi to obtain report data.
         /// </summary>
         /// <param name="reportKey"></param>
         /// <param name="currentParams"></param>
@@ -973,7 +960,7 @@ namespace XenAdmin.Controls.Wlb
             }
 
             AsyncAction a = new WlbReportAction(Pool.Connection, 
-                                                Helpers.GetMaster(Pool.Connection),
+                                                Helpers.GetCoordinator(Pool.Connection),
                                                 reportKey, 
                                                 _reportInfo.ReportName, 
                                                 false,
@@ -1128,9 +1115,9 @@ namespace XenAdmin.Controls.Wlb
 
 
         /// <summary>
-        /// Performs common report execution steps such as populating datasets, labels and defaults
+        /// Performs common report running steps such as populating datasets, labels and defaults
         /// </summary>
-        private void RunReport()
+        private void StartRunReport()
         {
             try
             {
@@ -1143,7 +1130,7 @@ namespace XenAdmin.Controls.Wlb
                 // Bind the report to a datasource and set label values
                 PopulateReportData();
 
-                // Go ahead and show the toolbar now that a report has been executed
+                // Go ahead and show the toolbar now that a report has been run
                 CCustomMessageClass customMessages = new CCustomMessageClass();
                 this.reportViewer1.Messages = customMessages;
 
@@ -1209,13 +1196,9 @@ namespace XenAdmin.Controls.Wlb
         /// <param name="e"></param>
         private void ReportView_Load(object sender, EventArgs e)
         {
-            this.btnRunReport.Enabled = false;
-            this.btnLaterReport.Enabled = false;
-            this.btnSubscribe.Enabled = false;
-
             this.hostComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // Hide the toolbar until a report is executed
+            // Hide the toolbar until a report is run
             this.reportViewer1.ShowToolBar = false;
 
             SetPickerDateValues();
@@ -1281,7 +1264,7 @@ namespace XenAdmin.Controls.Wlb
                 }
             }
             this.reportViewer1.Reset();
-            this.ExecuteReport();
+            this.RunReport();
         }
 
 
@@ -1301,7 +1284,7 @@ namespace XenAdmin.Controls.Wlb
                 _endLine -= _lineLimit;
             }
             this.reportViewer1.Reset();
-            this.ExecuteReport();
+            this.RunReport();
         }
 
 
@@ -1360,7 +1343,7 @@ namespace XenAdmin.Controls.Wlb
             System.IO.MemoryStream stream = new System.IO.MemoryStream(rdlBytes);
             _localReport.LoadReportDefinition(stream);
 
-            RunReport();
+            StartRunReport();
 
             if (!_bDisplayedError)
                 _localReport.Refresh(); 
@@ -1408,7 +1391,7 @@ namespace XenAdmin.Controls.Wlb
                         _selectedCustomFilters = customFilterDialog.GetSelectedFilters();
                         this.btnSubscribe.Enabled = false;
                         this.reportViewer1.Reset();
-                        this.ExecuteReport();
+                        this.RunReport();
                     }
                     else
                     {
@@ -1485,14 +1468,8 @@ namespace XenAdmin.Controls.Wlb
                 catch (Exception ex)
                 {
                     log.Debug(ex, ex);
-                    using (var dlg = new ThreeButtonDialog(
-                       new ThreeButtonDialog.Details(
-                           SystemIcons.Error,
-                           ex.Message,
-                           Messages.XENCENTER)))
-                    {
+                    using (var dlg = new ErrorDialog(ex.Message))
                         dlg.ShowDialog(this);
-                    }
                 }
                 finally
                 {

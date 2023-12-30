@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,17 +31,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using XenAdmin.Actions;
 using XenAdmin.Commands;
 using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.CustomFields;
 using XenAdmin.Dialogs;
+using XenAdmin.Dialogs.ServerUpdates;
 using XenAdmin.Model;
 using XenAdmin.Network;
 using XenAdmin.SettingsPanels;
@@ -53,18 +52,26 @@ namespace XenAdmin.TabPages
 {
     public partial class GeneralTabPage : BaseTabPage
     {
+        #region Private fields
+
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private readonly List<PDSection> sections = new List<PDSection>();
         private readonly Dictionary<Type, List<PDSection>> _expandedSections = new Dictionary<Type, List<PDSection>>();
 
+        private IXenObject xenObject;
+
         /// <summary>
-        /// Set when we need to do a rebuild, but we are not visible, to queue up a rebuild.
+        /// Indicates whether rebuild requests have been queued,
+        /// in which case rebuilding the section list is necessary
         /// </summary>
-        private bool refreshNeeded = false;
+        private bool refreshNeeded;
+
+        private readonly CollectionChangeEventHandler VM_guest_metrics_CollectionChangedWithInvoke;
 
         private LicenseStatus licenseStatus;
 
-        private readonly List<PDSection> sections;
+        #endregion
 
         public LicenseManagerLauncher LicenseLauncher { private get; set; }
 
@@ -74,23 +81,22 @@ namespace XenAdmin.TabPages
 
             VM_guest_metrics_CollectionChangedWithInvoke = Program.ProgramInvokeHandler(VM_guest_metrics_CollectionChanged);
             OtherConfigAndTagsWatcher.TagsChanged += OtherConfigAndTagsWatcher_TagsChanged;
-            sections = new List<PDSection>();
+
             foreach (Control control in panel2.Controls)
             {
-                Panel p = control as Panel;
-                if (p == null)
+                if (!(control is Panel p))
                     continue;
 
                 foreach (Control c in p.Controls)
                 {
-                    PDSection s = c as PDSection;
-                    if (s == null)
+                    if (!(c is PDSection s))
                         continue;
                     sections.Add(s);
-                    s.contentChangedSelection += s_contentChangedSelection;
-                    s.contentReceivedFocus += s_contentReceivedFocus;
+                    s.ContentChangedSelection += s_ContentChangedSelection;
+                    s.ContentReceivedFocus += s_ContentReceivedFocus;
+                    s.ExpandedChanged += s_ExpandedChanged;
                 }
-            }            
+            }
         }
 
         public override string HelpID => "TabPageSettings";
@@ -110,6 +116,7 @@ namespace XenAdmin.TabPages
 
                 if (xenObject is Pool p)
                 {
+                    var additionalString = PoolAdditionalLicenseString(p);
                     pdSectionGeneral.UpdateEntryValueWithKey(
                         Messages.POOL_LICENSE, Helpers.GetFriendlyLicenseName(p),
                         true);
@@ -117,17 +124,7 @@ namespace XenAdmin.TabPages
                 });
         }
 
-        void s_contentReceivedFocus(PDSection s)
-        {
-            scrollToSelectionIfNeeded(s);
-        }
-
-        void s_contentChangedSelection(PDSection s)
-        {
-            scrollToSelectionIfNeeded(s);
-        }
-
-        private void scrollToSelectionIfNeeded(PDSection s)
+        private void ScrollToSelectionIfNeeded(PDSection s)
         {
             if (s.HasNoSelection())
                 return;
@@ -151,12 +148,6 @@ namespace XenAdmin.TabPages
             panel2.ForceScrollTo(s);
         }
 
-        private void EditButton_Click(object sender, EventArgs e)
-        {
-            new PropertiesCommand(Program.MainWindow, xenObject).Execute();
-        }
-
-        private IXenObject xenObject;
         public IXenObject XenObject
         {
             set
@@ -191,66 +182,17 @@ namespace XenAdmin.TabPages
                     RegisterHandlers();
                     BuildList();
 
-                    if (xenObject != null && !_expandedSections.ContainsKey(xenObject.GetType()))
-                    {
-                        _expandedSections.Add(xenObject.GetType(), new List<PDSection> {pdSectionGeneral});
-                        pdSectionGeneral.Expand();
-                    }
+                List<PDSection> expandedSections = null;
 
-                        ResetExpandState();
-                }
-                }
-
-        private void pdSection_ExpandedChanged(PDSection pdSection)
-        {
-            if (pdSection != null && xenObject != null)
-            {
-                List<PDSection> listSections;
-                if (_expandedSections.TryGetValue(xenObject.GetType(), out listSections))
+                if (xenObject != null && !_expandedSections.TryGetValue(xenObject.GetType(), out expandedSections))
                 {
-                    if (!listSections.Contains(pdSection) && pdSection.IsExpanded)
-                        listSections.Add(pdSection);
-                    else if (!pdSection.IsExpanded)
-                        listSections.Remove(pdSection);
+                    expandedSections = new List<PDSection> { pdSectionGeneral };
+                    _expandedSections[xenObject.GetType()] = expandedSections;
                 }
-                else if (pdSection.IsExpanded)
-                {
-                    _expandedSections.Add(xenObject.GetType(), new List<PDSection> {pdSection});
-                }
-            }
-            SetStatesOfExpandingLinks();
-        }
 
-
-        private void ResetExpandState()
-        {
-            List<PDSection> expandedSections = null;
-            if (xenObject != null)
-                _expandedSections.TryGetValue(xenObject.GetType(), out expandedSections);
-
-            try
-            {
-            panel2.SuspendLayout();
-
-            foreach (PDSection s in sections)
-            {
-                    if (expandedSections == null)
-                    {
-                        if (s == pdSectionGeneral)
-                            s.Expand();
-                        else
-                s.Contract();
+                ToggleExpandedState(s => expandedSections == null && s == pdSectionGeneral ||
+                                         expandedSections != null && expandedSections.Contains(s));
             }
-                    else if (expandedSections.Contains(s))
-                    s.Expand();
-                else
-                    s.Contract();
-            }
-            }
-            finally
-            {
-            panel2.ResumeLayout();
-        }
         }
 
         private void UnregisterHandlers()
@@ -258,18 +200,14 @@ namespace XenAdmin.TabPages
             if (xenObject != null)
                 xenObject.PropertyChanged -= PropertyChanged;
 
-            if (xenObject is Host)
+            if (xenObject is Host host)
             {
-                Host host = xenObject as Host;
-
-                Host_metrics metric = xenObject.Connection.Resolve<Host_metrics>(host.metrics);
+                Host_metrics metric = xenObject.Connection.Resolve(host.metrics);
                 if (metric != null)
                     metric.PropertyChanged -= PropertyChanged;
             }
-            else if (xenObject is VM)
+            else if (xenObject is VM vm)
             {
-                VM vm = xenObject as VM;
-
                 VM_metrics metric = vm.Connection.Resolve(vm.metrics);
                 if (metric != null)
                     metric.PropertyChanged -= PropertyChanged;
@@ -280,10 +218,8 @@ namespace XenAdmin.TabPages
 
                 vm.Connection.Cache.DeregisterCollectionChanged<VM_guest_metrics>(VM_guest_metrics_CollectionChangedWithInvoke);
             }
-            else if (xenObject is SR)
+            else if (xenObject is SR sr)
             {
-                SR sr = xenObject as SR;
-
                 foreach (PBD pbd in sr.Connection.ResolveAll(sr.PBDs))
                 {
                     pbd.PropertyChanged -= PropertyChanged;
@@ -296,7 +232,7 @@ namespace XenAdmin.TabPages
             }
         }
 
-        void VM_guest_metrics_CollectionChanged(object sender, CollectionChangeEventArgs e)
+        private void VM_guest_metrics_CollectionChanged(object sender, CollectionChangeEventArgs e)
         {
             if (!this.Visible)
                 return;
@@ -305,30 +241,26 @@ namespace XenAdmin.TabPages
             BuildList();
         }
 
-        private readonly CollectionChangeEventHandler VM_guest_metrics_CollectionChangedWithInvoke;
         private void RegisterHandlers()
         {
             if (xenObject != null)
-                xenObject.PropertyChanged += new PropertyChangedEventHandler(PropertyChanged);
+                xenObject.PropertyChanged += PropertyChanged;
 
-            if (xenObject is Host)
+            if (xenObject is Host host)
             {
-                Host host = xenObject as Host;
                 Host_metrics metric = xenObject.Connection.Resolve(host.metrics);
                 if (metric != null)
-                    metric.PropertyChanged += new PropertyChangedEventHandler(PropertyChanged);
+                    metric.PropertyChanged += PropertyChanged;
             }
-            else if (xenObject is VM)
+            else if (xenObject is VM vm)
             {
-                VM vm = xenObject as VM;
-
                 VM_metrics metric = vm.Connection.Resolve(vm.metrics);
                 if (metric != null)
-                    metric.PropertyChanged += new PropertyChangedEventHandler(PropertyChanged);
+                    metric.PropertyChanged += PropertyChanged;
 
                 VM_guest_metrics guestmetric = xenObject.Connection.Resolve(vm.guest_metrics);
                 if (guestmetric != null)
-                    guestmetric.PropertyChanged += new PropertyChangedEventHandler(PropertyChanged);
+                    guestmetric.PropertyChanged += PropertyChanged;
 
                 xenObject.Connection.Cache.RegisterCollectionChanged<VM_guest_metrics>(VM_guest_metrics_CollectionChangedWithInvoke);
             }
@@ -339,22 +271,21 @@ namespace XenAdmin.TabPages
             }
         }
 
-        void Pool_patch_BatchCollectionChanged(object sender, EventArgs e)
+        private void Pool_patch_BatchCollectionChanged(object sender, EventArgs e)
         {
             Program.BeginInvoke(this, BuildList);
         }
 
-        void Pool_update_BatchCollectionChanged(object sender, EventArgs e)
+        private void Pool_update_BatchCollectionChanged(object sender, EventArgs e)
         {
             Program.BeginInvoke(this, BuildList);
         }
 
-        void OtherConfigAndTagsWatcher_TagsChanged()
+        private void OtherConfigAndTagsWatcher_TagsChanged()
         {
             BuildList();
         }
 
-        // We queue up a rebuild if we are not shown but the contents becomes out of date, this just fires off the rebuild
         protected override void OnVisibleChanged(EventArgs e)
         {
             if (Visible && refreshNeeded)
@@ -367,7 +298,6 @@ namespace XenAdmin.TabPages
 
         private void PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-
             if (e.PropertyName == "state" || e.PropertyName == "last_updated")
             {
                 return;
@@ -386,78 +316,54 @@ namespace XenAdmin.TabPages
                         pbd.PropertyChanged -= PropertyChanged;
                         pbd.PropertyChanged += PropertyChanged;
                     }
-
-                    BuildList();
                 }
                 else
                 {
-                    // Atm we are rebuilding on almost any property changed event. 
-                    // As long as we are just clearing and readding the rows in the PDSections this seems to be super quick. 
+                    // At the moment we are rebuilding on almost any property changed event. 
+                    // As long as we are just clearing and re-adding the rows in the PDSections this seems to be super quick. 
                     // If it gets slower we should update specific boxes for specific property changes.
                     if (licenseStatus != null && licenseStatus.Updated)
                         licenseStatus.BeginUpdate();
-                    BuildList();
-                    EnableDisableEdit();
                 }
+
+                BuildList();
             });
         }
 
-        public void EnableDisableEdit()
+        public void UpdateButtons()
         {
-            buttonProperties.Enabled = xenObject != null && !xenObject.Locked && xenObject.Connection != null && xenObject.Connection.IsConnected;
-
-            //keeping it separate
-            var container = xenObject as DockerContainer;
-            if (container != null)
+            if (xenObject is DockerContainer container)
             {
-                buttonProperties.Enabled = false;
+                buttonProperties.Visible = false;
 
-                buttonViewConsole.Visible = true;
-                buttonViewLog.Visible = true;
-
-                // Grey out the buttons if the Container management VM is Windows.
-                // For Linux VM, enable the buttons only when the docker is running.
-                if (container.Parent.IsWindows())
-                {
-                    buttonViewConsole.Enabled = false;
-                    buttonViewLog.Enabled = false;
-                }
-                else
-                {
-                    buttonViewConsole.Enabled = buttonViewLog.Enabled = container.power_state == vm_power_state.Running;
-                }
+                linkLabelCollapse.Visible =
+                    linkLabelExpand.Visible = !Helpers.StockholmOrGreater(xenObject.Connection);
             }
             else
             {
-                buttonViewConsole.Visible = false;
-                buttonViewLog.Visible = false;
+                buttonProperties.Visible = true;
+                buttonProperties.Enabled = xenObject != null && !xenObject.Locked && xenObject.Connection != null && xenObject.Connection.IsConnected;
+                linkLabelCollapse.Visible = linkLabelExpand.Visible = true;
             }
-
         }
 
         public void BuildList()
         {
-            //Program.AssertOnEventThread();
-
-            if (!this.Visible)
+            if (!Visible)
             {
                 refreshNeeded = true;
                 return;
             }
+
             if (xenObject == null)
                 return;
 
             if (xenObject is Host && !xenObject.Connection.IsConnected)
                 base.Text = Messages.CONNECTION_GENERAL_TAB_TITLE;
             else if (xenObject is Host)
-            {
                 base.Text = Messages.HOST_GENERAL_TAB_TITLE;
-            }
-                
-                
-            else if (xenObject is VM)
+            else if (xenObject is VM vm)
             {
-                VM vm = (VM)xenObject;
                 if (vm.is_a_snapshot)
                     base.Text = Messages.SNAPSHOT_GENERAL_TAB_TITLE;
                 else if (vm.is_a_template)
@@ -480,35 +386,37 @@ namespace XenAdmin.TabPages
                 s.ClearData();
             }
             // Generate the content of each box, each method performs a cast and only populates if XenObject is the relevant type
-           
+
             if (xenObject is Host && (xenObject.Connection == null || !xenObject.Connection.IsConnected))
             {
-                generateDisconnectedHostBox();
+                GenerateDisconnectedHostBox();
             }
-            else if (xenObject is DockerContainer)
+            else if (xenObject is DockerContainer dockerContainer)
             {
-                generateDockerContainerGeneralBox();
+                if (!Helpers.StockholmOrGreater(xenObject.Connection))
+                    GenerateDockerContainerGeneralBox(dockerContainer);
             }
             else
             {
-                generateGeneralBox();
-                generateCustomFieldsBox();
-                generateBiosBox();
-                generateInterfaceBox();
-                generateMemoryBox();
-                generateVersionBox();
-                generateLicenseBox();
-                generateCPUBox();
-                generateHostPatchesBox();
-                generateBootBox();
-                generateHABox();
-                generateStatusBox();
-                generateMultipathBox();
-                generatePoolPatchesBox();
-                generateMultipathBootBox();
-                generateVCPUsBox();
-                generateDockerInfoBox();
-                generateReadCachingBox();
+                GenerateGeneralBox();
+                GenerateCertificateBox();
+                GenerateCustomFieldsBox();
+                GenerateInterfaceBox();
+                GenerateMemoryBox();
+                GenerateVersionBox();
+                GenerateLicenseBox();
+                GenerateCPUBox();
+                GenerateHostUpdatesBox();
+                GenerateBootBox();
+                GenerateHABox();
+                GenerateStatusBox();
+                GenerateMultipathBox();
+                GeneratePoolUpdatesBox();
+                GenerateMultipathBootBox();
+                GenerateVCPUsBox();
+                GenerateDockerInfoBox();
+                GenerateReadCachingBox();
+                GenerateDeviceSecurityBox();
             }
 
             // hide all the sections which haven't been populated, those that have make sure are visible
@@ -527,10 +435,11 @@ namespace XenAdmin.TabPages
                 s.StartLayout();
             }
             panel2.ResumeLayout();
-            EnableDisableEdit();
+            SetupDeprecationBanner();
+            UpdateButtons();
         }
 
-        private void generateInterfaceBox()
+        private void GenerateInterfaceBox()
         {
             Host Host = xenObject as Host;
             Pool Pool = xenObject as Pool;
@@ -552,7 +461,7 @@ namespace XenAdmin.TabPages
         {
             PDSection s = pdSectionManagementInterfaces;
 
-            ToolStripMenuItem editValue = new ToolStripMenuItem(Messages.EDIT) { Image = Properties.Resources.edit_16 };
+            var editValue = new ToolStripMenuItem(Messages.EDIT) { Image = Images.StaticImages.edit_16 };
             editValue.Click += delegate
                 {
                     NetworkingProperties p = new NetworkingProperties(Host, null);
@@ -598,24 +507,7 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void generateBiosBox()
-        {
-            PDSection s = pdSectionBios;
-
-            Host host = xenObject as Host;
-            if (host != null)
-            {
-                if (host.bios_strings != null)
-                {
-                    foreach (var entry in host.bios_strings)
-                    {
-                        s.AddEntry(entry.Key, entry.Value);
-                    }
-                }
-            }
-        }
-
-        private void generateCustomFieldsBox()
+        private void GenerateCustomFieldsBox()
         {
             List<CustomField> customFields = CustomFieldsManager.CustomFieldValues(xenObject);
             if (customFields.Count <= 0)
@@ -625,7 +517,7 @@ namespace XenAdmin.TabPages
 
             foreach (CustomField customField in customFields)
             {
-                ToolStripMenuItem editValue = new ToolStripMenuItem(Messages.EDIT){Image= Properties.Resources.edit_16};
+                var editValue = new ToolStripMenuItem(Messages.EDIT) { Image = Images.StaticImages.edit_16 };
                 editValue.Click += delegate
                     {
                         using (PropertiesDialog dialog = new PropertiesDialog(xenObject))
@@ -635,105 +527,240 @@ namespace XenAdmin.TabPages
                         }
                     };
 
-                var menuItems = new[] { editValue };
-                CustomFieldWrapper cfWrapper = new CustomFieldWrapper(xenObject, customField.Definition);
-
-                s.AddEntry(customField.Definition.Name.Ellipsise(30), cfWrapper.ToString(), menuItems, customField.Definition.Name);
+                var cfWrapper = new CustomFieldWrapper(xenObject, customField.Definition);
+                s.AddEntry(customField.Definition.Name, cfWrapper.ToString(), editValue);
             }
         }
 
-        private void generatePoolPatchesBox()
+        private void GeneratePoolUpdatesBox()
         {
-            Pool pool = xenObject as Pool;
-            if (pool == null)
+            if (!(xenObject is Pool pool))
                 return;
 
-            PDSection s = pdSectionUpdates;
-
-            List<KeyValuePair<String, String>> messages = CheckPoolUpdate(pool);
+            var messages = CheckPoolUpdate(pool);
             if (messages.Count > 0)
             {
-                foreach (KeyValuePair<String, String> kvp in messages)
+                foreach (var kvp in messages)
+                    pdSectionUpdates.AddEntry(kvp.Key, kvp.Value);
+            }
+
+            var fullyApplied = new List<string>();
+            var partAppliedError = new List<string>();
+            var partApplied = new List<string>();
+
+            var cache = xenObject.Connection.Cache;
+            var allHostCount = xenObject.Connection.Cache.HostCount;
+
+            if (Helpers.CloudOrGreater(pool.Connection))
+                GenerateCdnUpdatesBox(pool);
+
+            if (Helpers.ElyOrGreater(xenObject.Connection))
+            {
+                foreach (var u in cache.Pool_updates)
                 {
-                    s.AddEntry(kvp.Key, kvp.Value);
+                    var entry = Helpers.UpdatesFriendlyNameAndVersion(u);
+                    var appliedHostCount = u.AppliedOnHosts().Count;
+
+                    if (appliedHostCount == allHostCount)
+                    {
+                        fullyApplied.Add(entry);
+                    }
+                    else if (appliedHostCount > 0)
+                    {
+                        if (u.EnforceHomogeneity())
+                            partAppliedError.Add(entry);
+                        else
+                            partApplied.Add(entry);
+                    }
                 }
-            }
-            Host master = Helpers.GetMaster(xenObject.Connection);
-            if (master == null)
-                return;
-
-            var poolAppPatches = poolAppliedPatches();
-            if (!string.IsNullOrEmpty(poolAppPatches))
-            {
-                s.AddEntry(FriendlyName("Pool_patch.fully_applied"), poolAppPatches);
-            }
-
-            var poolPartPatches = poolPartialPatches();
-            if (!string.IsNullOrEmpty(poolPartPatches))
-            {
-                CommandToolStripMenuItem applypatch = new CommandToolStripMenuItem(
-                    new InstallNewUpdateCommand(Program.MainWindow), true);
-                var menuItems = new[] { applypatch };
-
-                s.AddEntry(FriendlyName("Pool_patch.partially_applied"), poolPartPatches, menuItems, Color.Red);
-            }
-        }
-
-        private void generateHostPatchesBox()
-        {
-            Host host = xenObject as Host;
-            if (host == null)
-                return;
-
-            PDSection s = pdSectionUpdates;
-            List<KeyValuePair<String, String>> messages;
-
-            bool elyOrGreater = Helpers.ElyOrGreater(host);
-
-            if (elyOrGreater)
-            {
-                // As of Ely we use host.updates_requiring_reboot to generate the list of reboot required messages
-                messages = CheckHostUpdatesRequiringReboot(host);
             }
             else
             {
-                // For older versions no change to how messages are generated
-                messages = CheckServerUpdates(host);
-            }
-
-            if (messages.Count > 0)
-            {
-                foreach (KeyValuePair<String, String> kvp in messages)
+                foreach (var p in cache.Pool_patches)
                 {
-                    s.AddEntry(kvp.Key, kvp.Value);
+                    var entry = p.name_label;
+                    var appliedHostCount = p.host_patches.Count;
+
+                    if (appliedHostCount == allHostCount)
+                        fullyApplied.Add(entry);
+                    else if (appliedHostCount > 0)
+                        partAppliedError.Add(entry);
                 }
             }
 
-            var appliedPatchesList = Helpers.HostAppliedPatchesList(host);
-            var appliedPatches = string.Join(Environment.NewLine, appliedPatchesList.ToArray());
-            if (!string.IsNullOrEmpty(appliedPatches))
+            if (fullyApplied.Count > 0)
             {
-                s.AddEntry(FriendlyName("Pool_patch.applied"), appliedPatches);
+                fullyApplied.Sort(StringUtility.NaturalCompare);
+                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.fully_applied"), string.Join(Environment.NewLine, fullyApplied));
             }
 
-            var recommendedPatches = RecommendedPatchesForHost(host);
-            if (!string.IsNullOrEmpty(recommendedPatches))
+            if (partApplied.Count > 0)
             {
-                s.AddEntry(FriendlyName("Pool_patch.required-updates"), recommendedPatches);
+                var menuItems = new ToolStripMenuItem[] {new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true)};
+                partApplied.Sort(StringUtility.NaturalCompare);
+                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.partially_applied"), string.Join(Environment.NewLine, partApplied), menuItems);
             }
 
-            if (!elyOrGreater)
+            if (partAppliedError.Count > 0)
             {
-                // add supplemental packs
-                var suppPacks = hostInstalledSuppPacks(host);
-                if (!string.IsNullOrEmpty(suppPacks))
+                var menuItems = new ToolStripMenuItem[] {new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true)};
+                partAppliedError.Sort(StringUtility.NaturalCompare);
+                pdSectionUpdates.AddEntry(string.Format(Messages.STRING_SPACE_STRING,
+                        FriendlyName("Pool_patch.partially_applied"), Messages.UPDATES_GENERAL_TAB_ENFORCE_HOMOGENEITY),
+                    string.Join(Environment.NewLine, partAppliedError), Color.Red, menuItems);
+            }
+        }
+
+        private void GenerateCdnUpdatesBox(Pool pool)
+        {
+            var repoNames = (from repoRef in pool.repositories
+                let repo = pool.Connection.Resolve(repoRef)
+                where repo != null
+                let found = RepoDescriptor.AllRepos.FirstOrDefault(rd => rd.MatchesRepository(repo))
+                where found != null
+                select found.FriendlyName).ToList();
+
+            pdSectionUpdates.AddEntryWithNoteLink(Messages.UPDATES_GENERAL_TAB_REPO,
+                repoNames.Count == 0 ? Messages.NOT_CONFIGURED : string.Join("\n", repoNames),
+                Messages.UPDATES_GENERAL_TAB_CONFIG,
+                () =>
                 {
-                    s.AddEntry(FriendlyName("Supplemental_packs.installed"), suppPacks);
+                    using (var dialog = new ConfigUpdatesDialog())
+                        dialog.ShowDialog(this);
+                }, true);
+
+            string lastSyncTime = Messages.INDETERMINABLE;
+
+            if (Helpers.XapiEqualOrGreater_23_18_0(pool.Connection))
+            {
+                lastSyncTime = Messages.NEVER;
+
+                if (pool.last_update_sync > Util.GetUnixMinDateTime())
+                {
+                    lastSyncTime = HelpersGUI.DateTimeToString(pool.last_update_sync.ToLocalTime(), Messages.DATEFORMAT_DMY_HMS, true);
+                }
+            }
+
+            if (pool.repositories.Count > 0)
+            {
+                var enabled = pool.allowed_operations.Contains(pool_allowed_operations.sync_updates) &&
+                              !ConnectionsManager.History.Any(a =>
+                                  !a.IsCompleted && a is SyncWithCdnAction syncA && !syncA.Cancelled && syncA.Connection == pool.Connection);
+
+                pdSectionUpdates.AddEntryWithNoteLink(Messages.UPDATES_GENERAL_TAB_LAST_SYNCED,
+                    lastSyncTime, Messages.UPDATES_GENERAL_TAB_SYNC_NOW,
+                    () =>
+                    {
+                        var syncAction = new SyncWithCdnAction(pool);
+                        BuildList();
+                        syncAction.Completed += a => Updates.CheckForCdnUpdates(a.Connection);
+                        syncAction.RunAsync();
+                    }, enabled);
+            }
+            else
+            {
+                pdSectionUpdates.AddEntry(Messages.UPDATES_GENERAL_TAB_LAST_SYNCED, lastSyncTime);
+            }
+
+            foreach (var host in pool.Connection.Cache.Hosts)
+            {
+                if (host.pending_guidances.Count > 0)
+                {
+                    pdSectionUpdates.AddEntry(string.Format(Messages.CDN_PENDING_GUIDANCES_KEY, host.Name().Ellipsise(30)),
+                        string.Format(Messages.CDN_PENDING_GUIDANCES_VALUE, string.Join(Environment.NewLine, host.pending_guidances.Select(GetPendingGuidance))));
                 }
             }
         }
 
-        private void generateHABox()
+        private void GenerateHostUpdatesBox()
+        {
+            if (!(xenObject is Host host))
+                return;
+
+            bool elyOrGreater = Helpers.ElyOrGreater(host);
+
+            // As of Ely we use host.updates_requiring_reboot to generate the list of reboot required messages
+            // For older versions no change to how messages are generated
+            
+            var messages = elyOrGreater ? CheckHostUpdatesRequiringReboot(host) : CheckServerUpdates(host);
+
+            foreach (var kvp in messages)
+                pdSectionUpdates.AddEntry(kvp.Key, kvp.Value);
+
+            var appliedPatches = string.Join(Environment.NewLine, Helpers.HostAppliedPatchesList(host));
+            
+            if (!string.IsNullOrEmpty(appliedPatches))
+                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.applied"), appliedPatches);
+
+            var recommendedPatches = RecommendedPatchesForHost(host);
+            
+            if (!string.IsNullOrEmpty(recommendedPatches))
+                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.required-updates"), recommendedPatches);
+
+            if (!elyOrGreater)
+            {
+                var suppPacks = hostInstalledSuppPacks(host);
+
+                if (!string.IsNullOrEmpty(suppPacks))
+                    pdSectionUpdates.AddEntry(FriendlyName("Supplemental_packs.installed"), suppPacks);
+            }
+
+            if (Helpers.CloudOrGreater(host))
+            {
+                var pool = Helpers.GetPool(host.Connection);
+                if (pool == null) //standalone host
+                {
+                    pool = Helpers.GetPoolOfOne(host.Connection);
+                    GenerateCdnUpdatesBox(pool);
+                }
+
+                if (host.pending_guidances.Count > 0)
+                {
+                    pdSectionUpdates.AddEntry(string.Format(Messages.CDN_PENDING_GUIDANCES_KEY, host.Name().Ellipsise(30)),
+                        string.Format(Messages.CDN_PENDING_GUIDANCES_VALUE, string.Join(Environment.NewLine, host.pending_guidances.Select(GetPendingGuidance))));
+                }
+
+                if (Helpers.XapiEqualOrGreater_22_20_0(host))
+                {
+                    var unixMinDateTime = Util.GetUnixMinDateTime();
+                    var softwareVersionDate = unixMinDateTime;
+
+                    if (host.software_version.ContainsKey("date"))
+                    {
+                        if (!Util.TryParseIso8601DateTime(host.software_version["date"], out softwareVersionDate))
+                            Util.TryParseNonIso8601DateTime(host.software_version["date"], out softwareVersionDate);
+                    }
+
+                    string lastUpdateTime = Messages.NEVER;
+
+                    if (host.last_software_update > softwareVersionDate && host.last_software_update > unixMinDateTime)
+                    {
+                        lastUpdateTime = HelpersGUI.DateTimeToString(host.last_software_update.ToLocalTime(), Messages.DATEFORMAT_DMY_HMS, true);
+                    }
+
+                    pdSectionUpdates.AddEntry(Messages.SOFTWARE_VERSION_LAST_UPDATED, lastUpdateTime);
+                }
+            }
+        }
+
+        private static string GetPendingGuidance(update_guidances guidance)
+        {
+            switch (guidance)
+            {
+                case update_guidances.reboot_host:
+                    return Messages.CDN_GUIDANCE_REBOOT_HOST;
+                case update_guidances.reboot_host_on_livepatch_failure:
+                    return Messages.CDN_GUIDANCE_REBOOT_HOST_LIVEPATCH_FAILURE;
+                case update_guidances.restart_toolstack:
+                    return Messages.CDN_GUIDANCE_RESTART_TOOLSTACK;
+                case update_guidances.restart_device_model:
+                    return Messages.CDN_GUIDANCE_RESTART_DEVICE_MODEL;
+                default:
+                    return Messages.UNKNOWN;
+            }
+        }
+
+        private void GenerateHABox()
         {
             VM vm = xenObject as VM;
             if (vm == null)
@@ -749,7 +776,7 @@ namespace XenAdmin.TabPages
                 new PropertiesToolStripMenuItem(new VmEditHaCommand(Program.MainWindow, xenObject)));
         }
 
-        private void generateStatusBox()
+        private void GenerateStatusBox()
         {
             SR sr = xenObject as SR;
             if (sr == null)
@@ -757,25 +784,38 @@ namespace XenAdmin.TabPages
 
             PDSection s = pdSectionStatus;
 
-            bool broken = sr.IsBroken() || !sr.MultipathAOK();
-            bool detached = !sr.HasPBDs();
+            bool broken = false;
+            bool repairable = sr.HasPBDs();
+            var statusString = Messages.GENERAL_STATE_OK;
+            
+            if (sr.IsDetached())
+            {
+                broken = true;
+                statusString = Messages.DETACHED;
+            }
+            else if (sr.IsBroken())
+            {
+                broken = true;
+                statusString = Messages.GENERAL_SR_STATE_BROKEN;
+            }
+            else if (!sr.MultipathAOK())
+            {
+                broken = true;
+                statusString = Messages.GENERAL_MULTIPATH_FAILURE;
+            }
 
-            ToolStripMenuItem repair = new ToolStripMenuItem
-                {
-                    Text = Messages.GENERAL_SR_CONTEXT_REPAIR,
-                    Image = Properties.Resources._000_StorageBroken_h32bit_16
-                };
-            repair.Click += delegate
-                {
-                    Program.MainWindow.ShowPerConnectionWizard(xenObject.Connection, new RepairSRDialog(sr));
-                };
+            var repairItem = new ToolStripMenuItem
+            {
+                Text = Messages.GENERAL_SR_CONTEXT_REPAIR,
+                Image = Images.StaticImages._000_StorageBroken_h32bit_16
+            };
+            repairItem.Click += (sender, args) =>
+                Program.MainWindow.ShowPerConnectionWizard(xenObject.Connection, new RepairSRDialog(sr));
 
-            var menuItems = new[] { repair };
-
-            if (broken && !detached)
-                s.AddEntry(FriendlyName("SR.state"), sr.StatusString(), menuItems);
+            if (broken && repairable)
+                s.AddEntry(FriendlyName("SR.state"), statusString, repairItem);
             else
-                s.AddEntry(FriendlyName("SR.state"), sr.StatusString());
+                s.AddEntry(FriendlyName("SR.state"), statusString);
 
             foreach (Host host in xenObject.Connection.Cache.Hosts)
             {
@@ -793,23 +833,23 @@ namespace XenAdmin.TabPages
                     if (!sr.shared)
                         continue;
 
-                    if (!detached)
-                        s.AddEntry("  " + Helpers.GetName(host).Ellipsise(30),
-                            Messages.REPAIR_SR_DIALOG_CONNECTION_MISSING, menuItems, Color.Red);
+                    if (repairable)
+                        s.AddEntry(Helpers.GetName(host).Ellipsise(30),
+                            Messages.REPAIR_SR_DIALOG_CONNECTION_MISSING, Color.Red, repairItem);
                     else
-                        s.AddEntry("  " + Helpers.GetName(host).Ellipsise(30),
+                        s.AddEntry(Helpers.GetName(host).Ellipsise(30),
                             Messages.REPAIR_SR_DIALOG_CONNECTION_MISSING, Color.Red);
 
                     continue;
                 }
 
-                pbdToSR.PropertyChanged -= new PropertyChangedEventHandler(PropertyChanged);
-                pbdToSR.PropertyChanged += new PropertyChangedEventHandler(PropertyChanged);
+                pbdToSR.PropertyChanged -= PropertyChanged;
+                pbdToSR.PropertyChanged += PropertyChanged;
 
                 if (!pbdToSR.currently_attached)
                 {
-                    if (!detached)
-                        s.AddEntry(Helpers.GetName(host).Ellipsise(30), pbdToSR.StatusString(), menuItems, Color.Red);
+                    if (repairable)
+                        s.AddEntry(Helpers.GetName(host).Ellipsise(30), pbdToSR.StatusString(), Color.Red, repairItem);
                     else
                         s.AddEntry(Helpers.GetName(host).Ellipsise(30), pbdToSR.StatusString(), Color.Red);
                 }
@@ -820,7 +860,7 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void generateMultipathBox()
+        private void GenerateMultipathBox()
         {
             SR sr = xenObject as SR;
             if (sr == null)
@@ -949,7 +989,7 @@ namespace XenAdmin.TabPages
                 s.AddEntry(title, row);
         }
 
-        private void generateMultipathBootBox()
+        private void GenerateMultipathBootBox()
         {
             Host host = xenObject as Host;
             if (host == null)
@@ -968,7 +1008,7 @@ namespace XenAdmin.TabPages
                 s.AddEntry(Messages.STATUS, text);
         }
 
-        private void generateBootBox()
+        private void GenerateBootBox()
         {
             VM vm = xenObject as VM;
             if (vm == null)
@@ -976,15 +1016,32 @@ namespace XenAdmin.TabPages
 
             PDSection s = pdSectionBootOptions;
 
-            s.AddEntry(FriendlyName("VM.auto_boot"), Helpers.BoolToString(vm.GetAutoPowerOn()),
-                new PropertiesToolStripMenuItem(new VmEditStartupOptionsCommand(Program.MainWindow, vm)));
-
             if (vm.IsHVM())
-            {	
+            {
                 s.AddEntry(FriendlyName("VM.BootOrder"), HVMBootOrder(vm),
                     new PropertiesToolStripMenuItem(new VmEditStartupOptionsCommand(Program.MainWindow, vm)));
+
                 if (Helpers.NaplesOrGreater(vm.Connection))
-                    s.AddEntry(FriendlyName("VM.BootMode"), HVMBootMode(vm));
+                {
+                    //see XSI-1362 for an explanation of this logic
+                    if (vm.IsHVM() && vm.IsDefaultBootModeUefi())
+                    {
+                        var secureBoot = vm.GetSecureBootMode();
+                        var pool = Helpers.GetPoolOfOne(vm.Connection);
+                        var poolHasCertificates = !string.IsNullOrEmpty(pool?.uefi_certificates);
+
+                        if (secureBoot == "true" && !poolHasCertificates)
+                            s.AddEntry(FriendlyName("VM.BootMode"), string.Format(Messages.CUSTOM_FIELD_NAME_AND_TYPE, Messages.UEFI_SECURE_BOOT, Messages.GUEFI_SECUREBOOT_MODE_MISSING_CERTIFICATES), Color.Red);
+                        else if (secureBoot == "true" || secureBoot == "auto" && poolHasCertificates)
+                            s.AddEntry(FriendlyName("VM.BootMode"), Messages.UEFI_SECURE_BOOT);
+                        else
+                            s.AddEntry(FriendlyName("VM.BootMode"), Messages.UEFI_BOOT);
+                    }
+                    else
+                    {
+                        s.AddEntry(FriendlyName("VM.BootMode"), Messages.BIOS_BOOT);
+                    }
+                }
             }
             else
             {
@@ -993,13 +1050,24 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void generateLicenseBox()
+        private void GenerateLicenseBox()
         {
-            Host host = xenObject as Host;
-            if (host == null)
+            if (!(xenObject is Host host))
                 return;
 
             PDSection s = pdSectionLicense;
+
+            if (host.CanShowTrialEditionUpsell())
+            {
+                pdSectionLicense.AddEntryWithNoteLink(Messages.WARNING, Messages.TRIAL_EDITION_UPSELLING_MESSAGE,
+                    Messages.LICENSE_MANAGER_BUY_LICENSE_LINK_TEXT, () => Program.OpenURL(InvisibleMessages.LICENSE_BUY_URL), Color.Red);
+            }
+            
+            if (host.CssLicenseHasExpired() && !host.IsInPreviewRelease())
+            {
+                pdSectionLicense.AddEntryWithNoteLink(Messages.WARNING, Messages.EXPIRED_CSS_UPSELLING_MESSAGE_HOST,
+                    Messages.LICENSE_MANAGER_PURCHASE_SUPPORT_LINK_TEXT, () => Program.OpenURL(InvisibleMessages.CSS_URL), Color.Red);
+            }
 
             if (host.license_params == null)
                 return;
@@ -1031,9 +1099,11 @@ namespace XenAdmin.TabPages
                     var ss = new GeneralTabLicenseStatusStringifier(licenseStatus);
                     s.AddEntry(Messages.LICENSE_STATUS,
                         licenseStatus.Updated ? ss.ExpiryStatus : Messages.GENERAL_LICENSE_QUERYING, editItem);
-                    s.AddEntry(FriendlyName("host.license_params-expiry"),
-                        licenseStatus.Updated ? ss.ExpiryDate : Messages.GENERAL_LICENSE_QUERYING,
-                        editItem, ss.ShowExpiryDate);
+
+                    if (ss.ShowExpiryDate)
+                        s.AddEntry(FriendlyName("host.license_params-expiry"),
+                            licenseStatus.Updated ? ss.ExpiryDate : Messages.GENERAL_LICENSE_QUERYING,
+                            editItem);
                 }
 
                 info.Remove("expiry");
@@ -1053,12 +1123,16 @@ namespace XenAdmin.TabPages
                     s.AddEntry(FriendlyName("host.license_server-address"), host.license_server["address"]);
                 else
                 {
-                    var openUrl = new ToolStripMenuItem(Messages.LICENSE_SERVER_WEB_CONSOLE_GOTO);
-                    openUrl.Click += (sender, args) => Program.OpenURL(string.Format(Messages.LICENSE_SERVER_WEB_CONSOLE_FORMAT, licenseServerAddress, Host.LicenseServerWebConsolePort));
-                    s.AddEntryLink(FriendlyName("host.license_server-address"),
-                                   host.license_server["address"],
-                                   new[] {openUrl},
-                                   openUrl.PerformClick);
+                    void OpenWebConsole()
+                    {
+                        Program.OpenURL(string.Format(Messages.LICENSE_SERVER_WEB_CONSOLE_FORMAT, licenseServerAddress, Host.LicenseServerWebConsolePort));
+                    }
+
+                    var openUrl = new ToolStripMenuItem(Messages.LICENSE_SERVER_WEB_CONSOLE_GOTO, null,
+                        (sender, e) => OpenWebConsole());
+
+                    s.AddEntryLink(FriendlyName("host.license_server-address"), host.license_server["address"],
+                        OpenWebConsole, openUrl);
                 }
             }
             if (host.license_server.ContainsKey("port"))
@@ -1085,32 +1159,46 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void generateVersionBox()
+        private void GenerateVersionBox()
         {
-            Host host = xenObject as Host;
-
-            if (host == null || host.software_version == null)
+            if (!(xenObject is Host host) || host.software_version == null)
                 return;
 
+            var unixMinDateTime = Util.GetUnixMinDateTime();
+
             if (host.software_version.ContainsKey("date"))
-                pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_DATE, host.software_version["date"]);
+            {
+                string buildDate = host.software_version["date"];
+
+                if (Util.TryParseIso8601DateTime(host.software_version["date"], out var softwareVersionDate) && softwareVersionDate > unixMinDateTime)
+                    buildDate = HelpersGUI.DateTimeToString(softwareVersionDate.ToLocalTime(), Messages.DATEFORMAT_DMY_HMS, true);
+                else if (Util.TryParseNonIso8601DateTime(host.software_version["date"], out softwareVersionDate) && softwareVersionDate > unixMinDateTime)
+                    buildDate = HelpersGUI.DateTimeToString(softwareVersionDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true);
+
+                pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_DATE, buildDate);
+            }
+
             if (!Helpers.ElyOrGreater(host) && host.software_version.ContainsKey("build_number"))
                 pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_BUILD_NUMBER, host.software_version["build_number"]);
+
             if (host.software_version.ContainsKey("product_version"))
             {
-                //var hotfixEligibilityString = AdditionalVersionString(host);
-                //if (string.IsNullOrEmpty(hotfixEligibilityString))
-                pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, host.ProductVersionText());
-                //else
-                //    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
-                //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, host.ProductVersionText(), hotfixEligibilityString),
-                //        Color.Red);
+                var hotfixEligibilityString = AdditionalVersionString(host);
+                var versionString = $"{host.ProductBrand()} {host.ProductVersionText()}";
+                
+                if (string.IsNullOrEmpty(hotfixEligibilityString))
+                    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
+                else
+                    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
+                        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
+                        Color.Red);
             }
+
             if (host.software_version.ContainsKey("dbv"))
                 pdSectionVersion.AddEntry("DBV", host.software_version["dbv"]);
         }
 
-        private void generateCPUBox()
+        private void GenerateCPUBox()
         {
             Host host = xenObject as Host;
             if (host == null)
@@ -1138,21 +1226,21 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void generateVCPUsBox()
+        private void GenerateVCPUsBox()
         {
             VM vm = xenObject as VM;
             if (vm == null)
                 return;
 
-            PDSection s = pdSectionVCPUs; 
-            
+            PDSection s = pdSectionVCPUs;
+
             s.AddEntry(FriendlyName("VM.VCPUs"), vm.VCPUs_at_startup.ToString());
             if (vm.VCPUs_at_startup != vm.VCPUs_max || vm.SupportsVcpuHotplug())
                 s.AddEntry(FriendlyName("VM.MaxVCPUs"), vm.VCPUs_max.ToString());
             s.AddEntry(FriendlyName("VM.Topology"), vm.Topology());
         }
 
-        private void generateDisconnectedHostBox()
+        private void GenerateDisconnectedHostBox()
         {
             IXenConnection conn = xenObject.Connection;
 
@@ -1168,7 +1256,64 @@ namespace XenAdmin.TabPages
 
         }
 
-        private void generateGeneralBox()
+        private string GetCertificateType(certificate_type typ)
+        {
+            switch (typ)
+            {
+                case certificate_type.ca:
+                    return Messages.CERTIFICATE_TYPE_CA;
+                case certificate_type.host:
+                    return Messages.CERTIFICATE_TYPE_HOST;
+                case certificate_type.host_internal:
+                    return Messages.CERTIFICATE_TYPE_HOST_INTERNAL;
+                case certificate_type.unknown:
+                default:
+                    return Messages.UNKNOWN;
+            }
+        }
+
+        private void GenerateCertificateBox()
+        {
+            if (xenObject is Host host && Helpers.StockholmOrGreater(host) && host.certificates != null)
+            {
+                var certificates = host.certificates.Select(c => host.Connection.Resolve(c)).Where(c => c != null).OrderBy(c => c.type).ToList();
+
+                foreach (var certificate in certificates)
+                {
+                    var validity = string.Format(Messages.CERTIFICATE_VALIDITY_PERIOD_VALUE,
+                        HelpersGUI.DateTimeToString(certificate.not_before.ToLocalTime(), Messages.DATEFORMAT_DMY_HM, true),
+                        HelpersGUI.DateTimeToString(certificate.not_after.ToLocalTime(), Messages.DATEFORMAT_DMY_HM, true));
+
+                    var thumbprint = string.Format(Messages.CERTIFICATE_THUMBPRINT_VALUE, certificate.fingerprint);
+
+                    if (!Helpers.CloudOrGreater(host) || !Helpers.XapiEqualOrGreater_1_290_0(host) || certificate.type == certificate_type.host)
+                        pdSectionCertificate.AddEntry(GetCertificateType(certificate.type), $"{validity}\n{thumbprint}",
+                            new CommandToolStripMenuItem(new InstallCertificateCommand(Program.MainWindow, host), true),
+                            new CommandToolStripMenuItem(new ResetCertificateCommand(Program.MainWindow, host), true));
+                    else
+                        pdSectionCertificate.AddEntry(GetCertificateType(certificate.type), $"{validity}\n{thumbprint}");
+                }
+            }
+
+            if (xenObject is Pool pool && Helpers.CloudOrGreater(pool.Connection))
+            {
+                var certificates = pool.Connection.Cache.Certificates.Where(c => c != null && c.type == certificate_type.ca).OrderBy(c => c.name).ToList();
+
+                foreach (var certificate in certificates)
+                {
+                    var validity = string.Format(Messages.CERTIFICATE_VALIDITY_PERIOD_VALUE,
+                        HelpersGUI.DateTimeToString(certificate.not_before.ToLocalTime(), Messages.DATEFORMAT_DMY_HM, true),
+                        HelpersGUI.DateTimeToString(certificate.not_after.ToLocalTime(), Messages.DATEFORMAT_DMY_HM, true));
+
+                    var thumbprint = string.Format(Messages.CERTIFICATE_THUMBPRINT_VALUE, certificate.fingerprint);
+
+                    pdSectionCertificate.AddEntry(certificate.name,
+                        $"{GetCertificateType(certificate.type)}\n{validity}\n{thumbprint}");
+                }
+            }
+        }
+
+        private void GenerateGeneralBox()
         {
             PDSection s = pdSectionGeneral;
 
@@ -1185,11 +1330,12 @@ namespace XenAdmin.TabPages
             GenTagRow(s);
             GenFolderRow(s);
 
-            Host host = xenObject as Host;
-            if (host != null)
+            if (xenObject is Host host)
             {
-                if (Helpers.GetPool(xenObject.Connection) != null)
-                    s.AddEntry(Messages.POOL_MASTER, host.IsMaster() ? Messages.YES : Messages.NO);
+                var isStandAloneHost = Helpers.GetPool(xenObject.Connection) == null;
+
+                if (!isStandAloneHost)
+                    s.AddEntry(Messages.POOL_COORDINATOR, host.IsCoordinator() ? Messages.YES : Messages.NO);
 
                 if (!host.IsLive())
                 {
@@ -1197,26 +1343,44 @@ namespace XenAdmin.TabPages
                 }
                 else if (!host.enabled)
                 {
-                    var item = new ToolStripMenuItem(Messages.EXIT_MAINTENANCE_MODE);
-                    item.Click += delegate
-                        {
-                            new HostMaintenanceModeCommand(Program.MainWindow, host,
-                                                           HostMaintenanceModeCommandParameter.Exit).Execute();
-                        };
                     s.AddEntry(FriendlyName("host.enabled"),
                                host.MaintenanceMode() ? Messages.HOST_IN_MAINTENANCE_MODE : Messages.DISABLED,
-                               new[] { item },
-                               Color.Red);
+                               Color.Red,
+                               new CommandToolStripMenuItem(new HostMaintenanceModeCommand(
+                                   Program.MainWindow, host, HostMaintenanceModeCommandParameter.Exit)));
                 }
                 else
                 {
-                    var item = new ToolStripMenuItem(Messages.ENTER_MAINTENANCE_MODE);
-                    item.Click += delegate
-                        {
-                            new HostMaintenanceModeCommand(Program.MainWindow, host,
-                                HostMaintenanceModeCommandParameter.Enter).Execute();
-                        };
+                    var item = new CommandToolStripMenuItem(new HostMaintenanceModeCommand(
+                        Program.MainWindow, host, HostMaintenanceModeCommandParameter.Enter));
+
                     s.AddEntry(FriendlyName("host.enabled"), Messages.YES, item);
+                }
+
+                if (Helpers.CloudOrGreater(host) && Helpers.XapiEqualOrGreater_1_290_0(host))
+                {
+                    var pool = Helpers.GetPoolOfOne(xenObject.Connection);
+
+                    if (pool.tls_verification_enabled &&
+                        (!Helpers.XapiEqualOrGreater_1_313_0(host) || host.tls_verification_enabled))
+                    {
+                        s.AddEntry(Messages.CERTIFICATE_VERIFICATION_KEY, Messages.ENABLED);
+                    }
+                    else if (pool.tls_verification_enabled && Helpers.XapiEqualOrGreater_1_313_0(host) &&
+                             !host.tls_verification_enabled && isStandAloneHost)
+                    {
+                        s.AddEntry(Messages.CERTIFICATE_VERIFICATION_KEY,
+                            Messages.CERTIFICATE_VERIFICATION_HOST_DISABLED_STANDALONE,
+                            Color.Red,
+                            new CommandToolStripMenuItem(new EnableTlsVerificationCommand(Program.MainWindow, pool)));
+                    }
+                    else
+                    {
+                        s.AddEntry(Messages.CERTIFICATE_VERIFICATION_KEY,
+                            Messages.DISABLED,
+                            Color.Red,
+                            new CommandToolStripMenuItem(new EnableTlsVerificationCommand(Program.MainWindow, pool)));
+                    }
                 }
 
                 s.AddEntry(FriendlyName("host.iscsi_iqn"), host.GetIscsiIqn(),
@@ -1250,29 +1414,25 @@ namespace XenAdmin.TabPages
                     s.AddEntry(Messages.BIOS_STRINGS_COPIED, vm.BiosStringsCopied() ? Messages.YES : Messages.NO);
                 }
 
-				if (vm.Connection != null)
-				{
-					var appl = vm.Connection.Resolve(vm.appliance);
-					if (appl != null)
-					{
-                        var applProperties = new ToolStripMenuItem(Messages.VM_APPLIANCE_PROPERTIES);
-					    applProperties.Click +=
-					        (sender, e) =>
-					            {
-					                using (PropertiesDialog propertiesDialog = new PropertiesDialog(appl))
-					                    propertiesDialog.ShowDialog(this);
-					            };
+                if (vm.Connection != null)
+                {
+                    var appl = vm.Connection.Resolve(vm.appliance);
+                    if (appl != null)
+                    {
+                        void LaunchProperties()
+                        {
+                            using (PropertiesDialog propertiesDialog = new PropertiesDialog(appl))
+                                propertiesDialog.ShowDialog(this);
+                        }
 
-						s.AddEntryLink(Messages.VM_APPLIANCE, appl.Name(), new[] { applProperties },
-									   () =>
-									   {
-										   using (PropertiesDialog propertiesDialog = new PropertiesDialog(appl))
-											   propertiesDialog.ShowDialog(this);
-									   });
-					}
-				}
+                        var applProperties = new ToolStripMenuItem(Messages.VM_APPLIANCE_PROPERTIES, null,
+                            (sender, e) => LaunchProperties());
 
-            	if (vm.is_a_snapshot)
+                        s.AddEntryLink(Messages.VM_APPLIANCE, appl.Name(), LaunchProperties, applProperties);
+                    }
+                }
+
+                if (vm.is_a_snapshot)
                 {
                     VM snapshotOf = vm.Connection.Resolve(vm.snapshot_of);
                     s.AddEntry(Messages.SNAPSHOT_OF, snapshotOf == null ? string.Empty : snapshotOf.Name());
@@ -1302,8 +1462,7 @@ namespace XenAdmin.TabPages
                 }
             }
 
-            SR sr = xenObject as SR;
-            if (sr != null)
+            if (xenObject is SR sr)
             {
                 s.AddEntry(Messages.TYPE, sr.FriendlyTypeName());
 
@@ -1325,7 +1484,7 @@ namespace XenAdmin.TabPages
                     }
                     else
                     {
-                        belongsTo = Helpers.GetMaster(sr.Connection);
+                        belongsTo = Helpers.GetCoordinator(sr.Connection);
 
                         if (belongsTo != null)
                         {
@@ -1335,42 +1494,77 @@ namespace XenAdmin.TabPages
                 }
             }
 
-            Pool p = xenObject as Pool;
-            if (p != null)
+            if (xenObject is Pool p)
             {
-                s.AddEntry(Messages.POOL_LICENSE, Helpers.GetFriendlyLicenseName(p));
+                var additionalString = PoolAdditionalLicenseString(p);
+                s.AddEntry(Messages.POOL_LICENSE,
+                    additionalString != string.Empty
+                        ? string.Format(Messages.MAINWINDOW_CONTEXT_REASON, Helpers.GetFriendlyLicenseName(p), additionalString)
+                        : Helpers.GetFriendlyLicenseName(p));
                 s.AddEntry(Messages.NUMBER_OF_SOCKETS, p.CpuSockets().ToString());
 
-                var master = p.Connection.Resolve(p.master);
-                if (master != null)
+                if (Helpers.CloudOrGreater(p.Connection) && Helpers.XapiEqualOrGreater_1_290_0(p.Connection))
                 {
-                    //if (p.IsPoolFullyUpgraded())
-                    //{
-                        //var hotfixEligibilityString = AdditionalVersionString(master);
-                        //if (string.IsNullOrEmpty(hotfixEligibilityString))
-                        s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, master.ProductVersionText());
-                        //else
-                        //    s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, 
-                        //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, master.ProductVersionText(), hotfixEligibilityString),
-                        //        Color.Red);
-                    //}
-                    //else
-                    //{
-                    //    var cmd = new RollingUpgradeCommand(Program.MainWindow);
-                    //    var runRpuWizard = new ToolStripMenuItem(Messages.ROLLING_POOL_UPGRADE_ELLIPSIS,
-                    //        null,
-                    //        (sender, args) => cmd.Execute());
+                    if (p.tls_verification_enabled)
+                    {
+                        var disabledHosts = p.Connection.Cache.Hosts.Where(h => !h.tls_verification_enabled).ToList();
 
-                    //    s.AddEntryLink(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
-                    //        string.Format(Messages.POOL_VERSIONS_LINK_TEXT, master.ProductVersionText()),
-                    //        new[] {runRpuWizard},
-                    //        cmd);
-                    //}
+                        if (Helpers.XapiEqualOrGreater_1_313_0(p.Connection) && disabledHosts.Count > 0)
+                        {
+                            var sb = new StringBuilder(Messages.CERTIFICATE_VERIFICATION_HOST_DISABLED_IN_POOL);
+                            foreach (var h in disabledHosts)
+                                sb.AppendLine().AppendFormat(h.Name());
+
+                            s.AddEntry(Messages.CERTIFICATE_VERIFICATION_KEY,
+                                sb.ToString(),
+                                Color.Red,
+                                new CommandToolStripMenuItem(new EnableTlsVerificationCommand(Program.MainWindow, p)));
+                        }
+                        else
+                        {
+                            s.AddEntry(Messages.CERTIFICATE_VERIFICATION_KEY, Messages.ENABLED);
+                        }
+                    }
+                    else
+                    {
+                        s.AddEntry(Messages.CERTIFICATE_VERIFICATION_KEY,
+                            Messages.DISABLED,
+                            Color.Red,
+                            new CommandToolStripMenuItem(new EnableTlsVerificationCommand(Program.MainWindow, p)));
+                    }
+                }
+
+                var coordinator = p.Connection.Resolve(p.master);
+                if (coordinator != null)
+                {
+                    var versionString = $"{coordinator.ProductBrand()} {coordinator.ProductVersionText()}";
+
+                    if (p.IsPoolFullyUpgraded())
+                    {
+                        var hotfixEligibilityString = AdditionalVersionString(coordinator);
+
+                        if (string.IsNullOrEmpty(hotfixEligibilityString))
+                            s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
+                        else
+                            s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
+                                string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
+                                Color.Red);
+                    }
+                    else
+                    {
+                        var cmd = new RollingUpgradeCommand(Program.MainWindow);
+                        var runRpuWizard = new ToolStripMenuItem(Messages.ROLLING_POOL_UPGRADE_ELLIPSIS,
+                            null,
+                            (sender, args) => cmd.Run());
+
+                        s.AddEntryLink(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
+                            string.Format(Messages.POOL_VERSIONS_LINK_TEXT, versionString),
+                            cmd, runRpuWizard);
+                    }
                 }
             }
 
-            VDI vdi = xenObject as VDI;
-            if (vdi != null)
+            if (xenObject is VDI vdi)
             {
                 s.AddEntry(Messages.SIZE, vdi.SizeText(),
                     new PropertiesToolStripMenuItem(new VdiEditSizeLocationCommand(Program.MainWindow, xenObject)));
@@ -1384,25 +1578,25 @@ namespace XenAdmin.TabPages
                     s.AddEntry(Messages.VIRTUAL_MACHINE, vdiVms);
             }
 
-            s.AddEntry(FriendlyName("host.uuid"), GetUUID(xenObject));
+            s.AddEntry(FriendlyName("host.uuid"), xenObject.Get("uuid") as string);
         }
 
-        //private string PoolAdditionalLicenseString()
-        //{
-        //    if (licenseStatus != null && licenseStatus.LicencedHost != null)
-        //    {
-        //        if (licenseStatus.LicencedHost.edition == "xcp-ng")
-        //            return string.Empty;
-        //        else if (licenseStatus.CurrentState == LicenseStatus.HostState.Expired)
-        //            return Messages.LICENSE_EXPIRED;
-        //        else if (licenseStatus.CurrentState == LicenseStatus.HostState.Free)
-        //            return Messages.LICENSE_UNLICENSED;
-        //        else
-        //            return string.Empty;
-        //    }
-        //    else
-        //        return string.Empty;
-        //}
+        private string PoolAdditionalLicenseString(IXenObject pool)
+        {
+            if (licenseStatus == null)
+                return string.Empty;
+
+            switch (licenseStatus.CurrentState)
+            {
+                case LicenseStatus.HostState.Expired:
+                    return Messages.LICENSE_EXPIRED;
+                case LicenseStatus.HostState.Free:
+                    // We don't show "Unlicensed" when the pool is in Trial edition
+                    return Helpers.NileOrGreater(pool?.Connection) ? string.Empty : Messages.LICENSE_UNLICENSED;
+                default:
+                    return string.Empty;
+            }
+        }
 
         //private string AdditionalVersionString(Host host)
         //{
@@ -1428,74 +1622,55 @@ namespace XenAdmin.TabPages
         //        case hotfix_eligibility.cu:
         //            return Messages.HOTFIX_ELIGIBILITY_WARNING_CU_NO_DATE;
 
-        //        // none
-        //        case hotfix_eligibility.none when unlicensed && xenServerVersion.EolDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.none when xenServerVersion.EolDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.none when unlicensed:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE_NO_DATE;
-        //        case hotfix_eligibility.none:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_NO_DATE;
-                
-        //        // default
-        //        default:
-        //            return string.Empty;
-        //    }
-        //}
+                // none
+                case hotfix_eligibility.none when unlicensed && xenServerVersion.EolDate != DateTime.MinValue:
+                    return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
+                case hotfix_eligibility.none when xenServerVersion.EolDate != DateTime.MinValue:
+                    return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
+                case hotfix_eligibility.none when unlicensed:
+                    return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE_NO_DATE;
+                case hotfix_eligibility.none:
+                    return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_NO_DATE;
+
+                // default
+                default:
+                    return string.Empty;
+            }
+        }
 
         private static void GenerateVirtualisationStatusForGeneralBox(PDSection s, VM vm)
         {
             if (vm != null && vm.Connection != null)
             {
                 //For Dundee or higher Windows VMs
-                if (Helpers.DundeeOrGreater(vm.Connection) && vm.IsWindows())
+                if (vm.HasNewVirtualizationStates())
                 {
-                    var gm = vm.Connection.Resolve(vm.guest_metrics);
-
-                    bool isIoOptimized = gm != null && gm.PV_drivers_detected;
-                    bool isManagementAgentInstalled = vm.GetVirtualisationStatus().HasFlag(VM.VirtualisationStatus.MANAGEMENT_INSTALLED);
-                    bool canInstallIoDriversAndManagementAgent = InstallToolsCommand.CanExecute(vm) && !isIoOptimized;
-                    bool canInstallManagementAgentOnly = InstallToolsCommand.CanExecute(vm) && isIoOptimized && !isManagementAgentInstalled;
-                    //canInstallIoDriversOnly is missing - management agent communicates with XS using the I/O drivers
+                    var status = vm.GetVirtualizationStatus(out var statusString);
 
                     var sb = new StringBuilder();
 
                     if (vm.power_state == vm_power_state.Running)
                     {
-                        if (vm.GetVirtualisationStatus().HasFlag(XenAPI.VM.VirtualisationStatus.UNKNOWN))
+                        if (status.HasFlag(VM.VirtualizationStatus.Unknown))
                         {
-                            sb.AppendLine(vm.VirtualisationStatusString());
+                            sb.AppendLine(statusString);
                         }
                         else
                         {
                             //Row 1 : I/O Drivers
-                            if (isIoOptimized)
-                            {
-                                sb.Append(Messages.VIRTUALIZATION_STATE_VM_IO_OPTIMIZED);
-                            }
-                            else
-                            {
-                                sb.Append(Messages.VIRTUALIZATION_STATE_VM_IO_NOT_OPTIMIZED);
-                            }
-
-                            sb.Append(Environment.NewLine);
+                            sb.AppendLine(status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled)
+                                ? Messages.VIRTUALIZATION_STATE_VM_IO_OPTIMIZED
+                                : Messages.VIRTUALIZATION_STATE_VM_IO_NOT_OPTIMIZED);
 
                             //Row 2: Management Agent
-                            if (isManagementAgentInstalled)
-                            {
-                                sb.Append(Messages.VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_INSTALLED);
-                            }
-                            else
-                            {
-                                sb.Append(Messages.VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_NOT_INSTALLED);
-                            }
-                            sb.Append(Environment.NewLine);
+                            sb.AppendLine(status.HasFlag(VM.VirtualizationStatus.ManagementInstalled)
+                                ? Messages.VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_INSTALLED
+                                : Messages.VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_NOT_INSTALLED);
                         }
                     }
 
                     //Row 3 : vendor device - Windows Update
-                    if(!HiddenFeatures.WindowsUpdateHidden)
+                    if (!HiddenFeatures.WindowsUpdateHidden)
                         sb.Append(vm.has_vendor_device ? Messages.VIRTUALIZATION_STATE_VM_RECEIVING_UPDATES : Messages.VIRTUALIZATION_STATE_VM_NOT_RECEIVING_UPDATES);
 
                     // displaying Row1 - Row3
@@ -1505,25 +1680,37 @@ namespace XenAdmin.TabPages
                     {
                         //Row 4: Install Tools
                         string installMessage = string.Empty;
-                        if (canInstallIoDriversAndManagementAgent)
+                        var canInstall = InstallToolsCommand.CanRun(vm);
+
+                        if (canInstall && !status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
                         {
                             installMessage = Messages.VIRTUALIZATION_STATE_VM_INSTALL_IO_DRIVERS_AND_MANAGEMENT_AGENT;
                         }
-                        else if (canInstallManagementAgentOnly)
+                        else if (canInstall && status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled) &&
+                                 !status.HasFlag(VM.VirtualizationStatus.ManagementInstalled))
                         {
                             installMessage = Messages.VIRTUALIZATION_STATE_VM_INSTALL_MANAGEMENT_AGENT;
                         }
 
                         if (!string.IsNullOrEmpty(installMessage))
                         {
-                            var installtools = new ToolStripMenuItem(installMessage);
-                            installtools.Click += delegate
+                            if (Helpers.StockholmOrGreater(vm.Connection))
                             {
-                                new InstallToolsCommand(Program.MainWindow, vm).Execute();
-                            };
-                            s.AddEntryLink(string.Empty, installMessage,
-                                new[] { installtools },
-                                new InstallToolsCommand(Program.MainWindow, vm));
+                                void GoToHelp()
+                                {
+                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
+                                }
+
+                                var toolsItem = new ToolStripMenuItem(string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), null,
+                                    (sender, args) => GoToHelp());
+                                s.AddEntryLink(string.Empty, string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), GoToHelp, toolsItem);
+                            }
+                            else
+                            {
+                                var cmd = new InstallToolsCommand(Program.MainWindow, vm);
+                                var toolsItem = new ToolStripMenuItem(installMessage, null, (sender, args) => cmd.Run());
+                                s.AddEntryLink(string.Empty, installMessage, cmd, toolsItem);
+                            }
                         }
                     }
                 }
@@ -1531,64 +1718,72 @@ namespace XenAdmin.TabPages
                 //for everything else (All VMs on pre-Dundee hosts & All non-Windows VMs on any host)
                 else if (vm.power_state == vm_power_state.Running)
                 {
-                    var status = vm.GetVirtualisationStatus();
-                    if (status == 0 || status.HasFlag(XenAPI.VM.VirtualisationStatus.PV_DRIVERS_OUT_OF_DATE))
+                    var status = vm.GetVirtualizationStatus(out var statusString);
+
+                    if (status == VM.VirtualizationStatus.NotInstalled || status.HasFlag(VM.VirtualizationStatus.PvDriversOutOfDate))
                     {
-                        if (InstallToolsCommand.CanExecute(vm))
+                        if (InstallToolsCommand.CanRun(vm))
                         {
-                            var installtools = new ToolStripMenuItem(Messages.INSTALL_XENSERVER_TOOLS_DOTS);
-                            installtools.Click += delegate
+                            if (Helpers.StockholmOrGreater(vm.Connection))
                             {
-                                new InstallToolsCommand(Program.MainWindow, vm).Execute();
-                            };
-                            s.AddEntryLink(FriendlyName("VM.VirtualizationState"), vm.VirtualisationStatusString(),
-                                new[] { installtools },
-                                new InstallToolsCommand(Program.MainWindow, vm));
+                                void GoToHelp()
+                                {
+                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
+                                }
+
+                                var toolsItem = new ToolStripMenuItem(string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), null, (sender, args) => GoToHelp());
+
+                                s.AddEntry(FriendlyName("VM.VirtualizationState"), statusString);
+                                s.AddEntryLink("", string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), GoToHelp, toolsItem);
+                            }
+                            else
+                            {
+                                var cmd = new InstallToolsCommand(Program.MainWindow, vm);
+                                var toolsItem = new ToolStripMenuItem(string.Format(Messages.INSTALL_XENSERVER_TOOLS, BrandManager.VmTools), null,
+                                    (sender, args) => cmd.Run());
+
+                                s.AddEntryLink(FriendlyName("VM.VirtualizationState"), statusString,
+                                    cmd, toolsItem);
+                            }
                         }
                         else
                         {
-                            s.AddEntry(FriendlyName("VM.VirtualizationState"), vm.VirtualisationStatusString(), Color.Red);
+                            s.AddEntry(FriendlyName("VM.VirtualizationState"), statusString, Color.Red);
                         }
-
                     }
                     else
                     {
-                        s.AddEntry(FriendlyName("VM.VirtualizationState"), vm.VirtualisationStatusString());
+                        s.AddEntry(FriendlyName("VM.VirtualizationState"), statusString);
                     }
                 }
             }
         }
 
-        private void generateDockerContainerGeneralBox()
+        private void GenerateDockerContainerGeneralBox(DockerContainer dockerContainer)
         {
-            var dockerContainer = xenObject as DockerContainer;
-            if (dockerContainer != null)
+            PDSection s = pdSectionGeneral;
+            s.AddEntry(Messages.NAME, dockerContainer.Name().Length != 0 ? dockerContainer.Name() : Messages.NONE);
+            s.AddEntry(Messages.STATUS, dockerContainer.status.Length != 0 ? dockerContainer.status : Messages.NONE);
+            try
             {
-                PDSection s = pdSectionGeneral;
-                s.AddEntry(Messages.NAME, dockerContainer.Name().Length != 0 ? dockerContainer.Name() : Messages.NONE);
-                s.AddEntry(Messages.STATUS, dockerContainer.status.Length != 0 ? dockerContainer.status : Messages.NONE);
-                try
-                {
-                    DateTime created = Util.FromUnixTime(double.Parse(dockerContainer.created)).ToLocalTime();
-                    s.AddEntry(Messages.CONTAINER_CREATED, HelpersGUI.DateTimeToString(created, Messages.DATEFORMAT_DMY_HMS, true));
-                }
-                catch
-                {
-                    s.AddEntry(Messages.CONTAINER_CREATED, dockerContainer.created.Length != 0 ? dockerContainer.created : Messages.NONE);
-                }
-                s.AddEntry(Messages.CONTAINER_IMAGE, dockerContainer.image.Length != 0 ? dockerContainer.image : Messages.NONE);
-                s.AddEntry(Messages.CONTAINER, dockerContainer.container.Length != 0 ? dockerContainer.container : Messages.NONE);
-                s.AddEntry(Messages.CONTAINER_COMMAND, dockerContainer.command.Length != 0 ? dockerContainer.command : Messages.NONE);
-                var ports = dockerContainer.PortList.Select(p => p.Description);
-                if (ports.Count() > 0)
-                {
-                    s.AddEntry(Messages.CONTAINER_PORTS, string.Join(Environment.NewLine, ports));
-                }
-                s.AddEntry(Messages.UUID, dockerContainer.uuid.Length != 0 ? dockerContainer.uuid : Messages.NONE);
+                DateTime created = Util.FromUnixTime(double.Parse(dockerContainer.created)).ToLocalTime();
+                s.AddEntry(Messages.CONTAINER_CREATED, HelpersGUI.DateTimeToString(created, Messages.DATEFORMAT_DMY_HMS, true));
             }
+            catch
+            {
+                s.AddEntry(Messages.CONTAINER_CREATED, dockerContainer.created.Length != 0 ? dockerContainer.created : Messages.NONE);
+            }
+            s.AddEntry(Messages.CONTAINER_IMAGE, dockerContainer.image.Length != 0 ? dockerContainer.image : Messages.NONE);
+            s.AddEntry(Messages.CONTAINER, dockerContainer.container.Length != 0 ? dockerContainer.container : Messages.NONE);
+            s.AddEntry(Messages.CONTAINER_COMMAND, dockerContainer.command.Length != 0 ? dockerContainer.command : Messages.NONE);
+            var ports = dockerContainer.PortList.Select(p => p.Description).ToList();
+            if (ports.Count > 0)
+                s.AddEntry(Messages.CONTAINER_PORTS, string.Join(Environment.NewLine, ports));
+
+            s.AddEntry(Messages.UUID, dockerContainer.uuid.Length != 0 ? dockerContainer.uuid : Messages.NONE);
         }
 
-        private void generateReadCachingBox()
+        private void GenerateReadCachingBox()
         {
             VM vm = xenObject as VM;
             if (vm == null || !vm.IsRunning())
@@ -1614,6 +1809,22 @@ namespace XenAdmin.TabPages
             }
         }
 
+        private void GenerateDeviceSecurityBox()
+        {
+            if (!(xenObject is VM vm) || Helpers.FeatureForbidden(vm, Host.RestrictVtpm) ||
+                !Helpers.XapiEqualOrGreater_22_26_0(vm.Connection))
+                return;
+
+            PDSection s = pdSectionDeviceSecurity;
+
+            if (vm.VTPMs.Count > 0)
+            {
+                s.AddEntry(Messages.VTPM,
+                    vm.VTPMs.Count == 1 ? Messages.VTPM_ATTACHED_ONE : string.Format(Messages.VTPM_ATTACHED_MANY, vm.VTPMs.Count),
+                    new CommandToolStripMenuItem(new VtpmCommand(Program.MainWindow, vm), true));
+            }
+        }
+
         private static bool VMCanChooseHomeServer(VM vm)
         {
             if (vm != null && !vm.is_a_template)
@@ -1630,7 +1841,7 @@ namespace XenAdmin.TabPages
         private void GenTagRow(PDSection s)
         {
             string[] tags = Tags.GetTags(xenObject);
-            
+
             if (tags != null && tags.Length > 0)
             {
                 ToolStripMenuItem goToTag = new ToolStripMenuItem(Messages.VIEW_TAG_MENU_OPTION);
@@ -1660,22 +1871,22 @@ namespace XenAdmin.TabPages
 
         private void GenFolderRow(PDSection s)
         {
-            List<ToolStripMenuItem> menuItems = new List<ToolStripMenuItem>();
-            if (xenObject.Path != "")
+            var folderValue = new FolderListItem(xenObject.Path, FolderListItem.AllowSearch.None, false);
+            var propertiesItem = new PropertiesToolStripMenuItem(new PropertiesCommand(Program.MainWindow, xenObject));
+
+            if (xenObject.Path == "")
             {
-                var item = new ToolStripMenuItem(Messages.VIEW_FOLDER_MENU_OPTION);
-                item.Click += delegate { Program.MainWindow.SearchForFolder(xenObject.Path); };
-                menuItems.Add(item);
+                s.AddEntry(Messages.FOLDER, folderValue, propertiesItem);
             }
-            menuItems.Add(new PropertiesToolStripMenuItem(new PropertiesCommand(Program.MainWindow, xenObject)));
-            s.AddEntry(
-                Messages.FOLDER,
-                new FolderListItem(xenObject.Path, FolderListItem.AllowSearch.None, false),
-                menuItems
-                );
+            else
+            {
+                var folderItem = new ToolStripMenuItem(Messages.VIEW_FOLDER_MENU_OPTION);
+                folderItem.Click += (sender, args) => Program.MainWindow.SearchForFolder(xenObject.Path);
+                s.AddEntry(Messages.FOLDER, folderValue, folderItem, propertiesItem);
+            }
         }
 
-        private void generateMemoryBox()
+        private void GenerateMemoryBox()
         {
             Host host = xenObject as Host;
             if (host == null)
@@ -1683,11 +1894,11 @@ namespace XenAdmin.TabPages
 
             PDSection s = pdSectionMemory;
 
-      
+
             s.AddEntry(FriendlyName("host.ServerMemory"), host.HostMemoryString());
             s.AddEntry(FriendlyName("host.VMMemory"), host.ResidentVMMemoryUsageString());
             s.AddEntry(FriendlyName("host.XenMemory"), host.XenMemoryString());
-            
+
         }
 
         private void addStringEntry(PDSection s, string key, string value)
@@ -1695,10 +1906,9 @@ namespace XenAdmin.TabPages
             s.AddEntry(key, string.IsNullOrEmpty(value) ? Messages.NONE : value);
         }
 
-        private void generateDockerInfoBox()
+        private void GenerateDockerInfoBox()
         {
-            VM vm = xenObject as VM;
-            if (vm == null)
+            if (!(xenObject is VM vm) || Helpers.StockholmOrGreater(xenObject.Connection))
                 return;
 
             VM_Docker_Info info = vm.DockerInfo();
@@ -1757,74 +1967,37 @@ namespace XenAdmin.TabPages
             return string.Join("\n", result.ToArray());
         }
 
+        private void SetupDeprecationBanner()
+        {
+            if (xenObject is DockerContainer && !Helpers.ContainerCapability(xenObject.Connection))
+            {
+                Banner.BannerType = DeprecationBanner.Type.Removal;
+                Banner.WarningMessage = string.Format(Messages.CONTAINER_MANAGEMENT_REMOVAL_WARNING, BrandManager.ProductVersion82);
+                Banner.LinkText = Messages.DETAILS;
+                Banner.LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
+                Banner.Visible = true;
+            }
+            else if (xenObject is SR sr && sr.GetSRType(true) == SR.SRTypes.lvmofcoe)
+            {
+                Banner.BannerType = DeprecationBanner.Type.Deprecation;
+                Banner.WarningMessage = string.Format(
+                    Messages.FCOE_DEPRECATION_WARNING, string.Format(Messages.STRING_SPACE_STRING, BrandManager.ProductBrand, BrandManager.ProductVersionPost82));
+                Banner.LinkText = Messages.PATCHING_WIZARD_WEBPAGE_CELL;
+                Banner.LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
+                Banner.Visible = true;
+            }
+            else
+            {
+                Banner.Visible = false;
+            }
+        }
+
         #region VM delegates
 
         private static string HVMBootOrder(VM vm)
         {
             var order = vm.GetBootOrder().ToUpper().Union(new[] { 'D', 'C', 'N' });
             return string.Join("\n", order.Select(c => new BootDevice(c).ToString()).ToArray());
-        }
-
-        private static string HVMBootMode(VM vm)
-        {
-            if (vm.IsSecureBootEnabled())
-                return Messages.UEFI_SECURE_BOOT;
-            if (vm.IsUEFIEnabled())
-                return Messages.UEFI_BOOT;
-            return Messages.BIOS_BOOT;
-        }
-
-        #endregion
-
-        #region Pool delegates
-
-        private string poolAppliedPatches()
-        {
-            return 
-                Helpers.ElyOrGreater(xenObject.Connection)
-                ? poolUpdateString(update => update.AppliedOnHosts().Count == xenObject.Connection.Cache.HostCount)
-                : poolPatchString(patch => patch.host_patches.Count == xenObject.Connection.Cache.HostCount);
-        }
-
-        private string poolPartialPatches()
-        {
-            return Helpers.ElyOrGreater(xenObject.Connection)
-                ? poolUpdateString(update =>
-                {
-                    var appliedOnHosts = update.AppliedOnHosts();
-                    return appliedOnHosts.Count > 0 && appliedOnHosts.Count != xenObject.Connection.Cache.HostCount;
-                })
-                : poolPatchString(patch => patch.host_patches.Count > 0 && patch.host_patches.Count != xenObject.Connection.Cache.HostCount);
-        }
-
-        private string poolPatchString(Predicate<Pool_patch> predicate)
-        {
-            Pool_patch[] patches = xenObject.Connection.Cache.Pool_patches;
-
-            List<String> output = new List<String>();
-
-            foreach (Pool_patch patch in patches)
-                if (predicate(patch))
-                    output.Add(patch.name_label);
-
-            output.Sort(StringUtility.NaturalCompare);
-
-            return string.Join(Environment.NewLine, output);
-        }
-
-        private string poolUpdateString(Predicate<Pool_update> predicate)
-        {
-            Pool_update[] updates = xenObject.Connection.Cache.Pool_updates;
-
-            List<String> output = new List<String>();
-
-            foreach (var update in updates)
-                if (predicate(update))
-                    output.Add(Helpers.UpdatesFriendlyNameAndVersion(update));
-
-            output.Sort(StringUtility.NaturalCompare);
-
-            return string.Join(Environment.NewLine, output);
         }
 
         #endregion
@@ -1893,7 +2066,7 @@ namespace XenAdmin.TabPages
         private List<KeyValuePair<String, String>> CheckHostUpdatesRequiringReboot(Host host)
         {
             var warnings = new List<KeyValuePair<String, String>>();
-            
+
             // Updates that require host restart
             var updateRefs = host.updates_requiring_reboot;
             foreach (var updateRef in updateRefs)
@@ -1938,7 +2111,7 @@ namespace XenAdmin.TabPages
             {
                 value = string.Format(Messages.GENERAL_PANEL_UPDATE_RESTART_TOOLSTACK_WARNING, host.Name(), patch.Name());
             }
-            
+
             return new KeyValuePair<string, string>(key, value);
         }
 
@@ -1949,110 +2122,86 @@ namespace XenAdmin.TabPages
 
             return new KeyValuePair<string, string>(key, value);
         }
- 
-        private static string GetUUID(IXenObject o)
-        {
-            return o.Get("uuid") as String;
-        }
 
         private static string FriendlyName(string propertyName)
         {
             return FriendlyNameManager.GetFriendlyName(string.Format("Label-{0}", propertyName)) ?? propertyName;
         }
 
+
+        #region Control Event Handlers
+
+        private void s_ContentChangedSelection(PDSection s)
+        {
+            ScrollToSelectionIfNeeded(s);
+        }
+
+        private void s_ContentReceivedFocus(PDSection s)
+        {
+            ScrollToSelectionIfNeeded(s);
+        }
+
+        private void s_ExpandedChanged(PDSection pdSection)
+        {
+            if (xenObject != null)
+                _expandedSections[xenObject.GetType()] = sections.Where(s => s.Parent.Visible && s.IsExpanded).ToList();
+
+            linkLabelExpand.Enabled = sections.Any(s => s.Parent.Visible && !s.IsExpanded);
+            linkLabelCollapse.Enabled = sections.Any(s => s.Parent.Visible && s.IsExpanded);
+        }
+
         private void linkLabelExpand_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            foreach (PDSection s in sections)
-            {
-                if (!s.Parent.Visible)
-                    continue;
-
-                s.DisableFocusEvent = true;
-                s.Expand();
-                s.DisableFocusEvent = false;
-            }
-
-            linkLabelCollapse.Focus();
+            ToggleExpandedState(s => true);
         }
 
         private void linkLabelCollapse_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            
-            foreach (PDSection s in sections)
-            {
-                if (!s.Parent.Visible)
-                    continue;
-
-                s.DisableFocusEvent = true;
-                s.Contract();
-                s.DisableFocusEvent = false;
-            }
-
-            linkLabelExpand.Focus();
+            ToggleExpandedState(s => false);
         }
 
-        private void SetStatesOfExpandingLinks()
+        private void buttonProperties_Click(object sender, EventArgs e)
         {
-            var sectionsVisible = sections.Where(section => section.Parent.Visible);
-            bool anyExpanded = sectionsVisible.Any(s => s.IsExpanded);
-            bool anyCollapsed = sectionsVisible.Any(s => !s.IsExpanded);
-            linkLabelExpand.Enabled = anyCollapsed;
-            linkLabelCollapse.Enabled = anyExpanded;
+            new PropertiesCommand(Program.MainWindow, xenObject).Run();
         }
 
-        private void buttonViewConsole_Click(object sender, EventArgs e)
+        private void panel2_Paint(object sender, PaintEventArgs e)
         {
-            var dockerContainer = xenObject as DockerContainer;
-            if (dockerContainer != null)
-            {
-                string vmIp = dockerContainer.Parent.IPAddressForSSH();
-                //Set command 'docker attach' to attach to the container.
-                string dockerCmd = "env docker attach --sig-proxy=false " + dockerContainer.uuid;
-                startPutty(dockerCmd, vmIp);
-            }
+            //Force scrollbar to be repainted to avoid occasional pixel glitch.
+            panel2.AutoScroll = sections.Sum(s => s.Parent?.Height ?? s.Height) > panel2.ClientRectangle.Height;
         }
 
-        private void buttonViewLog_Click(object sender, EventArgs e)
-        {
-            var dockerContainer = xenObject as DockerContainer;
-            if (dockerContainer != null)
-            {
-                string vmIp = dockerContainer.Parent.IPAddressForSSH();
-                //Set command 'docker logs' to retrieve the logs of the container.
-                string dockerCmd = "env docker logs --tail=50 --follow --timestamps " + dockerContainer.uuid;
-                startPutty(dockerCmd, vmIp);
-            }
-        }
+        #endregion
 
-        private void startPutty(string command, string ipAddr)
+        private void ToggleExpandedState(Func<PDSection, bool> expand)
         {
             try
             {
-                //Write docker command to a temp file.
-                string cmdFile = Path.Combine(Path.GetTempPath(), "ContainerManagementCommand.txt");
-                File.WriteAllText(cmdFile, command);
+                panel2.SuspendLayout();
 
-                //Invoke Putty, SSH to VM and execute docker command.
-                var puttyPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "putty.exe");
-                string args = "-m " + cmdFile + " -t " + ipAddr;
-
-                //Specify the key for SSH connection.
-                var keyFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "ContainerManagement.ppk");
-                if (File.Exists(keyFile))
+                foreach (PDSection s in sections)
                 {
-                    args = args + " -i " + keyFile;
-                }
-                var startInfo = new ProcessStartInfo(puttyPath, args);
+                    if (!s.Parent.Visible)
+                        continue;
 
-                Process.Start(startInfo);
+                    try
+                    {
+                        s.DisableFocusEvent = true;
+
+                        if (expand(s))
+                            s.Expand();
+                        else
+                            s.Collapse();
+                    }
+                    finally
+                    {
+                        s.DisableFocusEvent = false;
+                    }
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                log.Error("Error starting PuTTY.", ex);
-                using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Error, Messages.ERROR_PUTTY_LAUNCHING, Messages.XENCENTER)))
-                {
-                    dlg.ShowDialog(Parent);
-                }
+                panel2.ResumeLayout();
             }
         }
     }

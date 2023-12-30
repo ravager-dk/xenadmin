@@ -174,23 +174,32 @@
   <data name="CancelActionDialog" xml:space="preserve">
     <value>troubleshooting-bugtool</value>
   </data>
+  <data name="CertificateAlert" xml:space="preserve">
+    <value>hosts-certificates</value>
+  </data>
   <data name="CertificateChangedDialog" xml:space="preserve">
     <value>hosts-reconnect</value>
   </data>
   <data name="ChangeHomeDialog" xml:space="preserve">
     <value>vms-properties</value>
   </data>
-  <data name="ChangeMasterPasswordDialog" xml:space="preserve">
+  <data name="ChangeMainPasswordDialog" xml:space="preserve">
     <value>hosts-connect-save</value>
   </data>
   <data name="ChangeServerPasswordDialog" xml:space="preserve">
     <value>pools-rootpassword</value>
+  </data>
+  <data name="ClientIdDialog" xml:space="preserve">
+  <value>updates-applying-ch</value>
   </data>
   <data name="CloseXenCenterWarningDialog" xml:space="preserve">
     <value>intro-start</value>
   </data>
   <data name="ConfigureAdDialogAccessChanged" xml:space="preserve">
     <value>users-overview</value>
+  </data>
+  <data name="ConfigureUpdatesDialog" xml:space="preserve">
+    <value>updates-autoconfig</value>
   </data>
   <data name="ConfirmTemplateConvertDialog" xml:space="preserve">
     <value>templates-new</value>
@@ -264,6 +273,9 @@
   <data name="CrossPoolMigrateWizard_TransferNetworkPane" xml:space="preserve">
     <value>vms-relocate</value>
   </data>
+  <data name="CssExpiryAlert" xml:space="preserve">
+    <value>systemalerts</value>
+  </data>
   <data name="CustomFieldsDialog" xml:space="preserve">
     <value>resources-customfields</value>
   </data>
@@ -290,9 +302,6 @@
   </data>
   <data name="DRFailoverWizard_Dryrun_PrechecksPane" xml:space="preserve">
     <value>dr-testfailover</value>
-  </data>
-  <data name="DRFailoverWizard_Dryrun_RbacPane" xml:space="preserve">
-    <value>9830</value>
   </data>
   <data name="DRFailoverWizard_Dryrun_RecoverPane" xml:space="preserve">
     <value>dr-testfailover</value>
@@ -402,9 +411,6 @@
   <data name="EditVmNetworkSettingsDialog" xml:space="preserve">
     <value>vms-network-properties</value>
   </data>
-  <data name="EditVMPPGeneralSettingsDialog" xml:space="preserve">
-    <value>6536</value>
-  </data>
   <data name="EditVMSSGeneralSettingsDialog" xml:space="preserve">
     <value>vms-snapshotschedule-manage-policy</value>
   </data>
@@ -420,7 +426,7 @@
   <data name="EnableRDPonVM" xml:space="preserve">
     <value>tabs</value>
   </data>
-  <data name="EnterMasterPasswordDialog" xml:space="preserve">
+  <data name="EnterMainPasswordDialog" xml:space="preserve">
     <value>hosts-connect-save</value>
   </data>
   <data name="EvacuateHostDialog" xml:space="preserve">
@@ -455,9 +461,6 @@
   </data>
   <data name="ExportApplianceWizard_SelectVMsXvaPane" xml:space="preserve">
     <value>vms-export</value>
-  </data>
-  <data name="ExportApplianceWizard_TvmIpExportPane" xml:space="preserve">
-    <value>vms-export-ovf</value>
   </data>
   <data name="ExportVMDialog" xml:space="preserve">
     <value>vms-export</value>
@@ -503,12 +506,6 @@
   </data>
   <data name="HAWizard" xml:space="preserve">
     <value>pools-ha-enable</value>
-  </data>
-  <data name="HealthCheckOverviewDialog" xml:space="preserve">
-    <value>health-check</value>
-  </data>
-  <data name="HealthCheckSettingsDialog" xml:space="preserve">
-    <value>health-check</value>
   </data>
   <data name="HotfixEligibilityAlert" xml:space="preserve">
     <value>updates-about</value>
@@ -573,14 +570,11 @@
   <data name="ImportWizard_StoragePickerPane" xml:space="preserve">
     <value>vms-import</value>
   </data>
-  <data name="ImportWizard_TvmIpImportImagePane" xml:space="preserve">
-    <value>vms-importdiskimage</value>
-  </data>
-  <data name="ImportWizard_TvmIpImportOvfPane" xml:space="preserve">
-    <value>vms-import-ovf</value>
-  </data>
   <data name="ImportWizard_VMConfigPane" xml:space="preserve">
     <value>vms-importdiskimage</value>
+  </data>
+  <data name="InstallCertificate" xml:space="preserve">
+    <value>hosts-certificates</value>
   </data>
   <data name="InstallToolsWarningDialog" xml:space="preserve">
     <value>vms-installtools</value>
@@ -590,6 +584,9 @@
   </data>
   <data name="IscsiDeviceConfigDialog" xml:space="preserve">
     <value>dr-testfailover</value>
+  </data>
+  <data name="LeafCoalesceAlert" xml:space="preserve">
+    <value>systemalerts</value>
   </data>
   <data name="LicenseKeyDialog" xml:space="preserve">
     <value>licensing-about</value>
@@ -606,8 +603,11 @@
   <data name="LVMoHBAWarningDialog" xml:space="preserve">
     <value>storage-pools-add-hba</value>
   </data>
-  <data name="ManageUpdatesDialog" xml:space="preserve">
-    <value>updates-applying</value>
+  <data name="ManageCdnUpdatesTabPage" xml:space="preserve">
+    <value>updates-applying-xs</value>
+  </data>
+  <data name="ManageUpdatesTabPage" xml:space="preserve">
+    <value>updates-applying-ch</value>
   </data>
   <data name="MemoryUsageMessageAlert" xml:space="preserve">
     <value>systemalerts</value>
@@ -849,32 +849,14 @@
   <data name="OptionsDialog" xml:space="preserve">
     <value>intro-options</value>
   </data>
-  <data name="PatchingWizard_ApplyUpdatePane" xml:space="preserve">
-    <value>updates-applying</value>
+  <data name="OutOfSyncWithCdnAlert" xml:space="preserve">
+    <value>systemalerts</value>
   </data>
-  <data name="PatchingWizard_BeforeyoustartPane" xml:space="preserve">
-    <value>updates-applying</value>
+  <data name="PatchingWizard_ch" xml:space="preserve">
+    <value>updates-applying-ch</value>
   </data>
-  <data name="PatchingWizard_InstallUpdatePane" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
-  <data name="PatchingWizard_SelectPatchPane" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
-  <data name="PatchingWizard_SelectServersPane" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
-  <data name="PatchingWizard_SelectUpdatePane" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
-  <data name="PatchingWizard_UpdateModePane" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
-  <data name="PatchingWizard_UpdatePrechecksPane" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
-  <data name="PatchingWizard_UploadPatchPane" xml:space="preserve">
-    <value>updates-applying</value>
+  <data name="PatchingWizard_xs" xml:space="preserve">
+    <value>updates-applying-xs</value>
   </data>
   <data name="PoolJoinAdConfiguring" xml:space="preserve">
     <value>pools-add-host</value>
@@ -963,7 +945,7 @@
   <data name="SelectVMsToSuspendDialog" xml:space="preserve">
     <value>vms-suspend</value>
   </data>
-  <data name="SetMasterPasswordDialog" xml:space="preserve">
+  <data name="SetMainPasswordDialog" xml:space="preserve">
     <value>hosts-connect-save</value>
   </data>
   <data name="StorageUsageMessageAlert" xml:space="preserve">
@@ -1077,9 +1059,6 @@
   <data name="UnknownCertificateDialog" xml:space="preserve">
     <value>hosts-reconnect</value>
   </data>
-  <data name="UpdatesDialog" xml:space="preserve">
-    <value>updates-applying</value>
-  </data>
   <data name="VcpuWarningDialog" xml:space="preserve">
     <value>vms-properties</value>
   </data>
@@ -1138,9 +1117,15 @@
     <value>updates-xencenter</value>
   </data>
   <data name="XenServerPatchAlert" xml:space="preserve">
-    <value>updates-applying</value>
+    <value>updates-applying-ch</value>
   </data>
   <data name="XenServerUpdateAlert" xml:space="preserve">
-    <value>updates-applying</value>
+    <value>updates-applying-ch</value>
+  </data>
+  <data name="StorageReadCaching" xml:space="preserve">
+    <value>storage-readcaching</value>
+  </data>
+  <data name="YumRepoNotConfiguredAlert" xml:space="preserve">
+    <value>systemalerts</value>
   </data>
 </root>

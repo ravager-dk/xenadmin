@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAdmin.Actions;
-using XenAdmin.Wizards;
 using XenAPI;
-using XenAdmin.Properties;
 using System.Drawing;
-using System.Collections.ObjectModel;
-using System.Windows.Forms;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 
@@ -65,7 +57,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             if (newPoolDialog == null || newPoolDialog.IsDisposed)
             {

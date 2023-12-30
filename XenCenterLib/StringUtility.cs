@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,45 +30,34 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections;
+using System.IO;
+
 
 namespace XenCenterLib
 {
     public static class StringUtility
     {
         /// <summary>
-        /// Parses strings of the form "hostname:port" 
+        /// Parses server strings of the form "hostname:port" 
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="hostname"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        public static bool TryParseHostname(string s, int defaultPort, out string hostname, out int port)
+        public static void ParseHostnamePort(string server, out string hostname, out int port)
         {
-            try
-            {
-                int i = s.IndexOf(':');
-                if (i != -1)
-                {
-                    hostname = s.Substring(0, i).Trim();
-                    port = int.Parse(s.Substring(i + 1).Trim());
-                }
-                else
-                {
-                    hostname = s;
-                    port = defaultPort; // Program.DEFAULT_XEN_PORT;
-                }
-                return true;
-            }
-            catch (Exception)
-            {
-                hostname = null;
-                port = 0;
-                return false;
-            }
+            hostname = server;
+            port = 0;
+
+            if (string.IsNullOrWhiteSpace(server))
+                return;
+
+            var parts = server.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length > 0)
+                hostname = parts[0].Trim();
+
+            if (parts.Length > 1)
+                int.TryParse(parts[1].Trim(), out port);
         }
 
         public static int NaturalCompare(string s1, string s2)
@@ -231,6 +219,40 @@ namespace XenCenterLib
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// To be used to format file and directory paths for File streams. <br />
+        /// Prepends \\?\ to path if it is longer than (MAX_PATH - 12) in Windows. This is the legacy directory length limit.<br /><br />
+        /// See <see href='https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea'>CreateFileA</see> and <see href='https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry'>Maximum Path Length Limitation</see> for more info.
+        /// </summary>
+        /// <param name="inputPath">The input path</param>
+        /// <param name="isDirectory">Whether the input path is a directory</param>
+        public static string ToLongWindowsPath(string inputPath, bool isDirectory)
+        {
+            if (string.IsNullOrEmpty(inputPath) || inputPath.StartsWith(@"\\?\"))
+                return inputPath;
+
+            if (isDirectory)
+                return inputPath.Length >= 248 ? ToLongWindowsPathUnchecked(inputPath) : inputPath;
+            
+            var dir = Path.GetDirectoryName(inputPath);
+            if (string.IsNullOrEmpty(dir))
+                return inputPath;
+
+            return dir.Length >= 248 || inputPath.Length >= 260 ? ToLongWindowsPathUnchecked(inputPath) : inputPath;
+        }
+
+        /// <summary>
+        /// To be used to format file and directory paths for File streams. <br />
+        /// Prepends \\?\ to path if it is longer than (MAX_PATH - 12) in Windows. This is the legacy directory length limit.<br /><br />
+        /// See <see href='https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea'>CreateFileA</see> and
+        /// <see href='https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=registry'>Maximum Path Length Limitation</see> for more info.
+        /// </summary>
+        /// <param name="inputPath">The input path</param>
+        public static string ToLongWindowsPathUnchecked(string inputPath)
+        {
+            return $@"\\?\{inputPath}";
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -52,8 +51,8 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
 
         public override string Description => livePatchingRestricted
             ? string.Format(Messages.UPDATES_WIZARD_REBOOT_NEEDED_LIVEPATCH_RESTRICTED, host.name_label)
-            : livePatchingDisabled 
-                ? string.Format(Messages.UPDATES_WIZARD_REBOOT_NEEDED_LIVEPATCH_DISABLED, host.name_label) 
+            : livePatchingDisabled
+                ? string.Format(Messages.UPDATES_WIZARD_REBOOT_NEEDED_LIVEPATCH_DISABLED, host.name_label)
                 : string.Format(Messages.UPDATES_WIZARD_REBOOT_NEEDED, host.name_label);
     }
 }

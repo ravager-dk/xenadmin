@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -53,13 +52,7 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
         }
 
 
-        protected string ServerName
-        {
-            get
-            {
-                return residentOn != null ? Helpers.GetName(residentOn).Ellipsise(30) : Helpers.GetName(Helpers.GetPoolOfOne(VM.Connection)).Ellipsise(30);
-            }
-        }
+        protected string ServerName => residentOn != null ? Helpers.GetName(residentOn).Ellipsise(30) : Helpers.GetName(Helpers.GetPoolOfOne(VM.Connection)).Ellipsise(30);
 
         public override string HelpMessage
         {
@@ -74,10 +67,7 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
             }
         }
 
-        public sealed override string Title
-        {
-            get { return string.Format(Messages.PROBLEM_VMPROBLEM_TITLE, VM.uuid); }
-        }
+        public sealed override string Title => string.Format(Messages.PROBLEM_VMPROBLEM_TITLE, VM.uuid);
 
         protected AsyncAction SuspendVM()
         {
@@ -89,13 +79,7 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
             return new VMHardShutdown(VM);
         }
 
-        protected virtual bool CanSuspendVM
-        {
-            get
-            {
-                return VM.allowed_operations.Contains(vm_operations.suspend);
-            }
-        }
+        protected virtual bool CanSuspendVM => VM.allowed_operations.Contains(vm_operations.suspend);
 
         protected override AsyncAction CreateAction(out bool cancelled)
         {
@@ -115,7 +99,7 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
 
             Debug.Assert(VM.power_state == vm_power_state.Halted ||
                          VM.power_state == vm_power_state.Suspended, "Expected VM to be suspended or shut down!");
-            if(VM.power_state==vm_power_state.Halted)
+            if (VM.power_state == vm_power_state.Halted)
                 return new VMStartOnAction(VM, residentOn, VMOperationCommand.WarningDialogHAInvalidConfig, VMOperationCommand.StartDiagnosisForm);
             else
             {

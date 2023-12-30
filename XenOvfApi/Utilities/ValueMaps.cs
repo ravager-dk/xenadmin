@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,8 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Runtime.Serialization;
 using System.Reflection;
 using System.Xml;
 
@@ -44,6 +41,13 @@ namespace XenOvf.Utilities
     /// </summary>
     public static class ValueMaps
     {
+        private static readonly string[] MofFiles =
+        {
+            "CIM_OperatingSystem.xml",
+            "CIM_ResourceAllocationSettingData.xml",
+            "CIM_VirtualSystemSettingData.xml"
+        };
+
         private static bool isLoaded = false;
         private static Dictionary<string, string> MapResourceType = new Dictionary<string, string>();
         private static Dictionary<string, string> MapConsumerVisibility = new Dictionary<string, string>();
@@ -123,19 +127,17 @@ namespace XenOvf.Utilities
         {
             return ResolveMapping(MapOperatingSystem, key);
         }
-        
-        
+
         private static void Load()
         {
             if (!isLoaded)
             {
                 string assemblypath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string[] files = Properties.Settings.Default.mofFiles.Split(new char[] { ',' });
 
                 string path1 = assemblypath;
-                string path2 = Path.Combine(assemblypath, "Schemas"); 
+                string path2 = Path.Combine(assemblypath, "Schemas");
 
-                foreach (string file in files)
+                foreach (string file in MofFiles)
                 {
                     string fileinuse = string.Empty;
                     if (File.Exists(Path.Combine(path1, file.Trim())))
@@ -170,7 +172,7 @@ namespace XenOvf.Utilities
                 }
             }
         }
-        private static void LoadMap(XmlDocument xd, string fieldname, Dictionary<string,string> mapdictionary)
+        private static void LoadMap(XmlDocument xd, string fieldname, Dictionary<string, string> mapdictionary)
         {
             mapdictionary.Clear();
             XmlNodeList xmlOSTypeValuesMap = null;
@@ -178,17 +180,25 @@ namespace XenOvf.Utilities
             XmlNodeList xnl = xd.SelectNodes("CIM/DECLARATION/DECLGROUP/VALUE.OBJECT/CLASS/PROPERTY");
             foreach (XmlNode xn in xnl)
             {
+                if (xn.Attributes == null)
+                    continue;
                 foreach (XmlAttribute xa in xn.Attributes)
                 {
                     if (xa.Name.ToUpper().Equals("NAME") && xa.Value.ToUpper().Equals(fieldname.ToUpper()))
                     {
                         foreach (XmlNode xn1 in xn.ChildNodes)
                         {
-                            if (xn1.Name.ToUpper().Equals("QUALIFIER") && xn1.Attributes.GetNamedItem("NAME").Value.ToUpper().Equals("VALUEMAP"))
+                            if (xn1.Attributes == null)
+                                continue;
+
+                            if (xn1.Name.ToUpper().Equals("QUALIFIER") &&
+                                xn1.Attributes.GetNamedItem("NAME").Value.ToUpper().Equals("VALUEMAP"))
                             {
                                 xmlOSTypeValuesMap = xn1.ChildNodes;
                             }
-                            if (xn1.Name.ToUpper().Equals("QUALIFIER") && xn1.Attributes.GetNamedItem("NAME").Value.ToUpper().Equals("VALUES"))
+
+                            if (xn1.Name.ToUpper().Equals("QUALIFIER") &&
+                                xn1.Attributes.GetNamedItem("NAME").Value.ToUpper().Equals("VALUES"))
                             {
                                 xmlOFTypeStrings = xn1.ChildNodes;
                             }
@@ -197,6 +207,9 @@ namespace XenOvf.Utilities
                 }
             }
 
+            if (xmlOSTypeValuesMap == null || xmlOFTypeStrings == null)
+                return;
+
             xmlOSTypeValuesMap = xmlOSTypeValuesMap[0].ChildNodes;
             xmlOFTypeStrings = xmlOFTypeStrings[0].ChildNodes;
 
@@ -204,6 +217,7 @@ namespace XenOvf.Utilities
             {
                 mapdictionary.Add(xmlOSTypeValuesMap[i].InnerText, xmlOFTypeStrings[i].InnerText);
             }
+
         }
 
         private static UInt16 ResolveMapping(Dictionary<string, string> dictionary, string key)

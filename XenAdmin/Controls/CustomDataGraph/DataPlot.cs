@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,8 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Core;
 
@@ -238,7 +235,7 @@ namespace XenAdmin.Controls.CustomDataGraph
         protected override void OnDrawToBuffer(PaintEventArgs paintEventArgs)
         {
             Program.AssertOnEventThread();
-
+            var originalClipRectangle = paintEventArgs.ClipRectangle;
             Rectangle SlightlySmaller = GraphRectangle(paintEventArgs.ClipRectangle);
             // Fill BG
             paintEventArgs.Graphics.FillRectangle(Palette.PaperBrush, SlightlySmaller);
@@ -265,7 +262,7 @@ namespace XenAdmin.Controls.CustomDataGraph
             bool require_tools = true;
             foreach (DataSetCollectionWrapper set in DataKey.CurrentKeys)
             {
-                if (set.Sets[ArchiveInterval.FiveSecond].TypeString != "memory")
+                if (set.Sets[ArchiveInterval.FiveSecond].DataSourceName != "memory")
                 {
                     require_tools = false;
                     break;
@@ -274,15 +271,15 @@ namespace XenAdmin.Controls.CustomDataGraph
             if (require_tools && DataKey.CurrentKeys.Count > 0)
             {
                 Rectangle messageRect = Rectangle.Inflate(SlightlySmaller, -10, -10);
-                paintEventArgs.Graphics.DrawString(Messages.GRAPH_NEEDS_TOOLS, Palette.LabelFont, Palette.LabelBrush,
-                                                   messageRect);
+                paintEventArgs.Graphics.DrawString(string.Format(Messages.GRAPH_NEEDS_TOOLS, BrandManager.VmTools),
+                    Palette.LabelFont, Palette.LabelBrush, messageRect);
                 return;
             }
 
             // Refresh all sets
             foreach (DataSet set in DataPlotNav.CurrentArchive.Sets.ToArray())
             {
-                if (!set.Draw || !DataKey.DataSourceUUIDsToShow.Contains(set.Uuid))
+                if (set.Hide || !DataKey.DataSourceUUIDsToShow.Contains(set.Id))
                     continue;
 
                 List<DataPoint> todraw;
@@ -365,18 +362,24 @@ namespace XenAdmin.Controls.CustomDataGraph
             Array.Reverse(sets_to_show);
             foreach (DataSet set in sets_to_show)
             {
-                if (!set.Draw || DataKey == null || !DataKey.DataSourceUUIDsToShow.Contains(set.Uuid))
+                if (set.Hide || DataKey == null || !DataKey.DataSourceUUIDsToShow.Contains(set.Id))
                     continue;
 
                 lock (Palette.PaletteLock)
                 {
-                    using (var thickPen = Palette.CreatePen(set.Uuid, Palette.PEN_THICKNESS_THICK))
+                    using (var thickPen = Palette.CreatePen(set.Id, Palette.PEN_THICKNESS_THICK))
                     {
-                        using (var normalPen = Palette.CreatePen(set.Uuid, Palette.PEN_THICKNESS_NORMAL))
+                        using (var normalPen = Palette.CreatePen(set.Id, Palette.PEN_THICKNESS_NORMAL))
                         {
-                            using (var shadowBrush = Palette.CreateBrush(set.Uuid))
+                            using (var shadowBrush = Palette.CreateBrush(set.Id))
                             {
+                                // CA-334613: Sharp turns in the graph can result in
+                                // the line being drawn outside of the box
+                                paintEventArgs.Graphics.SetClip(SlightlySmaller);
                                 LineRenderer.Render(paintEventArgs.Graphics, SlightlySmaller, DataPlotNav.XRange, set.CustomYRange ?? SelectedYRange, set.Selected ? thickPen : normalPen, shadowBrush, set.CurrentlyDisplayed, true);
+                                // CA-368958: Resetting the clip so that on the next
+                                // render we don't hide labels and title
+                                paintEventArgs.Graphics.SetClip(originalClipRectangle);
                             }
                         }
                     }
@@ -389,8 +392,10 @@ namespace XenAdmin.Controls.CustomDataGraph
             SizeF labelsize = new SizeF(0,0);
             if (SelectedPoint != null && DataKey.SelectedDataSet != null)
             {
-                string label = string.Format(string.Format("{0} - {1} = {2}", DataPlotNav.XRange.GetString(SelectedPoint.X + ArchiveMaintainer.ClientServerOffset.Ticks), DataKey.SelectedDataSet.Name,
-                                                           SelectedPoint.Y >= 0 ? SelectedYRange.GetString(SelectedPoint.Y) : Messages.GRAPHS_NO_DATA));
+                string label = string.Format("{0} - {1} = {2}",
+                    DataPlotNav.XRange.GetString(SelectedPoint.X + ArchiveMaintainer.ClientServerOffset.Ticks),
+                    DataKey.SelectedDataSet.FriendlyName,
+                    SelectedPoint.Y >= 0 ? SelectedYRange.GetString(SelectedPoint.Y) : Messages.GRAPHS_NO_DATA);
                 labelsize = paintEventArgs.Graphics.MeasureString(label,Palette.LabelFont);
                 paintEventArgs.Graphics.DrawString(label, Palette.LabelFont, Palette.LabelBrush, SlightlySmaller.Right - labelsize.Width, SlightlySmaller.Top - (labelsize.Height + 1));
             }
@@ -535,7 +540,7 @@ namespace XenAdmin.Controls.CustomDataGraph
             {
                 foreach (DataSet set in DataPlotNav.CurrentArchive.Sets.ToArray())
                 {
-                    if (!set.Draw || DataKey == null || !DataKey.DataSourceUUIDsToShow.Contains(set.Uuid))
+                    if (set.Hide || DataKey == null || !DataKey.DataSourceUUIDsToShow.Contains(set.Id))
                         continue;
                     if (set.OnMouseClick(new MouseActionArgs(e.Location, GraphRectangle(), DataPlotNav.XRange, SelectedYRange)))
                     {

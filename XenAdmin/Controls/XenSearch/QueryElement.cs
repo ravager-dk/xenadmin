@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -75,9 +74,9 @@ namespace XenAdmin.Controls.XenSearch
             queryTypes.Add(new IPAddressQueryType(3, ObjectTypes.VM | ObjectTypes.Server | ObjectTypes.LocalSR | ObjectTypes.RemoteSR, PropertyNames.ip_address));
             queryTypes.Add(new DatePropertyQueryType(3, ObjectTypes.VM, PropertyNames.start_time));
             queryTypes.Add(new EnumPropertyQueryType<vm_power_state>(3, ObjectTypes.VM, PropertyNames.power_state));
-            queryTypes.Add(new EnumPropertyQueryType<VM.VirtualisationStatus>(3, ObjectTypes.VM, PropertyNames.virtualisation_status));
+            queryTypes.Add(new EnumPropertyQueryType<VM.VirtualizationStatus>(3, ObjectTypes.VM, PropertyNames.virtualisation_status));
             queryTypes.Add(new ValuePropertyQueryType(3, ObjectTypes.VM, PropertyNames.os_name));
-            queryTypes.Add(new EnumPropertyQueryType<VM.HA_Restart_Priority>(3, ObjectTypes.VM, PropertyNames.ha_restart_priority));
+            queryTypes.Add(new EnumPropertyQueryType<VM.HaRestartPriority>(3, ObjectTypes.VM, PropertyNames.ha_restart_priority));
             queryTypes.Add(new BooleanQueryType(3, ObjectTypes.VM, PropertyNames.read_caching_enabled));
             queryTypes.Add(new BooleanQueryType(3, ObjectTypes.VM, PropertyNames.vendor_device_state));
             queryTypes.Add(new EnumPropertyQueryType<SR.SRTypes>(3, /*ObjectTypes.LocalSR | ObjectTypes.RemoteSR*/ ObjectTypes.None, PropertyNames.sr_type));
@@ -414,10 +413,7 @@ namespace XenAdmin.Controls.XenSearch
         /// <summary>
         /// Populate a combo box, trying to preserve the selected index
         /// </summary>
-        /// <param name="comboButton"></param>
-        /// <param name="values"></param>
-        /// <param name="imageDelegate"></param>
-        private void PopulateComboButton(DropDownComboButton comboButton, Object[] values, ImageDelegate<Object> imageDelegate)
+        private void PopulateComboButton(DropDownComboButton comboButton, Object[] values, Func<object, Icons> imageDelegate)
         {
             populatingComboButton = true;
             try
@@ -1034,7 +1030,7 @@ namespace XenAdmin.Controls.XenSearch
         internal abstract class PropertyQueryType<T> : QueryType
         {
             protected readonly PropertyNames property;
-            protected readonly PropertyAccessor propertyAccessor;
+            protected readonly Func<IXenObject, IComparable> propertyAccessor;
             protected readonly String i18n;
 
             protected PropertyQueryType(int group, ObjectTypes appliesTo, PropertyNames property, String i18n)
@@ -1083,7 +1079,7 @@ namespace XenAdmin.Controls.XenSearch
 
             public class ExtraComboEntry
             {
-                public StringPropertyQuery.PropertyQueryType type;
+                public readonly StringPropertyQuery.PropertyQueryType type;
                 public ExtraComboEntry(StringPropertyQuery.PropertyQueryType type)
                 {
                     this.type = type;
@@ -1124,7 +1120,7 @@ namespace XenAdmin.Controls.XenSearch
 
                 public override int GetHashCode()
                 {
-                    return base.GetHashCode();
+                    return (int) type;
                 }
             }
 
@@ -1283,7 +1279,7 @@ namespace XenAdmin.Controls.XenSearch
 
             internal class ExtraComboEntry
             {
-                public DatePropertyQuery.PropertyQueryType type;
+                public readonly DatePropertyQuery.PropertyQueryType type;
                 public ExtraComboEntry(DatePropertyQuery.PropertyQueryType type)
                 {
                     this.type = type;
@@ -1330,7 +1326,7 @@ namespace XenAdmin.Controls.XenSearch
 
                 public override int GetHashCode()
                 {
-                    return base.GetHashCode();
+                    return (int)type;
                 }
             }
 
@@ -2501,7 +2497,7 @@ namespace XenAdmin.Controls.XenSearch
                 if (intQuery == null)
                     return;
 
-                queryElement.numericUpDown.Value = intQuery.query / multiplier;
+                queryElement.numericUpDown.Value = (decimal) intQuery.query / multiplier;
             }
         }
 

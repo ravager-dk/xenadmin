@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,7 +38,7 @@ using XenCenterLib.Archive;
 
 namespace XenAdmin.Actions
 {
-    public class SingleHostStatusAction :  StatusReportAction
+    public class SingleHostStatusReportAction :  StatusReportAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         
@@ -47,8 +46,8 @@ namespace XenAdmin.Actions
         private readonly string[] capabilityKeys;
         private readonly long size;
         private readonly string[] RBAC_FAIL_STRINGS = {"HTTP", "403", "Forbidden"};
-
-    public SingleHostStatusAction(Host host, long size, List<string> capabilityKeys, string path, string time)
+        
+        public SingleHostStatusReportAction(Host host, long size, List<string> capabilityKeys, string path, string time)
             : base(host.Connection, string.Format(Messages.ACTION_SYSTEM_STATUS_COMPILING, Helpers.GetName(host)), path, time)
         {
             this.host = host;
@@ -56,11 +55,22 @@ namespace XenAdmin.Actions
             this.size = size;
         }
 
-        public long DataTransferred;
+        public long DataTransferred { get; private set; }
 
+        public static RbacMethodList StaticRBACDependencies
+        {
+            get
+            {
+                var list = new RbacMethodList("HTTP/get_system_status");
+                list.AddRange(Role.CommonSessionApiList);
+                list.AddRange(Role.CommonTaskApiList);
+                return list;
+            }
+        }
         protected override void Run()
         {
-            Status = ReportStatus.compiling;
+            Description = string.Format(Messages.ACTION_SYSTEM_STATUS_COMPILING, Helpers.GetName(host));
+            Status = ReportStatus.inProgress;
 
             string hostname = Helpers.GetName(host);
             hostname = TarSanitization.SanitizeTarPathMember(hostname);
@@ -73,37 +83,43 @@ namespace XenAdmin.Actions
 
             log.DebugFormat("Getting system status for {0} on {1}", entries_string, hostname);
 
+            if (Session == null)
+            {
+                Status = ReportStatus.failed;
+                Error = new Exception(Messages.CONNECTION_IO_EXCEPTION);
+                throw Error;
+            }
+
             try
             {
-                if (Session == null)
-                    throw new Exception(Messages.CONNECTION_IO_EXCEPTION);
+                RelatedTask = Task.create(Session, "get_system_status_task", host.address);
+                log.DebugFormat("HTTP GETTING file from {0} to {1}", host.address, filename);
 
-                HTTPHelper.Get(this, false, dataRxDelegate, filename, host.address,
-                    (HTTP_actions.get_ssss)HTTP_actions.get_system_status,
-                    Session.opaque_ref, entries_string, "tar");
+                HTTP_actions.get_system_status(dataRxDelegate,
+                    () => XenAdminConfigManager.Provider.ForcedExiting || GetCancelling(),
+                    XenAdminConfigManager.Provider.GetProxyTimeout(false),
+                    host.address,
+                    XenAdminConfigManager.Provider.GetProxyFromSettings(Connection),
+                    filename, RelatedTask.opaque_ref, Session.opaque_ref, entries_string, "tar");
 
-                log.DebugFormat("Getting system status from {0} successful", hostname);
-
+                PollToCompletion();
                 Status = ReportStatus.succeeded;
-                Description = Messages.COMPLETED;
-                PercentComplete = 100;
-            }
-            catch (HTTP.CancelledException)
-            {
-                throw new CancelledException();
-            }
-            catch (CancelledException ce)
-            {
-                log.Info("Getting system status cancelled");
-                Status = ReportStatus.cancelled;
-                Error = ce;
-                Description = Messages.ACTION_SYSTEM_STATUS_CANCELLED;
-                throw;
+                Tick(100, Messages.COMPLETED);
             }
             catch (Exception e)
             {
-                log.Error(string.Format("Getting system status from {0} failed", hostname), e);
+                PollToCompletion(suppressFailures: true);
 
+                if (e is HTTP.CancelledException || e is CancelledException)
+                {
+                    log.Info("Getting system status cancelled");
+                    Status = ReportStatus.cancelled;
+                    Error = e;
+                    Description = Messages.ACTION_SYSTEM_STATUS_CANCELLED;
+                    throw new CancelledException();
+                }
+
+                log.Error(string.Format("Getting system status from {0} failed", hostname), e);
                 Status = ReportStatus.failed;
                 Error = e;
 
@@ -127,7 +143,7 @@ namespace XenAdmin.Actions
 
         private void dataRxDelegate(long rxd)
         {
-            Status = ReportStatus.downloading;
+            Status = ReportStatus.inProgress;
             DataTransferred = rxd;
 
             if (Cancelling)

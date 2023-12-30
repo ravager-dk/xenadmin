@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,106 +42,131 @@ using XenAPI;
 
 namespace XenAdmin.Wizards.GenericPages
 {
-	/// <summary>
-	/// Class representing the page of the ImportAppliance wizard where the user specifies
-	/// the targets where the VMs of the appliance will be imported
-	/// </summary>
-	internal abstract partial class SelectMultipleVMDestinationPage : XenTabPage
-	{
-		private Dictionary<string, VmMapping> m_vmMappings;
-		private IXenObject m_selectedObject;
-		private bool updatingDestinationCombobox;
+    /// <summary>
+    /// Class representing the page of the ImportAppliance wizard where the user specifies
+    /// the targets where the VMs of the appliance will be imported
+    /// </summary>
+    internal abstract partial class SelectMultipleVMDestinationPage : XenTabPage
+    {
+        private Dictionary<string, VmMapping> m_vmMappings;
+        private bool updatingDestinationCombobox;
         private bool restoreGridHomeServerSelection;
         private bool updatingHomeServerList;
         private bool m_buttonNextEnabled;
         protected List<IXenConnection> ignoredConnections = new List<IXenConnection>();
         private readonly CollectionChangeEventHandler Host_CollectionChangedWithInvoke;
+        private string _preferredHomeRef;
+        private IXenObject _selectedTargetPool;
+        private IXenObject _selectedTarget;
+
+        #region Nested classes
 
         /// <summary>
-        /// Combobox item that can execute a command but also be an IEnableableComboBoxItem
+        /// Combobox item that can run a command but also be an IEnableableComboBoxItem
         /// </summary>
-        private class AddHostExecutingComboBoxItem : IEnableableComboBoxItem
+        private class AddHostRunningComboBoxItem : IEnableableComboBoxItem
         {
             public override string ToString()
             {
                 return Messages.ADD_POOL_OR_SERVER;
             }
 
-            public void ExecuteCommand(Control parent)
+            public void RunCommand(Control parent)
             {
-                new AddHostCommand(Program.MainWindow, parent).Execute();
+                new AddHostCommand(Program.MainWindow, parent).Run();
             }
 
-            public bool Enabled
+            public bool Enabled => true;
+        }
+
+        private class NoTargetServerPoolItem : IEnableableXenObjectComboBoxItem
+        {
+            private readonly Pool _pool;
+
+            public NoTargetServerPoolItem(Pool pool)
             {
-                get { return true; }
+                _pool = pool;
+            }
+
+            public IXenObject Item => _pool;
+
+            public bool Enabled => true;
+
+            public override string ToString()
+            {
+                return Messages.DONT_SELECT_TARGET_SERVER;
             }
         }
 
-	    protected SelectMultipleVMDestinationPage()
-		{
-			InitializeComponent();
-            InitializeText();
+        #endregion
+
+        protected SelectMultipleVMDestinationPage()
+        {
+            InitializeComponent();
             Host_CollectionChangedWithInvoke = Program.ProgramInvokeHandler(CollectionChanged);
-			ConnectionsManager.XenConnections.CollectionChanged += CollectionChanged;
+            ConnectionsManager.XenConnections.CollectionChanged += CollectionChanged;
             ShowWarning(null);
-		}
+        }
 
-	    protected void InitializeText()
-	    {
-	        m_labelIntro.Text = InstructionText;
-	        label1.Text = TargetServerText;
-	        label2.Text = TargetServerSelectionIntroText;
+        protected void InitializeText()
+        {
+            m_labelIntro.Text = InstructionText;
+            label1.Text = TargetPoolText;
+            label2.Text = TargetServerSelectionIntroText;
             m_colVmName.HeaderText = VmColumnHeaderText;
-	        m_colTarget.HeaderText = TargetColumnHeaderText;
-	    }
+        }
 
-	    private IXenObject _chosenItem;
-	    public IXenObject ChosenItem
-	    {
-	        get { return _chosenItem; }
-            protected set
+        public IXenObject SelectedTargetPool
+        {
+            get => _selectedTargetPool;
+            private set
             {
-                _chosenItem = value;
-                OnChosenItemChanged();
-            }
-	    }
+                var oldTargetPool = _selectedTargetPool;
+                _selectedTargetPool = value;
 
-	    /// <summary>
-        /// Text containing instructions for use - at the top of the page
-        /// </summary>
-	    protected abstract string InstructionText { get; }
+                if (oldTargetPool?.opaque_ref != _selectedTargetPool?.opaque_ref)
+                    OnSelectedTargetPoolChanged();
+            }
+        }
+
+        public IXenObject SelectedTarget
+        {
+            get => _selectedTarget;
+            set
+            {
+                _selectedTarget = value;
+                OnSelectedTargetChanged();
+            }
+        }
+
+        public List<IXenObject> AllSelectedTargets { get; } = new List<IXenObject>();
 
         /// <summary>
-        /// Text demarking what the label for the target server drop down should be
+        /// Text containing instructions for use - at the top of the page
         /// </summary>
-	    protected abstract string TargetServerText { get; }
+        protected abstract string InstructionText { get; }
 
-        protected virtual string VmColumnHeaderText 
-        {
-            get
-            {
-                return m_colVmName.HeaderText;
-            }
-        }
+        /// <summary>
+        /// Text specifying the label for the target pool or standalone server drop down
+        /// </summary>
+        protected abstract string TargetPoolText { get; }
 
-	    protected virtual string TargetColumnHeaderText
-	    {
-	        get
-	        {
-	            return m_colTarget.HeaderText;
-	        }
-	    }
+        protected virtual string VmColumnHeaderText => Messages.VM;
 
         /// <summary>
         /// Text above the table containing a list of VMs and concomitant home server
         /// </summary>
         protected abstract string TargetServerSelectionIntroText { get; }
 
-        protected virtual void OnChosenItemChanged()
-        {}
+        protected virtual void OnSelectedTargetPoolChanged()
+        { }
 
-	    protected void ShowWarning(string warningText)
+        protected virtual void OnSelectedTargetChanged()
+        {
+
+        }
+
+        protected void ShowWarning(string warningText)
         {
             if (string.IsNullOrEmpty(warningText))
                 tableLayoutPanelWarning.Visible = false;
@@ -153,14 +177,14 @@ namespace XenAdmin.Wizards.GenericPages
             }
         }
 
-		#region Base class (XenTabPage) overrides
+        #region Base class (XenTabPage) overrides
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
-		{
-            ChosenItem = null;
+        {
+            SelectedTargetPool = null;
             restoreGridHomeServerSelection = direction == PageLoadedDirection.Back;
             PopulateComboBox();
-		}
+        }
 
         public override void PageCancelled(ref bool cancel)
         {
@@ -168,7 +192,7 @@ namespace XenAdmin.Wizards.GenericPages
             CancelFilters();
             ClearComboBox();
             ClearDataGridView();
-            ChosenItem = null;
+            SelectedTargetPool = null;
         }
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
@@ -181,7 +205,6 @@ namespace XenAdmin.Wizards.GenericPages
             }
 
             UnregisterHandlers();
-            SetDefaultTarget(ChosenItem);
             ClearComboBox();
         }
 
@@ -195,52 +218,47 @@ namespace XenAdmin.Wizards.GenericPages
             return m_buttonNextEnabled;
         }
 
-		#endregion
+        #endregion
 
-		#region Accessors
+        #region Accessors
 
-		public Dictionary<string, VmMapping> VmMappings
-		{
-			get
-			{
-				foreach (DataGridViewRow row in m_dataGridView.Rows)
-				{
-					string sysId = (string)row.Cells[0].Tag;
+        public Dictionary<string, VmMapping> VmMappings
+        {
+            get
+            {
+                foreach (DataGridViewRow row in m_dataGridView.Rows)
+                {
+                    var sysId = (string)row.Cells[0].Tag;
 
-					if (m_vmMappings.ContainsKey(sysId))
-					{
-						var mapping = m_vmMappings[sysId];
-                        DataGridViewEnableableComboBoxCell cbCell = row.Cells[m_colTarget.Index] as DataGridViewEnableableComboBoxCell;
+                    if (m_vmMappings.ContainsKey(sysId))
+                    {
+                        var mapping = m_vmMappings[sysId];
+                        var cbCell = row.Cells[m_colTarget.Index] as DataGridViewEnableableComboBoxCell;
                         System.Diagnostics.Debug.Assert(cbCell != null, "ComboBox cell was not found");
-					    
-                        IEnableableXenObjectComboBoxItem selectedItem = cbCell.Value as IEnableableXenObjectComboBoxItem;
-						System.Diagnostics.Debug.Assert(selectedItem != null, "Vm has no target mapped");
-						var type = selectedItem.Item.GetType();
 
-						if (type == typeof(Pool))
+                        var selectedItem = cbCell.Value as IEnableableXenObjectComboBoxItem;
+                        System.Diagnostics.Debug.Assert(selectedItem != null, "Vm has no target mapped");
+                        var type = selectedItem.Item.GetType();
+
+                        if (type == typeof(Pool))
                             mapping.XenRef = new XenRef<Pool>(selectedItem.Item.opaque_ref);
-						else if (type == typeof(Host))
+                        else if (type == typeof(Host))
                             mapping.XenRef = new XenRef<Host>(selectedItem.Item.opaque_ref);
 
                         mapping.TargetName = selectedItem.Item.Name();
-					}
-				}
+                    }
+                }
 
-				return m_vmMappings;
-			}
-			set { m_vmMappings = value; }
-		}
+                return m_vmMappings;
+            }
+            set => m_vmMappings = value;
+        }
 
-		#endregion
-
-	    public void SetDefaultTarget(IXenObject xenObject)
-		{
-			m_selectedObject = xenObject;
-		}
+        #endregion
 
         protected abstract DelayLoadingOptionComboBoxItem CreateDelayLoadingOptionComboBoxItem(IXenObject xenItem);
 
-		#region Private methods
+        #region Private methods
 
         private void SetButtonNextEnabled(bool enabled)
         {
@@ -248,10 +266,10 @@ namespace XenAdmin.Wizards.GenericPages
             OnPageUpdated();
         }
 
-	    protected virtual bool PerformCheck()
-	    {
-	        return true;
-	    }
+        protected virtual bool PerformCheck()
+        {
+            return true;
+        }
 
         private void ClearComboBox()
         {
@@ -259,8 +277,7 @@ namespace XenAdmin.Wizards.GenericPages
 
             foreach (var item in m_comboBoxConnection.Items)
             {
-                DelayLoadingOptionComboBoxItem tempItem = item as DelayLoadingOptionComboBoxItem;
-                if (tempItem != null)
+                if (item is DelayLoadingOptionComboBoxItem tempItem)
                     tempItem.ReasonUpdated -= DelayLoadedComboBoxItem_ReasonChanged;
             }
             m_comboBoxConnection.Items.Clear();
@@ -278,68 +295,66 @@ namespace XenAdmin.Wizards.GenericPages
             m_dataGridView.Refresh();
         }
 
-		private void PopulateComboBox()
-		{
-			Program.AssertOnEventThread();
+        private void PopulateComboBox()
+        {
+            Program.AssertOnEventThread();
 
-		    ClearDataGridView();
+            ClearDataGridView();
 
-			updatingDestinationCombobox = true;
-		    ClearComboBox();
+            updatingDestinationCombobox = true;
+            ClearComboBox();
 
-		    var targetConnections = ConnectionsManager.XenConnectionsCopy.Where(con => con.IsConnected).Except(ignoredConnections).ToList();
+            var targetConnections = ConnectionsManager.XenConnectionsCopy.Where(con => con.IsConnected).Except(ignoredConnections).ToList();
             foreach (var xenConnection in targetConnections)
-			{
-			    DelayLoadingOptionComboBoxItem item = null;
+            {
+                DelayLoadingOptionComboBoxItem item = null;
 
-				Pool pool = Helpers.GetPool(xenConnection);
+                var pool = Helpers.GetPool(xenConnection);
 
-				if (pool == null)
-				{
-					Host host = Helpers.GetMaster(xenConnection);
+                if (pool == null)
+                {
+                    var host = Helpers.GetCoordinator(xenConnection);
 
-					if (host != null)
-					{
+                    if (host != null)
+                    {
                         item = CreateDelayLoadingOptionComboBoxItem(host);
                         m_comboBoxConnection.Items.Add(item);
                         item.ReasonUpdated += DelayLoadedComboBoxItem_ReasonChanged;
                         item.LoadAsync();
-					    host.PropertyChanged -= PropertyChanged;
-					    host.PropertyChanged += PropertyChanged;
-					}
-				}
-				else
-				{
+                        host.PropertyChanged -= PropertyChanged;
+                        host.PropertyChanged += PropertyChanged;
+                    }
+                }
+                else
+                {
                     item = CreateDelayLoadingOptionComboBoxItem(pool);
                     m_comboBoxConnection.Items.Add(item);
                     item.ReasonUpdated += DelayLoadedComboBoxItem_ReasonChanged;
                     item.LoadAsync();
-			        pool.PropertyChanged -= PropertyChanged;
-			        pool.PropertyChanged += PropertyChanged;
-				}
+                    pool.PropertyChanged -= PropertyChanged;
+                    pool.PropertyChanged += PropertyChanged;
+                }
 
-				if (item != null && m_selectedObject != null && item.Item.Connection == m_selectedObject.Connection)
-				    item.PreferAsSelectedItem = true;
+                if (item != null && SelectedTarget != null && item.Item.Connection == SelectedTarget.Connection)
+                    _preferredHomeRef = item.Item.opaque_ref;
 
-				xenConnection.ConnectionStateChanged -= xenConnection_ConnectionStateChanged;
-				xenConnection.ConnectionStateChanged += xenConnection_ConnectionStateChanged;
-				xenConnection.CachePopulated -= xenConnection_CachePopulated;
-				xenConnection.CachePopulated += xenConnection_CachePopulated;
-				xenConnection.Cache.RegisterCollectionChanged<Host>(Host_CollectionChangedWithInvoke);
-			}
+                xenConnection.ConnectionStateChanged -= xenConnection_ConnectionStateChanged;
+                xenConnection.ConnectionStateChanged += xenConnection_ConnectionStateChanged;
+                xenConnection.CachePopulated -= xenConnection_CachePopulated;
+                xenConnection.CachePopulated += xenConnection_CachePopulated;
+                xenConnection.Cache.RegisterCollectionChanged<Host>(Host_CollectionChangedWithInvoke);
+            }
 
-			m_comboBoxConnection.Items.Add(new AddHostExecutingComboBoxItem());
-			updatingDestinationCombobox = false;
-		}
+            m_comboBoxConnection.Items.Add(new AddHostRunningComboBoxItem());
+            updatingDestinationCombobox = false;
+        }
 
         private bool MatchingWithXenRefObject(IEnableableXenObjectComboBoxItem item, object xenRef)
         {
-            XenRef<Host> hostRef = xenRef as XenRef<Host>;
-            if (hostRef != null)
+            if (xenRef is XenRef<Host> hostRef)
                 return hostRef.opaque_ref == item.Item.opaque_ref;
 
-            XenRef<Pool> poolRef = xenRef as XenRef<Pool>;
-            if (poolRef != null)
+            if (xenRef is XenRef<Pool> poolRef)
                 return poolRef.opaque_ref == item.Item.opaque_ref;
 
             return false;
@@ -349,23 +364,20 @@ namespace XenAdmin.Wizards.GenericPages
         {
             foreach (DataGridViewRow row in m_dataGridView.Rows)
             {
-                string sysId = (string)row.Cells[0].Tag;
-                if (m_vmMappings.ContainsKey(sysId))
-                {
-                    var mapping = m_vmMappings[sysId];
-                    var cbCell = row.Cells[m_colTarget.Index] as DataGridViewEnableableComboBoxCell;
-                    if (cbCell == null)
-                        return;
+                var sysId = (string)row.Cells[m_colVmName.Index].Tag;
 
-                    var list = cbCell.Items.OfType<IEnableableXenObjectComboBoxItem>().ToList();
-                    var item = list.FirstOrDefault(cbi => MatchingWithXenRefObject(cbi, mapping.XenRef));
+                if (m_vmMappings.TryGetValue(sysId, out var mapping) &&
+                    row.Cells[m_colTarget.Index] is DataGridViewEnableableComboBoxCell cbCell)
+                {
+                    var item = cbCell.Items.OfType<IEnableableXenObjectComboBoxItem>()
+                        .FirstOrDefault(cbi => MatchingWithXenRefObject(cbi, mapping.XenRef));
                     if (item != null)
                         cbCell.Value = item;
                 }
             }
         }
-        
-        private void PopulateDataGridView(IEnableableXenObjectComboBoxItem selectedItem)
+
+        private void PopulateDataGridView()
         {
             Program.AssertOnEventThread();
 
@@ -382,24 +394,24 @@ namespace XenAdmin.Wizards.GenericPages
 
                 foreach (var kvp in m_vmMappings)
                 {
-                    var tb = new DataGridViewTextBoxCell {Value = kvp.Value.VmNameLabel, Tag = kvp.Key};
-                    var cb = new DataGridViewEnableableComboBoxCell{FlatStyle = FlatStyle.Flat};
-                    var homeserverFilters = CreateTargetServerFilterList(selectedItem, new List<string> {kvp.Key});
+                    var tb = new DataGridViewTextBoxCell { Value = kvp.Value.VmNameLabel, Tag = kvp.Key };
+                    var cb = new DataGridViewEnableableComboBoxCell { FlatStyle = FlatStyle.Flat };
 
                     if (target != null)
                     {
                         if (hasPoolSharedStorage)
                         {
-                            foreach (var pool in target.Item.Connection.Cache.Pools)
+                            //there exists one pool per connection
+                            var pools = target.Item.Connection.Cache.Pools;
+                            if (pools.Length > 0)
                             {
+                                var pool = pools.First();
                                 var item = new NoTargetServerPoolItem(pool);
                                 cb.Items.Add(item);
 
-                                if ((m_selectedObject != null && m_selectedObject.opaque_ref == pool.opaque_ref) ||
-                                    (target.Item.opaque_ref == pool.opaque_ref))
-                                    cb.Value = item;
-
-                                break; //there exists one pool per connection
+                                if ((SelectedTarget != null && SelectedTarget.opaque_ref == pool.opaque_ref) ||
+                                    target.Item.opaque_ref == pool.opaque_ref)
+                                    _preferredHomeRef = item.Item.opaque_ref;
                             }
                         }
 
@@ -408,15 +420,19 @@ namespace XenAdmin.Wizards.GenericPages
 
                         foreach (var host in sortedHosts)
                         {
-                            var item = new DelayLoadingOptionComboBoxItem(host, homeserverFilters);
+                            var filters = CreateTargetServerFilterList(host, new List<string> { kvp.Key });
+                            var item = new DelayLoadingOptionComboBoxItem(host, filters);
                             cb.Items.Add(item);
                             item.ParentComboBox = cb;
-                            item.PreferAsSelectedItem = m_selectedObject != null && m_selectedObject.opaque_ref == host.opaque_ref ||
-                                                 target.Item.opaque_ref == host.opaque_ref || 
-                                                 sortedHosts.Count == 1;
+                            if (SelectedTarget != null && SelectedTarget.opaque_ref == host.opaque_ref ||
+                                target.Item.opaque_ref == host.opaque_ref)
+                                _preferredHomeRef = item.Item.opaque_ref;
                             item.ReasonUpdated += DelayLoadedGridComboBoxItem_ReasonChanged;
                             item.LoadAsync();
                         }
+
+                        if (cb.Items.Count == 1 && cb.Items[0] is DelayLoadingOptionComboBoxItem it)
+                            _preferredHomeRef = it.Item.opaque_ref;
                     }
 
                     SetComboBoxPreSelection(cb);
@@ -439,47 +455,47 @@ namespace XenAdmin.Wizards.GenericPages
                 updatingHomeServerList = false;
                 m_dataGridView.ResumeLayout();
             }
-		}
+        }
 
-	    private void SetComboBoxPreSelection(DataGridViewEnableableComboBoxCell cb)
-	    {
-	        if (cb.Value == null)
-	        {
-	            var firstEnabled = cb.Items.OfType<IEnableableComboBoxItem>().FirstOrDefault(i => i.Enabled);
-	            if (firstEnabled != null)
-	            {
-	                cb.Value = firstEnabled;
-	                SetButtonNextEnabled(true);
-	            }
-	            else
-	            {
-	                SetButtonNextEnabled(false);
-	            }
-	        }
-	        else
-	        {
+        private void SetComboBoxPreSelection(DataGridViewEnableableComboBoxCell cb)
+        {
+            if (cb.Value == null)
+            {
+                var firstEnabled = cb.Items.OfType<IEnableableComboBoxItem>().FirstOrDefault(i => i.Enabled);
+                if (firstEnabled != null)
+                {
+                    cb.Value = firstEnabled;
+                    SetButtonNextEnabled(true);
+                }
+                else
+                {
+                    SetButtonNextEnabled(false);
+                }
+            }
+            else
+            {
                 SetButtonNextEnabled(true);
-	        }
-	    }
+            }
+        }
 
-	    private static bool HasPoolSharedStorage(IXenConnection conn)
-		{
+        private static bool HasPoolSharedStorage(IXenConnection conn)
+        {
             if (conn == null)
-				return false;
+                return false;
 
             foreach (var pbd in conn.Cache.PBDs.Where(thePbd => thePbd.SR != null))
-			{
+            {
                 var sr = conn.Resolve(pbd.SR);
-				
-				if (sr != null && sr.SupportsVdiCreate() && sr.shared)
-						return true;
-			}
-			return false;
-		}
 
-		#endregion
+                if (sr != null && sr.SupportsVdiCreate() && sr.shared)
+                    return true;
+            }
+            return false;
+        }
 
-		#region Event Handlers
+        #endregion
+
+        #region Event Handlers
 
         private void DelayLoadedComboBoxItem_ReasonChanged(DelayLoadingOptionComboBoxItem item)
         {
@@ -488,17 +504,16 @@ namespace XenAdmin.Wizards.GenericPages
 
             Program.Invoke(this, () =>
             {
-                int index = m_comboBoxConnection.Items.IndexOf(item);
+                var index = m_comboBoxConnection.Items.IndexOf(item);
                 if (index < 0 || index >= m_comboBoxConnection.Items.Count)
                     return;
 
                 if (updatingDestinationCombobox || updatingHomeServerList)
                     return;
 
-                int selectedIndex = m_comboBoxConnection.SelectedIndex;
+                var selectedIndex = m_comboBoxConnection.SelectedIndex;
 
-                var tempItem = m_comboBoxConnection.Items[index] as DelayLoadingOptionComboBoxItem;
-                if (tempItem == null)
+                if (!(m_comboBoxConnection.Items[index] is DelayLoadingOptionComboBoxItem tempItem))
                     throw new NullReferenceException("Trying to update delay loaded reason but failed to extract reason");
 
                 tempItem.CopyFrom(item);
@@ -514,7 +529,7 @@ namespace XenAdmin.Wizards.GenericPages
                     m_comboBoxConnection.Items.Insert(index, tempItem);
                     m_comboBoxConnection.SelectedIndex = selectedIndex;
 
-                    if (tempItem.PreferAsSelectedItem)
+                    if (_preferredHomeRef == tempItem.Item.opaque_ref)
                         m_comboBoxConnection.SelectedItem = tempItem;
                 }
                 finally
@@ -525,132 +540,164 @@ namespace XenAdmin.Wizards.GenericPages
             });
         }
 
-	    private void DelayLoadedGridComboBoxItem_ReasonChanged(DelayLoadingOptionComboBoxItem item)
-	    {
-	        if (item == null)
-	            throw new NullReferenceException("Trying to update delay loaded reason but failed to extract reason");
+        private void DelayLoadedGridComboBoxItem_ReasonChanged(DelayLoadingOptionComboBoxItem item)
+        {
+            if (item == null)
+                throw new NullReferenceException("Trying to update delay loaded reason but failed to extract reason");
 
-	        var cb = item.ParentComboBox as DataGridViewEnableableComboBoxCell;
-	        if (cb == null)
-	            return;
+            if (!(item.ParentComboBox is DataGridViewEnableableComboBoxCell cb))
+                return;
 
             Program.Invoke(this, () =>
-	        {
-	            try
-	            {
-	                var selectedValue = cb.Value;
-	                if (cb.DataGridView == null)
-	                    return;
+            {
+                try
+                {
+                    if (cb.DataGridView == null)
+                        return;
 
+                    var selectedValue = cb.Value;
                     cb.DataGridView.RefreshEdit();
-	                if (item.Enabled && item.PreferAsSelectedItem)
-	                    cb.Value = item;
-	                else
-	                    cb.Value = selectedValue;
-	                SetButtonNextEnabled(cb.Value is IEnableableComboBoxItem enableableComboBoxItem && enableableComboBoxItem.Enabled);
+
+                    if (item.Enabled && _preferredHomeRef == item.Item.opaque_ref)
+                        cb.Value = item;
+                    else
+                        cb.Value = selectedValue;
+
+                    cb.DataGridView.Refresh();
+                    SetButtonNextEnabled(cb.Value is IEnableableComboBoxItem enableableComboBoxItem && enableableComboBoxItem.Enabled);
                 }
-	            finally
-	            {
-	                item.ReasonUpdated -= DelayLoadedGridComboBoxItem_ReasonChanged;
-	            }
-	        });
-	    }
-
-        private void PropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-	        if (e.PropertyName == "name_label" || e.PropertyName == "metrics" ||
-	            e.PropertyName == "enabled" || e.PropertyName == "live" || e.PropertyName == "patches")
-	            Program.Invoke(this, PopulateComboBox);
-		}
-
-		private void CollectionChanged(object sender, CollectionChangeEventArgs e)
-		{
-			Program.BeginInvoke(this, PopulateComboBox);
-		}
-
-		private void xenConnection_CachePopulated(IXenConnection conn)
-        {
-			Program.Invoke(this, PopulateComboBox);
+                finally
+                {
+                    item.ReasonUpdated -= DelayLoadedGridComboBoxItem_ReasonChanged;
+                }
+            });
         }
 
-		private void xenConnection_ConnectionStateChanged(IXenConnection conn)
-		{
-			Program.Invoke(this, PopulateComboBox);
-		}
+        private void PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "name_label" || e.PropertyName == "metrics" ||
+                e.PropertyName == "enabled" || e.PropertyName == "live" || e.PropertyName == "patches")
+                Program.Invoke(this, PopulateComboBox);
+        }
 
-		#endregion
+        private void CollectionChanged(object sender, CollectionChangeEventArgs e)
+        {
+            Program.BeginInvoke(this, PopulateComboBox);
+        }
 
-		#region Control event handlers
-		private void m_comboBoxConnection_SelectedIndexChanged(object sender, EventArgs e)
-		{
+        private void xenConnection_CachePopulated(IXenConnection conn)
+        {
+            Program.Invoke(this, PopulateComboBox);
+        }
+
+        private void xenConnection_ConnectionStateChanged(IXenConnection conn)
+        {
+            Program.Invoke(this, PopulateComboBox);
+        }
+
+        #endregion
+
+        #region Control event handlers
+
+        private void m_comboBoxConnection_SelectedIndexChanged(object sender, EventArgs e)
+        {
             if (updatingHomeServerList)
                 return;
 
+            // when selecting a new destination pool, reset the target host selection
+            if (SelectedTargetPool != null && !SelectedTargetPool.Equals(m_comboBoxConnection.SelectedItem))
+            {
+                AllSelectedTargets.Clear();
+                SelectedTarget = null;
+            }
+
             //If the item is delay loading and them item is disabled, null the selection made 
             //and clear the table containing server data
-            IEnableableXenObjectComboBoxItem item = m_comboBoxConnection.SelectedItem as IEnableableXenObjectComboBoxItem;
-            if(item != null && !item.Enabled)
+            var item = m_comboBoxConnection.SelectedItem as IEnableableXenObjectComboBoxItem;
+            if (item != null && !item.Enabled)
             {
                 m_comboBoxConnection.SelectedIndex = -1;
                 m_dataGridView.Rows.Clear();
-                ChosenItem = null;
+                SelectedTargetPool = null;
                 return;
             }
 
-		    AddHostExecutingComboBoxItem exeItem = m_comboBoxConnection.SelectedItem as AddHostExecutingComboBoxItem;
-            if (exeItem != null && !updatingDestinationCombobox)
-                exeItem.ExecuteCommand(this);
-				
-			else if(!updatingDestinationCombobox)
-			{
-			    try
-			    {
-			        Cursor.Current = Cursors.WaitCursor;
-			        ChosenItem = item == null ? null : item.Item;
-			        PopulateDataGridView(item);
-			    }
-			    finally
-			    {
+            if (m_comboBoxConnection.SelectedItem is AddHostRunningComboBoxItem exeItem && !updatingDestinationCombobox)
+                exeItem.RunCommand(this);
+
+            else if (!updatingDestinationCombobox)
+            {
+                try
+                {
+                    Cursor.Current = Cursors.WaitCursor;
+                    SelectedTargetPool = item?.Item;
+                    PopulateDataGridView();
+                }
+                finally
+                {
                     Cursor.Current = Cursors.Default;
-			    }
-			}
-                
-			IsDirty = true;
-		}
+                }
+            }
+
+            IsDirty = true;
+        }
 
         /// <summary>
         /// Create a set of filters for the homeserver combo box selection
         /// </summary>
-        /// <param name="item">selected item from the host combobox</param>
-        /// <param name="vmOpaqueRefs">OpaqRefs of VMs which need to apply those filters</param>
+        /// <param name="xenObject">XenObject behind the selected item from the host combobox</param>
+        /// <param name="vmOpaqueRefs">OpaqueRefs of VMs which need to apply those filters</param>
         /// <returns></returns>
-        protected virtual List<ReasoningFilter> CreateTargetServerFilterList(IEnableableXenObjectComboBoxItem item, List<string> vmOpaqueRefs)
+        protected virtual List<ReasoningFilter> CreateTargetServerFilterList(IXenObject xenObject, List<string> vmOpaqueRefs)
         {
             return new List<ReasoningFilter>();
         }
 
         private void m_dataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
-		{
-			if (e.ColumnIndex != m_colTarget.Index || e.RowIndex < 0 || e.RowIndex >= m_dataGridView.RowCount)
-				return;
+        {
+            if (e.ColumnIndex != m_colTarget.Index || e.RowIndex < 0 || e.RowIndex >= m_dataGridView.RowCount)
+                return;
 
-			m_dataGridView.BeginEdit(false);
+            m_dataGridView.BeginEdit(false);
 
-		    var editingControl = m_dataGridView.EditingControl as ComboBox;
-		    if (editingControl != null)
-		        editingControl.DroppedDown = true;
-		}
+            if (m_dataGridView.EditingControl is ComboBox editingControl)
+                editingControl.DroppedDown = true;
+        }
 
-		private void m_dataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)
-		{
-			m_dataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
-			IsDirty = true;
+        private void m_dataGridView_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+        {
+            m_dataGridView.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            IsDirty = true;
             if (!m_buttonNextEnabled)
                 SetButtonNextEnabled(true);
-		}
+        }
 
-		#endregion
-        
+        private void m_dataGridView_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            AllSelectedTargets.Clear();
+            IXenObject newTarget = null;
+            for(var rowIndex = 0; rowIndex < m_dataGridView.RowCount; rowIndex++)
+            {
+                for (var columnIndex = 0; columnIndex < m_dataGridView.ColumnCount; columnIndex++)
+                {
+                    var cell = m_dataGridView.Rows[rowIndex].Cells[columnIndex];
+                    if (cell.Value is IEnableableXenObjectComboBoxItem value)
+                    {
+                        if (rowIndex == e.RowIndex && columnIndex == e.ColumnIndex)
+                        {
+                            newTarget = value.Item;
+                        }
+                        if(value.Item != null)
+                            AllSelectedTargets.Add(value.Item);
+                    }
+                }
+            }
+
+            SelectedTarget = newTarget;
+        }
+
+        #endregion
+
         private void UnregisterHandlers()
         {
             ConnectionsManager.XenConnections.CollectionChanged -= CollectionChanged;
@@ -659,7 +706,7 @@ namespace XenAdmin.Wizards.GenericPages
                 var pool = Helpers.GetPool(xenConnection);
                 if (pool == null)
                 {
-                    var host = Helpers.GetMaster(xenConnection);
+                    var host = Helpers.GetCoordinator(xenConnection);
                     if (host != null)
                         host.PropertyChanged -= PropertyChanged;
                 }
@@ -674,14 +721,13 @@ namespace XenAdmin.Wizards.GenericPages
             }
         }
 
-	    private void CancelFilters()
-	    {
-	        foreach (var item in m_comboBoxConnection.Items)
-	        {
-	            DelayLoadingOptionComboBoxItem comboBoxItem = item as DelayLoadingOptionComboBoxItem;
-                if (comboBoxItem != null)
+        private void CancelFilters()
+        {
+            foreach (var item in m_comboBoxConnection.Items)
+            {
+                if (item is DelayLoadingOptionComboBoxItem comboBoxItem)
                     comboBoxItem.CancelFilters();
-	        }
+            }
         }
 
     }

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -94,75 +94,28 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new SM from a Proxy_SM.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public SM(Proxy_SM proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given SM.
         /// </summary>
-        public override void UpdateFrom(SM update)
+        public override void UpdateFrom(SM record)
         {
-            uuid = update.uuid;
-            name_label = update.name_label;
-            name_description = update.name_description;
-            type = update.type;
-            vendor = update.vendor;
-            copyright = update.copyright;
-            version = update.version;
-            required_api_version = update.required_api_version;
-            configuration = update.configuration;
-            capabilities = update.capabilities;
-            features = update.features;
-            other_config = update.other_config;
-            driver_filename = update.driver_filename;
-            required_cluster_stack = update.required_cluster_stack;
-        }
-
-        internal void UpdateFrom(Proxy_SM proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            name_label = proxy.name_label == null ? null : proxy.name_label;
-            name_description = proxy.name_description == null ? null : proxy.name_description;
-            type = proxy.type == null ? null : proxy.type;
-            vendor = proxy.vendor == null ? null : proxy.vendor;
-            copyright = proxy.copyright == null ? null : proxy.copyright;
-            version = proxy.version == null ? null : proxy.version;
-            required_api_version = proxy.required_api_version == null ? null : proxy.required_api_version;
-            configuration = proxy.configuration == null ? null : Maps.convert_from_proxy_string_string(proxy.configuration);
-            capabilities = proxy.capabilities == null ? new string[] {} : (string [])proxy.capabilities;
-            features = proxy.features == null ? null : Maps.convert_from_proxy_string_long(proxy.features);
-            other_config = proxy.other_config == null ? null : Maps.convert_from_proxy_string_string(proxy.other_config);
-            driver_filename = proxy.driver_filename == null ? null : proxy.driver_filename;
-            required_cluster_stack = proxy.required_cluster_stack == null ? new string[] {} : (string [])proxy.required_cluster_stack;
-        }
-
-        public Proxy_SM ToProxy()
-        {
-            Proxy_SM result_ = new Proxy_SM();
-            result_.uuid = uuid ?? "";
-            result_.name_label = name_label ?? "";
-            result_.name_description = name_description ?? "";
-            result_.type = type ?? "";
-            result_.vendor = vendor ?? "";
-            result_.copyright = copyright ?? "";
-            result_.version = version ?? "";
-            result_.required_api_version = required_api_version ?? "";
-            result_.configuration = Maps.convert_to_proxy_string_string(configuration);
-            result_.capabilities = capabilities;
-            result_.features = Maps.convert_to_proxy_string_long(features);
-            result_.other_config = Maps.convert_to_proxy_string_string(other_config);
-            result_.driver_filename = driver_filename ?? "";
-            result_.required_cluster_stack = required_cluster_stack;
-            return result_;
+            uuid = record.uuid;
+            name_label = record.name_label;
+            name_description = record.name_description;
+            type = record.type;
+            vendor = record.vendor;
+            copyright = record.copyright;
+            version = record.version;
+            required_api_version = record.required_api_version;
+            configuration = record.configuration;
+            capabilities = record.capabilities;
+            features = record.features;
+            other_config = record.other_config;
+            driver_filename = record.driver_filename;
+            required_cluster_stack = record.required_cluster_stack;
         }
 
         /// <summary>
@@ -190,13 +143,13 @@ namespace XenAPI
             if (table.ContainsKey("required_api_version"))
                 required_api_version = Marshalling.ParseString(table, "required_api_version");
             if (table.ContainsKey("configuration"))
-                configuration = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "configuration"));
+                configuration = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "configuration"));
             if (table.ContainsKey("capabilities"))
                 capabilities = Marshalling.ParseStringArray(table, "capabilities");
             if (table.ContainsKey("features"))
-                features = Maps.convert_from_proxy_string_long(Marshalling.ParseHashTable(table, "features"));
+                features = Maps.ToDictionary_string_long(Marshalling.ParseHashTable(table, "features"));
             if (table.ContainsKey("other_config"))
-                other_config = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "other_config"));
+                other_config = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "other_config"));
             if (table.ContainsKey("driver_filename"))
                 driver_filename = Marshalling.ParseString(table, "driver_filename");
             if (table.ContainsKey("required_cluster_stack"))
@@ -210,29 +163,20 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._name_label, other._name_label) &&
-                Helper.AreEqual2(this._name_description, other._name_description) &&
-                Helper.AreEqual2(this._type, other._type) &&
-                Helper.AreEqual2(this._vendor, other._vendor) &&
-                Helper.AreEqual2(this._copyright, other._copyright) &&
-                Helper.AreEqual2(this._version, other._version) &&
-                Helper.AreEqual2(this._required_api_version, other._required_api_version) &&
-                Helper.AreEqual2(this._configuration, other._configuration) &&
-                Helper.AreEqual2(this._capabilities, other._capabilities) &&
-                Helper.AreEqual2(this._features, other._features) &&
-                Helper.AreEqual2(this._other_config, other._other_config) &&
-                Helper.AreEqual2(this._driver_filename, other._driver_filename) &&
-                Helper.AreEqual2(this._required_cluster_stack, other._required_cluster_stack);
-        }
-
-        internal static List<SM> ProxyArrayToObjectList(Proxy_SM[] input)
-        {
-            var result = new List<SM>();
-            foreach (var item in input)
-                result.Add(new SM(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_name_label, other._name_label) &&
+                Helper.AreEqual2(_name_description, other._name_description) &&
+                Helper.AreEqual2(_type, other._type) &&
+                Helper.AreEqual2(_vendor, other._vendor) &&
+                Helper.AreEqual2(_copyright, other._copyright) &&
+                Helper.AreEqual2(_version, other._version) &&
+                Helper.AreEqual2(_required_api_version, other._required_api_version) &&
+                Helper.AreEqual2(_configuration, other._configuration) &&
+                Helper.AreEqual2(_capabilities, other._capabilities) &&
+                Helper.AreEqual2(_features, other._features) &&
+                Helper.AreEqual2(_other_config, other._other_config) &&
+                Helper.AreEqual2(_driver_filename, other._driver_filename) &&
+                Helper.AreEqual2(_required_cluster_stack, other._required_cluster_stack);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, SM server)
@@ -252,6 +196,7 @@ namespace XenAPI
                 return null;
             }
         }
+
         /// <summary>
         /// Get a record containing the current state of the given SM.
         /// First published in XenServer 4.0.
@@ -260,10 +205,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static SM get_record(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_record(session.opaque_ref, _sm);
-            else
-                return new SM(session.XmlRpcProxy.sm_get_record(session.opaque_ref, _sm ?? "").parse());
+            return session.JsonRpcClient.sm_get_record(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -274,10 +216,7 @@ namespace XenAPI
         /// <param name="_uuid">UUID of object to return</param>
         public static XenRef<SM> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<SM>.Create(session.XmlRpcProxy.sm_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.sm_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -288,10 +227,7 @@ namespace XenAPI
         /// <param name="_label">label of object to return</param>
         public static List<XenRef<SM>> get_by_name_label(Session session, string _label)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_by_name_label(session.opaque_ref, _label);
-            else
-                return XenRef<SM>.Create(session.XmlRpcProxy.sm_get_by_name_label(session.opaque_ref, _label ?? "").parse());
+            return session.JsonRpcClient.sm_get_by_name_label(session.opaque_ref, _label);
         }
 
         /// <summary>
@@ -302,10 +238,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_uuid(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_uuid(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_uuid(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_uuid(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -316,10 +249,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_name_label(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_name_label(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_name_label(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_name_label(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -330,10 +260,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_name_description(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_name_description(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_name_description(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_name_description(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -344,10 +271,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_type(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_type(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_type(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_type(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -358,10 +282,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_vendor(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_vendor(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_vendor(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_vendor(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -372,10 +293,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_copyright(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_copyright(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_copyright(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_copyright(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -386,10 +304,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_version(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_version(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_version(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_version(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -400,10 +315,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_required_api_version(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_required_api_version(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_required_api_version(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_required_api_version(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -414,15 +326,12 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static Dictionary<string, string> get_configuration(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_configuration(session.opaque_ref, _sm);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.sm_get_configuration(session.opaque_ref, _sm ?? "").parse());
+            return session.JsonRpcClient.sm_get_configuration(session.opaque_ref, _sm);
         }
 
         /// <summary>
         /// Get the capabilities field of the given SM.
-        /// First published in XenServer 4.0.
+        /// First published in XenServer 4.1.
         /// Deprecated since XenServer 6.2.
         /// </summary>
         /// <param name="session">The session</param>
@@ -430,10 +339,7 @@ namespace XenAPI
         [Deprecated("XenServer 6.2")]
         public static string[] get_capabilities(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_capabilities(session.opaque_ref, _sm);
-            else
-                return (string [])session.XmlRpcProxy.sm_get_capabilities(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_capabilities(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -444,10 +350,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static Dictionary<string, long> get_features(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_features(session.opaque_ref, _sm);
-            else
-                return Maps.convert_from_proxy_string_long(session.XmlRpcProxy.sm_get_features(session.opaque_ref, _sm ?? "").parse());
+            return session.JsonRpcClient.sm_get_features(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -458,10 +361,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static Dictionary<string, string> get_other_config(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_other_config(session.opaque_ref, _sm);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.sm_get_other_config(session.opaque_ref, _sm ?? "").parse());
+            return session.JsonRpcClient.sm_get_other_config(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -472,10 +372,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string get_driver_filename(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_driver_filename(session.opaque_ref, _sm);
-            else
-                return session.XmlRpcProxy.sm_get_driver_filename(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_driver_filename(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -486,10 +383,7 @@ namespace XenAPI
         /// <param name="_sm">The opaque_ref of the given sm</param>
         public static string[] get_required_cluster_stack(Session session, string _sm)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_required_cluster_stack(session.opaque_ref, _sm);
-            else
-                return (string [])session.XmlRpcProxy.sm_get_required_cluster_stack(session.opaque_ref, _sm ?? "").parse();
+            return session.JsonRpcClient.sm_get_required_cluster_stack(session.opaque_ref, _sm);
         }
 
         /// <summary>
@@ -501,10 +395,7 @@ namespace XenAPI
         /// <param name="_other_config">New value to set</param>
         public static void set_other_config(Session session, string _sm, Dictionary<string, string> _other_config)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sm_set_other_config(session.opaque_ref, _sm, _other_config);
-            else
-                session.XmlRpcProxy.sm_set_other_config(session.opaque_ref, _sm ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse();
+            session.JsonRpcClient.sm_set_other_config(session.opaque_ref, _sm, _other_config);
         }
 
         /// <summary>
@@ -517,10 +408,7 @@ namespace XenAPI
         /// <param name="_value">Value to add</param>
         public static void add_to_other_config(Session session, string _sm, string _key, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sm_add_to_other_config(session.opaque_ref, _sm, _key, _value);
-            else
-                session.XmlRpcProxy.sm_add_to_other_config(session.opaque_ref, _sm ?? "", _key ?? "", _value ?? "").parse();
+            session.JsonRpcClient.sm_add_to_other_config(session.opaque_ref, _sm, _key, _value);
         }
 
         /// <summary>
@@ -532,10 +420,7 @@ namespace XenAPI
         /// <param name="_key">Key to remove</param>
         public static void remove_from_other_config(Session session, string _sm, string _key)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.sm_remove_from_other_config(session.opaque_ref, _sm, _key);
-            else
-                session.XmlRpcProxy.sm_remove_from_other_config(session.opaque_ref, _sm ?? "", _key ?? "").parse();
+            session.JsonRpcClient.sm_remove_from_other_config(session.opaque_ref, _sm, _key);
         }
 
         /// <summary>
@@ -545,10 +430,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<SM>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_all(session.opaque_ref);
-            else
-                return XenRef<SM>.Create(session.XmlRpcProxy.sm_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.sm_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -558,10 +440,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<SM>, SM> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.sm_get_all_records(session.opaque_ref);
-            else
-                return XenRef<SM>.Create<Proxy_SM>(session.XmlRpcProxy.sm_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.sm_get_all_records(session.opaque_ref);
         }
 
         /// <summary>
@@ -720,6 +599,7 @@ namespace XenAPI
 
         /// <summary>
         /// capabilities of the SM plugin
+        /// First published in XenServer 4.1.
         /// </summary>
         public virtual string[] capabilities
         {

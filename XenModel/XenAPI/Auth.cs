@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -63,33 +63,14 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new Auth from a Proxy_Auth.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public Auth(Proxy_Auth proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given Auth.
         /// </summary>
-        public override void UpdateFrom(Auth update)
+        public override void UpdateFrom(Auth record)
         {
-        }
-
-        internal void UpdateFrom(Proxy_Auth proxy)
-        {
-        }
-
-        public Proxy_Auth ToProxy()
-        {
-            Proxy_Auth result_ = new Proxy_Auth();
-            return result_;
         }
 
         /// <summary>
@@ -112,15 +93,6 @@ namespace XenAPI
             return false;
         }
 
-        internal static List<Auth> ProxyArrayToObjectList(Proxy_Auth[] input)
-        {
-            var result = new List<Auth>();
-            foreach (var item in input)
-                result.Add(new Auth(item));
-
-            return result;
-        }
-
         public override string SaveChanges(Session session, string opaqueRef, Auth server)
         {
             if (opaqueRef == null)
@@ -133,6 +105,7 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// This call queries the external directory service to obtain the subject_identifier as a string from the human-readable subject_name
         /// First published in XenServer 5.5.
@@ -141,10 +114,7 @@ namespace XenAPI
         /// <param name="_subject_name">The human-readable subject_name, such as a username or a groupname</param>
         public static string get_subject_identifier(Session session, string _subject_name)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.auth_get_subject_identifier(session.opaque_ref, _subject_name);
-            else
-                return session.XmlRpcProxy.auth_get_subject_identifier(session.opaque_ref, _subject_name ?? "").parse();
+            return session.JsonRpcClient.auth_get_subject_identifier(session.opaque_ref, _subject_name);
         }
 
         /// <summary>
@@ -155,10 +125,7 @@ namespace XenAPI
         /// <param name="_subject_identifier">A string containing the subject_identifier, unique in the external directory service</param>
         public static Dictionary<string, string> get_subject_information_from_identifier(Session session, string _subject_identifier)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.auth_get_subject_information_from_identifier(session.opaque_ref, _subject_identifier);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.auth_get_subject_information_from_identifier(session.opaque_ref, _subject_identifier ?? "").parse());
+            return session.JsonRpcClient.auth_get_subject_information_from_identifier(session.opaque_ref, _subject_identifier);
         }
 
         /// <summary>
@@ -169,10 +136,7 @@ namespace XenAPI
         /// <param name="_subject_identifier">A string containing the subject_identifier, unique in the external directory service</param>
         public static string[] get_group_membership(Session session, string _subject_identifier)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.auth_get_group_membership(session.opaque_ref, _subject_identifier);
-            else
-                return (string [])session.XmlRpcProxy.auth_get_group_membership(session.opaque_ref, _subject_identifier ?? "").parse();
+            return session.JsonRpcClient.auth_get_group_membership(session.opaque_ref, _subject_identifier);
         }
     }
 }

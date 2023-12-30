@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -52,7 +51,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
         {
             AddProgressStep(string.Format(Messages.UPDATES_WIZARD_APPLYING_UPDATE, vdi.Name(), host.Name()));
             var suppPackVdis = new Dictionary<Host, VDI> { { host, vdi } };
-            new InstallSupplementalPackAction(suppPackVdis, true).RunExternal(session);
+            new InstallSupplementalPackAction(suppPackVdis, true).RunSync(session);
         }
     }
 }

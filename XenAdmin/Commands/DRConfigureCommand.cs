@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -72,7 +71,7 @@ namespace XenAdmin.Commands
         }
 
 
-		protected override void ExecuteCore(SelectedItemCollection selection)
+		protected override void RunCore(SelectedItemCollection selection)
 		{
 			var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
 
@@ -80,7 +79,7 @@ namespace XenAdmin.Commands
 			{
 				if (Helpers.FeatureForbidden(pool.Connection, Host.RestrictDR))
 				{
-					ShowUpsellDialog(Parent);
+					UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_DR, Parent);
 				}
 				else
 				{
@@ -115,15 +114,7 @@ namespace XenAdmin.Commands
 			}
 		}
 
-    	private static void ShowUpsellDialog(IWin32Window parent)
-        {
-            // Show upsell dialog
-            using (var dlg = new UpsellDialog(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_DR : Messages.UPSELL_BLURB_DR + Messages.UPSELL_BLURB_TRIAL,
-                                                InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL))
-                dlg.ShowDialog(parent);
-        }
-
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null && selection.FirstAsXenObject.Connection.IsConnected
 				&& (selection.PoolAncestor != null || selection.HostAncestor != null); //CA-61207: this check ensures there's no cross-pool selection

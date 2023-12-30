@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -110,7 +109,7 @@ namespace XenAdmin.Dialogs
                 var configuredRows = rows.Where(r => r.CacheSr != null).ToList();
 
                 if (configuredRows.Count == 0)
-                    return Messages.PVS_CACHE_NOT_CONFIGURED;
+                    return Messages.NOT_CONFIGURED;
 
                 return configuredRows.Any(row => row.CacheSr.GetSRType(false) != SR.SRTypes.tmpfs) 
                     ? Messages.PVS_CACHE_MEMORY_AND_DISK 
@@ -170,6 +169,9 @@ namespace XenAdmin.Dialogs
         }
 
         public void ShowLocalValidationMessages()
+        { }
+
+        public void HideLocalValidationMessages()
         { }
 
         public void Cleanup()

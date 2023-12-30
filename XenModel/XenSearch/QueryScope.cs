@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using XenAPI;
 
@@ -39,7 +36,7 @@ namespace XenAdmin.XenSearch
 {
     public class QueryScope: IEquatable<QueryScope>
     {
-        private ObjectTypes types;
+        private readonly ObjectTypes types;
 
         public QueryScope(ObjectTypes types)
         {
@@ -134,7 +131,7 @@ namespace XenAdmin.XenSearch
 
         private ObjectTypes? ObjectTypeOf(IXenObject o)
         {
-            PropertyAccessor pa = PropertyAccessors.Get(PropertyNames.type);
+            var pa = PropertyAccessors.Get(PropertyNames.type);
             Object obj = pa(o);
             return (ObjectTypes?)obj;
         }

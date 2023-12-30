@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 
 using XenAdmin.Core;
@@ -38,10 +36,10 @@ using XenAdmin.Network;
 
 namespace XenAdmin.Actions
 {
-    public class DisableAdAction : PureAsyncAction
+    public class DisableAdAction : AsyncAction
     {
         public static readonly string KEY_USER = "user";
-        public static readonly string KEY_PASSWORD = "pass";
+        public static readonly string KEY_PASS = "pass";
         private Dictionary<string, string> creds;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -54,7 +52,9 @@ namespace XenAdmin.Actions
             if (pool != null)
                 Pool = Helpers.GetPool(Connection);
             else
-                Host = Helpers.GetMaster(Connection);
+                Host = Helpers.GetCoordinator(Connection);
+
+            ApiMethodsToRoleCheck.Add("pool.disable_external_auth");
         }
 
         protected override void Run()

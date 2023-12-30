@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -85,8 +84,9 @@ namespace XenAdmin.Plugins
             ContextMenu = Helpers.GetEnumXmlAttribute(node, ATT_CONTEXT_MENU, GetContextMenuFromMenu(Menu));
             Serialized = Helpers.GetEnumXmlAttribute(node, ATT_SERIALIZED, PluginSerializationLevel.none);
 
-            foreach (XmlNode child in node.ChildNodes)
-            {   
+            if (node.ChildNodes.Count > 0)
+            {
+                var child = node.ChildNodes[0];
                 switch (child.Name)
                 {
                     case TYPE_SHELL:
@@ -99,7 +99,6 @@ namespace XenAdmin.Plugins
                         ShellCmd = new XenServerPowershellCmd(child, paramsFromXML(child));
                         break;
                 }
-                return;
             }
         }
 

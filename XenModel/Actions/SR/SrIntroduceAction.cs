@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -132,7 +131,7 @@ namespace XenAdmin.Actions
                     throw new Failure(Failure.HANDLE_INVALID, "SR", Result);
 
                 // Set this SR to be the default
-                new SrAction(SrActionKind.SetAsDefault, new_sr).RunExternal(Session);
+                new SetSrAsDefaultAction(new_sr).RunSync(Session);
             }
 
             Description = Messages.ACTION_SR_ATTACH_SUCCESSFUL;

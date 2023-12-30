@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,6 +34,7 @@ namespace XenAdmin.Wizards.GenericPages
 {
     public interface INetworkResource
     {
+        string VmNameOverride { get; }
         string NetworkName { get; }
         string MACAddress { get; }
         string NetworkID { get; }

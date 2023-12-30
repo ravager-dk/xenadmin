@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -114,12 +113,8 @@ namespace XenAdmin.Actions
         /// (by reboot, shutdown or disable) will succeed.
         /// May throw CancelledException if the user says no.
         /// </summary>
-        /// <param name="actionKind">Must be one of Evacuate, Reboot, RebootAndWait or Shutdown. Required so we can show the correct prompt.</param>
-        protected void MaybeReduceNtolBeforeOp(HostActionKind actionKind)
+        protected void MaybeReduceNtolBeforeOp()
         {
-            System.Diagnostics.Trace.Assert(actionKind == HostActionKind.Reboot ||
-                actionKind == HostActionKind.RebootAndWait || actionKind == HostActionKind.Shutdown||actionKind==HostActionKind.Evacuate);
-
             // We may need to drop ntol for this disable to succeed. 
             Pool pool = Helpers.GetPoolOfOne(Host.Connection);
             if (pool != null && pool.ha_enabled)
@@ -176,10 +171,5 @@ namespace XenAdmin.Actions
                     Pool.set_ha_host_failures_to_tolerate(this.Session, pool.opaque_ref, max);
             }
         }
-
-      
     }
-
-
-    public enum HostActionKind { Reboot, RebootAndWait, Evacuate, Shutdown };
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,7 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using XenAdmin.Network;
 using XenAPI;
@@ -37,7 +35,7 @@ using XenAPI;
 
 namespace XenAdmin.Actions.GPU
 {
-    public class VgpuConfigurationAction : PureAsyncAction
+    public class VgpuConfigurationAction : AsyncAction
     {
         private readonly Dictionary<PGPU, List<XenRef<VGPU_type>>> updatedEnabledVGpuListByPGpu;
 
@@ -46,7 +44,8 @@ namespace XenAdmin.Actions.GPU
         {
             this.updatedEnabledVGpuListByPGpu = updatedEnabledVGpuListByPGpu;
             Description = Messages.ACTION_PREPARING;
-            this.Pool = Core.Helpers.GetPool(connection);
+            Pool = Core.Helpers.GetPool(connection);
+            ApiMethodsToRoleCheck.Add("PGPU.set_enabled_VGPU_types");
         }
 
         protected override void Run()

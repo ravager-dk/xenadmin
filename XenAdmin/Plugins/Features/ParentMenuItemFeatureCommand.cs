@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAPI;
 using System.Drawing;
-using System.Collections.ObjectModel;
 using XenAdmin.XenSearch;
 using XenAdmin.Commands;
+using XenAPI;
+
 
 namespace XenAdmin.Plugins
 {
@@ -53,7 +50,7 @@ namespace XenAdmin.Plugins
             _search = search;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (!_owner.Enabled)
             {
@@ -72,28 +69,12 @@ namespace XenAdmin.Plugins
             return false;
         }
 
-        public override string MenuText
-        {
-            get
-            {
-                return _owner.ToString();
-            }
-        }
+        public override string MenuText => _owner.ToString();
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return _owner.Icon;
-            }
-        }
+        public override Image MenuImage => _owner.Icon;
 
-        public override string ToolTipText
-        {
-            get
-            {
-                return _owner.Tooltip ?? string.Empty;
-            }
-        }
+        public override string EnabledToolTipText => _owner.Tooltip;
+
+        public override string DisabledToolTipText => _owner.Tooltip;
     }
 }

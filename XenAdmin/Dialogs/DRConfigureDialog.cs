@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAPI;
@@ -58,9 +56,6 @@ namespace XenAdmin.Dialogs
 		{
 			InitializeComponent();
 			Text = String.Format(Messages.DR_CONFIGURE_TITLE, pool.Name());
-            pictureBoxWarning1.Image = SystemIcons.Warning.ToBitmap();
-			pictureBoxWarning2.Image = SystemIcons.Warning.ToBitmap();
-            pictureBoxInfo.Image = SystemIcons.Information.ToBitmap();
 			m_labelLimit2.Text = String.Format(Messages.DR_CONFIGURE_TOO_MANY_SRS, MAX_SR_SELECTED);
 			HideAllWarnings();
 			Pool = pool;

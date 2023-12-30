@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -52,6 +51,7 @@ namespace XenAdmin.Wizards.NewPolicyWizard
         {
             InitializeComponent();
             label6.Text = string.Format(label6.Text, BrandManager.ProductVersion81);
+            labelWarning.Text = string.Format(labelWarning.Text, BrandManager.VmTools);
         }
 
         public string SubText
@@ -79,11 +79,14 @@ namespace XenAdmin.Wizards.NewPolicyWizard
                 EnableShapshotTypes(Connection);
         }
 
-        public Image Image => Properties.Resources._000_VMSession_h32bit_16;
+        public Image Image => Images.StaticImages._000_VMSession_h32bit_16;
 
         public bool ValidToSave => true;
 
         public void ShowLocalValidationMessages()
+        { }
+
+        public void HideLocalValidationMessages()
         { }
 
         public void Cleanup()

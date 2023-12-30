@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
@@ -91,24 +91,21 @@ namespace XenAdmin.Actions.DR
                     MetadataSession = Session.get_record(Session, MetadataSessionRef);
 
                     #region FIND POOL 
-                    Dictionary<XenRef<XenAPI.Pool>, XenAPI.Pool> pools = XenAPI.Pool.get_all_records(MetadataSession);
-                    foreach (var pool in pools.Values)
+                    var pools = Pool.get_all_records(MetadataSession);
+                    var poolValues = pools.Values;
+                    if (poolValues.Count > 0)
                     {
+                        var pool = poolValues.First();
                         _poolMetadata.Pool = pool;
-                        string poolName = String.IsNullOrEmpty(pool.name_label) && pool.master != null
-                                              ? XenAPI.Host.get_name_label(MetadataSession, pool.master.opaque_ref)
-                                              : pool.name_label;
-                        _poolMetadata.Pool.name_label = poolName;
-                        log.DebugFormat("Found metadata of pool '{0}' (UUID={1})", _poolMetadata.Pool.Name(),
-                                        _poolMetadata.Pool.uuid);
-                        break;
-                    }
-                    #endregion
 
-                    /*if (_poolMetadata.Pool.uuid == Pool.uuid) // metadata of current pool
-                    {
-                        return;
-                    }*/
+                        if (string.IsNullOrEmpty(pool.name_label) && pool.master != null)
+                            _poolMetadata.Pool.name_label = Host.get_name_label(MetadataSession, pool.master.opaque_ref);
+
+                        log.DebugFormat("Found metadata of pool '{0}' (UUID={1})", _poolMetadata.Pool.Name(),
+                            _poolMetadata.Pool.uuid);
+                    }
+                  
+                    #endregion
 
                     _poolMetadata.VmAppliances = VM_appliance.get_all_records(MetadataSession);
                     foreach (var vmAppRef in _poolMetadata.VmAppliances.Keys)
@@ -122,7 +119,7 @@ namespace XenAdmin.Actions.DR
                     foreach (var vmRef in vms.Keys)
                     {
                         VM vm = vms[vmRef];
-                        if (vm.not_a_real_vm())
+                        if (!vm.IsRealVm())
                             continue;
                         vm.opaque_ref = vmRef.opaque_ref;
                         _poolMetadata.Vms.Add(vmRef, vm);
@@ -130,10 +127,11 @@ namespace XenAdmin.Actions.DR
                 }
                 catch (Exception)
                 {
+                    // ignored
                 }
             }
-            PercentComplete = 100;
-            Description = Messages.ACTION_VDI_LOAD_METADATA_DONE;
+
+            Tick(100, Messages.ACTION_VDI_LOAD_METADATA_DONE);
         }
     }
 

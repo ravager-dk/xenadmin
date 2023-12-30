@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -49,23 +48,14 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         public PatchingWizard_ModePage()
         {
-            InitializeComponent();          
+            InitializeComponent();
+            AutomaticRadioButton.Text = string.Format(AutomaticRadioButton.Text, BrandManager.BrandConsole);
+            removeUpdateFileCheckBox.Text = string.Format(removeUpdateFileCheckBox.Text, BrandManager.BrandConsole);
         }
 
-        public override string Text
-        {
-            get { return Messages.PATCHINGWIZARD_MODEPAGE_TEXT; }
-        }
+        public override string Text => Messages.PATCHINGWIZARD_MODEPAGE_TEXT;
 
-        public override string PageTitle
-        {
-            get { return Messages.PATCHINGWIZARD_MODEPAGE_TITLE; }
-        }
-
-        public override string HelpID
-        {
-            get { return "UpdateMode"; }
-        }
+        public override string PageTitle => Messages.PATCHINGWIZARD_MODEPAGE_TITLE;
 
         public override bool EnablePrevious()
         {
@@ -74,11 +64,13 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         public override string NextText(bool isLastPage)
         {
-            return Messages.UPDATES_WIZARD_APPLY_UPDATE;
+            return WizardMode == WizardMode.AutomatedUpdates ? Messages.UPDATES_WIZARD_APPLY_UPDATES : Messages.UPDATES_WIZARD_APPLY_UPDATE;
         }
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {
+            removeUpdateFileCheckBox.Visible = !IsNewGeneration;
+
             var anyPoolForbidsAutostart = SelectedServers.Select(s => Helpers.GetPoolOfOne(s.Connection)).Any(p => p.IsAutoUpdateRestartsForbidden());
 
             // this will be true if a patch has restartHost guidance or if livepatching fails
@@ -88,8 +80,17 @@ namespace XenAdmin.Wizards.PatchingWizard
             switch (SelectedUpdateType)
             {
                 case UpdateType.Legacy:
-                    ManualTextInstructions = ModePoolPatch(out someHostMayRequireRestart);
-                    automaticDisabled = anyPoolForbidsAutostart && someHostMayRequireRestart;
+                    if (IsNewGeneration)
+                    {
+                        ManualTextInstructions = ModeCdnUpdates();
+                        automaticDisabled = anyPoolForbidsAutostart;
+                    }
+                    else
+                    {
+                        ManualTextInstructions = ModePoolPatch(out someHostMayRequireRestart);
+                        automaticDisabled = anyPoolForbidsAutostart && someHostMayRequireRestart;
+                    }
+
                     break;
                 case UpdateType.ISO:
                     ManualTextInstructions = PoolUpdate != null
@@ -113,7 +114,7 @@ namespace XenAdmin.Wizards.PatchingWizard
                 foreach (var kvp in ManualTextInstructions)
                 {
                     sb.AppendFormat("{0}:", kvp.Key).AppendLine();
-                    sb.AppendIndented(kvp.Value).AppendLine();
+                    sb.AppendIndented(kvp.Value.ToString()).AppendLine();
                 }
                 textBoxLog.Text = sb.ToString();
             }
@@ -166,25 +167,16 @@ namespace XenAdmin.Wizards.PatchingWizard
             return AutomaticRadioButton.Checked || ManualRadioButton.Checked;
         }
 
-        private void UpdateEnablement()
-        {
-            textBoxLog.Enabled = ManualRadioButton.Checked;
-            OnPageUpdated();
-        }
-
         #region Accessors
+
+        public WizardMode WizardMode { get; set; }
+        public bool IsNewGeneration { get; set; }
 
         public Dictionary<Pool, StringBuilder> ManualTextInstructions { get; private set; }
 
-        public bool IsAutomaticMode
-        {
-            get { return AutomaticRadioButton.Checked; }
-        }
+        public bool IsAutomaticMode => AutomaticRadioButton.Checked;
 
-        public bool RemoveUpdateFile
-        {
-            get { return removeUpdateFileCheckBox.Checked; }
-        }
+        public bool RemoveUpdateFile => removeUpdateFileCheckBox.Visible && removeUpdateFileCheckBox.Checked;
 
         public List<Pool> SelectedPools { private get; set; }
         public List<Host> SelectedServers { private get; set; }
@@ -197,12 +189,14 @@ namespace XenAdmin.Wizards.PatchingWizard
 
         private void AutomaticRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            UpdateEnablement();
+            if (AutomaticRadioButton.Checked)
+                OnPageUpdated();
         }
 
         private void ManualRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            UpdateEnablement();
+            if (ManualRadioButton.Checked)
+                OnPageUpdated();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -284,6 +278,61 @@ namespace XenAdmin.Wizards.PatchingWizard
             return GetGuidanceList(after_apply_guidance.restartHost, serversPerPool, null, out someHostMayRequireRestart);
         }
 
+        private Dictionary<Pool, StringBuilder> ModeCdnUpdates()
+        {
+            var poolDict = new Dictionary<Pool, StringBuilder>();
+
+            foreach (var pool in SelectedPools)
+            {
+                if (!Updates.CdnUpdateInfoPerConnection.TryGetValue(pool.Connection, out var poolUpdateInfo))
+                    continue;
+
+                var hostDict = new Dictionary<Host, StringBuilder>();
+
+                foreach (var hostUpdateInfo in poolUpdateInfo.HostsWithUpdates)
+                {
+                    var host = pool.Connection.Resolve(new XenRef<Host>(hostUpdateInfo.HostOpaqueRef));
+                    if (host != null)
+                    {
+                        var hostSb = new StringBuilder();
+
+                        var msg = host.IsCoordinator() ? $"{host.Name()} ({Messages.COORDINATOR})" : host.Name();
+                        hostSb.AppendIndented(msg).AppendLine();
+
+                        //evacuate host is a pre-update task and will be done regardless the mode selected
+
+                        if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RestartToolstack) ||
+                            host.pending_guidances.Contains(update_guidances.restart_toolstack))
+                        {
+                            hostSb.AppendIndented(Cdn.FriendlyInstruction(CdnGuidance.RestartToolstack), 4).AppendLine();
+                        }
+
+                        if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RebootHost) ||
+                            host.pending_guidances.Contains(update_guidances.reboot_host) ||
+                            host.pending_guidances.Contains(update_guidances.reboot_host_on_livepatch_failure))
+                        {
+                            hostSb.AppendIndented(Cdn.FriendlyInstruction(CdnGuidance.RebootHost), 4).AppendLine();
+                        }
+
+                        if (hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RestartDeviceModel) ||
+                            host.pending_guidances.Contains(update_guidances.restart_device_model))
+                            hostSb.AppendIndented(Cdn.FriendlyInstruction(CdnGuidance.RestartDeviceModel), 4).AppendLine();
+
+                        if (hostUpdateInfo.LivePatches.Length > 0 && !hostUpdateInfo.RecommendedGuidance.Contains(CdnGuidance.RebootHost))
+                            hostSb.AppendIndented(Messages.HOTFIX_POST_UPDATE_LIVEPATCH_ACTIONS, 4).AppendLine();
+
+                        hostDict[host] = hostSb;
+                    }
+                }
+
+                if (hostDict.Count > 0)
+                    poolDict[pool] = new StringBuilder(string.Join(Environment.NewLine,
+                        hostDict.OrderBy(k => k.Key).Select(k => k.Value.ToString())));
+            }
+
+            return poolDict;
+        }
+
 
         private Dictionary<Pool, List<Host>> GroupServersPerPool(List<Pool> pools, List<Host> servers)
         {
@@ -354,8 +403,8 @@ namespace XenAdmin.Wizards.PatchingWizard
                         && livePatchCodesByHost[server.uuid] == livepatch_status.ok_livepatch_complete)
                         continue;
 
-                    var msg = server.IsMaster()
-                        ? string.Format("{0} ({1})", server.Name(), Messages.MASTER)
+                    var msg = server.IsCoordinator()
+                        ? string.Format("{0} ({1})", server.Name(), Messages.COORDINATOR)
                         : server.Name();
                     sb.AppendIndented(msg).AppendLine();
                 }
@@ -379,8 +428,8 @@ namespace XenAdmin.Wizards.PatchingWizard
                 var sb = new StringBuilder();
                 foreach (var server in kvp.Value)
                 {
-                    var msg = server.IsMaster()
-                        ? string.Format("{0} ({1})", server.Name(), Messages.MASTER)
+                    var msg = server.IsCoordinator()
+                        ? string.Format("{0} ({1})", server.Name(), Messages.COORDINATOR)
                         : server.Name();
                     sb.AppendIndented(msg).AppendLine();
                 }
@@ -406,7 +455,7 @@ namespace XenAdmin.Wizards.PatchingWizard
                     foreach (var vmRef in server.resident_VMs)
                     {
                         var vm = server.Connection.Resolve(vmRef);
-                        if (vm != null && vm.is_a_real_vm() && predicate.Invoke(vm))
+                        if (vm != null && vm.IsRealVm() && predicate.Invoke(vm))
                             sb.AppendIndented(vm.Name()).AppendLine();
                     }
                 }

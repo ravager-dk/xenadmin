@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
-using XenAdmin.Properties;
 using System.Drawing;
 using XenAdmin.Dialogs;
 
@@ -56,7 +52,7 @@ namespace XenAdmin.Commands
             return _recommendations.GetOptimalServer(vm);
         }
 
-        protected override bool CanExecute(VM vm)
+        protected override bool CanRun(VM vm)
         {
             return GetHost(vm) != null;
         }
@@ -77,9 +73,9 @@ namespace XenAdmin.Commands
             }
         }
         
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
-            return new CommandErrorDialog(ErrorDialogTitle, ErrorDialogText, cantExecuteReasons);
+            return new CommandErrorDialog(ErrorDialogTitle, ErrorDialogText, cantRunReasons);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,10 +29,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace XenAdmin.Controls.MainWindowControls
@@ -76,18 +72,15 @@ namespace XenAdmin.Controls.MainWindowControls
 
         protected override void OnDropDownItemClicked(ToolStripItemClickedEventArgs e)
         {
-            var curItem = e.ClickedItem as ToolStripMenuItem;
-
-            if (curItem != null && !curItem.Checked)
+            if (e.ClickedItem is ToolStripMenuItem curItem && !curItem.Checked)
             {
-                foreach (ToolStripMenuItem item in DropDownItems)
+                foreach (var it in DropDownItems)
                 {
-                    if (item != null)
+                    if (it is ToolStripMenuItem item)
                         item.Checked = item == curItem;
                 }
 
-                if (NavigationViewChanged != null)
-                    NavigationViewChanged(curItem.Tag);
+                NavigationViewChanged?.Invoke(curItem.Tag);
             }
             base.OnDropDownItemClicked(e);
         }

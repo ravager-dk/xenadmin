@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -80,8 +79,8 @@ namespace XenAdmin.Commands
 
         private void CommandToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
-            // CA-42123 check command can execute again before opening dropdown.
-            if (Command.CanExecute())
+            // CA-42123 check command can run again before opening dropdown.
+            if (Command.CanRun())
             {
                 OnDropDownOpening(EventArgs.Empty);
             }
@@ -156,6 +155,7 @@ namespace XenAdmin.Commands
 
         protected virtual void Update()
         {
+            Enabled = _command != null && _command.CanRun();
             base.Enabled = DesignMode || Enabled;
 
             if (_command != null)
@@ -178,7 +178,8 @@ namespace XenAdmin.Commands
                     Image = _command.MenuImage;
                 }
 
-                ToolTipText = _command.ToolTipText; // null ToolTip is allowed (CA-47310)
+                // null ToolTip is allowed (CA-47310)
+                ToolTipText = Enabled ? _command.EnabledToolTipText : _command.DisabledToolTipText;
 
                 if (_command.ShortcutKeyDisplayString != null)
                 {
@@ -209,7 +210,7 @@ namespace XenAdmin.Commands
         {
             if (Enabled)
             {
-                _command.Execute();
+                _command.Run();
             }
             base.OnClick(e);
         }
@@ -229,13 +230,7 @@ namespace XenAdmin.Commands
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public new bool Enabled
-        {
-            get
-            {
-                return _command != null && _command.CanExecute();
-            }
-        }
+        public new bool Enabled { get; private set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SelectionBroadcaster"/> that should be listened to for selection changes.

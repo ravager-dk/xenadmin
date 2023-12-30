@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,24 +35,22 @@ namespace XenAdmin.Wizards.GenericPages
 {
     public abstract class ReasoningFilter
     {
+        private readonly IXenObject _baseItemToFilterOn;
+
         protected ReasoningFilter(IXenObject itemToFilterOn)
         {
-            if (!(itemToFilterOn is Host) && !(itemToFilterOn is Pool))
+            if (itemToFilterOn != null && !(itemToFilterOn is Host) && !(itemToFilterOn is Pool))
                 throw new ArgumentException("Target should be host or pool");
 
-            baseItemToFilterOn = itemToFilterOn;
+            _baseItemToFilterOn = itemToFilterOn;
         }
 
-        /// <summary>
-        /// Base item that should be used to filter on
-        /// </summary>
-        private IXenObject baseItemToFilterOn { get; set; }
-        //public abstract bool FailureFound { get; }
-        public abstract string Reason { get; }
+        protected abstract bool FailureFoundFor(IXenObject itemToFilterOn, out string failureReason);
 
-        public abstract bool FailureFoundFor(IXenObject xenObject);
-
-        public bool FailureFound => FailureFoundFor(baseItemToFilterOn);
+        public bool FailureFound(out string failureReason)
+        {
+            return FailureFoundFor(_baseItemToFilterOn, out failureReason);
+        }
 
         public virtual void Cancel() { }
     } 

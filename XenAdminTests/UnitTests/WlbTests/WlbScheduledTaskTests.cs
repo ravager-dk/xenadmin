@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,12 +31,13 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using XenAdmin.Controls.Wlb;
 using XenAdmin.Wlb;
-using XenAdminTests.UnitTests.UnitTestHelper;
+
 
 namespace XenAdminTests.UnitTests.WlbTests
 {
-    [TestFixture, Category(TestCategories.Unit), SetCulture("en-EN")]
+    [TestFixture, Category(TestCategories.Unit)]
     public class WlbScheduledTaskTests
     {
         #region Private Class Data
@@ -45,26 +45,26 @@ namespace XenAdminTests.UnitTests.WlbTests
         private WlbScheduledTask task;
 
         private ScheduledTaskData exampleData = new ScheduledTaskData()
-                                                    {
-                                                        DeleteTask = true,
-                                                        Name = "John Doe",
-                                                        Description = "Friendly",
-                                                        Enabled = true,
-                                                        Owner = "You",
-                                                        LastRunResult = true,
-                                                        LastTouchedBy = "Me",
-                                                        LastTouched = new DateTime(2011, 12, 25),
-                                                        TriggerInterval = WlbScheduledTask.WlbTaskTriggerType.Daily,
-                                                        DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Weekdays,
-                                                        ExecuteTime = new DateTime(2011, 12, 26),
-                                                        LastRunDate = new DateTime(2011, 12, 27),
-                                                        EnableDate = new DateTime(2011, 12, 28),
-                                                        DisableTime = new DateTime(2011, 12, 29),
-                                                        ActionType =
-                                                            WlbScheduledTask.WlbTaskActionType.SetOptimizationMode,
-                                                        TaskParameters =
-                                                            new Dictionary<string, string>() { { "key", "value" } }
-                                                    }; 
+        {
+            DeleteTask = true,
+            Name = "John Doe",
+            Description = "Friendly",
+            Enabled = true,
+            Owner = "You",
+            LastRunResult = true,
+            LastTouchedBy = "Me",
+            LastTouched = new DateTime(2011, 12, 25),
+            TriggerInterval = WlbScheduledTask.WlbTaskTriggerType.Daily,
+            DaysOfWeek = WlbScheduledTask.WlbTaskDaysOfWeek.Weekdays,
+            RunTime = new DateTime(2011, 12, 26),
+            LastRunDate = new DateTime(2011, 12, 27),
+            EnableDate = new DateTime(2011, 12, 28),
+            DisableTime = new DateTime(2011, 12, 29),
+            ActionType =
+                WlbScheduledTask.WlbTaskActionType.SetOptimizationMode,
+            TaskParameters =
+                new Dictionary<string, string>() {{"key", "value"}}
+        };
         #endregion
 
         [SetUp]
@@ -76,11 +76,8 @@ namespace XenAdminTests.UnitTests.WlbTests
         [Test]
         public void VerifyGettersAndSetters()
         {
-            IUnitTestVerifier validator = new VerifyGettersAndSetters(task);
-            validator.Verify(exampleData);
-
-            IUnitTestVerifier countValidator = new VerifyPropertyCounter(task);
-            countValidator.Verify(NUMBER_OF_PROPERTIES);
+            ClassVerifiers.VerifySettersAndGetters(task, exampleData);
+            ClassVerifiers.VerifyPropertyCounter(task, NUMBER_OF_PROPERTIES);
             Assert.AreEqual(73, task.TaskId, "Task ID as set in ctor");
         }
 
@@ -94,27 +91,21 @@ namespace XenAdminTests.UnitTests.WlbTests
         [Test]
         public void CheckClone()
         {
-            IUnitTestVerifier originalTaskSetterValidator = new VerifyGettersAndSetters(task);
-            IUnitTestVerifier originalTaskCounterValidator = new VerifyPropertyCounter(task);
             WlbScheduledTask clone = task.Clone();
-            IUnitTestVerifier clonedTaskSetterValidator = new VerifyGettersAndSetters(clone);
-            IUnitTestVerifier clonedTaskCounterValidator = new VerifyPropertyCounter(clone);
-
             Assert.AreNotEqual(task, clone);
 
             //Check contents are all equal to the expected
-            originalTaskCounterValidator.Verify(NUMBER_OF_PROPERTIES);
-            clonedTaskCounterValidator.Verify(NUMBER_OF_PROPERTIES);
+            ClassVerifiers.VerifyPropertyCounter(task, NUMBER_OF_PROPERTIES);
+            ClassVerifiers.VerifyPropertyCounter(clone, NUMBER_OF_PROPERTIES);
 
-            originalTaskSetterValidator.Verify(exampleData);
-            clonedTaskSetterValidator.Verify(exampleData);
-
+            ClassVerifiers.VerifySettersAndGetters(task, exampleData);
+            ClassVerifiers.VerifySettersAndGetters(clone, exampleData);
         }
 
         [Test]
         public void ExceptionRaisedIfOptModeNotSetButRequested()
         {
-            Assert.That(() => WlbScheduledTask.GetTaskOptMode(task), Throws.Exception.With.TypeOf(typeof(KeyNotFoundException)));
+            Assert.Throws(typeof(KeyNotFoundException), () => WlbScheduledTask.GetTaskOptMode(task));
         }
 
         [Test]
@@ -140,11 +131,11 @@ namespace XenAdminTests.UnitTests.WlbTests
         }
 
         [Test]
-        public void TaskExecutionTime()
+        public void TaskRunningTime()
         {
             const string expectedTime = "11:34 AM";
-            string executionTime = WlbScheduledTask.GetTaskExecuteTime(new DateTime(2011, 11, 20, 11, 34, 01));
-            Assert.AreEqual(expectedTime, executionTime);
+            string runTime = WlbOptModeScheduler.GetTaskRunTime(new DateTime(2011, 11, 20, 11, 34, 01));
+            Assert.AreEqual(expectedTime, runTime);
         }
 
         [Test]
@@ -230,7 +221,7 @@ namespace XenAdminTests.UnitTests.WlbTests
             public DateTime LastTouched;
             public WlbScheduledTask.WlbTaskTriggerType TriggerInterval;
             public WlbScheduledTask.WlbTaskDaysOfWeek DaysOfWeek;
-            public DateTime ExecuteTime;
+            public DateTime RunTime;
             public DateTime LastRunDate;
             public DateTime EnableDate;
             public DateTime DisableTime;

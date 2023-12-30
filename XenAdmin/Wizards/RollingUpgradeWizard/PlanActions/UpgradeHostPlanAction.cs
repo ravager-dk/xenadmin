@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -40,6 +39,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
 {
     public class UpgradeAutomatedHostPlanAction : UpgradeHostPlanAction
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly Dictionary<string, string> _arguments;
 
         public UpgradeAutomatedHostPlanAction(Host host, Control invokingControl, Dictionary<string, string> arguments)
@@ -84,9 +85,9 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
                 {
                     log.ErrorFormat("Host '{0}' rebooted with the same version '{1}'", hostAfterReboot.Name(), hostAfterReboot.LongProductVersion());
                     var error = new Exception(Messages.REBOOT_WITH_SAME_VERSION);
-                    //when the slave reboots with the same version do not interrupt the process,
+                    //when the supporter reboots with the same version do not interrupt the process,
                     //so set the error without throwing it
-                    if (hostAfterReboot.IsMaster())
+                    if (hostAfterReboot.IsCoordinator())
                         throw error;
                     Error = error;
                 }

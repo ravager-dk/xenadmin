@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,13 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAPI;
 using XenAdmin.Dialogs;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -98,7 +96,7 @@ namespace XenAdmin.Commands
         /// <param name="mainWindow">The application main window.</param>
         /// <param name="selection">The selection context for the Command.</param>
         protected Command(IMainWindow mainWindow, SelectedItem selection)
-            : this(mainWindow, new [] { selection })
+            : this(mainWindow, new[] { selection })
         {
         }
 
@@ -113,20 +111,6 @@ namespace XenAdmin.Commands
         }
 
         /// <summary>
-        /// Gets a list of <see cref="SelectedItem"/>s from the specified <see cref="IXenObject"/>s.
-        /// </summary>
-        protected static IEnumerable<SelectedItem> ConvertToSelection<T>(IEnumerable<T> xenObjects) where T : IXenObject
-        {
-            Util.ThrowIfParameterNull(xenObjects, "selection");
-            List<SelectedItem> selection = new List<SelectedItem>();
-            foreach (T xenObject in xenObjects)
-            {
-                selection.Add(new SelectedItem(xenObject));
-            }
-            return selection;
-        }
-
-        /// <summary>
         /// Gets the current selection context for the Command.
         /// </summary>
         public SelectedItemCollection GetSelection()
@@ -135,39 +119,39 @@ namespace XenAdmin.Commands
         }
 
         /// <summary>
-        /// Determines whether this instance can execute with the current selection context.
+        /// Determines whether this instance can run with the current selection context.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if this instance can execute; otherwise, <c>false</c>.
+        /// 	<c>true</c> if this instance can run; otherwise, <c>false</c>.
         /// </returns>
-        public bool CanExecute()
+        public bool CanRun()
         {
-            return MainWindowCommandInterface != null && CanExecuteCore(GetSelection());
+            return MainWindowCommandInterface != null && CanRunCore(GetSelection());
         }
 
         /// <summary>
-        /// Determines whether this instance can execute with the current selection context.
+        /// Determines whether this instance can run with the current selection context.
         /// </summary>
         /// <param name="selection">The selection context.</param>
         /// <returns>
-        /// 	<c>true</c> if this instance can execute with the specified selection; otherwise, <c>false</c>.
+        /// 	<c>true</c> if this instance can run with the specified selection; otherwise, <c>false</c>.
         /// </returns>
-        protected virtual bool CanExecuteCore(SelectedItemCollection selection)
+        protected virtual bool CanRunCore(SelectedItemCollection selection)
         {
             return true;
         }
 
         /// <summary>
-        /// Executes this Command on the current selection.
+        /// Runs this Command on the current selection.
         /// </summary>
-        public void Execute()
+        public void Run()
         {
             if (Confirm())
             {
-                var cantExecuteReasons = GetCantExecuteReasons();
-                var errorDialog = cantExecuteReasons.Count > 0 ? GetErrorDialogCore(cantExecuteReasons) : null;
+                var cantRunReasons = GetCantRunReasons();
+                var errorDialog = cantRunReasons.Count > 0 ? GetErrorDialogCore(cantRunReasons) : null;
 
-                ExecuteCore(GetSelection());
+                RunCore(GetSelection());
 
                 if (errorDialog != null)
                 {
@@ -177,107 +161,67 @@ namespace XenAdmin.Commands
         }
 
         /// <summary>
-        /// Executes this Command.
+        /// Runs this Command.
         /// </summary>
         /// <param name="selection">The selection the Command should operate on.</param>
-        protected virtual void ExecuteCore(SelectedItemCollection selection)
+        protected virtual void RunCore(SelectedItemCollection selection)
         {
         }
 
         /// <summary>
         /// Gets the text for a menu item which launches this Command.
         /// </summary>
-        public virtual string MenuText
-        {
-            get { return null; }
-        }
+        public virtual string MenuText => null;
 
         /// <summary>
         /// Gets the text for a context menu item which launches this Command.
         /// </summary>
-        public virtual string ContextMenuText
-        {
-            get { return null; }
-        }
+        public virtual string ContextMenuText => null;
 
         /// <summary>
         /// Gets the image for a menu item which launches this Command.
         /// </summary>
-        public virtual Image MenuImage
-        {
-            get { return null; }
-        }
+        public virtual Image MenuImage => null;
 
         /// <summary>
         /// Gets the image for a context menu item which launches this Command.
         /// </summary>
-        public virtual Image ContextMenuImage
-        {
-            get { return null; }
-        }
+        public virtual Image ContextMenuImage => null;
 
         /// <summary>
         /// Gets the text for the toolbar button which launches this Command.
         /// </summary>
-        public virtual string ToolBarText
-        {
-            get { return null; }
-        }
+        public virtual string ToolBarText => null;
 
         /// <summary>
         /// Gets the image for a toolbar button which launches this Command.
         /// </summary>
-        public virtual Image ToolBarImage
-        {
-            get { return null; }
-        }
+        public virtual Image ToolBarImage => null;
 
         /// <summary>
         /// Gets the text for a button which launches this Command.
         /// </summary>
-        public virtual string ButtonText
-        {
-            get { return null; }
-        }
+        public virtual string ButtonText => null;
 
         /// <summary>
-        /// Gets the tool tip text. By default this is the can't execute reason if execution is not possible and
-        /// blank if it can. Override EnabledToolTipText to provide a descriptive tooltip when the command is enabled.
+        /// Gets the tool tip text when running is not possible. This is the
+        /// can't run reason for single selection, and null otherwise.
         /// </summary>
-        public virtual string ToolTipText
+        public virtual string DisabledToolTipText
         {
-            get 
+            get
             {
-                if (CanExecute())
-                    return EnabledToolTipText;
-
-                return DisabledToolTipText;  
-            }
-        }
-
-        /// <summary>
-        /// Gets the tool tip text when the command is not able to run. CantExectuteReason for single items,
-        /// null for multiple.
-        /// </summary>
-        protected virtual string DisabledToolTipText
-        {
-            get 
-            {
-                var reasons = GetCantExecuteReasons();
-                // It's necessary to double check that we have one reason which matches up with a single selection
-                // as CanExecuteCore and GetCantExecuteReasons aren't required to match up.
-                if (reasons.Count == 1 && GetSelection().Count == 1)
+                var selection = GetSelection();
+                if (selection.Count == 1)
                 {
-                    foreach (string s in reasons.Values)
-                    {
-                        if (s.Equals(Messages.UNKNOWN))
-                        {
-                            //This is the default, and not a useful tooltip
-                            return null;
-                        }
-                        return s;
-                    }
+                    var item = selection[0];
+                    if (item?.XenObject == null)
+                        return null;
+
+                    string reason = GetCantRunReasonCore(item.XenObject);
+                    return reason == Messages.UNKNOWN ? null : reason;
                 }
+
                 return null;
             }
         }
@@ -285,101 +229,70 @@ namespace XenAdmin.Commands
         /// <summary>
         /// Gets the tool tip text when the command is able to run. Null by default.
         /// </summary>
-        protected virtual string EnabledToolTipText
-        {
-            get { return null; }
-        }
+        public virtual string EnabledToolTipText => null;
 
         /// <summary>
         /// Gets the shortcut key display string. This is only used if this Command is used on the main menu.
         /// </summary>
-        public virtual string ShortcutKeyDisplayString
-        {
-            get { return null; }
-        }
+        public virtual string ShortcutKeyDisplayString => null;
 
         /// <summary>
         /// Gets the shortcut keys. This is only used if this Command is used on the main menu.
         /// </summary>
-        public virtual Keys ShortcutKeys
-        {
-            get { return Keys.None; }
-        }
+        public virtual Keys ShortcutKeys => Keys.None;
 
         /// <summary>
         /// Gets a value indicating whether a confirmation dialog should be shown.
         /// </summary>
-        protected virtual bool ConfirmationRequired
-        {
-            get { return false; }
-        }
+        protected virtual bool ConfirmationRequired => false;
 
         /// <summary>
         /// Gets the confirmation dialog title. The default for this is Messages.MESSAGEBOX_CONFIRM.
         /// </summary>
-        protected virtual string ConfirmationDialogTitle
-        {
-            get { return null; }
-        }
+        protected virtual string ConfirmationDialogTitle => null;
 
         /// <summary>
         /// Gets the confirmation dialog text.
         /// </summary>
-        protected virtual string ConfirmationDialogText
-        {
-            get { return null; }
-        }
+        protected virtual string ConfirmationDialogText => null;
 
         /// <summary>
-        /// Gets the help id for the confirmatin dialog.
+        /// Gets the help id for the confirmation dialog.
         /// </summary>
-        protected virtual string ConfirmationDialogHelpId
-        {
-            get { return null; }
-        }
+        protected virtual string ConfirmationDialogHelpId => null;
 
-        /// <summary>
-        /// Gets the confirmation dialog's "Yes" button label.
-        /// </summary>
-        protected virtual string ConfirmationDialogYesButtonLabel
-        {
-            get { return null; }
-        }
+        protected virtual string ConfirmationDialogYesButtonLabel => null;
 
-        /// <summary>
-        /// Gets the confirmation dialog's "No" button label.
-        /// </summary>
-        protected virtual string ConfirmationDialogNoButtonLabel
-        {
-            get { return null; }
-        }
+        protected virtual string ConfirmationDialogNoButtonLabel => null;
 
-        /// <summary>
-        /// Gets a value indicating whether the "No" button should be selected when a confirmation dialog is displayed.
-        /// </summary>
-        protected virtual bool ConfirmationDialogNoButtonSelected
-        {
-            get { return false; }
-        }
+        protected virtual bool ConfirmationDialogNoButtonSelected => false;
 
         /// <summary>
         /// Shows a confirmation dialog.
         /// </summary>
-        /// <returns>true if the user clicked Yes.</returns>
-        protected bool ShowConfirmationDialog()
+        /// <returns>True if the user clicked Yes.</returns>
+        private bool ShowConfirmationDialog()
         {
-            ThreeButtonDialog.TBDButton buttonYes = ThreeButtonDialog.ButtonYes;
-            if (!string.IsNullOrEmpty(ConfirmationDialogYesButtonLabel))
-                buttonYes.label = ConfirmationDialogYesButtonLabel;
-            
-            ThreeButtonDialog.TBDButton buttonNo = ThreeButtonDialog.ButtonNo;
-            if (!string.IsNullOrEmpty(ConfirmationDialogNoButtonLabel))
-                buttonNo.label = ConfirmationDialogNoButtonLabel;
-            if (ConfirmationDialogNoButtonSelected)
-                buttonNo.selected = true;
+            if (Program.RunInAutomatedTestMode)
+                return true;
 
-            return MainWindow.Confirm(null, Parent, ConfirmationDialogTitle ?? Messages.XENCENTER,
-                ConfirmationDialogHelpId, buttonYes, buttonNo, ConfirmationDialogText);
+            var buttonYes = new ThreeButtonDialog.TBDButton(
+                string.IsNullOrEmpty(ConfirmationDialogYesButtonLabel) ? Messages.YES_BUTTON_CAPTION : ConfirmationDialogYesButtonLabel,
+                DialogResult.Yes);
+
+            var buttonNo = new ThreeButtonDialog.TBDButton(
+                string.IsNullOrEmpty(ConfirmationDialogNoButtonLabel) ? Messages.NO_BUTTON_CAPTION : ConfirmationDialogNoButtonLabel,
+                DialogResult.No,
+                selected: ConfirmationDialogNoButtonSelected);
+
+            using (var dialog = new WarningDialog(ConfirmationDialogText, buttonYes, buttonNo)
+            { WindowTitle = ConfirmationDialogTitle })
+            {
+                if (!string.IsNullOrEmpty(ConfirmationDialogHelpId))
+                    dialog.HelpNameSetter = ConfirmationDialogHelpId;
+
+                return dialog.ShowDialog(Parent ?? Program.MainWindow) == DialogResult.Yes;
+            }
         }
 
         /// <summary>
@@ -392,44 +305,44 @@ namespace XenAdmin.Commands
         }
 
         /// <summary>
-        /// Gets all of the reasons that items in the selection can't execute.
+        /// Gets all of the reasons that items in the selection can't run.
         /// </summary>
         /// <returns>A dictionary of reasons keyed by the item name.</returns>
-        public Dictionary<IXenObject, string> GetCantExecuteReasons()
+        public Dictionary<IXenObject, string> GetCantRunReasons()
         {
-            var cantExecuteReasons = new Dictionary<IXenObject, string>();
+            var cantRunReasons = new Dictionary<IXenObject, string>();
 
             foreach (SelectedItem item in GetSelection())
             {
                 if (item == null || item.XenObject == null)
                     continue;
-                if (MainWindowCommandInterface != null && CanExecuteCore(new SelectedItemCollection(item)))
+                if (MainWindowCommandInterface != null && CanRunCore(new SelectedItemCollection(item)))
                     continue;
 
-                string reason = GetCantExecuteReasonCore(item.XenObject);
+                string reason = GetCantRunReasonCore(item.XenObject);
                 if (reason != null)
-                    cantExecuteReasons.Add(item.XenObject, reason);
+                    cantRunReasons.Add(item.XenObject, reason);
             }
 
-            return cantExecuteReasons;
+            return cantRunReasons;
         }
 
 
         /// <summary>
-        /// Gets the reason that the specified item from the selection cant execute. This is displayed in the error dialog.
+        /// Gets the reason that the specified item from the selection can't run. This is displayed in the error dialog.
         /// The default is "Unknown".
         /// </summary>
-        protected virtual string GetCantExecuteReasonCore(IXenObject item)
+        protected virtual string GetCantRunReasonCore(IXenObject item)
         {
             return Messages.UNKNOWN;
         }
 
         /// <summary>
-        /// Gets the error dialog to be displayed if one or more items in the selection couldn't be executed. Returns null by
+        /// Gets the error dialog to be displayed if one or more items in the selection couldn't be run. Returns null by
         /// default i.e. An error dialog isn't displayed by default.
         /// </summary>
-        /// <param name="cantExecuteReasons">The reasons for why the items couldn't execute.</param>
-        protected virtual CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        /// <param name="cantRunReasons">The reasons for why the items couldn't run.</param>
+        protected virtual CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
             return null;
         }
@@ -437,36 +350,24 @@ namespace XenAdmin.Commands
         /// <summary>
         /// Gets the main window to be used by the Command.
         /// </summary>
-        public IMainWindow MainWindowCommandInterface
-        {
-            get { return _mainWindow; }
-        }
+        public IMainWindow MainWindowCommandInterface => _mainWindow;
+
 
         /// <summary>
-        /// Sets the parent for any dialogs. If not called, then the main window is used.
-        /// </summary>
-        /// <param name="parent">The parent.</param>
-        public void SetParent(Control parent)
-        {
-            _parent = parent;
-        }
-
-        /// <summary>
-        /// Gets the parent for any dialogs. If SetParent() hasn't been called then the MainWindow is returned.
+        /// Gets or sets the parent control for any dialogs launched during the
+        /// running of the command. Defaults to the MainWindow Form.
         /// </summary>
         public Control Parent
         {
-            get
-            {
-                return _parent ?? _mainWindow.Form;
-            }
+            get => _parent ?? _mainWindow?.Form;
+            set => _parent = value;
         }
-        
+
         /// <summary>
         /// Runs the specified <see cref="AsyncAction"/>s such that they are synchronous per connection but asynchronous across connections.
         /// </summary>
         /// <param name="endDescription"></param>
-        /// <param name="runActionsInParallel">Whether the actions should be executed simultaneously</param>
+        /// <param name="runActionsInParallel">Whether the actions should be run simultaneously</param>
         /// <param name="actions"></param>
         /// <param name="title"></param>
         /// <param name="startDescription"></param>

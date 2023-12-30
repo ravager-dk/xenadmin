@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,10 +30,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Core;
 
@@ -44,7 +43,6 @@ namespace XenAdmin.Controls.Ballooning
     public partial class ShinyBar : UserControl
     {
         private static readonly Font font = new Font("Segoe UI", 9);
-        //private static readonly Font font = FormFontFixer.DefaultFont;
         private const int radius = 5;
         private const int pad = 2;
         private const int TEXT_PAD = 3;
@@ -59,6 +57,19 @@ namespace XenAdmin.Controls.Ballooning
         private Point toolTipLocation;
         private string toolTipText;
         private bool ignoreNextOnMouseMove;
+
+        //palette
+        protected Color VMShinyBar_Used = Color.ForestGreen;
+        protected Color HostShinyBar_Xen = Color.DarkGray;
+        protected Color HostShinyBar_ControlDomain = Color.DimGray; 
+        protected Color[] HostShinyBar_VMs = { Color.MidnightBlue, Color.SteelBlue };
+        protected Color[] GpuShinyBar_VMs = { Color.FromArgb(83, 39, 139), Color.FromArgb(157, 115, 215) };
+        protected Color ShinyBar_Unused = Color.Black;
+        protected Color ShinyBar_Text = Color.White;
+        protected Color Grid = Color.DarkGray;
+        protected Color SliderLimits = Color.LightGray;
+        private readonly Func<Color, Color> _colorTransformer = ControlPaint.LightLight;
+
 
         public ShinyBar()
         {
@@ -90,7 +101,7 @@ namespace XenAdmin.Controls.Ballooning
                 // Outer rounded rectangle
                 {
                     Color topColor = color;
-                    Color bottomColor = ControlPaint.LightLight(color);
+                    Color bottomColor = _colorTransformer(color);
                     using (LinearGradientBrush outerBrush = new LinearGradientBrush(barBounds, topColor, bottomColor, LinearGradientMode.Vertical))
                     {
                         g.FillPath(outerBrush, outerPath);
@@ -210,8 +221,9 @@ namespace XenAdmin.Controls.Ballooning
             return path;
         }
 
-        protected static void DrawGrid(Graphics g, Rectangle barArea, double bytesPerPixel, double max)
+        protected void DrawGrid(Graphics g, Rectangle barArea, double bytesPerPixel, double max)
         {
+            Debug.Assert(max > 0, "Memory value should be larger than zero");
             const int min_gap = 40;  // min gap between consecutive labels (which are on alternate ticks)
             const int line_height = 12;
 
@@ -226,15 +238,15 @@ namespace XenAdmin.Controls.Ballooning
             int text_top = text_bottom - labelSize.Height;
 
             // Calculate a suitable increment
-            long incr = Util.BINARY_MEGA / 2;
-            while((double)incr / bytesPerPixel * 2 < min_gap + longest)
+            var incr = Util.BINARY_MEGA / 2.0;
+            while(incr / bytesPerPixel * 2 < min_gap + longest)
                 incr *= 2;
 
             // Draw the grid
-            using (Pen pen = new Pen(BallooningColors.Grid))
+            using (Pen pen = new Pen(Grid))
             {
                 bool withLabel = true;
-                for (long x = 0; x <= max; x += incr)
+                for (var x = 0.0; x <= max; x += incr)
                 {
                     // Tick
                     int pos = barArea.Left + (int)((double)x / bytesPerPixel);
@@ -247,9 +259,9 @@ namespace XenAdmin.Controls.Ballooning
                         Size size = Drawing.MeasureText(g, label, Program.DefaultFont);
                         Rectangle rect = new Rectangle(new Point(pos - size.Width/2, text_top), size);
 
-                        if (LabelShouldBeShown(max, label, x))
+                        if (LabelShouldBeShown(max, x))
                         {
-                            Drawing.DrawText(g, label, Program.DefaultFont, rect, BallooningColors.Grid, Color.Transparent);
+                            Drawing.DrawText(g, label, Program.DefaultFont, rect, Grid, Color.Transparent);
                         }
                     }
                     withLabel = !withLabel;
@@ -263,10 +275,9 @@ namespace XenAdmin.Controls.Ballooning
         /// 2. If the maximum is greater than 1 GB, then show only the labels that are a multiple of half a GB.
         /// </summary>
         /// <param name="max"></param>
-        /// <param name="label"></param>
         /// <param name="x"></param>
         /// <returns></returns>
-        private static bool LabelShouldBeShown(double max, string label, long x)
+        private static bool LabelShouldBeShown(double max, double x)
         {
             return max <= Util.BINARY_GIGA  || (x % (0.5 * Util.BINARY_GIGA)) == 0;
         }

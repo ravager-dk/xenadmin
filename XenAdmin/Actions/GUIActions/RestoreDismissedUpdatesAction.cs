@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
+using XenAdmin.Alerts;
 using XenAdmin.Network;
 using XenAdmin.Core;
 using XenAPI;
@@ -56,11 +54,11 @@ namespace XenAdmin.Actions
 
             Dictionary<string, string> other_config = pool.other_config;
 
-            if (other_config.ContainsKey(Updates.IgnorePatchKey))
-                other_config.Remove(Updates.IgnorePatchKey);
+            if (other_config.ContainsKey(XenServerPatchAlert.IgnorePatchKey))
+                other_config.Remove(XenServerPatchAlert.IgnorePatchKey);
 
-            if (other_config.ContainsKey(Updates.LAST_SEEN_SERVER_VERSION_KEY))
-                other_config.Remove(Updates.LAST_SEEN_SERVER_VERSION_KEY);
+            if (other_config.ContainsKey(XenServerVersionAlert.LAST_SEEN_SERVER_VERSION_KEY))
+                other_config.Remove(XenServerVersionAlert.LAST_SEEN_SERVER_VERSION_KEY);
 
 
             XenAPI.Pool.set_other_config(Connection.Session, pool.opaque_ref, other_config);

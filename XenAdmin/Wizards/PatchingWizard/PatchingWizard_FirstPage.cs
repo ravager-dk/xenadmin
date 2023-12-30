@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System.Drawing;
+using System;
+using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Controls;
-using XenAdmin.Dialogs;
+using XenAdmin.Core;
+using XenAdmin.Dialogs.ServerUpdates;
 
 namespace XenAdmin.Wizards.PatchingWizard
 {
@@ -41,27 +42,62 @@ namespace XenAdmin.Wizards.PatchingWizard
         public PatchingWizard_FirstPage()
         {
             InitializeComponent();
+            radioButtonCdn.Text = string.Format(Messages.CONFIG_CDN_UPDATES_TAB_TITLE, BrandManager.ProductBrand, BrandManager.ProductVersionPost82);
+            radioButtonLcm.Text = string.Format(Messages.CONFIG_LCM_UPDATES_TAB_TITLE, BrandManager.ProductVersion821);
+            label5.Text = string.Format(label5.Text, BrandManager.BrandConsole);
+            label6.Text = string.Format(label6.Text, BrandManager.BrandConsole, BrandManager.CompanyNameLegacy);
         }
 
-        public override string Text
+        protected override void OnHandleCreated(EventArgs e)
         {
-            get
+            base.OnHandleCreated(e);
+
+            var connections = ConnectionsManager.XenConnectionsCopy;
+
+            if (connections.Count > 0 && connections.All(c => c.IsConnected && !Helpers.CloudOrGreater(c)))
+                radioButtonLcm.Checked = true;
+            else
+                radioButtonCdn.Checked = true;
+        }
+
+        public override string Text => Messages.BEFORE_YOU_START;
+
+        public override string  PageTitle => Messages.BEFORE_YOU_START;
+
+        public bool IsNewGeneration
+        {
+            get => radioButtonCdn.Checked;
+            set
             {
-                return Messages.BEFORE_YOU_START;
+                radioButtonCdn.Checked = value;
+                radioButtonLcm.Checked = !value;
             }
         }
 
-        public override string  PageTitle
+        private void ToggleClientIdInfo()
         {
-            get
-            {
-                return Messages.BEFORE_YOU_START;
-            }
+            pictureBox4.Visible = label6.Visible = linkLabelClientId.Visible = radioButtonLcm.Checked;
         }
 
-        public override string HelpID
+        private void radioButtonCdn_CheckedChanged(object sender, EventArgs e)
         {
-            get { return "Beforeyoustart"; }
+            if (radioButtonCdn.Checked)
+                ToggleClientIdInfo();
+        }
+
+        private void radioButtonLcm_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonLcm.Checked)
+                ToggleClientIdInfo();
+        }
+
+        private void linkLabelClientId_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            using (var dialog = new ConfigUpdatesDialog())
+            {
+                dialog.SelectLcmTab();
+                dialog.ShowDialog(this);
+            }
         }
     }
 }

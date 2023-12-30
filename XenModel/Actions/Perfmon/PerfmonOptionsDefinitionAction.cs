@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,6 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using XenAdmin.Alerts;
 using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
@@ -40,37 +35,56 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class PerfmonOptionsDefinitionAction : PureAsyncAction
+    public class PerfmonOptionsDefinitionAction : AsyncAction
     {
-        private readonly Pool pool;
-        private readonly PerfmonOptionsDefinition perfmonOptions;
+        private readonly Pool _pool;
+        private readonly string _mailDestination;
+        private readonly string _mailHub;
+        private readonly string _mailLangCode;
 
-        public PerfmonOptionsDefinitionAction(IXenConnection connection, PerfmonOptionsDefinition perfmonOptions, bool suppressHistory)
+        public PerfmonOptionsDefinitionAction(IXenConnection connection, string mailDestination, string mailHub, string mailLangCode, bool suppressHistory)
             : base(connection, Messages.ACTION_CHANGE_EMAIL_OPTIONS, suppressHistory)
         {
-            this.perfmonOptions = perfmonOptions;
-            pool = Helpers.GetPoolOfOne(connection);
-            this.Description = string.Format(Messages.ACTION_CHANGING_EMAIL_OPTIONS_FOR, pool);
+            _mailDestination = mailDestination;
+            _mailHub = mailHub;
+            _mailLangCode = mailLangCode;
+            _pool = Helpers.GetPoolOfOne(connection);
+
+            Description = string.Format(Messages.ACTION_CHANGING_EMAIL_OPTIONS_FOR, _pool);
+
+            ApiMethodsToRoleCheck.AddWithKey("pool.remove_from_other_config", Pool.MAIL_DESTINATION_KEY_NAME);
+            ApiMethodsToRoleCheck.AddWithKey("pool.remove_from_other_config", Pool.SMTP_MAILHUB_KEY_NAME);
+            ApiMethodsToRoleCheck.AddWithKey("pool.remove_from_other_config", Pool.MAIL_LANGUAGE_KEY_NAME);
+
+            if (_mailDestination != null && _mailHub != null)
+            {
+                ApiMethodsToRoleCheck.AddWithKey("pool.add_to_other_config", Pool.MAIL_DESTINATION_KEY_NAME);
+                ApiMethodsToRoleCheck.AddWithKey("pool.add_to_other_config", Pool.SMTP_MAILHUB_KEY_NAME);
+                
+                if (_mailLangCode != null)
+                    ApiMethodsToRoleCheck.AddWithKey("pool.add_to_other_config", Pool.MAIL_LANGUAGE_KEY_NAME);
+            }
         }
 
         protected override void Run()
         {
-            if (pool == null)
+            if (_pool == null)
                 return;
 
-            if (perfmonOptions == null)
-            {
-                Helpers.RemoveFromOtherConfig(Session, pool, PerfmonOptionsDefinition.MAIL_DESTINATION_KEY_NAME);
-                Helpers.RemoveFromOtherConfig(Session, pool, PerfmonOptionsDefinition.SMTP_MAILHUB_KEY_NAME);
-                Helpers.RemoveFromOtherConfig(Session, pool, PerfmonOptionsDefinition.MAIL_LANGUAGE_KEY_NAME);
-            }
-            else
-            {
-                Helpers.SetOtherConfig(Session, pool, PerfmonOptionsDefinition.MAIL_DESTINATION_KEY_NAME, perfmonOptions.MailDestination);
-                Helpers.SetOtherConfig(Session, pool, PerfmonOptionsDefinition.SMTP_MAILHUB_KEY_NAME, perfmonOptions.MailHub);
-                if(null != perfmonOptions.MailLanguageCode)
-                    Helpers.SetOtherConfig(Session, pool, PerfmonOptionsDefinition.MAIL_LANGUAGE_KEY_NAME, perfmonOptions.MailLanguageCode);
-            }
+            Pool.remove_from_other_config(Session, _pool.opaque_ref, Pool.MAIL_DESTINATION_KEY_NAME);
+
+            if (_mailDestination != null)
+                Pool.add_to_other_config(Session, _pool.opaque_ref, Pool.MAIL_DESTINATION_KEY_NAME, _mailDestination);
+
+            Pool.remove_from_other_config(Session, _pool.opaque_ref, Pool.SMTP_MAILHUB_KEY_NAME);
+            
+            if (_mailHub != null)
+                Pool.add_to_other_config(Session, _pool.opaque_ref, Pool.SMTP_MAILHUB_KEY_NAME, _mailHub);
+
+            Pool.remove_from_other_config(Session, _pool.opaque_ref, Pool.MAIL_LANGUAGE_KEY_NAME);
+
+            if (_mailLangCode != null)
+                Pool.add_to_other_config(Session, _pool.opaque_ref, Pool.MAIL_LANGUAGE_KEY_NAME, _mailLangCode);
         }
     }
 }

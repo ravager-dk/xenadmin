@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using XenAdmin.Commands;
@@ -218,7 +216,7 @@ namespace XenAdmin.Controls.MainWindowControls
                 buttonInfraBig.Checked = true;
         }
 
-        private void SwitchToNotificationsView(NotificationsSubMode subMode)
+        public void SwitchToNotificationsView(NotificationsSubMode subMode)
         {
             //check the button if switching has been requested programmatically
             if (!buttonNotifyBig.Checked)
@@ -266,8 +264,8 @@ namespace XenAdmin.Controls.MainWindowControls
                                    Text = search.Name.EscapeAmpersands(),
                                    Tag = search,
                                    Image = search.DefaultSearch
-                                               ? Properties.Resources._000_defaultSpyglass_h32bit_16
-                                               : Properties.Resources._000_Search_h32bit_16,
+                                               ? Images.StaticImages._000_defaultSpyglass_h32bit_16
+                                               : Images.StaticImages._000_Search_h32bit_16,
 
                                };
                 itemList.Add(item);

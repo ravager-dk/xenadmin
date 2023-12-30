@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,11 +29,8 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Core;
@@ -46,41 +42,27 @@ namespace XenAdmin.Controls
 {
     public partial class UpsellPage : UserControl, IEditPage
     {
-        private string learnMoreUrl;
-
         public UpsellPage()
         {
             InitializeComponent();
-            this.LearnMoreButton.Visible = !HiddenFeatures.LearnMoreButtonHidden;
+            LearnMoreButton.Visible = !HiddenFeatures.LearnMoreButtonHidden;
         }
 
-        public void enableOkButton()
+        public void EnableOkButton()
         {
             OKButton.Visible = true;
         }
 
         public string BlurbText
         {
-            set
-            {
-                Blurb.Text = value;
-            }
-        }
-
-        public string LearnMoreUrl
-        {
-            set { learnMoreUrl = value; }
-        }
-
-        public void SetAllTexts(string blurb, string learnMoreUrl)
-        {
-            BlurbText = blurb;
-            LearnMoreUrl = learnMoreUrl;
+            set => Blurb.Text = HiddenFeatures.LinkLabelHidden
+                ? value
+                : value + string.Format(Messages.UPSELL_BLURB_TRIAL, BrandManager.ProductBrand);
         }
 
         private void LearnMoreButton_Clicked(object sender, EventArgs e)
         {
-            NavigateTo(learnMoreUrl);
+            NavigateTo(InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL);
         }
 
         private void NavigateTo(string url)
@@ -101,12 +83,13 @@ namespace XenAdmin.Controls
         {
         }
 
-        public bool ValidToSave
-        {
-            get { return true; }
-        }
+        public bool ValidToSave => true;
 
         public void ShowLocalValidationMessages()
+        {
+        }
+
+        public void HideLocalValidationMessages()
         {
         }
 
@@ -114,34 +97,16 @@ namespace XenAdmin.Controls
         {
         }
 
-        public bool HasChanged
-        {
-            get { return false; }
-        }
+        public bool HasChanged => false;
 
 
         #region IVerticalTab Members
 
-        public string SubText
-        {
-            get
-            {
-                return Messages.XENSERVER_UPGRADE_REQUIRED;
-            }
-        }
+        public string SubText => Messages.XENSERVER_UPGRADE_REQUIRED;
 
-        private Image image = Properties.Resources.upsell_16;
-        public Image Image
-        {
-            get
-            {
-                return image;
-            }
-            set
-            {
-                image = value;
-            }
-        }
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Image Image { get; set; } = Images.StaticImages.Logo; //serving as default value; never really shown
 
         #endregion
 
@@ -149,7 +114,7 @@ namespace XenAdmin.Controls
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            ParentForm.Close();
+            ParentForm?.Close();
         }
     }
 }

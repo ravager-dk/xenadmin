@@ -123,14 +123,8 @@
   <data name="CERTIFICATE_IS_INVALID" xml:space="preserve">
     <value>Certificate is invalid.</value>
   </data>
-  <data name="COMPRESS_FAILED" xml:space="preserve">
-    <value>Failed to compress {0}.</value>
-  </data>
   <data name="COMPRESS_INVALID_METHOD" xml:space="preserve">
     <value>Compression method {0} is not supported.</value>
-  </data>
-  <data name="CONVERSION_FAILED" xml:space="preserve">
-    <value>Failed to convert OVF to OVA.</value>
   </data>
   <data name="CONVERSION_NO_DATA" xml:space="preserve">
     <value>Failed to convert HyperV configuration file.</value>
@@ -149,9 +143,6 @@
   </data>
   <data name="EULA_RB_REJECT" xml:space="preserve">
     <value>Reject</value>
-  </data>
-  <data name="EULA_TITLE" xml:space="preserve">
-    <value>[Citrix] OVF EULA</value>
   </data>
   <data name="FAILED_TO_ADD_OS_SECTION" xml:space="preserve">
     <value>Failed to add operating system section because the virtual system collection is invalid.</value>
@@ -190,7 +181,7 @@
     <value>Failed to open {0}.</value>
   </data>
   <data name="OVF_CREATED" xml:space="preserve">
-    <value>Created by [XenCenter] Disk Image Import</value>
+    <value>Created by Disk Image Import</value>
   </data>
   <data name="OVF_DEPLOYMENT_CFG_SECTION_MISSING" xml:space="preserve">
     <value>Failed to find deployment configuration section.</value>

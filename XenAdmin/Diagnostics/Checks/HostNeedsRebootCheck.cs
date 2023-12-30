@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -67,15 +66,23 @@ namespace XenAdmin.Diagnostics.Checks
             this.restartHostPatches = restartHostPatches;
         }
 
+        public HostNeedsRebootCheck(Host host)
+            : base(host)
+        {
+        }
+
 
         protected override Problem RunHostCheck()
         {
-            var updateSequenceIsLivePatchable = restartHostPatches != null && restartHostPatches.Count > 0 && restartHostPatches.All(p => p.ContainsLivepatch);
+            if (Helpers.CloudOrGreater(Host) && livePatchCodesByHost == null)
+                return new HostNeedsReboot(this, Host);
 
-            // when livepatching is available, no restart is expected
-            if (livePatchCodesByHost != null && livePatchCodesByHost.ContainsKey(Host.uuid) &&
-                livePatchCodesByHost[Host.uuid] == livepatch_status.ok_livepatch_complete
-                || updateSequenceIsLivePatchable)
+            var updateSequenceIsLivePatchable = restartHostPatches != null && restartHostPatches.Count > 0 &&
+                                                restartHostPatches.All(p => p.ContainsLivepatch);
+            var hostHasBeenLivePatched = livePatchCodesByHost != null && livePatchCodesByHost.ContainsKey(Host.uuid) &&
+                                         livePatchCodesByHost[Host.uuid] == livepatch_status.ok_livepatch_complete;
+
+            if (hostHasBeenLivePatched || updateSequenceIsLivePatchable)
             {
                 var livePatchingRestricted = Helpers.FeatureForbidden(Host.Connection, Host.RestrictLivePatching);
                 var livePatchingRDisabled = Helpers.GetPoolOfOne(Host.Connection)?.live_patching_disabled == true;
@@ -87,25 +94,19 @@ namespace XenAdmin.Diagnostics.Checks
                 return null;
             }
 
-            if ((updateGuidance != null && updateGuidance.Contains(update_after_apply_guidance.restartHost))
-                || (patchGuidance != null && patchGuidance.Contains(after_apply_guidance.restartHost))
-                || (restartHostPatches != null && restartHostPatches.Count > 0))
+            if (updateGuidance != null && updateGuidance.Contains(update_after_apply_guidance.restartHost) ||
+                patchGuidance != null && patchGuidance.Contains(after_apply_guidance.restartHost) ||
+                restartHostPatches != null && restartHostPatches.Count > 0)
             {
-                 return new HostNeedsReboot(this, Host);
+                return new HostNeedsReboot(this, Host);
             }
 
             successfulCheckDescription = string.Format(Messages.UPDATES_WIZARD_NO_REBOOT_NEEDED, Host);
             return null;
         }
         
-        public override string Description
-        {
-            get { return Messages.HOST_NEEDS_REBOOT_CHECK_DESCRIPTION; }
-        }
+        public override string Description => Messages.HOST_NEEDS_REBOOT_CHECK_DESCRIPTION;
 
-        public override string SuccessfulCheckDescription
-        {
-            get { return successfulCheckDescription; }
-        }
+        public override string SuccessfulCheckDescription => successfulCheckDescription;
     }
 }

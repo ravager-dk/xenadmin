@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -63,7 +62,7 @@ namespace XenAdmin.Wizards.NewVMWizard
         private readonly Page_CloudConfigParameters page_CloudConfigParameters;
 
         private Host m_affinity;
-        private bool BlockAffinitySelection = false;
+        private bool BlockAffinitySelection;
         private bool gpuCapability;
 
         public AsyncAction Action;
@@ -88,49 +87,42 @@ namespace XenAdmin.Wizards.NewVMWizard
             page_CloudConfigParameters = new Page_CloudConfigParameters();
 
             #region RBAC Warning Page Checks
-            if (connection.Session.IsLocalSuperuser || Helpers.GetMaster(connection).external_auth_type == Auth.AUTH_TYPE_NONE)
+            if (Helpers.ConnectionRequiresRbac(connection))
             {
-                //page_RbacWarning.DisableStep = true;
-            }
-            else
-            {
-                // Check to see if they can even create a VM
-                var createCheck = new RBACWarningPage.WizardPermissionCheck(Messages.RBAC_WARNING_VM_WIZARD_BLOCK);
-                foreach (RbacMethod method in CreateVMAction.StaticRBACDependencies)
-                    createCheck.AddApiCheck(method);
-                createCheck.Blocking = true;
+                var createCheck = new WizardRbacCheck(Messages.RBAC_WARNING_VM_WIZARD_BLOCK,
+                    CreateVMAction.StaticRBACDependencies) {Blocking = true};
 
                 // Check to see if they can set memory values
-                var memCheck = new RBACWarningPage.WizardPermissionCheck(Messages.RBAC_WARNING_VM_WIZARD_MEM);
-                memCheck.AddApiCheck("vm.set_memory_limits");
-                memCheck.WarningAction = new RBACWarningPage.PermissionCheckActionDelegate(delegate()
+                var memCheck = new WizardRbacCheck(Messages.RBAC_WARNING_VM_WIZARD_MEM,
+                    "vm.set_memory_limits")
                 {
-                    // no point letting them continue
-                    page_5_CpuMem.DisableMemoryControls();
-                });
+                    WarningAction = () => page_5_CpuMem.DisableMemoryControls()
+                };
 
 
                 // Check to see if they can set the VM's affinity
-                var affinityCheck = new RBACWarningPage.WizardPermissionCheck(Messages.RBAC_WARNING_VM_WIZARD_AFFINITY);
-                affinityCheck.ApiCallsToCheck.Add("vm.set_affinity");
-                affinityCheck.WarningAction = new RBACWarningPage.PermissionCheckActionDelegate(delegate()
+                var affinityCheck = new WizardRbacCheck(Messages.RBAC_WARNING_VM_WIZARD_AFFINITY, "vm.set_affinity")
                 {
-                    page_4_HomeServer.DisableStep = true;
-                    BlockAffinitySelection = true;
-                    Program.Invoke(this, RefreshProgress);
-                });
+                    WarningAction = () =>
+                    {
+                        page_4_HomeServer.DisableStep = true;
+                        BlockAffinitySelection = true;
+                        Program.Invoke(this, RefreshProgress);
+                    }
+                };
 
                 page_RbacWarning.AddPermissionChecks(xenConnection, createCheck, affinityCheck, memCheck);
 
                 if (Helpers.GpuCapability(xenConnection))
                 {
-                    var vgpuCheck = new RBACWarningPage.WizardPermissionCheck(Messages.RBAC_WARNING_VM_WIZARD_GPU);
-                    vgpuCheck.ApiCallsToCheck.Add("vgpu.create");
-                    vgpuCheck.WarningAction = new RBACWarningPage.PermissionCheckActionDelegate(() =>
+                    var vgpuCheck = new WizardRbacCheck(Messages.RBAC_WARNING_VM_WIZARD_GPU, "vgpu.create")
                     {
-                        pageVgpu.DisableStep = true;
-                        Program.Invoke(this, RefreshProgress);
-                    });
+                        WarningAction = () =>
+                        {
+                            pageVgpu.DisableStep = true;
+                            Program.Invoke(this, RefreshProgress);
+                        }
+                    };
 
                     page_RbacWarning.AddPermissionChecks(xenConnection, vgpuCheck);
                 }
@@ -139,7 +131,7 @@ namespace XenAdmin.Wizards.NewVMWizard
             }
             #endregion
 
-            page_8_Finish.SummaryRetreiver = GetSummary;
+            page_8_Finish.SummaryRetriever = GetSummary;
 
             AddPages(page_1_Template, page_2_Name, page_3_InstallationMedia, page_4_HomeServer,
                      page_5_CpuMem, page_6_Storage, page_7_Networking, page_8_Finish);
@@ -169,8 +161,8 @@ namespace XenAdmin.Wizards.NewVMWizard
                                         page_3_InstallationMedia.SelectedUrl,
                                         page_3_InstallationMedia.SelectedBootMode,
                                         m_affinity,
-                                        page_5_CpuMem.SelectedVcpusMax,
-                                        page_5_CpuMem.SelectedVcpusAtStartup,
+                                        page_5_CpuMem.SelectedVCpusMax,
+                                        page_5_CpuMem.SelectedVCpusAtStartup,
                                         (long)page_5_CpuMem.SelectedMemoryDynamicMin,
                                         (long)page_5_CpuMem.SelectedMemoryDynamicMax,
                                         (long)page_5_CpuMem.SelectedMemoryStaticMax,
@@ -180,6 +172,7 @@ namespace XenAdmin.Wizards.NewVMWizard
                                         page_6_Storage.FullCopySR,
                                         page_7_Networking.SelectedVifs,
                                         page_8_Finish.StartImmediately,
+                                        page_3_InstallationMedia.AssignVtpm,
                                         VMOperationCommand.WarningDialogHAInvalidConfig,
                                         VMOperationCommand.StartDiagnosisForm,
                                         gpuCapability ? pageVgpu.VGpus : null,
@@ -192,13 +185,14 @@ namespace XenAdmin.Wizards.NewVMWizard
             base.FinishWizard();
         }
 
-        protected override void OnKeyPress(System.Windows.Forms.KeyPressEventArgs e)
+        protected override void OnKeyPress(KeyPressEventArgs e)
         {
             if (page_CloudConfigParameters != null && page_CloudConfigParameters.ActiveControl is TextBox && e.KeyChar == (char)Keys.Enter)
                 return;
 
             base.OnKeyPress(e);
         }
+
         protected override void UpdateWizardContent(XenTabPage senderPage)
         {
             var prevPageType = senderPage.GetType();
@@ -220,7 +214,7 @@ namespace XenAdmin.Wizards.NewVMWizard
 
 
                 RemovePage(pageVgpu);
-                gpuCapability = Helpers.GpuCapability(xenConnection) && selectedTemplate.CanHaveGpu();
+                gpuCapability = Helpers.GpuCapability(xenConnection) && selectedTemplate.CanHaveGpu() && Helpers.GpusAvailable(xenConnection);
                 if (gpuCapability)
                     AddAfterPage(page_5_CpuMem, pageVgpu);
 
@@ -239,20 +233,13 @@ namespace XenAdmin.Wizards.NewVMWizard
                         page_4_HomeServer.DisableStep = false;
                 }
 
-                // if custom template has no cd drive (must have been removed via cli) don't add one
-                var noInstallMedia = Helpers.CustomWithNoDVD(selectedTemplate);
-
-                if (selectedTemplate != null && selectedTemplate.DefaultTemplate() && string.IsNullOrEmpty(selectedTemplate.InstallMethods()))
-                    noInstallMedia = true;
-
-                page_3_InstallationMedia.ShowInstallationMedia = !noInstallMedia;
-
                 // The user cannot set their own affinity, use the one off the template
                 if (BlockAffinitySelection)
                     m_affinity = xenConnection.Resolve(selectedTemplate.affinity);
 
                 RemovePage(page_CloudConfigParameters);
-                if (selectedTemplate != null && selectedTemplate.CanHaveCloudConfigDrive() && Helpers.ContainerCapability(xenConnection))
+                if (selectedTemplate != null && Helpers.ContainerCapability(xenConnection) &&
+                    selectedTemplate.CanHaveCloudConfigDrive())
                 {
                     AddAfterPage(page_6_Storage, page_CloudConfigParameters);
                 }
@@ -283,7 +270,7 @@ namespace XenAdmin.Wizards.NewVMWizard
             {
                 if (!page_4_HomeServer.DisableStep)
                 {
-                    m_affinity = page_4_HomeServer.SelectedHomeServer;
+                    m_affinity = page_4_HomeServer.Affinity;
                     page_6_Storage.Affinity = m_affinity;
                     page_CloudConfigParameters.Affinity = m_affinity;
                 }
@@ -298,6 +285,10 @@ namespace XenAdmin.Wizards.NewVMWizard
                     AddAfterPage(page_6_Storage, page_6b_LunPerVdi);
                 }
             }
+            else if (prevPageType == typeof(Page_CpuMem))
+            {
+                page_8_Finish.CanStartImmediately = CanStartVm();
+            }
         }
 
         protected override string WizardPaneHelpID()
@@ -305,10 +296,31 @@ namespace XenAdmin.Wizards.NewVMWizard
             return CurrentStepTabPage is RBACWarningPage ? FormatHelpId("Rbac") : base.WizardPaneHelpID();
         }
 
+        private bool CanStartVm()
+        {
+            var homeHost = page_6_Storage.FullCopySR?.Home();
+
+            if (homeHost != null)
+            {
+                if (homeHost.CpuCount() < page_5_CpuMem.SelectedVCpusMax)
+                    return false;
+
+                if (homeHost.memory_available_calc() < page_5_CpuMem.SelectedMemoryDynamicMin)
+                    return false;
+            }
+
+            return page_5_CpuMem.CanStartVm;
+        }
+
         private void ShowXenAppXenDesktopWarning(IXenConnection connection)
         {
             if (connection != null && connection.Cache.Hosts.Any(h => h.DesktopFeaturesEnabled() || h.DesktopPlusFeaturesEnabled() || h.DesktopCloudFeaturesEnabled()))
-                ShowInformationMessage(Helpers.GetPool(connection) != null ? Messages.NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_POOL : Messages.NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_SERVER);
+            {
+                var format = Helpers.GetPool(connection) != null
+                    ? Messages.NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_POOL
+                    : Messages.NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_SERVER;
+                ShowInformationMessage(string.Format(format, BrandManager.CompanyNameLegacy));
+            }
             else
                 HideInformationMessage();
         }

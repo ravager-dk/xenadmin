@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,34 +30,45 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using XenAPI;
 using XenAdmin.Core;
 
 
 namespace XenAdmin.Actions.VMActions
 {
-    public class VMDestroyAction : PureAsyncAction
+    public class VMDestroyAction : AsyncAction
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private List<VBD> _deleteDisks;
-        private List<VM> _deleteSnapshots;
+        private readonly List<VBD> _disksToDelete;
+        private List<VM> _snapshotsToDelete;
 
-        public VMDestroyAction(VM vm, List<VBD> deleteDisks, List<VM> deleteSnapshots)
-            : base(vm.Connection, String.Format(Messages.ACTION_VM_DESTROYING_TITLE, vm.Name(), vm.Home() == null ? Helpers.GetName(vm.Connection) : Helpers.GetName(vm.Home())))
+        public VMDestroyAction(VM vm, List<VBD> disksToDelete, List<VM> snapshotsToDelete)
+            : base(vm.Connection, "")
         {
             VM = vm;
             Host = vm.Home();
             Pool = Helpers.GetPoolOfOne(vm.Connection);
-            _deleteDisks = deleteDisks;
-            _deleteSnapshots = deleteSnapshots;
+            _disksToDelete = disksToDelete;
+            _snapshotsToDelete = snapshotsToDelete;
+
+            Title = string.Format(Messages.ACTION_VM_DESTROYING_TITLE,
+                vm.Name(),
+                vm.Home() == null ? Helpers.GetName(vm.Connection) : Helpers.GetName(vm.Home()));
+
+            Description = Messages.ACTION_VM_DESTROYING;
+
+            ApiMethodsToRoleCheck.AddRange("VM.destroy", "VDI.destroy");
+
+            if (_snapshotsToDelete.Any(s => s.power_state == vm_power_state.Suspended))
+                ApiMethodsToRoleCheck.Add("VM.hard_shutdown");
         }
 
 
         protected override void Run()
         {
-            Description = Messages.ACTION_VM_DESTROYING;
-            DestroyVM(Session, VM, _deleteDisks, _deleteSnapshots);
+            DestroyVM(Session, VM, _disksToDelete, _snapshotsToDelete);
             Description = Messages.ACTION_VM_DESTROYED;
         }
 
@@ -68,24 +78,25 @@ namespace XenAdmin.Actions.VMActions
         }
 
 
-        private static void DestroyVM(Session session, VM vm, List<VBD> deleteDisks, IEnumerable<VM> deleteSnapshots)
+        private static void DestroyVM(Session session, VM vm, List<VBD> disksToDelete, IEnumerable<VM> snapshotsToDelete)
         {
-            Exception caught = null;
+            var caught = new List<Exception>();
 
-
-            foreach (VM snapshot in deleteSnapshots)
+            foreach (VM snapshot in snapshotsToDelete)
             {
                 VM snap = snapshot;
-                BestEffort(ref caught, session.Connection.ExpectDisruption, () =>
-                                           {
-                                               if (snap.power_state == vm_power_state.Suspended)
-                                               {
-                                                   XenAPI.VM.hard_shutdown(session, snap.opaque_ref);
-                                               }
-                                               DestroyVM(session, snap, true);
-                                           });
+                try
+                {
+                    if (snap.power_state == vm_power_state.Suspended)
+                        VM.hard_shutdown(session, snap.opaque_ref);
+                    DestroyVM(session, snap, true);
+                }
+                catch (Exception e)
+                {
+                    log.Error($"Failed to delete snapshot {snap.opaque_ref}", e);
+                    caught.Add(e);
+                }
             }
-
 
             List<XenRef<VDI>> vdiRefs = new List<XenRef<VDI>>();
 
@@ -95,8 +106,7 @@ namespace XenAdmin.Actions.VMActions
                 if (vbd == null)
                     continue;
 
-
-                if (deleteDisks.Contains(vbd))
+                if (disksToDelete.Contains(vbd))
                 {
                     if(vbd.Connection.Resolve(vbd.VDI)!=null)
                         vdiRefs.Add(vbd.VDI);
@@ -108,25 +118,34 @@ namespace XenAdmin.Actions.VMActions
             if (suspendVDI != null)
                 vdiRefs.Add(vm.suspend_VDI);
 
-            XenAPI.VM.destroy(session, vm.opaque_ref);
-
+            VM.destroy(session, vm.opaque_ref);
 
             foreach (XenRef<VDI> vdiRef in vdiRefs)
             {
-                XenRef<VDI> vdi = vdiRef;
-                BestEffort(ref caught, session.Connection.ExpectDisruption, () => XenAPI.VDI.destroy(session, vdi.opaque_ref));
-
-                //CA-115249. XenAPI could have already deleted the VDI. Destroy suspended VM and destroy snapshot functions are affected.
-                var failure = caught as Failure;
-                if (failure != null && failure.ErrorDescription != null && failure.ErrorDescription.Count > 0 && failure.ErrorDescription[0] == "HANDLE_INVALID")
+                try
                 {
-                    log.InfoFormat("VDI:{0} has already been deleted -- ignoring exception.", vdi.opaque_ref);
-                    caught = null;
+                    VDI.destroy(session, vdiRef.opaque_ref);
+                }
+                catch (Exception e)
+                {
+                    //CA-115249. XenAPI could have already deleted the VDI.
+                    //Destroy suspended VM and destroy snapshot functions are affected.
+
+                    if (e is Failure failure && failure.ErrorDescription != null &&
+                        failure.ErrorDescription.Count > 0 && failure.ErrorDescription[0] == "HANDLE_INVALID")
+                    {
+                        log.InfoFormat($"VDI {vdiRef.opaque_ref} has already been deleted; ignoring API failure.");
+                    }
+                    else
+                    {
+                        log.Error($"Failed to delete VDI {vdiRef.opaque_ref}", e);
+                        caught.Add(e);
+                    }
                 }
             }
 
-            if (caught != null)
-                throw caught;
+            if (caught.Count > 0)
+                throw caught[0];
         }
     }
 }

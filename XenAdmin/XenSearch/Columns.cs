@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -100,47 +99,53 @@ namespace XenAdmin.XenSearch
             VM vm = o as VM;
             if (vm != null)
             {
-                VM.VirtualisationStatus status = vm.GetVirtualisationStatus();
+                VM.VirtualizationStatus status = vm.GetVirtualizationStatus(out _);
                 if (vm.power_state != vm_power_state.Running ||
-                    status.HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED | VM.VirtualisationStatus.MANAGEMENT_INSTALLED) ||
-                    status.HasFlag(VM.VirtualisationStatus.UNKNOWN))
+                    status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled | VM.VirtualizationStatus.ManagementInstalled) ||
+                    status.HasFlag(VM.VirtualizationStatus.Unknown))
                     return false;
 
-                if (property == PropertyNames.memoryValue && status.HasFlag(VM.VirtualisationStatus.MANAGEMENT_INSTALLED))
+                if (property == PropertyNames.memoryValue && status.HasFlag(VM.VirtualizationStatus.ManagementInstalled))
                     return false;
 
-                if ((property == PropertyNames.diskText || property == PropertyNames.networkText) && status.HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED))
+                if ((property == PropertyNames.diskText || property == PropertyNames.networkText) && status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
                     return false;
 
                 string warningMessage;
                 int colSpan;                
 
-                if (property == PropertyNames.memoryValue && !status.HasFlag(VM.VirtualisationStatus.MANAGEMENT_INSTALLED))
+                if (property == PropertyNames.memoryValue && !status.HasFlag(VM.VirtualizationStatus.ManagementInstalled))
                 {
-                    if (vm.HasNewVirtualisationStates())
+                    if (vm.HasNewVirtualizationStates())
                     {
                         warningMessage = Messages.VIRTUALIZATION_STATE_VM_MANAGEMENT_AGENT_NOT_INSTALLED;
                         colSpan = 1;
                     }
                     else
                     {
-                        warningMessage = vm.GetVirtualisationWarningMessages();
+                        warningMessage = vm.GetVirtualizationWarningMessages();
                         colSpan = 3;
                     }
 
-                    if (InstallToolsCommand.CanExecute(vm))
+                    if (InstallToolsCommand.CanRun(vm))
                     {
                         item = new GridStringItem(warningMessage,
-                                                  HorizontalAlignment.Center,
-                                                  VerticalAlignment.Middle,
-                                                  false,
-                                                  false,
-                                                  QueryPanel.LinkBrush,
-                                                  Program.DefaultFontUnderline,
-                                                  QueryPanel.LinkBrush,
-                                                  Program.DefaultFontUnderline,
-                                                  colSpan,
-                                                  (sender, args) => new InstallToolsCommand(Program.MainWindow, vm).Execute(), null);
+                            HorizontalAlignment.Center,
+                            VerticalAlignment.Middle,
+                            false,
+                            false,
+                            QueryPanel.LinkBrush,
+                            Program.DefaultFontUnderline,
+                            QueryPanel.LinkBrush,
+                            Program.DefaultFontUnderline,
+                            colSpan,
+                            (sender, args) =>
+                            {
+                                if (Helpers.StockholmOrGreater(vm.Connection))
+                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
+                                else
+                                    new InstallToolsCommand(Program.MainWindow, vm).Run();
+                            }, null);
                     }
                     else
                     {
@@ -155,24 +160,30 @@ namespace XenAdmin.XenSearch
                     }
                 }
 
-                if (property == PropertyNames.diskText && vm.HasNewVirtualisationStates() && !status.HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED))
+                if (property == PropertyNames.diskText && vm.HasNewVirtualizationStates() && !status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
                 {
                     warningMessage = Messages.VIRTUALIZATION_STATE_VM_IO_NOT_OPTIMIZED;
                     colSpan = 2;
 
-                    if (InstallToolsCommand.CanExecute(vm))
+                    if (InstallToolsCommand.CanRun(vm))
                     {
-                        item = new GridStringItem(warningMessage, 
-                                                  HorizontalAlignment.Center,
-                                                  VerticalAlignment.Middle,
-                                                  false,
-                                                  false,
-                                                  QueryPanel.LinkBrush,
-                                                  Program.DefaultFontUnderline,
-                                                  QueryPanel.LinkBrush,
-                                                  Program.DefaultFontUnderline,
-                                                  colSpan,
-                                                  (sender, args) => new InstallToolsCommand(Program.MainWindow, vm).Execute(), null);
+                        item = new GridStringItem(warningMessage,
+                            HorizontalAlignment.Center,
+                            VerticalAlignment.Middle,
+                            false,
+                            false,
+                            QueryPanel.LinkBrush,
+                            Program.DefaultFontUnderline,
+                            QueryPanel.LinkBrush,
+                            Program.DefaultFontUnderline,
+                            colSpan,
+                            (sender, args) =>
+                            {
+                                if (Helpers.StockholmOrGreater(vm.Connection))
+                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
+                                else
+                                    new InstallToolsCommand(Program.MainWindow, vm).Run();
+                            }, null);
                     }
                     else
                     {
@@ -189,18 +200,18 @@ namespace XenAdmin.XenSearch
                 return true;
             }
 
-            Pool pool = o as Pool;
-            if (pool != null && !pool.IsPoolFullyUpgraded())
+            if (o is Pool pool && !pool.IsPoolFullyUpgraded())
             {
                 if (property == PropertyNames.memoryValue)
                 {
-                    var master = pool.Connection.Resolve(pool.master);
+                    var coordinator = pool.Connection.Resolve(pool.master);
+                    var versionString = $"{coordinator.ProductBrand()} {coordinator.ProductVersionText()}";
 
-                    item = new GridStringItem(string.Format(Messages.POOL_VERSIONS_LINK_TEXT, master.ProductVersionText()),
+                    item = new GridStringItem(string.Format(Messages.POOL_VERSIONS_LINK_TEXT, versionString),
                                   HorizontalAlignment.Center, VerticalAlignment.Middle, false, false,
                                   QueryPanel.LinkBrush, Program.DefaultFontUnderline, QueryPanel.LinkBrush,
                                   Program.DefaultFontUnderline, 3,
-                                  (sender, args) => new RollingUpgradeCommand(Program.MainWindow).Execute(),
+                                  (sender, args) => new RollingUpgradeCommand(Program.MainWindow).Run(),
                                   null);
                 }
 
@@ -338,7 +349,7 @@ namespace XenAdmin.XenSearch
                     if (i == null)
                         return null;
 
-                    return HelpersGUI.GetProgressImage(i.Value);
+                    return Images.GetImageForPercentage(i.Value);
                 }));
         }
 

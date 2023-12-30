@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,13 +29,14 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using XenAdmin.Core;
 using XenAdmin.Mappings;
 using XenAPI;
 
 namespace XenAdmin.Actions.VMActions
 {
-    public class VMCrossPoolMigrateAction : PureAsyncAction
+    public class VMCrossPoolMigrateAction : AsyncAction
     {
         private readonly VmMapping mapping;
         private readonly XenAPI.Network transferNetwork;
@@ -56,14 +56,13 @@ namespace XenAdmin.Actions.VMActions
             : base(vm.Connection, GetTitle(vm, destinationHost, copy))
         {
             Session = vm.Connection.Session;
-            Description = Messages.ACTION_PREPARING;
             VM = vm;
             Host = destinationHost;
             Pool = Helpers.GetPool(vm.Connection);
             this.mapping = mapping;
             this.transferNetwork = transferNetwork;
             this.copy = copy;
-            this.force = force;
+            ApiMethodsToRoleCheck.AddRange(StaticRBACDependencies);
         }
 
         public static RbacMethodList StaticRBACDependencies
@@ -78,55 +77,99 @@ namespace XenAdmin.Actions.VMActions
                 return list;
             }
         }
-            
 
         public static string GetTitle(VM vm, Host toHost, bool copy)
         {
             if (copy)
-                return string.Format(Messages.ACTION_VM_CROSS_POOL_COPY_TITLE, vm.Name(), toHost.Name());
+                return string.Format(Messages.ACTION_VM_CROSS_POOL_COPY_TITLE,
+                    vm.NameWithLocation(),
+                    Helpers.GetPool(vm.Connection)?.Name() ?? vm.Connection.Name,
+                    toHost.NameWithLocation());
 
             Host residentOn = vm.Connection.Resolve(vm.resident_on);
-            
+
             return residentOn == null
-                ? string.Format(Messages.ACTION_VM_MIGRATING_NON_RESIDENT, vm.Name(), toHost.Name())
-                : string.Format(Messages.ACTION_VM_MIGRATING_RESIDENT, vm.Name(), Helpers.GetName(residentOn), toHost.Name());
+                ? string.Format(Messages.ACTION_VM_MIGRATING_NON_RESIDENT, vm.NameWithLocation(), toHost.NameWithLocation())
+                : string.Format(Messages.ACTION_VM_MIGRATING_RESIDENT, vm.Name(), residentOn.NameWithLocation(), toHost.NameWithLocation());
         }
 
         protected override void Run()
         {
-            Description = copy ? Messages.ACTION_VM_COPYING: Messages.ACTION_VM_MIGRATING;
             try
             {
                 PercentComplete = 0;
                 Session session = Host.Connection.DuplicateSession();
-                Dictionary<string, string> sendData = Host.migrate_receive(session, Host.opaque_ref, 
-                                                                           transferNetwork.opaque_ref, new Dictionary<string, string>());
+                var sendData = Host.migrate_receive(session, Host.opaque_ref,
+                    transferNetwork.opaque_ref, new Dictionary<string, string>());
                 PercentComplete = 5;
-                LiveMigrateOptionsVmMapping options = new LiveMigrateOptionsVmMapping(mapping, VM);
-                var _options = new Dictionary<string, string>(options.Options);
-                if (force)
-                    _options.Add("force", "true");
-                if (copy)
-                    _options.Add("copy", "true");
-                RelatedTask = VM.async_migrate_send(Session, VM.opaque_ref, sendData, 
-                                                    options.Live, options.VdiMap,
-                                                    options.VifMap, _options);
+
+                var options = copy
+                    ? new Dictionary<string, string> {{"copy", "true"}}
+                    : new Dictionary<string, string>();
+
+                RelatedTask = VM.async_migrate_send(Session, VM.opaque_ref, sendData,
+                    true, GetVdiMap(mapping), GetVifMap(mapping, VM), options);
 
                 PollToCompletion(PercentComplete, 100);
             }
             catch (CancelledException)
             {
-                Description = string.Format(copy ? Messages.ACTION_VM_CROSS_POOL_COPY_CANCELLED : Messages.ACTION_VM_MIGRATE_CANCELLED, 
-                                            VM.Name());
+                Description = string.Format(copy
+                        ? Messages.ACTION_VM_CROSS_POOL_COPY_CANCELLED
+                        : Messages.ACTION_VM_MIGRATE_CANCELLED,
+                    VM.NameWithLocation());
                 throw;
             }
             catch (Failure ex)
             {
                 Description = ex.Message;
-                List<string> errors = ex.ErrorDescription;
                 throw;
             }
             Description = copy ? Messages.ACTION_VM_COPIED: Messages.ACTION_VM_MIGRATED;
+        }
+
+        /// <summary>
+        /// VDI ref to SR ref Map
+        /// </summary>
+        private Dictionary<XenRef<VDI>, XenRef<SR>> GetVdiMap(VmMapping vmMap)
+        {
+            return vmMap.Storage.ToDictionary(pair => new XenRef<VDI>(pair.Key),
+                pair => new XenRef<SR>(pair.Value));
+        }
+
+        /// <summary>
+        /// VIF ref to remote Network ref
+        /// </summary>
+        private Dictionary<XenRef<VIF>, XenRef<XenAPI.Network>> GetVifMap(VmMapping vmMap, VM vm) 
+        { 
+            var map = new Dictionary<XenRef<VIF>, XenRef<XenAPI.Network>>();
+            var vmVifs = vm.Connection.ResolveAll(vm.VIFs);
+            var vmMacs = vmVifs.Select(vif => vif.MAC);
+
+            // CA-359124: add VIFs that are present in the VM's snapshots, but not the VM
+            var snapVIFs = vm.snapshots
+                .Select(Connection.Resolve)
+                .SelectMany(snap => Connection.ResolveAll(snap.VIFs))
+                // use MAC to identify VIFs that are not in the VM, opaque_ref differentiates between VM and snapshot VIFs
+                .Where(snapVif => !vmMacs.Contains(snapVif.MAC))
+                .ToList();
+
+            var allVifs = vmVifs.Concat(snapVIFs).ToList();
+            foreach (var pair in vmMap.VIFs)
+            {
+                var vifMac = pair.Key;
+
+                var vif = allVifs.FirstOrDefault(v => v.MAC.Equals(vifMac));
+                if (vif == null)
+                {
+                    continue;
+                }
+                var vifRef = new XenRef<VIF>(vif);
+                var networkRef = new XenRef<XenAPI.Network>(pair.Value);
+                map.Add(vifRef, networkRef);
+            }
+
+            return map;
         }
     }
 }

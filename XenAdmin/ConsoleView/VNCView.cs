@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,32 +42,24 @@ namespace XenAdmin.ConsoleView
     {
         private readonly VM source;
         private readonly VNCTabView vncTabView;
-        public Form undockedForm = null;
+        public Form undockedForm;
 
         /// <summary>
         /// Helper boolean to only trigger Resize_End when window is really resized by dragging edges
         /// Without this Resize_End is triggered even when window is moved around and not resized
         /// </summary>
-        private bool undockedFormResized = false;
+        private bool undockedFormResized;
 
-        public bool isDocked
-        {
-            get
-            {
-                return this.undockedForm == null || !this.undockedForm.Visible;
-            }
-        }
+        public bool IsDocked => undockedForm == null || !undockedForm.Visible;
 
         public void Pause()
         {
-            if (vncTabView != null && isDocked)
-                vncTabView.Pause();
+            vncTabView?.Pause();
         }
 
         public void Unpause()
         {
-            if(vncTabView != null)
-                vncTabView.Unpause();
+            vncTabView?.Unpause();
         }
 
         public VNCView(VM source, string elevatedUsername, string elevatedPassword)
@@ -94,7 +85,7 @@ namespace XenAdmin.ConsoleView
 
         public void DockUnDock()
         {
-            if (this.isDocked)
+            if (IsDocked)
             {
                 if (this.undockedForm == null)
                 {
@@ -202,20 +193,15 @@ namespace XenAdmin.ConsoleView
             UpdateRDPResolution();
         }
 
-        private string UndockedWindowTitle(VM source)
+        private string UndockedWindowTitle(VM vm)
         {
-            if (source.is_control_domain)
-            {
-                Host host = source.Connection.Resolve(source.resident_on);
-                if (host == null)
-                    return source.Name();
+            if (vm.IsControlDomainZero(out Host host))
+                return string.Format(Messages.CONSOLE_HOST, host.Name());
 
-                return string.Format(source.IsControlDomainZero() ? Messages.CONSOLE_HOST : Messages.CONSOLE_HOST_NUTANIX, host.Name());
-            }
-            else
-            {
-                return source.Name();
-            }
+            if (vm.IsSrDriverDomain(out SR sr))
+                return string.Format(Messages.CONSOLE_SR_DRIVER_DOMAIN, sr.Name());
+
+            return vm.Name();
         }
 
         private void undockedForm_HelpButtonClicked(object sender, CancelEventArgs e)
@@ -234,13 +220,13 @@ namespace XenAdmin.ConsoleView
         {
             if (e.PropertyName == "name_label" && undockedForm != null)
             {
-                undockedForm.Text = source.name_label;
+                undockedForm.Text = UndockedWindowTitle(source);
             }
         }
 
         private void findConsoleButton_Click(object sender, EventArgs e)
         {
-            if (!this.isDocked)
+            if (!IsDocked)
                 undockedForm.BringToFront();
             if (undockedForm.WindowState == FormWindowState.Minimized)
                 undockedForm.WindowState = FormWindowState.Normal;
@@ -276,11 +262,6 @@ namespace XenAdmin.ConsoleView
         public void refreshIsoList()
         {
             vncTabView.setupCD();
-        }
-
-        internal bool IsVNC
-        {
-            get { return vncTabView.IsVNC; }
         }
 
         public void UpdateRDPResolution(bool fullscreen = false)

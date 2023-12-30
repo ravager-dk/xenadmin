@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,10 +32,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Properties;
-using XenAPI;
-using XenAdmin.Dialogs;
 using XenAdmin.Actions.VMActions;
+using XenAdmin.Dialogs;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -69,7 +67,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override bool CanExecute(VM vm)
+        protected override bool CanRun(VM vm)
         {
             if (!vm.is_a_template && vm.power_state == vm_power_state.Running && vm.allowed_operations != null && vm.allowed_operations.Contains(vm_operations.suspend))
             {
@@ -78,58 +76,22 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override void Execute(List<VM> vms)
+        protected override void Run(List<VM> vms)
         {
             RunAction(vms, Messages.ACTION_VMS_SUSPENDING_TITLE, Messages.ACTION_VMS_SUSPENDING_TITLE, Messages.ACTION_VM_SUSPENDED, null);
         }
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_SUSPEND;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_SUSPEND;
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return Images.StaticImages._000_paused_h32bit_16;
-            }
-        }
+        public override Image MenuImage => Images.StaticImages._000_paused_h32bit_16;
 
-        public override Image ToolBarImage
-        {
-            get
-            {
-                return Images.StaticImages._000_Paused_h32bit_24;
-            }
-        }
+        public override Image ToolBarImage => Images.StaticImages._000_Paused_h32bit_24;
 
-        public override string ToolBarText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_TOOLBAR_SUSPEND;
-            }
-        }
+        public override string ToolBarText => Messages.MAINWINDOW_TOOLBAR_SUSPEND;
 
-        protected override string EnabledToolTipText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_TOOLBAR_SUSPENDVM;
-            }
-        }
+        public override string EnabledToolTipText => Messages.MAINWINDOW_TOOLBAR_SUSPENDVM;
 
-        protected override bool ConfirmationRequired
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationRequired => true;
 
         protected override string ConfirmationDialogTitle
         {
@@ -157,45 +119,30 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override string ConfirmationDialogHelpId
-        {
-            get { return "WarningVmLifeCycleSuspend"; }
-        }
+        protected override string ConfirmationDialogHelpId => "WarningVmLifeCycleSuspend";
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
             foreach (VM vm in GetSelection().AsXenObjects<VM>())
             {
-                if (!CanExecute(vm) && vm.power_state == vm_power_state.Running)
+                if (!CanRun(vm) && vm.power_state == vm_power_state.Running)
                 {
-                    return new CommandErrorDialog(Messages.ERROR_DIALOG_SUSPEND_VM_TITLE, Messages.ERROR_DIALOG_SUSPEND_VM_TEXT, cantExecuteReasons);
+                    return new CommandErrorDialog(Messages.ERROR_DIALOG_SUSPEND_VM_TITLE, Messages.ERROR_DIALOG_SUSPEND_VM_TEXT, cantRunReasons);
                 }
             }
             return null;
         }
 
-        public override Keys ShortcutKeys
-        {
-            get
-            {
-                return Keys.Control | Keys.Y;
-            }
-        }
+        public override Keys ShortcutKeys => Keys.Control | Keys.Y;
 
-        public override string ShortcutKeyDisplayString
-        {
-            get
-            {
-                return Messages.MAINWINDOW_CTRL_Y;
-            }
-        }
+        public override string ShortcutKeyDisplayString => Messages.MAINWINDOW_CTRL_Y;
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             VM vm = item as VM;
             if (vm == null)
             {
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
             }
             if (vm.power_state == vm_power_state.Halted)
             {
@@ -206,7 +153,7 @@ namespace XenAdmin.Commands
                 return Messages.VM_ALREADY_SUSPENDED;
             }
 
-            var noToolsOrDriversReason = GetCantExecuteNoToolsOrDriversReasonCore(item);
+            var noToolsOrDriversReason = GetCantRunNoToolsOrDriversReasonCore(item);
             if (noToolsOrDriversReason != null)
             {
                 return noToolsOrDriversReason;
@@ -217,7 +164,7 @@ namespace XenAdmin.Commands
                 return Messages.VM_HAS_GPU_PASSTHROUGH;
             }
 
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
 
         protected override AsyncAction BuildAction(VM vm)

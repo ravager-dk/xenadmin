@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -65,28 +64,27 @@ namespace XenAdmin.Dialogs
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            
-            srPicker1.Usage = SrPickerType;
-            srPicker1.SetExistingVDIs(_vdis.ToArray());
-            srPicker1.DiskSize = _vdis.Sum(d => d.physical_utilisation);
-            srPicker1.Connection = connection;
-            srPicker1.Invalidate();
-            srPicker1.selectDefaultSROrAny();
+
+            UpdateMoveButton();
+            srPicker1.Populate(SrPickerType, connection, null, null, _vdis.ToArray());
         }
 
-        protected SR SelectedSR
+        internal override string HelpName => "VDIMigrateDialog";
+
+        protected SR SelectedSR => srPicker1.SR;
+
+        protected virtual SrPicker.SRPickerType SrPickerType => SrPicker.SRPickerType.Move;
+
+        private void UpdateMoveButton()
         {
-            get { return srPicker1.SR; }
+            buttonMove.Enabled = srPicker1.SR != null;
         }
 
-        protected virtual SrPicker.SRPickerType SrPickerType
-        {
-            get { return SrPicker.SRPickerType.MoveOrCopy; }
-        }
+        #region Control event handlers
 
         private void srPicker1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            updateButtons();
+            UpdateMoveButton();
         }
 
         private void srPicker1_DoubleClickOnRow(object sender, EventArgs e)
@@ -95,9 +93,15 @@ namespace XenAdmin.Dialogs
                 buttonMove.PerformClick();
         }
 
-        private void updateButtons()
+        private void srPicker1_CanBeScannedChanged()
         {
-            buttonMove.Enabled = srPicker1.SR != null;
+            buttonRescan.Enabled = srPicker1.CanBeScanned;
+            UpdateMoveButton();
+        }
+
+        private void buttonRescan_Click(object sender, EventArgs e)
+        {
+            srPicker1.ScanSRs();
         }
 
         private void buttonMove_Click(object sender, EventArgs e)
@@ -110,6 +114,8 @@ namespace XenAdmin.Dialogs
         {
             Close();
         }
+
+        #endregion
 
         protected virtual void CreateAndRunParallelActions()
         {
@@ -124,14 +130,10 @@ namespace XenAdmin.Dialogs
                 var batch = from VDI vdi in _vdis
                     select (AsyncAction)new MoveVirtualDiskAction(connection, vdi, SelectedSR);
 
-                new ParallelAction(connection, title, Messages.ACTION_MOVING_X_VDIS_STARTED,
-                    Messages.ACTION_MOVING_X_VDIS_COMPLETED, batch.ToList(), BATCH_SIZE).RunAsync();
+                new ParallelAction(title, Messages.ACTION_MOVING_X_VDIS_STARTED,
+                    Messages.ACTION_MOVING_X_VDIS_COMPLETED, batch.ToList(),
+                    connection, maxNumberOfParallelActions: BATCH_SIZE).RunAsync();
             }
-        }
-
-        internal override string HelpName
-        {
-            get { return "VDIMigrateDialog"; }
         }
 
         internal static Command MoveMigrateCommand(IMainWindow mainWindow, SelectedItemCollection selection)
@@ -139,7 +141,7 @@ namespace XenAdmin.Dialogs
             var cmd = new MigrateVirtualDiskCommand(mainWindow, selection);
             var con = selection.GetConnectionOfFirstItem();
 
-            if (cmd.CanExecute() && !Helpers.FeatureForbidden(con, Host.RestrictCrossPoolMigrate))
+            if (cmd.CanRun() && !Helpers.FeatureForbidden(con, Host.RestrictCrossPoolMigrate))
                 return cmd;
 
             return new MoveVirtualDiskCommand(mainWindow, selection);
@@ -154,10 +156,7 @@ namespace XenAdmin.Dialogs
         {
         }
 
-        protected override SrPicker.SRPickerType SrPickerType
-        {
-            get { return SrPicker.SRPickerType.Migrate; }
-        }
+        protected override SrPicker.SRPickerType SrPickerType => SrPicker.SRPickerType.Migrate;
 
         protected override void CreateAndRunParallelActions()
         {
@@ -172,8 +171,9 @@ namespace XenAdmin.Dialogs
                 var batch = from VDI vdi in _vdis
                     select (AsyncAction)new MigrateVirtualDiskAction(connection, vdi, SelectedSR);
 
-                new ParallelAction(connection, title, Messages.ACTION_MIGRATING_X_VDIS_STARTED,
-                    Messages.ACTION_MIGRATING_X_VDIS_COMPLETED, batch.ToList(), BATCH_SIZE).RunAsync();
+                new ParallelAction(title, Messages.ACTION_MIGRATING_X_VDIS_STARTED,
+                    Messages.ACTION_MIGRATING_X_VDIS_COMPLETED, batch.ToList(),
+                    connection, maxNumberOfParallelActions: BATCH_SIZE).RunAsync();
             }
         }
     }

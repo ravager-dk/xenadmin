@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,38 +28,39 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class CreateVUSBAction : PureAsyncAction
+    public class CreateVUSBAction : AsyncAction
     {
-        private PUSB _pusb;
+        private readonly PUSB _pusb;
 
-        public CreateVUSBAction(PUSB pusb, VM vm) : 
-            base(pusb.Connection, String.Format(Messages.ACTION_VUSB_CREATING,  pusb.Name(), vm.Name()))
+        public CreateVUSBAction(PUSB pusb, VM vm) :
+            base(pusb.Connection, string.Format(Messages.ACTION_VUSB_CREATING, pusb.Name(), vm.Name()))
         {
             _pusb = pusb;
             VM = vm;
+
+            if (!VM.UsingUpstreamQemu())
+                ApiMethodsToRoleCheck.Add("VM.set_platform");
+
+            ApiMethodsToRoleCheck.Add("VUSB.create");
         }
 
         protected override void Run()
         {
             if (!VM.UsingUpstreamQemu())
             {
-                Dictionary<string, string> platform = VM.platform == null ?
-                    new Dictionary<string, string>() :
-                    new Dictionary<string, string>(VM.platform);
+                Dictionary<string, string> platform = VM.platform == null
+                    ? new Dictionary<string, string>()
+                    : new Dictionary<string, string>(VM.platform);
                 platform["device-model"] = "qemu-upstream-compat";
                 VM.set_platform(Session, VM.opaque_ref, platform);
             }
 
-            XenRef<VUSB> vusbRef = VUSB.create(Session, VM.opaque_ref, _pusb.USB_group, null);
+            VUSB.create(Session, VM.opaque_ref, _pusb.USB_group, null);
             Description = Messages.ACTION_VUSB_CREATED;
         }
     }

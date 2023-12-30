@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,6 +35,7 @@ using System.Linq;
 using XenAdmin.Core;
 using XenAPI;
 using System.Threading;
+using XenAdmin.Actions.VMActions;
 using XenAdmin.Network;
 
 
@@ -56,10 +56,13 @@ namespace XenAdmin.Actions
     	private object monitor = new object();
 		private bool m_wizardDone;
 
+        private readonly Action<VM, bool> _warningDelegate;
+        private readonly Action<VMStartAbstractAction, Failure> _failureDiagnosisDelegate;
+
     	/// <summary>
         /// These calls are always required to import a VM, as opposed to the set which are only called if needed set in the constructor of this action.
         /// </summary>
-        public readonly static RbacMethodList ConstantRBACRequirements = new RbacMethodList(            
+        public static readonly RbacMethodList ConstantRBACRequirements = new RbacMethodList(            
             "vm.set_name_label",
             "network.destroy",
             "vif.create",
@@ -67,15 +70,19 @@ namespace XenAdmin.Actions
             "http/put_import"
         );
 
-		public ImportVmAction(IXenConnection connection, Host affinity, string filename, SR sr)
-			: base(connection, string.Format(Messages.IMPORTVM_TITLE, filename, Helpers.GetName(connection)), Messages.IMPORTVM_PREP)
-		{
-			Pool = Helpers.GetPoolOfOne(connection);
+        public ImportVmAction(IXenConnection connection, Host affinity, string filename, SR sr,
+            Action<VM, bool> warningDelegate, Action<VMStartAbstractAction, Failure> failureDiagnosisDelegate)
+			: base(connection, "")
+        {
+            Description = Messages.IMPORTVM_PREP;
+            Pool = Helpers.GetPoolOfOne(connection);
 			m_affinity = affinity;
 			Host = affinity ?? connection.Resolve(Pool.master);
 			SR = sr;
 			VM = null;
 			m_filename = filename;
+            _warningDelegate = warningDelegate;
+            _failureDiagnosisDelegate = failureDiagnosisDelegate;
 
 			#region RBAC Dependencies
 
@@ -84,182 +91,135 @@ namespace XenAdmin.Actions
 			if (affinity != null)
 				ApiMethodsToRoleCheck.Add("vm.set_affinity");
 
-			//??
-			//if (startAutomatically)
-			//	ApiMethodsToRoleCheck.Add("vm.start");
-
 			ApiMethodsToRoleCheck.AddRange(Role.CommonTaskApiList);
 			ApiMethodsToRoleCheck.AddRange(Role.CommonSessionApiList);
 
 			#endregion
-		}
 
-    	private string GetVmRef(string result)
-        {
-            if (string.IsNullOrEmpty(result))
-                return null;
-
-            string head = "<value><array><data><value>";
-            string tail = "</value></data></array></value>";
-
-            if (!result.StartsWith(head) || !result.EndsWith(tail))
-                return null;
-
-            int start = head.Length;
-            int length = result.IndexOf(tail) - start;
-
-            return result.Substring(start, length);
+            Title = string.Format(Messages.IMPORTVM_TITLE, filename, Host.NameWithLocation());
         }
 
         protected override void Run()
         {
             SafeToExit = false;
-        	bool isTemplate;
 
-        	try
+            string vmRef = UploadFile(out string importTaskRef);
+            if (string.IsNullOrEmpty(vmRef))
+                return;
+
+            // Now let's try and set the affinity and start the VM
+
+            while (!Cancelling && (VM = Connection.Resolve(new XenRef<VM>(vmRef))) == null)
+                Thread.Sleep(100);
+
+            if (Cancelling)
+                throw new CancelledException();
+
+            var vmRec = VM.get_record(Session, vmRef);
+            var isTemplate = vmRec.is_a_template;
+
+            if (isTemplate && vmRec.is_default_template && Helpers.FalconOrGreater(Connection))
             {
-                string vmRef;
+                if (!vmRec.other_config.ContainsKey(IMPORT_TASK) || vmRec.other_config[IMPORT_TASK] != importTaskRef)
+                    throw new Exception(string.Format(Messages.IMPORT_TEMPLATE_ALREADY_EXISTS, BrandManager.ProductBrand));
+            }
 
-				if (m_filename.EndsWith("ova.xml"))//importing version 1 from of VM
-				{
-					m_filename = m_filename.Replace("ova.xml", "");
-					vmRef = GetVmRef(applyVersionOneFiles());
-				}
-				else//importing current format of VM
-					vmRef = GetVmRef(applyFile());
+            Description = isTemplate ? Messages.IMPORT_TEMPLATE_UPDATING_TEMPLATE : Messages.IMPORTVM_UPDATING_VM;
+            VM.set_name_label(Session, vmRef, DefaultVMName(VM.get_name_label(Session, vmRef)));
 
-            	if (Cancelling)
-                    throw new CancelledException();
+			if (!isTemplate && m_affinity != null)
+				VM.set_affinity(Session, vmRef, m_affinity.opaque_ref);
 
-                // Now lets try and set the affinity and start the VM
+            // Wait here for the wizard to finish
+            Description = isTemplate ? Messages.IMPORT_TEMPLATE_WAITING_FOR_WIZARD : Messages.IMPORTVM_WAITING_FOR_WIZARD;
+			lock (monitor)
+			{
+				while (!(m_wizardDone || Cancelling))
+					Monitor.Wait(monitor);
+			}
 
-                if (string.IsNullOrEmpty(vmRef))
-                    return;
+            if (Cancelling)
+                throw new CancelledException();
 
-                while (!Cancelling && (VM = Connection.Resolve(new XenRef<VM>(vmRef))) == null)
-                    Thread.Sleep(100);
+            if (m_VIFs != null)
+            {
+                Description = isTemplate ? Messages.IMPORT_TEMPLATE_UPDATING_NETWORKS : Messages.IMPORTVM_UPDATING_NETWORKS;
 
-                if (Cancelling)
-                    throw new CancelledException();
+                // For ElyOrGreater hosts, we can move the VIFs to another network, 
+                // but for older hosts we need to destroy all vifs and recreate them
 
-                isTemplate = VM.get_is_a_template(Session, vmRef);
-                if (isTemplate && Helpers.FalconOrGreater(Connection) && VM.get_is_default_template(Session, vmRef))
+                List<XenRef<VIF>> vifs = VM.get_VIFs(Session, vmRef);
+                List<XenAPI.Network> networks = new List<XenAPI.Network>();
+
+                foreach (XenRef<VIF> vif in vifs)
                 {
-                    var otherConfig = VM.get_other_config(Session, vmRef);
-                    if (!otherConfig.ContainsKey(IMPORT_TASK) || otherConfig[IMPORT_TASK] != RelatedTask.opaque_ref)
+                    // Save the network as we may have to delete it later
+                    XenAPI.Network network = Connection.Resolve(VIF.get_network(Session, vif));
+                    if (network != null)
+                        networks.Add(network);
+
+                    if (Helpers.ElyOrGreater(Connection))
                     {
-                        throw new Exception(Messages.IMPORT_TEMPLATE_ALREADY_EXISTS);
-                    }
-                }
-
-                Description = isTemplate ? Messages.IMPORT_TEMPLATE_UPDATING_TEMPLATE : Messages.IMPORTVM_UPDATING_VM;
-                VM.set_name_label(Session, vmRef, DefaultVMName(VM.get_name_label(Session, vmRef)));
-
-				if (!isTemplate && m_affinity != null)
-					VM.set_affinity(Session, vmRef, m_affinity.opaque_ref);
-
-                // Wait here for the wizard to finish
-                Description = isTemplate ? Messages.IMPORT_TEMPLATE_WAITING_FOR_WIZARD : Messages.IMPORTVM_WAITING_FOR_WIZARD;
-				lock (monitor)
-				{
-					while (!(m_wizardDone || Cancelling))
-						Monitor.Wait(monitor);
-				}
-
-                if (Cancelling)
-                    throw new CancelledException();
-
-                if (m_VIFs != null)
-                {
-                    Description = isTemplate ? Messages.IMPORT_TEMPLATE_UPDATING_NETWORKS : Messages.IMPORTVM_UPDATING_NETWORKS;
-
-                    // For ElyOrGreater hosts, we can move the VIFs to another network, 
-                    // but for older hosts we need to destroy all vifs and recreate them
-
-                    List<XenRef<VIF>> vifs = VM.get_VIFs(Session, vmRef);
-                    List<XenAPI.Network> networks = new List<XenAPI.Network>();
-
-                    bool canMoveVifs = Helpers.ElyOrGreater(Connection);
-
-                    foreach (XenRef<VIF> vif in vifs)
-                    {
-                        // Save the network as we may have to delete it later
-                        XenAPI.Network network = Connection.Resolve(VIF.get_network(Session, vif));
-                        if (network != null)
-                            networks.Add(network);
-
-                        string oldmac = VIF.get_MAC(Session, vif);
-
-                        if (canMoveVifs)
-                        {
-                            var vifObj = Connection.Resolve(vif);
-                            if (vifObj == null)
-                                continue;
-                            // try to find a matching VIF in the m_proxyVIFs list, based on the device field
-                            var matchingProxyVif = m_VIFs.FirstOrDefault(proxyVIF => proxyVIF.device == vifObj.device);
-                            if (matchingProxyVif != null && matchingProxyVif.MAC == oldmac)
-                            {
-                                // move the VIF to the desired network
-                                VIF.move(Session, vif, matchingProxyVif.network);
-                                // remove matchingProxyVif from the list, so we don't create the VIF again later
-                                m_VIFs.Remove(matchingProxyVif); 
-                                continue;
-                            }
-                        }
-                        // destroy the VIF, if we haven't managed to move it
-                        VIF.destroy(Session, vif);
-                    }
-
-                    // recreate VIFs if needed (m_proxyVIFs can be empty, if we moved all the VIFs in the previous step)
-                    foreach (VIF vif in m_VIFs)
-                    {
-                        vif.VM = new XenRef<VM>(vmRef);
-                        VIF.create(Session, vif);
-                    }
-
-                    // now delete any Networks associated with this task if they have no VIFs
-
-                    foreach (XenAPI.Network network in networks)
-                    {
-                        if (!network.other_config.ContainsKey(IMPORT_TASK))
+                        var vifObj = Connection.Resolve(vif);
+                        if (vifObj == null)
                             continue;
 
-                        if (network.other_config[IMPORT_TASK] != RelatedTask.opaque_ref)
+                        // try to find a VIF in the m_VIFs list which matches the device field,
+                        // then move it to the desired network and remove it from the m_VIFs list
+                        // so we don't create it again later
+
+                        var matchingVif = m_VIFs.FirstOrDefault(v => v.device == vifObj.device);
+                        if (matchingVif != null)
+                        {
+                            VIF.move(Session, vif, matchingVif.network);
+                            m_VIFs.Remove(matchingVif);
                             continue;
-
-                        try
-                        {
-                            if (XenAPI.Network.get_VIFs(Session, network.opaque_ref).Count > 0)
-                                continue;
-
-                            if (XenAPI.Network.get_PIFs(Session, network.opaque_ref).Count > 0)
-                                continue;
-
-                            XenAPI.Network.destroy(Session, network.opaque_ref);
-                        }
-                        catch (Exception e)
-                        {
-                            log.Error($"Exception while deleting network {network.Name()}. Squashing.", e);
                         }
                     }
+
+                    // destroy the VIF, if we haven't managed to move it
+                    VIF.destroy(Session, vif);
                 }
 
-                if (!VM.get_is_a_template(Session, vmRef))
+                // recreate VIFs if needed (m_VIFs can be empty, if we moved all the VIFs in the previous step)
+                foreach (VIF vif in m_VIFs)
                 {
-                    if (m_startAutomatically)
+                    vif.VM = new XenRef<VM>(vmRef);
+                    VIF.create(Session, vif);
+                }
+
+                // now delete any Networks associated with this task if they have no VIFs
+
+                foreach (XenAPI.Network network in networks)
+                {
+                    if (!network.other_config.ContainsKey(IMPORT_TASK) || network.other_config[IMPORT_TASK] != importTaskRef)
+                        continue;
+
+                    try
                     {
-                        Description = Messages.IMPORTVM_STARTING;
-                        VM.start(Session, vmRef, false, false);
+                        var record = XenAPI.Network.get_record(Session, network.opaque_ref);
+                        if (record.VIFs.Count > 0 || record.PIFs.Count > 0)
+                            continue;
+
+                        XenAPI.Network.destroy(Session, network.opaque_ref);
+                    }
+                    catch (Exception e)
+                    {
+                        log.Error($"Exception while deleting network {network.Name()}. Squashing.", e);
                     }
                 }
             }
-            catch (CancelledException)
-            {
-                Description = Messages.CANCELLED_BY_USER;
-                throw;
-            }
 
+            var vm = Connection.WaitForCache(new XenRef<VM>(vmRef));
             Description = isTemplate ? Messages.IMPORT_TEMPLATE_IMPORTCOMPLETE : Messages.IMPORTVM_IMPORTCOMPLETE;
+
+            if (vm != null && !vm.is_a_template && m_startAutomatically)
+            {
+                if (vm.power_state == vm_power_state.Suspended)
+                    new VMResumeAction(vm, _warningDelegate, _failureDiagnosisDelegate).RunAsync();
+                else
+                    new VMStartAction(vm, _warningDelegate, _failureDiagnosisDelegate).RunAsync();
+            }
         }
 
         private int VMsWithName(string name)
@@ -288,118 +248,50 @@ namespace XenAdmin.Actions
             return name;
         }
 
-        private List<string> TaskErrorInfo()
+        private string UploadFile(out string importTaskRef)
         {
-            return new List<string>(Task.get_error_info(Session, RelatedTask));
-        }
-
-        private long getSize(DirectoryInfo dir, long count)
-        {
-            long s = count;
-            foreach (FileInfo f in dir.GetFiles("*.gz"))
-                s += f.Length;
-
-            foreach (DirectoryInfo d in dir.GetDirectories())
-                s += getSize(d, s);
-
-            return s;
-        }
-
-        private string applyVersionOneFiles()
-        {
-            RelatedTask = Task.create(Session, "importTask", Messages.IMPORTING);
-
-            try
-            {
-				long totalSize = getSize(new DirectoryInfo(m_filename), 0);
-                long bytesWritten = 0;
-
-                if (totalSize == 0)
-                {
-                    // We didn't find any .gz files, just bail out here
-                    throw new Exception(Messages.IMPORT_INCOMPLETE_FILES);
-                }
-
-            	CommandLib.Config config = new CommandLib.Config
-            	                           	{
-            	                           		hostname = Connection.Hostname,
-            	                           		username = Connection.Username,
-            	                           		password = Connection.Password
-            	                           	};
-                
-                CommandLib.thinCLIProtocol tCLIprotocol = null;
-                int exitCode = 0;
-            	tCLIprotocol = new CommandLib.thinCLIProtocol(delegate(string s) { throw new Exception(s); },
-            	                                              delegate { throw new Exception(Messages.EXPORTVM_NOT_HAPPEN); },
-            	                                              delegate(string s, CommandLib.thinCLIProtocol t) { log.Debug(s); },
-            	                                              delegate(string s) { log.Debug(s); },
-            	                                              delegate(string s) { log.Debug(s); },
-            	                                              delegate { throw new Exception(Messages.EXPORTVM_NOT_HAPPEN); },
-            	                                              delegate(int i)
-            	                                              	{
-            	                                              		exitCode = i;
-            	                                              		tCLIprotocol.dropOut = true;
-            	                                              	},
-            	                                              delegate(int i)
-            	                                              	{
-            	                                              		bytesWritten += i;
-            	                                              		PercentComplete = (int)(100.0*bytesWritten/totalSize);
-            	                                              	},
-            	                                              config);
-
-                string body = string.Format("vm-import\nsr-uuid={0}\nfilename={1}\ntask_id={2}\n",
-											SR.uuid, m_filename, RelatedTask.opaque_ref);
-				log.DebugFormat("Importing Geneva-style XVA from {0} to SR {1} using {2}", m_filename, SR.Name(), body);
-                CommandLib.Messages.performCommand(body, tCLIprotocol);
-
-                // Check the task status -- Geneva-style XVAs don't raise an error, so we need to check manually.
-                List<string> excep = TaskErrorInfo();
-                if (excep.Count > 0)
-                    throw new Failure(excep);
-                
-                // CA-33665: We found a situation before were the task handling had been messed up, we should check the exit code as a failsafe
-				if (exitCode != 0)
-					throw new Failure(Messages.IMPORT_GENERIC_FAIL);
-
-                return Task.get_result(Session, RelatedTask);
-            }
-            catch
-            {
-                List<string> excep = TaskErrorInfo();
-                if (excep.Count > 0)
-                    throw new Failure(excep);
-                else
-                    throw;
-            }
-            finally
-            {
-                Task.destroy(Session, RelatedTask);
-            }
-        }
-
-        private string applyFile()
-        {
-            log.DebugFormat("Importing Rio-style XVA from {0} to SR {1}", m_filename, SR.Name());
-
             Host host = SR.GetStorageHost();
 
-            string hostURL;
+            string hostUrl;
             if (host == null)
             {
                 Uri uri = new Uri(Session.Url);
-                hostURL = uri.Host;
+                hostUrl = uri.Host;
+                log.InfoFormat("SR {0} is shared or disconnected or SR host could not be resolved. Uploading XVA {1} to {2}", SR.Name(), m_filename, hostUrl);
             }
             else
             {
-                log.DebugFormat("SR is not shared -- redirecting to {0}", host.address);
-                hostURL = host.address;
+                hostUrl = host.address;
+                log.InfoFormat("Resolved host for SR {0}. Uploading XVA {1} to {2}", SR.Name(), m_filename, hostUrl);
             }
 
-            log.DebugFormat("Using {0} for import", hostURL);
+            try
+            {
+                RelatedTask = Task.create(Session, "put_import_task", hostUrl);
+                //at the end of polling, the RelatedTask is destroyed; make a note of it for later use
+                importTaskRef = RelatedTask.opaque_ref;
 
-            return HTTPHelper.Put(this, HTTP_PUT_TIMEOUT, m_filename, hostURL,
-                                  (HTTP_actions.put_ssbbs)HTTP_actions.put_import,
-                                  Session.opaque_ref, false, false, SR.opaque_ref);
+                log.DebugFormat("HTTP PUTTING file from {0} to {1}", m_filename, hostUrl);
+
+                HTTP_actions.put_import(percent =>
+                    {
+                        Tick(percent, string.Format(Messages.IMPORTVM_UPLOADING, Path.GetFileName(m_filename), Pool.Name(), percent));
+                    },
+                    () => XenAdminConfigManager.Provider.ForcedExiting || GetCancelling(),
+                    HTTP_PUT_TIMEOUT, hostUrl,
+                    XenAdminConfigManager.Provider.GetProxyFromSettings(Connection),
+                    m_filename, RelatedTask.opaque_ref, Session.opaque_ref, false, false, SR.opaque_ref);
+
+                PollToCompletion();
+                return Result;
+            }
+            catch (Exception e)
+            {
+                PollToCompletion();
+                if (e is CancelledException || e is HTTP.CancelledException || e.InnerException is CancelledException)
+                    throw new CancelledException();
+                throw;
+            }
         }
 
 		public override void RecomputeCanCancel()

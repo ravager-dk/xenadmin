@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,6 +38,7 @@ using XenAdmin.Actions;
 using XenAdmin.Actions.DR;
 using XenAdmin.Commands;
 using XenAdmin.Controls;
+using XenAdmin.Core;
 using XenAdmin.Properties;
 using XenAPI;
 
@@ -48,6 +48,13 @@ namespace XenAdmin.Wizards.DRWizards
     public partial class DRFailoverWizardRecoverPage : XenTabPage
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        private static Bitmap animatedImage = Resources.ajax_loader;
+
+        private readonly Dictionary<VDI, List<AsyncAction>> _actions = new Dictionary<VDI, List<AsyncAction>>();
+        private int objectsToBeRecovered;
+        private MultipleAction multipleRecoverAction;
+        private Session metadataSession;
 
         public event Action ReportStarted;
         public event Action<AsyncAction> ReportActionResultGot;
@@ -69,15 +76,12 @@ namespace XenAdmin.Wizards.DRWizards
                     case DRWizardType.Dryrun:
                         return String.Format(Messages.DR_WIZARD_RECOVERPAGE_TITLE_DRYRUN, Connection.Name);
                     default:
-                        return Messages.DR_WIZARD_RECOVERPAGE_TITLE_FAILOVER;
+                        return string.Format(Messages.DR_WIZARD_RECOVERPAGE_TITLE_FAILOVER, BrandManager.ProductBrand);
                 } 
             }
         }
 
-        public override string Text
-        {
-            get { return Messages.DR_WIZARD_RECOVERPAGE_TEXT; }
-        }
+        public override string Text => Messages.DR_WIZARD_RECOVERPAGE_TEXT;
 
         public override string HelpID
         {
@@ -95,8 +99,6 @@ namespace XenAdmin.Wizards.DRWizards
             }
         }
 
-        private static Bitmap animatedImage = Resources.ajax_loader;
-
         private void onFrameChanged(object sender, EventArgs e)
         {
             try
@@ -106,6 +108,7 @@ namespace XenAdmin.Wizards.DRWizards
             }
             catch (Exception)
             {
+                // ignored
             }
         }
 
@@ -114,14 +117,13 @@ namespace XenAdmin.Wizards.DRWizards
             ImageAnimator.StopAnimate(animatedImage, onFrameChanged);
             if (direction == PageLoadedDirection.Back)
             {
-                actions.Clear();
+                _actions.Clear();
             }
         }
 
         public override bool EnableNext()
         {
-            SetupLabels();
-            return (progressBar1.Value == 100);
+            return progressBar1.Value == 100;
         }
 
         public override bool EnablePrevious()
@@ -129,45 +131,51 @@ namespace XenAdmin.Wizards.DRWizards
             return false;
         }
 
-        private void SetupLabels()
+        private void SetBlurb()
         {
             switch (WizardType)
             {
                 case DRWizardType.Failback:
-                    labelTitle.Text = progressBar1.Value == 100 
-                        ? String.Format(Messages.DR_WIZARD_RECOVERPAGE_COMPLETE_FAILBACK, Connection.Name) 
-                        : Messages.DR_WIZARD_RECOVERPAGE_IN_PROGRESS_FAILBACK; 
-                    labelContinue.Text = Messages.DR_WIZARD_RECOVERPAGE_CONTINUE_FAILBACK;
+                    labelTitle.Text = Messages.DR_WIZARD_RECOVERPAGE_BLURB_FAILBACK;
                     break;
                 case DRWizardType.Dryrun:
-                    labelTitle.Text = progressBar1.Value == 100
-                        ? String.Format(Messages.DR_WIZARD_RECOVERPAGE_COMPLETE_DRYRUN, Connection.Name)  
-                        : Messages.DR_WIZARD_RECOVERPAGE_IN_PROGRESS_DRYRUN;
-                    labelContinue.Text = Messages.DR_WIZARD_RECOVERPAGE_CONTINUE_DRYRUN;
+                    labelTitle.Text = Messages.DR_WIZARD_RECOVERPAGE_BLURB_DRYRUN;
                     break;
                 default:
-                    labelTitle.Text = progressBar1.Value == 100 
-                        ? Messages.DR_WIZARD_RECOVERPAGE_COMPLETE_FAILOVER 
-                        : Messages.DR_WIZARD_RECOVERPAGE_IN_PROGRESS_FAILOVER;
-                    labelContinue.Text = Messages.DR_WIZARD_RECOVERPAGE_CONTINUE_FAILOVER;
+                    labelTitle.Text = string.Format(Messages.DR_WIZARD_RECOVERPAGE_BLURB_FAILOVER, BrandManager.ProductBrand);
                     break;
             }
-            labelContinue.Visible = progressBar1.Value == 100;
+        }
+
+        private void SetCompletedMessages()
+        {
+            switch (WizardType)
+            {
+                case DRWizardType.Failback:
+                    labelOverallProgress.Text = string.Format(Messages.DR_WIZARD_RECOVERPAGE_COMPLETE_FAILBACK, Connection.Name);
+                    break;
+                case DRWizardType.Dryrun:
+                    labelOverallProgress.Text = string.Format(Messages.DR_WIZARD_RECOVERPAGE_COMPLETE_DRYRUN, Connection.Name) ;
+                    break;
+                default:
+                    labelOverallProgress.Text = string.Format(Messages.DR_WIZARD_RECOVERPAGE_COMPLETE_FAILOVER, BrandManager.ProductBrand) ;
+                    break;
+            }
         }
 
         public DRWizardType WizardType { private get; set; }
 
-        private Dictionary<VDI, List<AsyncAction>> actions = new Dictionary<VDI, List<AsyncAction>>();
-        private int objectsToBeRecovered;
+        internal List<string> RecoveredVmsUuids { get; } = new List<string>();
 
-        private StartActionAfterRecovery startActionAfterRecovery;
-        public StartActionAfterRecovery StartActionAfterRecovery { set { startActionAfterRecovery = value; } }
+        internal List<string> RecoveredVmAppliancesUuids { get; } = new List<string>();
+
+        public StartActionAfterRecovery StartActionAfterRecovery { private get; set; }
 
         public Dictionary<XenRef<VDI>, PoolMetadata> SelectedPoolMetadata { private get; set; }
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {
-            if (direction == PageLoadedDirection.Back || actions.Count > 0)
+            if (direction == PageLoadedDirection.Back || _actions.Count > 0)
                 return;
 
             ImageAnimator.Animate(animatedImage, onFrameChanged);
@@ -175,21 +183,22 @@ namespace XenAdmin.Wizards.DRWizards
             if (ReportStarted != null)
                 ReportStarted();
             
+            SetBlurb();
             OnPageUpdated();
 
             dataGridView1.Rows.Clear();
-            actions.Clear();
+            _actions.Clear();
             objectsToBeRecovered = 0;
 
             // add "recovery" tasks
             foreach (var poolMetadata in SelectedPoolMetadata.Values)
             {
-                actions.Add(poolMetadata.Vdi, CreateSubActionsFor(poolMetadata));
+                _actions.Add(poolMetadata.Vdi, CreateSubActionsFor(poolMetadata));
             }
 
             // add a row for "Start VMs and Appliances" task, if required
 
-            if (startActionAfterRecovery != StartActionAfterRecovery.None)
+            if (StartActionAfterRecovery != StartActionAfterRecovery.None)
                 dataGridView1.Rows.Add(new DataGridViewRowRecover(Messages.ACTION_START_VMS_AND_APPLIANCES_TITLE));
 
             labelOverallProgress.Text = string.Format(Messages.DR_WIZARD_RECOVERPAGE_OVERALL_PROGRESS, 0, dataGridView1.Rows.Count);
@@ -236,9 +245,6 @@ namespace XenAdmin.Wizards.DRWizards
             
             return subActions;
         }
-
-        internal List<string> RecoveredVmsUuids = new List<string>();
-        internal List<string> RecoveredVmAppliancesUuids = new List<string>();
 
         private void SingleRecoverActionCompleted(ActionBase sender)
         {
@@ -292,10 +298,6 @@ namespace XenAdmin.Wizards.DRWizards
             });
         }
 
-
-        private MultipleAction multipleRecoverAction;
-        private Session metadataSession;
-
         private void OpenDatabaseActionCompleted(ActionBase sender)
         {
             VdiOpenDatabaseAction senderAction = (VdiOpenDatabaseAction)sender;
@@ -309,7 +311,7 @@ namespace XenAdmin.Wizards.DRWizards
 
             // assign metadata session to all recover actions
             List<AsyncAction> recoverSubActions = new List<AsyncAction>();
-            foreach (var action in actions[senderAction.Vdi])
+            foreach (var action in _actions[senderAction.Vdi])
             {
                 if (action is DrRecoverAction)
                 {
@@ -340,7 +342,7 @@ namespace XenAdmin.Wizards.DRWizards
             {
                 if (objectsToBeRecovered == 0) // finished recovering, now start VMs, if required
                 {
-                    switch (startActionAfterRecovery)
+                    switch (StartActionAfterRecovery)
                     {
                         case StartActionAfterRecovery.Start :
                             StartRecoveredVMs(false);
@@ -350,6 +352,7 @@ namespace XenAdmin.Wizards.DRWizards
                             break;
                         default:
                             progressBar1.Value = 100;
+                            SetCompletedMessages();
                             OnPageUpdated();
                             if (ReportLineGot != null)
                                 ReportLineGot(labelTitle.Text, 0, true);
@@ -363,7 +366,7 @@ namespace XenAdmin.Wizards.DRWizards
 
         private void RecoverNextPool()
         {
-            foreach (var actionList in actions.Values)
+            foreach (var actionList in _actions.Values)
             {
                 bool startRecovery = false;
                 foreach (var action in actionList)
@@ -415,12 +418,9 @@ namespace XenAdmin.Wizards.DRWizards
             }
 
             var action = new StartVMsAndAppliancesAction(Connection, vmsToStart, vmAppliancesToStart, VMOperationCommand.WarningDialogHAInvalidConfig, VMOperationCommand.StartDiagnosisForm, paused);
-            if (action != null)
-            {
-                action.Completed += StartVMsActionCompleted;
-                action.Changed += StartVMsActionChanged;
-                action.RunAsync();
-            }
+            action.Completed += StartVMsActionCompleted;
+            action.Changed += StartVMsActionChanged;
+            action.RunAsync();
         }
 
         private void StartVMsActionChanged(ActionBase sender)
@@ -452,8 +452,7 @@ namespace XenAdmin.Wizards.DRWizards
             Program.BeginInvoke(this, () =>
             {
                 progressBar1.Value = 100;
-                var row = dataGridView1.Rows[dataGridView1.RowCount - 1] as DataGridViewRowRecover; //last row is "Start VMs and Appliances" row
-                if (row != null)
+                if (dataGridView1.Rows[dataGridView1.RowCount - 1] is DataGridViewRowRecover row) //last row is "Start VMs and Appliances" row
                 {
                     if (senderAction.Succeeded)
                         row.UpdateStatus(RecoverState.Recovered, Messages.DR_WIZARD_RECOVERPAGE_STATUS_COMPLETED);
@@ -462,6 +461,8 @@ namespace XenAdmin.Wizards.DRWizards
                     labelOverallProgress.Text = string.Format(Messages.DR_WIZARD_RECOVERPAGE_OVERALL_PROGRESS,
                                                               row.Index + 1, dataGridView1.Rows.Count);
                 }
+
+                SetCompletedMessages();
                 OnPageUpdated();
                 if (ReportLineGot != null)
                     ReportLineGot(labelTitle.Text, 0, true);
@@ -476,22 +477,20 @@ namespace XenAdmin.Wizards.DRWizards
         public class DataGridViewRowRecover : DataGridViewRow
         {
             public readonly IXenObject XenObject; // it can be VM or VM_appliance
-            private DataGridViewImageCell imageCell = new DataGridViewImageCell();
-            private DataGridViewTextBoxCell taskCell = new DataGridViewTextBoxCell();
-            private DataGridViewTextBoxCell statusCell = new DataGridViewTextBoxCell();
+            private readonly DataGridViewImageCell _imageCell = new DataGridViewImageCell();
+            private readonly DataGridViewTextBoxCell _taskCell = new DataGridViewTextBoxCell();
+            private readonly DataGridViewTextBoxCell _statusCell = new DataGridViewTextBoxCell();
 
             private DataGridViewRowRecover()
             {
-                this.Cells.Add(taskCell);
-                this.Cells.Add(imageCell);
-                this.Cells.Add(statusCell);
+                this.Cells.AddRange(_taskCell, _imageCell, _statusCell);
             }
 
             public DataGridViewRowRecover(IXenObject xenObject)
                 : this()
             {
                 XenObject = xenObject;
-                taskCell.Value = XenObject is VM
+                _taskCell.Value = XenObject is VM
                                      ? string.Format(Messages.ACTION_DR_RECOVER_VM_TITLE, XenObject.Name())
                                      : string.Format(Messages.ACTION_DR_RECOVER_APPLIANCE_TITLE, XenObject.Name());
                 UpdateStatus(RecoverState.NotRecovered, Messages.DR_WIZARD_RECOVERPAGE_STATUS_PENDING);
@@ -500,34 +499,29 @@ namespace XenAdmin.Wizards.DRWizards
             public DataGridViewRowRecover(string title)
                 : this()
             {
-                taskCell.Value = title;
+                _taskCell.Value = title;
                 UpdateStatus(RecoverState.NotRecovered, Messages.DR_WIZARD_RECOVERPAGE_STATUS_PENDING);
             }
 
-            public void UpdateStatus(RecoverState state, string value)
-            {
-                UpdateStatus(state, value, "");
-            }
-
-            public void UpdateStatus(RecoverState state, string value, string toolTipText)
+            public void UpdateStatus(RecoverState state, string value, string toolTipText = "")
             {
                 switch (state)
                 {
                     case RecoverState.Recovered:
-                        imageCell.Value = Resources._000_Tick_h32bit_16;
+                        _imageCell.Value = Images.StaticImages._000_Tick_h32bit_16;
                         break;
                     case RecoverState.Recovering:
-                        imageCell.Value = animatedImage;
+                        _imageCell.Value = animatedImage;
                         break;
                     case RecoverState.Error:
-                        imageCell.Value = Resources._000_Abort_h32bit_16;
+                        _imageCell.Value = Images.StaticImages._000_Abort_h32bit_16;
                         break;
                     case RecoverState.NotRecovered:
-                        imageCell.Value = new Bitmap(1, 1);
+                        _imageCell.Value = new Bitmap(1, 1);
                         break;
                 }
-                statusCell.Value = value;
-                statusCell.ToolTipText = toolTipText;
+                _statusCell.Value = value;
+                _statusCell.ToolTipText = toolTipText;
             }
         }
 

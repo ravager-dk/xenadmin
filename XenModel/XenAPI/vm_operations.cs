@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -228,6 +227,10 @@ namespace XenAPI
         /// refers to the act of uninstalling the VM
         /// </summary>
         destroy,
+        /// <summary>
+        /// Creating and adding a VTPM to this VM
+        /// </summary>
+        create_vtpm,
         unknown
     }
 
@@ -341,6 +344,8 @@ namespace XenAPI
                     return "reverting";
                 case vm_operations.destroy:
                     return "destroy";
+                case vm_operations.create_vtpm:
+                    return "create_vtpm";
                 default:
                     return "unknown";
             }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,10 +31,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Dialogs;
-using XenAdmin.Properties;
 using XenAPI;
 
 namespace XenAdmin.Commands
@@ -84,7 +80,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.AllItemsAre<VM_appliance>())
                 return selection.AtLeastOneXenObjectCan<VM_appliance>(CanShutDownAppliance);
@@ -103,7 +99,7 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             var appsToShutDown = new List<VM_appliance>();
 

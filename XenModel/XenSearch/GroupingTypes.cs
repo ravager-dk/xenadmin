@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -191,8 +190,8 @@ namespace XenAdmin.XenSearch
     {
         protected readonly Dictionary<T, String> i18ns;
         protected readonly String i18n;
-        protected readonly ImageDelegate<T> images;
-        protected readonly PropertyAccessor propertyAccessor;
+        protected readonly Func<T, Icons> images;
+        protected readonly Func<IXenObject, IComparable> propertyAccessor;
         public readonly PropertyNames property;
 
         public PropertyGrouping(PropertyNames property, Grouping subgrouping)
@@ -203,7 +202,7 @@ namespace XenAdmin.XenSearch
 
             this.i18n = PropertyAccessors.PropertyNames_i18n[property];
             this.i18ns = Invert((Dictionary<String, T>)PropertyAccessors.Geti18nFor(property));
-            this.images = (ImageDelegate<T>)PropertyAccessors.GetImagesFor(property);
+            images = (Func<T, Icons>)PropertyAccessors.GetImagesFor(property);
         }
 
         public PropertyGrouping(XmlNode node)
@@ -214,7 +213,7 @@ namespace XenAdmin.XenSearch
 
             this.i18n = PropertyAccessors.PropertyNames_i18n[property];
             this.i18ns = Invert((Dictionary<String, T>)PropertyAccessors.Geti18nFor(property));
-            this.images = (ImageDelegate<T>)PropertyAccessors.GetImagesFor(property);
+            images = (Func<T, Icons>)PropertyAccessors.GetImagesFor(property);
         }
 
         protected override void AddXmlAttributes(XmlDocument doc, XmlNode node)
@@ -357,8 +356,7 @@ namespace XenAdmin.XenSearch
             // Special case: if the type is VM, and the object is not a real VM,
             // it's not a group. This is because snapshots are XMO<VM>s internally,
             // but we want to group them by the real VM they came from.
-            VM vm = o as VM;
-            if (vm != null && vm.not_a_real_vm())
+            if (o is VM vm && !vm.IsRealVm())
                 return false;
 
             // Otherwise this is a group

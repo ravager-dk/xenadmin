@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Controls;
@@ -68,7 +66,6 @@ namespace XenAdmin.Dialogs
             pool.PropertyChanged += pool_PropertyChanged;
             originalNtol = pool.ha_host_failures_to_tolerate;
 
-            pictureBoxWarningIcon.Image = SystemIcons.Warning.ToBitmap();
             Rebuild();
         }
 
@@ -83,7 +80,7 @@ namespace XenAdmin.Dialogs
         {
             base.OnShown(e);
             assignPriorities.Connection = pool.Connection;
-            assignPriorities.PopulatePageControls();
+            assignPriorities.PopulatePage();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -130,11 +127,8 @@ namespace XenAdmin.Dialogs
                 {
                     Program.Invoke(this, delegate()
                     {
-                        using (var dlg = new ThreeButtonDialog(
-                           new ThreeButtonDialog.Details(
-                               SystemIcons.Exclamation,
-                               String.Format(Messages.HA_WAS_DISABLED, pool.Name()),
-                               Messages.HIGH_AVAILABILITY)))
+                        using (var dlg = new WarningDialog(string.Format(Messages.HA_WAS_DISABLED, pool.Name()))
+                            {WindowTitle = Messages.HIGH_AVAILABILITY})
                         {
                             dlg.ShowDialog(this);
                         }
@@ -158,10 +152,9 @@ namespace XenAdmin.Dialogs
             if (newNtol == 0)
             {
                 DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.HA_NTOL_ZERO_QUERY, Messages.HIGH_AVAILABILITY),
+                using (var dlg = new WarningDialog(Messages.HA_NTOL_ZERO_QUERY,
                         ThreeButtonDialog.ButtonYes,
-                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                        new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true)){WindowTitle = Messages.HIGH_AVAILABILITY})
                 {
                     dialogResult = dlg.ShowDialog(this);
                 }

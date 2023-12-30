@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,8 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Linq;
+using XenAdmin.Core;
 using XenAPI;
 
 
@@ -44,7 +43,7 @@ namespace XenAdmin.Actions
         private readonly bool _searchHiddenIsOs;
 
         public InstallPVToolsAction(VM vm, bool searchHiddenISOs)
-            : base(vm.Connection, string.Format(Messages.INSTALLTOOLS_TITLE, vm.Name()))
+            : base(vm.Connection, string.Format(Messages.INSTALLTOOLS_TITLE, BrandManager.VmTools, vm.Name()))
         {
             VM = vm;
             _searchHiddenIsOs = searchHiddenISOs;
@@ -75,11 +74,11 @@ namespace XenAdmin.Actions
                     try
                     {
                         SrRepairAction action = new SrRepairAction(sr.Connection, sr, false);
-                        action.RunExternal(Session);
+                        action.RunSync(Session);
                     }
                     catch (Failure f)
                     {
-                        throw new Failure(Messages.XS_TOOLS_SR_NOT_FOUND, f);
+                        throw new Failure(string.Format(Messages.XS_TOOLS_SR_NOT_FOUND, BrandManager.VmTools), f);
                     }
                 }
 
@@ -87,9 +86,9 @@ namespace XenAdmin.Actions
 
             // Check the version (if any) of the PV tools already on this host...
             VM_guest_metrics guestMetrics = Connection.Resolve(VM.guest_metrics);
-            if (guestMetrics != null && !VM.HasNewVirtualisationStates() && guestMetrics.PV_drivers_installed() && guestMetrics.PV_drivers_up_to_date)
+            if (guestMetrics != null && !VM.HasNewVirtualizationStates() && guestMetrics.PV_drivers_installed() && guestMetrics.PV_drivers_up_to_date)
             {
-                this.Description = Messages.INSTALLTOOLS_EXIST;
+                this.Description = string.Format(Messages.INSTALLTOOLS_EXIST, BrandManager.VmTools);
                 return;
             }
 
@@ -104,10 +103,10 @@ namespace XenAdmin.Actions
             XenAPI.VDI winIso = findWinISO(_searchHiddenIsOs);
             if (winIso == null)
             {
-                throw new Failure(Messages.INSTALLTOOLS_COULDNOTFIND_WIN);
+                throw new Failure(string.Format(Messages.INSTALLTOOLS_COULDNOTFIND_WIN, BrandManager.VmTools));
             }
 
-            Description = Messages.INSTALLTOOLS_STARTING;
+            Description = string.Format(Messages.INSTALLTOOLS_STARTING, BrandManager.VmTools);
 
             // Eject anything that's currently in the cd-rom...
             if (!cdrom.empty)
@@ -119,7 +118,7 @@ namespace XenAdmin.Actions
             XenAPI.VBD.insert(Session, cdrom.opaque_ref, winIso.opaque_ref);
 
             // done here; installation continues on the VM
-            Description = Messages.INSTALLTOOLS_DONE;
+            Description = string.Format(Messages.INSTALLTOOLS_DONE, BrandManager.VmTools);
         }
 
         // Find the windows ISO disc by scanning the SRs - will return

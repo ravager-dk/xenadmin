@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,6 +28,7 @@
  * SUCH DAMAGE.
  */
 
+using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
 
@@ -46,10 +46,8 @@ namespace XenAdmin.Diagnostics.Problems.PoolProblem
             this.pool = pool;
         }
 
-        public override string Title => Check.Description;
-
         public override string Description => string.Format(Messages.HOST_UNLICENSED_FOR_AUTOMATED_UPDATES_WARNING, pool);
 
-        public override string Message => Messages.AUTOMATED_UPDATES_UNLICENSED_WARNING_MORE_INFO;
+        public override string Message => string.Format(Messages.AUTOMATED_UPDATES_UNLICENSED_WARNING_MORE_INFO, BrandManager.BrandConsole);
     }
 }

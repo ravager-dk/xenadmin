@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using XenAdmin.Actions;
@@ -74,13 +72,7 @@ namespace XenAdmin.SettingsPanels
             InvalidParamToolTip.ToolTipTitle = Messages.INVALID_PARAMETER;
         }
 
-        public Image Image
-        {
-            get
-            {
-                return Properties.Resources._000_VM_h32bit_16;
-            }
-        }
+        public Image Image => Images.StaticImages._000_VM_h32bit_16;
 
         public bool ValidToSave
         {
@@ -202,9 +194,9 @@ namespace XenAdmin.SettingsPanels
 
             diskAccessPriorityTrackBar.Value = vbd.GetIoNice();
 
-            Host master = Helpers.GetMaster(vbd.Connection);
+            Host coordinator = Helpers.GetCoordinator(vbd.Connection);
 
-            if (sr == null || master == null || !sr.other_config.ContainsKey("scheduler") || sr.other_config["scheduler"] != "cfq")
+            if (sr == null || coordinator == null || !sr.other_config.ContainsKey("scheduler") || sr.other_config["scheduler"] != "cfq")
             {
                 DiskPriorityPanel.Visible = false;
                 label1.Visible = false;
@@ -230,6 +222,9 @@ namespace XenAdmin.SettingsPanels
         public void ShowLocalValidationMessages()
         {
         }
+
+        public void HideLocalValidationMessages()
+        { }
 
         public void Cleanup()
         {
@@ -262,11 +257,9 @@ namespace XenAdmin.SettingsPanels
                 vdi.type == vdi_type.system)
             {
                 DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.EDIT_SYS_DISK_WARNING,
-                        Messages.EDIT_SYS_DISK_WARNING_TITLE),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+                using (var dlg = new WarningDialog(Messages.EDIT_SYS_DISK_WARNING,
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                    {WindowTitle = Messages.EDIT_SYS_DISK_WARNING_TITLE})
                 {
                     dialogResult = dlg.ShowDialog(this);
                 }
@@ -309,13 +302,17 @@ namespace XenAdmin.SettingsPanels
                 }
                 else
                 {
-                    // The selected userdevice is already in use. Ask the user what to do about this.
-                    DialogResult result = new UserDeviceDialog(devicePosition).ShowDialog(this);
+                    using (var dialog = new WarningDialog(string.Format(Messages.DEVICE_POSITION_CONFLICT, devicePosition),
+                        new ThreeButtonDialog.TBDButton(Messages.DEVICE_POSITION_CONFLICT_SWAP, DialogResult.Yes),
+                        new ThreeButtonDialog.TBDButton(Messages.DEVICE_POSITION_CONFLICT_CONFIGURE, DialogResult.No),
+                        ThreeButtonDialog.ButtonCancel))
+                    {
+                        var result = dialog.ShowDialog(this);
+                        changeDevicePosition = result != DialogResult.Cancel;
 
-                    changeDevicePosition = result != DialogResult.Cancel;
-
-                    if (result == DialogResult.No || !changeDevicePosition)
-                        other = null;
+                        if (result == DialogResult.No || !changeDevicePosition)
+                            other = null;
+                    }
                 }
             }
             WarnUserSwap(vbd, other);
@@ -336,11 +333,8 @@ namespace XenAdmin.SettingsPanels
             {
                 Program.Invoke(Program.MainWindow, () =>
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                                    new ThreeButtonDialog.Details(SystemIcons.Information, Messages.DEVICE_POSITION_RESTART_REQUIRED, Messages.XENCENTER)))
-                    {
+                    using (var dlg = new InformationDialog(Messages.DEVICE_POSITION_RESTART_REQUIRED))
                         dlg.ShowDialog(Program.MainWindow);
-                    }
                 });
             }
         }

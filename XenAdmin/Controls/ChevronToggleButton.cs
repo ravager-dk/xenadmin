@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -64,8 +63,8 @@ namespace XenAdmin.Controls
 
         public ChevronToggleButton(string toogleUpText, string toogleDownText)
         {
-            ToggleUpImage = Properties.Resources.PDChevronRight;
-            ToggleDownImage = Properties.Resources.PDChevronDown;
+            ToggleUpImage = Images.StaticImages.PDChevronRight;
+            ToggleDownImage = Images.StaticImages.PDChevronDown;
             ToggleUpText = toogleUpText;
             ToggleDownText = toogleDownText;
             CurrentTogglePosition = TogglePosition.Collapsed;

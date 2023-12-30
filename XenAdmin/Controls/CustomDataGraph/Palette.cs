@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,9 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using XenAdmin.Core;
 using XenAPI;
@@ -142,7 +139,7 @@ namespace XenAdmin.Controls.CustomDataGraph
             if(pool == null)
                 return;
 
-            string key = GetColorKey(set.TypeString, set.XenObject);
+            string key = GetColorKey(set.DataSourceName, set.XenObject);
 
             Dictionary<string, string> gui_config = Helpers.GetGuiConfig(pool);
 
@@ -153,7 +150,7 @@ namespace XenAdmin.Controls.CustomDataGraph
             if (!int.TryParse(gui_config[key], out argb))
                 return;
 
-            SetCustomColor(set.Uuid, Color.FromArgb(argb));
+            SetCustomColor(set.Id, Color.FromArgb(argb));
         }
 
         public static string GetColorKey(string ds_name, IXenObject xo)

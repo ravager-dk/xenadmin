@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,9 +33,9 @@ using XenAPI;
 
 namespace XenAdmin.Actions
 {
-    public class DeleteVIFAction : PureAsyncAction
+    public class DeleteVIFAction : AsyncAction
     {
-        private VIF _vif;
+        private readonly VIF _vif;
 
         public DeleteVIFAction(VIF vif, bool suppressHistory = false)
             : base(vif.Connection,
@@ -45,20 +44,15 @@ namespace XenAdmin.Actions
         {
             _vif = vif;
             VM = vif.Connection.Resolve(vif.VM);
+            ApiMethodsToRoleCheck.AddRange("VIF.get_allowed_operations", "VIF.unplug", "VIF.destroy");
         }
-
-        /// <summary>
-        /// List of XML RPC calls made by the class
-        /// (although not needed explicitly here as this class is a pure async action)
-        /// </summary>
-        public static readonly string[] XmlRpcMethods = {"VIF.unplug", "VIF.destroy"};
 
         protected override void Run()
         {
             Description = Messages.ACTION_VIF_DELETING;
 
-            if (VM.power_state == vm_power_state.Running
-                && VIF.get_allowed_operations(Session, _vif.opaque_ref).Contains(vif_operations.unplug))
+            if (VM.power_state == vm_power_state.Running &&
+                VIF.get_allowed_operations(Session, _vif.opaque_ref).Contains(vif_operations.unplug))
             {
                 try
                 {

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -77,17 +76,9 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
             return null;
         }
 
-        private static bool NameExists(String potentialName, IEnumerable<string> names)
+        public static string DefaultSRName(string potentialName, List<string> names)
         {
-            if (names != null)
-                return names.Any(name => name.Equals(potentialName));
-
-            return false;
-        }
-
-        public static String DefaultSRName(String potentialName, IEnumerable<string> names)
-        {
-            if (!NameExists(potentialName, names))
+            if (!names.Contains(potentialName))
                 return potentialName;
 
             int i = 0;
@@ -96,16 +87,16 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
             {
                 i++;
 
-                String name = string.Format(Messages.NEWVM_DEFAULTNAME, potentialName, i);
+                string name = string.Format(Messages.NEWVM_DEFAULTNAME, potentialName, i);
 
-                if (!NameExists(name, names))
+                if (!names.Contains(name))
                     return name;
             }
         }
         
-        public static String DefaultSRName(String potentialName, IXenConnection connection)
+        public static string DefaultSRName(string potentialName, IXenConnection connection)
         {
-            return DefaultSRName(potentialName, connection.Cache.SRs.Select(sr => sr.Name()));
+            return DefaultSRName(potentialName, connection.Cache.SRs.Select(sr => sr.Name()).ToList());
         }
     }
 }

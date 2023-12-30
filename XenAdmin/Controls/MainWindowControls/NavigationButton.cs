@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,10 +29,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace XenAdmin.Controls.MainWindowControls
@@ -141,12 +137,12 @@ namespace XenAdmin.Controls.MainWindowControls
                 if (unreadEntries > 0)
                 {
                     Text = ToolTipText = string.Format(Messages.NOTIFICATIONS_TOTAL, unreadEntries);
-                    Image = Properties.Resources.notif_alerts_16;
+                    Image = Images.StaticImages.notif_alerts_16;
                 }
                 else
                 {
                     Text = ToolTipText = Messages.NOTIFICATIONS_TOTAL_ZERO;
-                    Image = Properties.Resources.notif_none_16;
+                    Image = Images.StaticImages.notif_none_16;
                 }
 
                 Invalidate();

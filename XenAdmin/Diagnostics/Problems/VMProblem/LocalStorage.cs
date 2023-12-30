@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
-using XenAdmin.Actions.VMActions;
 
 
 namespace XenAdmin.Diagnostics.Problems.VMProblem
@@ -43,9 +39,6 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
         public LocalStorage(Check check, VM vm)
             : base(check, vm) { }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.UPDATES_WIZARD_LOCAL_STORAGE, ServerName, VM.Name().Ellipsise(15)); }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_LOCAL_STORAGE, ServerName, VM.Name());
     }
 }

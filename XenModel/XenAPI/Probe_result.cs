@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -41,6 +41,7 @@ namespace XenAPI
 {
     /// <summary>
     /// A set of properties that describe one result element of SR.probe. Result elements and properties can change dynamically based on changes to the the SR.probe input-parameters or the target.
+    /// First published in XenServer 7.6.
     /// </summary>
     public partial class Probe_result : XenObject<Probe_result>
     {
@@ -73,45 +74,18 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new Probe_result from a Proxy_Probe_result.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public Probe_result(Proxy_Probe_result proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given Probe_result.
         /// </summary>
-        public override void UpdateFrom(Probe_result update)
+        public override void UpdateFrom(Probe_result record)
         {
-            configuration = update.configuration;
-            complete = update.complete;
-            sr = update.sr;
-            extra_info = update.extra_info;
-        }
-
-        internal void UpdateFrom(Proxy_Probe_result proxy)
-        {
-            configuration = proxy.configuration == null ? null : Maps.convert_from_proxy_string_string(proxy.configuration);
-            complete = (bool)proxy.complete;
-            sr = proxy.sr == null ? null : new Sr_stat(proxy.sr);
-            extra_info = proxy.extra_info == null ? null : Maps.convert_from_proxy_string_string(proxy.extra_info);
-        }
-
-        public Proxy_Probe_result ToProxy()
-        {
-            Proxy_Probe_result result_ = new Proxy_Probe_result();
-            result_.configuration = Maps.convert_to_proxy_string_string(configuration);
-            result_.complete = complete;
-            result_.sr = sr == null ? null : sr.ToProxy();
-            result_.extra_info = Maps.convert_to_proxy_string_string(extra_info);
-            return result_;
+            configuration = record.configuration;
+            complete = record.complete;
+            sr = record.sr;
+            extra_info = record.extra_info;
         }
 
         /// <summary>
@@ -123,13 +97,13 @@ namespace XenAPI
         public void UpdateFrom(Hashtable table)
         {
             if (table.ContainsKey("configuration"))
-                configuration = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "configuration"));
+                configuration = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "configuration"));
             if (table.ContainsKey("complete"))
                 complete = Marshalling.ParseBool(table, "complete");
             if (table.ContainsKey("sr"))
                 sr = (Sr_stat)Marshalling.convertStruct(typeof(Sr_stat), Marshalling.ParseHashTable(table, "sr"));;
             if (table.ContainsKey("extra_info"))
-                extra_info = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "extra_info"));
+                extra_info = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "extra_info"));
         }
 
         public bool DeepEquals(Probe_result other)
@@ -139,19 +113,10 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._configuration, other._configuration) &&
-                Helper.AreEqual2(this._complete, other._complete) &&
-                Helper.AreEqual2(this._sr, other._sr) &&
-                Helper.AreEqual2(this._extra_info, other._extra_info);
-        }
-
-        internal static List<Probe_result> ProxyArrayToObjectList(Proxy_Probe_result[] input)
-        {
-            var result = new List<Probe_result>();
-            foreach (var item in input)
-                result.Add(new Probe_result(item));
-
-            return result;
+            return Helper.AreEqual2(_configuration, other._configuration) &&
+                Helper.AreEqual2(_complete, other._complete) &&
+                Helper.AreEqual2(_sr, other._sr) &&
+                Helper.AreEqual2(_extra_info, other._extra_info);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, Probe_result server)
@@ -166,9 +131,9 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// Plugin-specific configuration which describes where and how to locate the storage repository. This may include the physical block device name, a remote NFS server and path or an RBD storage pool.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         [JsonConverter(typeof(StringStringMapConverter))]
         public virtual Dictionary<string, string> configuration
@@ -187,7 +152,6 @@ namespace XenAPI
 
         /// <summary>
         /// True if this configuration is complete and can be used to call SR.create. False if it requires further iterative calls to SR.probe, to potentially narrow down on a configuration that can be used.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual bool complete
         {
@@ -205,7 +169,6 @@ namespace XenAPI
 
         /// <summary>
         /// Existing SR found for this configuration
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         public virtual Sr_stat sr
         {
@@ -223,7 +186,6 @@ namespace XenAPI
 
         /// <summary>
         /// Additional plugin-specific information about this configuration, that might be of use for an API user. This can for example include the LUN or the WWPN.
-        /// Experimental. First published in XenServer 7.5.
         /// </summary>
         [JsonConverter(typeof(StringStringMapConverter))]
         public virtual Dictionary<string, string> extra_info

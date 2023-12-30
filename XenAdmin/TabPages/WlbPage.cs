@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 
 using XenAdmin.Actions;
@@ -86,8 +84,7 @@ namespace XenAdmin.TabPages
             InitializeComponent();
 
             base.Text = Messages.WORKLOAD_BALANCING;
-            pdSectionConfiguration.fixFirstColumnWidth(200);
-            pictureBoxWarningTriangle.Image = SystemIcons.Warning.ToBitmap();
+            pdSectionConfiguration.FixFirstColumnWidth(200);
 
             RefreshControls();
         }
@@ -217,43 +214,41 @@ namespace XenAdmin.TabPages
 
         protected void action_Completed(ActionBase sender)
         {
-            // This seems to be called off the event thread
-            AsyncAction action = (AsyncAction)sender;
-            if (action.IsCompleted)
+            if (!(sender is AsyncAction action) || !action.IsCompleted)
+                return;
+
+            action.Completed -= action_Completed;
+            if (action is EnableWLBAction || action is RetrieveWlbConfigurationAction || action is DisableWLBAction)
             {
-                action.Completed -= action_Completed;
-                if (action is EnableWLBAction || action is RetrieveWlbConfigurationAction || action is DisableWLBAction)
+                if (action is EnableWLBAction)
                 {
-                    if (action is EnableWLBAction)
+                    EnableWLBAction thisAction = (EnableWLBAction)action;
+                    _wlbPoolConfiguration = new WlbPoolConfiguration(thisAction.WlbConfiguration);
+                }
+                else if (action is RetrieveWlbConfigurationAction)
+                {
+                    RetrieveWlbConfigurationAction thisAction = (RetrieveWlbConfigurationAction)action;
+                    if (thisAction.Succeeded)
                     {
-                        EnableWLBAction thisAction = (EnableWLBAction)action;
                         _wlbPoolConfiguration = new WlbPoolConfiguration(thisAction.WlbConfiguration);
                     }
-                    else if (action is RetrieveWlbConfigurationAction)
+                    else
                     {
-                        RetrieveWlbConfigurationAction thisAction = (RetrieveWlbConfigurationAction)action;
-                        if (thisAction.Succeeded)
-                        {
-                            _wlbPoolConfiguration = new WlbPoolConfiguration(thisAction.WlbConfiguration);
-                        }
-                        else
-                        {
-                            //_statusError = thisAction.Exception.Message;
-                            _wlbPoolConfiguration = null;
-                        }
+                        //_statusError = thisAction.Exception.Message;
+                        _wlbPoolConfiguration = null;
                     }
-                    else if (action is DisableWLBAction)
-                    {
-                    }
-
-                    Program.Invoke(Program.MainWindow, delegate()
-                    {
-                        if (_pool != null && _pool.Connection == action.Connection)
-                        {
-                            RefreshControls();
-                        }
-                    });
                 }
+                else if (action is DisableWLBAction)
+                {
+                }
+
+                Program.Invoke(Program.MainWindow, delegate()
+                {
+                    if (_pool != null && _pool.Connection == action.Connection)
+                    {
+                        RefreshControls();
+                    }
+                });
             }
         }
 
@@ -350,7 +345,7 @@ namespace XenAdmin.TabPages
 
         private bool PassedRbacChecks()
         {
-            return Role.CanPerform(WLB_PERMISSION_CHECKS, _pool.Connection);
+            return Role.CanPerform(WLB_PERMISSION_CHECKS, _pool.Connection, out _);
         }
 
         private void SetButtonState()
@@ -547,10 +542,9 @@ namespace XenAdmin.TabPages
                         {
                             string blurb = string.Format(Messages.WLB_PROMPT_FOR_MODE_CHANGE_BLURB, getOptModeText(scheduledPerfMode), getOptModeText(_wlbPoolConfiguration.PerformanceMode));
                             DialogResult drModeCheck;
-                            using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(null, blurb, Messages.WLB_PROMPT_FOR_MODE_CHANGE_CAPTION),
-                                ThreeButtonDialog.ButtonYes,
-                                ThreeButtonDialog.ButtonNo))
+                            using (var dlg = new NoIconDialog(blurb,
+                                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                                {WindowTitle = Messages.WLB_PROMPT_FOR_MODE_CHANGE_CAPTION})
                             {
                                 drModeCheck = dlg.ShowDialog(this);
                             }
@@ -615,15 +609,15 @@ namespace XenAdmin.TabPages
         private string getNextOptModeTask(Pool pool)
         {
             //figure out the next task and return a nice string for display
-            WlbScheduledTask nextTask = _wlbPoolConfiguration.ScheduledTasks.GetNextExecutingTask();
+            WlbScheduledTask nextTask = _wlbPoolConfiguration.ScheduledTasks.GetNextRunningTask();
             WlbScheduledTask.WlbTaskDaysOfWeek dayOfWeek;
-            DateTime executeTime;
+            DateTime runTime;
 
-            WlbScheduledTask.GetLocalTaskTimes(nextTask.DaysOfWeek, nextTask.ExecuteTime, out dayOfWeek, out executeTime);
+            WlbScheduledTask.GetLocalTaskTimes(nextTask.DaysOfWeek, nextTask.RunTime, out dayOfWeek, out runTime);
 
             string localDayOfWeek = WlbScheduledTask.DaysOfWeekL10N(dayOfWeek);
 
-            return string.Format(Messages.WLB_NEXT_OPT_MODE_SCHEDULE_FORMAT, localDayOfWeek, HelpersGUI.DateTimeToString(executeTime, Messages.DATEFORMAT_HM, true));
+            return string.Format(Messages.WLB_NEXT_OPT_MODE_SCHEDULE_FORMAT, localDayOfWeek, HelpersGUI.DateTimeToString(runTime, Messages.DATEFORMAT_HM, true));
         }
         
         private string getAutoOptimization(Pool pool)
@@ -670,7 +664,7 @@ namespace XenAdmin.TabPages
         private void buttonReports_Click(object sender, EventArgs e)
         {
             ViewWorkloadReportsCommand viewWorkloadReportsCommand = new ViewWorkloadReportsCommand(Program.MainWindow, _pool);
-            viewWorkloadReportsCommand.Execute();
+            viewWorkloadReportsCommand.Run();
         }
 
         #endregion

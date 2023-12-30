@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -218,7 +217,7 @@ namespace XenAdmin.Controls
 
         private string PIFDescription(PIF pif)
         {
-            Bond bond = pif.BondSlaveOf();
+            Bond bond = pif.BondMemberOf();
             return bond == null ? "" : string.Format(Messages.ALREADY_IN_BOND, bond.Name());
         }
 
@@ -233,11 +232,8 @@ namespace XenAdmin.Controls
             // It is not allowed to bond primary and secondary interfaces together.
             if (will_disturb_primary && will_disturb_secondary)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Error,
-                        Messages.BOND_CREATE_WILL_DISTURB_BOTH,
-                        Messages.BOND_CREATE)))
+                using (var dlg = new ErrorDialog(Messages.BOND_CREATE_WILL_DISTURB_BOTH)
+                    {WindowTitle = Messages.BOND_CREATE})
                 {
                     dlg.ShowDialog(this);
                 }
@@ -252,11 +248,8 @@ namespace XenAdmin.Controls
                 Pool pool = Helpers.GetPool(Connection);
                 if (pool != null && pool.ha_enabled)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Error,
-                            string.Format(Messages.BOND_CREATE_HA_ENABLED, pool.Name()),
-                            Messages.BOND_CREATE)))
+                    using (var dlg = new ErrorDialog(string.Format(Messages.BOND_CREATE_HA_ENABLED, pool.Name()))
+                        {WindowTitle = Messages.BOND_CREATE})
                     {
                         dlg.ShowDialog(this);
                     }
@@ -265,11 +258,13 @@ namespace XenAdmin.Controls
                 }
 
                 DialogResult dialogResult;
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.BOND_CREATE_WILL_DISTURB_PRIMARY, Messages.BOND_CREATE),
-                    "BondConfigError",
+                using (var dlg = new WarningDialog(string.Format(Messages.BOND_CREATE_WILL_DISTURB_PRIMARY, BrandManager.BrandConsole),
                     new ThreeButtonDialog.TBDButton(Messages.BOND_CREATE_CONTINUE, DialogResult.OK),
-                    ThreeButtonDialog.ButtonCancel))
+                    ThreeButtonDialog.ButtonCancel)
+                {
+                    HelpNameSetter = "BondConfigError",
+                    WindowTitle = Messages.BOND_CREATE
+                })
                 {
                     dialogResult = dlg.ShowDialog(this);
                 }
@@ -283,13 +278,9 @@ namespace XenAdmin.Controls
                 DialogResult dialogResult;
                 if (will_disturb_clustering)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Warning,
-                            Messages.BOND_CREATE_WILL_DISTURB_CLUSTERING,
-                            Messages.BOND_CREATE),
-                        ThreeButtonDialog.ButtonOK,
-                        ThreeButtonDialog.ButtonCancel))
+                    using (var dlg = new WarningDialog(Messages.BOND_CREATE_WILL_DISTURB_CLUSTERING,
+                        ThreeButtonDialog.ButtonOK, ThreeButtonDialog.ButtonCancel)
+                        {WindowTitle = Messages.BOND_CREATE})
                     {
                         dialogResult = dlg.ShowDialog(this);
                     }
@@ -297,13 +288,9 @@ namespace XenAdmin.Controls
 
                 else
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Warning,
-                            Messages.BOND_CREATE_WILL_DISTURB_SECONDARY,
-                            Messages.BOND_CREATE),
-                        ThreeButtonDialog.ButtonOK,
-                        ThreeButtonDialog.ButtonCancel))
+                    using (var dlg = new WarningDialog(Messages.BOND_CREATE_WILL_DISTURB_SECONDARY,
+                        ThreeButtonDialog.ButtonOK, ThreeButtonDialog.ButtonCancel)
+                        {WindowTitle = Messages.BOND_CREATE})
                     {
                         dialogResult = dlg.ShowDialog(this);
                     }

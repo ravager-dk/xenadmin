@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,10 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAdmin.Actions;
 using System.Collections.ObjectModel;
 using XenAdmin.Network;
 
@@ -94,7 +90,7 @@ namespace XenAdmin.Actions
                 else
                 {
                     if (_runActionInParallel)
-                        new ParallelAction(connection, _title, _startDescription, _endDescription, actionsByConnection[connection]).RunAsync();
+                        new ParallelAction(_title, _startDescription, _endDescription, actionsByConnection[connection], connection).RunAsync();
                     else
                         new MultipleAction(connection, _title, _startDescription, _endDescription, actionsByConnection[connection]).RunAsync();
                 }
@@ -107,7 +103,7 @@ namespace XenAdmin.Actions
             else if (actionsWithNoConnection.Count > 1)
             {
                 if (_runActionInParallel)
-                    new ParallelAction(null, _title, _startDescription, _endDescription, actionsWithNoConnection).RunAsync();
+                    new ParallelAction(_title, _startDescription, _endDescription, actionsWithNoConnection).RunAsync();
                 else
                     new MultipleAction(null, _title, _startDescription, _endDescription, actionsWithNoConnection).RunAsync();
             }

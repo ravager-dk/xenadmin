@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
-  <Import Project="..\packages\NUnit.3.10.1\build\NUnit.props" Condition="Exists('..\packages\NUnit.3.10.1\build\NUnit.props')" />
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="17.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>XenAdminTests</RootNamespace>
     <AssemblyName>XenAdminTests</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -37,26 +36,20 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\packages\Castle.Core.4.2.1\lib\net45\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CookComputing.XmlRpcV2, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="CookComputing.XmlRpcV2, Version=2.5.0.1, Culture=neutral, PublicKeyToken=d247b8b0ac7959e9, processorArchitecture=MSIL">
       <HintPath>..\packages\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net, Version=2.0.15.0, Culture=neutral, PublicKeyToken=d247b8b0ac7959e9, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Moq, Version=4.8.0.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <HintPath>..\packages\Moq.4.8.2\lib\net45\Moq.dll</HintPath>
+    <Reference Include="Moq, Version=4.5.3.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json.CH, Version=13.0.1.0, Culture=neutral, PublicKeyToken=d247b8b0ac7959e9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.CH.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -65,29 +58,29 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.3.0\lib\portable-net45+win8+wp8+wpa81\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HealthCheckTests\CredentialTests.cs" />
-    <Compile Include="HealthCheckTests\RequestUploadTaskTests.cs" />
-    <Compile Include="UnitTests\BatchUpdatesTests\BatchUpdatesTests.cs" />
-    <Compile Include="UnitTests\CPUFeaturesTest.cs" />
-    <Compile Include="UnitTests\AlertTests\MultipathAlertTest.cs" />
-    <Compile Include="UnitTests\HealthCheckAnalysisProgressTest.cs" />
-    <Compile Include="UnitTests\HelpManagerTests.cs" />
-    <Compile Include="UnitTests\SubnetworkMaskValidatorTest.cs" />
-    <Compile Include="UnitTests\ExceptionSerializationTest.cs" />
-    <Compile Include="XenModelTests\ActionTests\ActionTest.cs" />
-    <Compile Include="XenModelTests\ActionTests\VMActionsTest.cs" />
-    <Compile Include="MainWindowWrapper\AttachDiskDialogWrapper.cs" />
-    <Compile Include="MainWindowWrapper\AddServerDialogWrapper.cs" />
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="ArchiveTests\ArchiveFactoryTests.cs" />
+    <Compile Include="ArchiveTests\ArchiveIteratorTests.cs" />
+    <Compile Include="ArchiveTests\ArchiveWriterTests.cs" />
+    <Compile Include="ArchiveTests\ThirdPartyArchiveWriterTests.cs" />
+    <Compile Include="ClassVerifiers.cs" />
+    <Compile Include="CodeTests\AssemblyTests.cs" />
+    <Compile Include="CodeTests\XenModelReferencesTest.cs" />
+    <Compile Include="CompressionTests\CompressionFactoryTests.cs" />
+    <Compile Include="CompressionTests\CompressionStreamTests.cs" />
+    <Compile Include="CompressionTests\ThirdPartyCompressionStreamTests.cs" />
+    <Compile Include="Controls\DecentGroupBoxTests.cs" />
+    <Compile Include="Controls\Folders\FolderListItemTests.cs" />
+    <Compile Include="Controls\LongStringComboBoxTest.cs" />
+    <Compile Include="LicensingTests\LicenceTimerTests.cs" />
+    <Compile Include="LicensingTests\ProductColumnComparerTests.cs" />
     <Compile Include="MainWindowWrapper\MockMainWindow.cs" />
     <Compile Include="MainWindowWrapper\NameAndConnectionPromptWrapper.cs" />
     <Compile Include="MainWindowWrapper\HostMenuWrapper.cs" />
@@ -133,83 +126,9 @@
     <Compile Include="LicensingTests\OpenFileDialogWrapper.cs" />
     <Compile Include="MainWindowTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SearchTests\ComparerAdapter.cs" />
-    <Compile Include="SearchTests\IPAddressTest.cs" />
-    <Compile Include="SearchTests\MatchTests.cs" />
-    <Compile Include="SearchTests\SearchMarshallingTests.cs" />
-    <Compile Include="SearchTests\SearchTestsSetup.cs" />
-    <Compile Include="TabsAndMenus\TabsAndMenus.cs" />
-    <Compile Include="UnitTests\NaturalCompareTest.cs" />
-    <Compile Include="UnitTests\TokenizerTest.cs" />
-    <Compile Include="UnitTests\XenObjectEqualsTests.cs" />
-    <Compile Include="WizardTests\BallooningWizardTest.cs" />
-    <Compile Include="WizardTests\BugToolWizardTest.cs" />
-    <Compile Include="WizardTests\HAWizardTest.cs" />
-    <Compile Include="WizardTests\NewNetworkWizardTest.cs" />
-    <Compile Include="WizardTests\NewSRWizardTest.cs" />
-    <Compile Include="WizardTests\NewVMWizardStorageTest.cs" />
-    <Compile Include="WizardTests\NewVMWizardTest.cs" />
-    <Compile Include="WizardTests\UpdatesWizardTest.cs" />
-    <Compile Include="WizardTests\WizardTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="TestResources\enterprise.xslic">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\express.xslic">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\PluginResources\XenServerPowerShellTest.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\PluginResources\PowerShellTest.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\PluginResources\ShellTest.bat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\state.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\succeed.[xsupdate]">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="TestResources\boston-db.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestResources\ContextMenuBuilderTestResults.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestResources\cowleyPolicies.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <EmbeddedResource Include="TestResources\PluginResources\ParentMenuItemFeatureTestPlugin.xcplugin.xml" />
-    <Content Include="TestResources\PluginResources\PowerShellPlugin.xcplugin.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <EmbeddedResource Include="TestResources\PluginResources\MenuItemFeatureTestPlugin.xcplugin.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TestResources\PluginResources\TabPageFeatureTestPlugin.xcplugin.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <Content Include="TestResources\PluginResources\XenServerPowerShellPlugin.xcplugin.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Compile Include="Controls\DecentGroupBoxTests.cs" />
-    <Compile Include="Controls\Folders\FolderListItemTests.cs" />
-    <Compile Include="DialogTests\LicenseManager\Comparers\NameColumnComparerTests.cs" />
-    <Compile Include="DialogTests\LicenseManager\Comparers\ProductColumnComparerTests.cs" />
-    <Compile Include="DialogTests\LicenseManager\SelectionVerifiers\CanUseLicenseServerVerifierTests.cs" />
-    <Compile Include="DialogTests\LicenseManager\SelectionVerifiers\OldServerVerifierTests.cs" />
-    <Compile Include="LicensingTests\LicenceStatusTests.cs" />
-    <Compile Include="LicensingTests\LicenseManagerSummaryLicenseExpiresDecoratorTests.cs" />
-    <Compile Include="LicensingTests\LicenseManagerTests.cs" />
-    <Compile Include="LicensingTests\FakeResponseSelectionVerifierFactories.cs" />
+    <Compile Include="SearchTests\VirtualisationStatePropertyQueryTests.cs" />
+    <Compile Include="SearchTests\DatePropertyQueryTests.cs" />
+    <Compile Include="SearchTests\XenSearchQueryTest.cs" />
     <Compile Include="StringExtensionsTests\EllipsiseStringTests.cs" />
     <Compile Include="StringExtensionsTests\EscapeAmpersandsTests.cs" />
     <Compile Include="TabsAndMenus\GeneralTabLicenseStatusStringifierTests.cs" />
@@ -357,16 +276,18 @@
     <Compile Include="UnitTests\AlertTests\DuplicateIqnAlertTests.cs" />
     <Compile Include="UnitTests\AlertTests\GuiOldAlertTest.cs" />
     <Compile Include="UnitTests\CPUMaskingTest.cs" />
-    <Compile Include="StringExtensionsTests\TruncateStringTest.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\IUnitTestVerifier.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\MockObjectBuilders\MockObjectBuilder.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\MockObjectBuilders\MockObjectBuilderFactory.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\MockObjectBuilders\MockVdiWithVbds.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\MockObjectBuilders\MockVmWithHomeServer.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\VerifyStaticMethodReturn.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\VerifyGetters.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\VerifyGettersAndSetters.cs" />
-    <Compile Include="UnitTests\UnitTestHelper\VerifyPropertyCounter.cs" />
+    <Compile Include="UnitTests\EmailAddressValidatorTests.cs" />
+    <Compile Include="UnitTests\ExceptionSerializationTest.cs" />
+    <Compile Include="UnitTests\NamesAndMessagesTests.cs" />
+    <Compile Include="UnitTests\NaturalCompareTest.cs" />
+    <Compile Include="UnitTests\RpmVersionTests.cs" />
+    <Compile Include="UnitTests\StreamUtilitiesTests.cs" />
+    <Compile Include="UnitTests\SubnetworkMaskValidatorTest.cs" />
+    <Compile Include="UnitTests\TimeUtilTests.cs" />
+    <Compile Include="UnitTests\UpdateManagerTests.cs" />
+    <Compile Include="UnitTests\RegexTests.cs" />
+    <Compile Include="UnitTests\EncryptionUtilTests.cs" />
+    <Compile Include="UnitTests\UtilTests.cs" />
     <Compile Include="UnitTests\WlbTests\WlbPoolConfigurationTests.cs" />
     <Compile Include="UnitTests\WlbTests\WlbReportSubscriptionTests.cs" />
     <Compile Include="UnitTests\WlbTests\WlbScheduledTasksTests.cs" />
@@ -399,14 +320,10 @@
     <Compile Include="XenModelTests\JsonConverterTests.cs" />
     <Compile Include="XenModelTests\XenModelReferencesTest.cs" />
     <Compile Include="XenOvf\FileDigestTests.cs" />
-    <None Include="TestResources\callVersions.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\disk-image.vhd">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestResources\emptyfile.gz">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="TestResources\emptyfile.bz2">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestResources\sample.xva">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -485,10 +402,6 @@
     <ProjectReference Include="..\XenOvfApi\XenOvfApi.csproj">
       <Project>{2D78AC6C-B867-484A-A447-3C6FC8B8EAF7}</Project>
       <Name>XenOvfApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\XenServerHealthCheck\XenServerHealthCheck.csproj">
-      <Project>{deb3208d-1153-407c-8c99-0d8899be25a5}</Project>
-      <Name>XenServerHealthCheck</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

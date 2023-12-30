@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,57 +34,35 @@ using XenAPI;
 
 namespace XenAdmin.Diagnostics.Hotfixing
 {
-    internal sealed class HotfixFactory
+    internal static class HotfixFactory
     {
         public enum HotfixableServerVersion
         {
-            Dundee,
-            ElyLima,
-            Naples
+            Stockholm
         }
 
-        private readonly Hotfix dundeeHotfix = new SingleHotfix
-        {
-            Filename = "RPU003",
-            UUID = "b651dd22-df7d-45a4-8c0a-6be037bc1714"
-        };
-
-        private readonly Hotfix elyLimaHotfix = new SingleHotfix
-        {
-            Filename = "RPU004",
-            UUID = "1821854d-0171-4696-a9c4-01daf75a45a0"
-        };
-
-        private readonly Hotfix naplesHotfix = new SingleHotfix
+        private static readonly Hotfix StockholmHotfix = new SingleHotfix
         {
             Filename = "RPU005",
-            UUID = "b43ea62d-2804-4589-9164-f6cc5867d011"
+            UUID = "38a7eeeb-31ec-4de3-934f-13929ad3e339"
         };
 
-        public Hotfix Hotfix(Host host)
+        public static Hotfix Hotfix(Host host)
         {
-            if (Helpers.NaplesOrGreater(host) && !Helpers.QuebecOrGreater(host))
-                return Hotfix(HotfixableServerVersion.Naples);
-            if (Helpers.ElyOrGreater(host) && !Helpers.NaplesOrGreater(host))
-                return Hotfix(HotfixableServerVersion.ElyLima);
-            if (Helpers.DundeeOrGreater(host) && !Helpers.ElyOrGreater(host))
-                return Hotfix(HotfixableServerVersion.Dundee);
+            if (Helpers.StockholmOrGreater(host) && !Helpers.CloudOrGreater(host))
+                return Hotfix(HotfixableServerVersion.Stockholm);
             return null;
         }
 
-        public Hotfix Hotfix(HotfixableServerVersion version)
+        public static Hotfix Hotfix(HotfixableServerVersion version)
         {
-            if (version == HotfixableServerVersion.Naples)
-                return naplesHotfix;
-            if (version == HotfixableServerVersion.ElyLima)
-                return elyLimaHotfix;
-            if (version == HotfixableServerVersion.Dundee)
-                return dundeeHotfix;
+            if (version == HotfixableServerVersion.Stockholm)
+                return StockholmHotfix;
 
             throw new ArgumentException("A version was provided for which there is no hotfix filename");
         }
 
-        public bool IsHotfixRequired(Host host)
+        public static bool IsHotfixRequired(Host host)
         {
             return Hotfix(host) != null;
         }

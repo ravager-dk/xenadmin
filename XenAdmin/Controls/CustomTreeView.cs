@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,12 +32,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using XenAdmin.Core;
-using XenAPI;
 
 namespace XenAdmin.Controls
 {
@@ -220,14 +216,14 @@ namespace XenAdmin.Controls
                     if(Application.RenderWithVisualStyles)
 						plusRenderer.DrawBackground(e.Graphics, new Rectangle(e.Bounds.Left + indent - ItemHeight, e.Bounds.Top + 3 + topMargin, 9, 9));
                     else
-						e.Graphics.DrawImage(Properties.Resources.tree_plus, new Rectangle(e.Bounds.Left + indent - ItemHeight, e.Bounds.Top + 3 + topMargin, 9, 9));
+						e.Graphics.DrawImage(Images.StaticImages.tree_plus, new Rectangle(e.Bounds.Left + indent - ItemHeight, e.Bounds.Top + 3 + topMargin, 9, 9));
                 }
                 else
                 {
                     if (Application.RenderWithVisualStyles)
 						minusRenderer.DrawBackground(e.Graphics, new Rectangle(e.Bounds.Left + indent - ItemHeight, e.Bounds.Top + 3 + topMargin, 9, 9));
                     else
-						e.Graphics.DrawImage(Properties.Resources.tree_minus, new Rectangle(e.Bounds.Left + indent - ItemHeight, e.Bounds.Top + 3 + topMargin, 9, 9));
+						e.Graphics.DrawImage(Images.StaticImages.tree_minus, new Rectangle(e.Bounds.Left + indent - ItemHeight, e.Bounds.Top + 3 + topMargin, 9, 9));
                 }
             }
 

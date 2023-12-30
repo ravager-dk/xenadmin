@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -315,7 +314,7 @@ namespace XenAdmin.XenSearch
 
         public static string GetVMHAStatus(VM vm)
         {
-            if (!vm.is_a_real_vm())
+            if (!vm.IsRealVm())
                 return "-";
             return Helpers.RestartPriorityI18n(vm.HARestartPriority());
         }

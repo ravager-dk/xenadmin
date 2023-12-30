@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
 using XenAdmin.Core;
-using XenAdmin.Properties;
 using XenAPI;
 using XenAdmin.Dialogs;
 
@@ -89,10 +87,10 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actions = new List<AsyncAction>();
-            foreach (Host host in selection.AsXenObjects<Host>(CanExecute))
+            foreach (Host host in selection.AsXenObjects<Host>(CanRun))
             {
                 var action = new HostPowerOnAction( host);
                 action.Completed += Program.MainWindow.action_Completed;
@@ -101,7 +99,7 @@ namespace XenAdmin.Commands
             RunMultipleActions(actions, null, Messages.ACTION_HOST_STARTING, Messages.ACTION_HOST_STARTED, true);
         }
 
-        private static bool CanExecute(Host host)
+        private static bool CanRun(Host host)
         {
             return host != null
                 && !host.IsLive()
@@ -110,18 +108,18 @@ namespace XenAdmin.Commands
                 && host.power_on_mode != "";
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<Host>() && selection.AtLeastOneXenObjectCan<Host>(CanExecute);
+            return selection.AllItemsAre<Host>() && selection.AtLeastOneXenObjectCan<Host>(CanRun);
         }
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
             foreach (Host host in GetSelection().AsXenObjects<Host>())
             {
-                if (!CanExecute(host) && !host.IsLive())
+                if (!CanRun(host) && !host.IsLive())
                 {
-                    return new CommandErrorDialog(Messages.ERROR_DIALOG_POWER_ON_HOST_TITLE, Messages.ERROR_DIALOG_POWER_ON_HOST_TEXT, cantExecuteReasons);
+                    return new CommandErrorDialog(Messages.ERROR_DIALOG_POWER_ON_HOST_TITLE, Messages.ERROR_DIALOG_POWER_ON_HOST_TEXT, cantRunReasons);
                 }
             }
             return null;
@@ -143,12 +141,12 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             Host host = item as Host;
             if (host == null)
             {
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
             }
             if (host.IsLive())
             {
@@ -158,7 +156,7 @@ namespace XenAdmin.Commands
             {
                 return Messages.HOST_POWER_ON_MODE_NOT_SET;
             }
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
 
 

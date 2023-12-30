@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
-using System.Windows.Forms;
 using XenAdmin.Dialogs;
-using System.Collections.ObjectModel;
-using System.Drawing;
+
 
 namespace XenAdmin.Commands
 {
@@ -63,17 +58,14 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             VM vm = (VM)selection[0].XenObject;
 
             if (vm.VBDs.Count >= vm.MaxVBDsAllowed())
             {
-                using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Error,
-                            FriendlyErrorNames.VBDS_MAX_ALLOWED,
-                            Messages.DISK_ATTACH)))
+                using (var dlg = new ErrorDialog(FriendlyErrorNames.VBDS_MAX_ALLOWED)
+                    {WindowTitle = Messages.DISK_ATTACH})
                 {
                     dlg.ShowDialog(Program.MainWindow);
                 }
@@ -84,16 +76,10 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            if (selection.Count == 1)
-            {
-                VM vm = selection[0].XenObject as VM;
-
-                return vm != null && !vm.is_a_snapshot && !vm.Locked;
-
-            }
-            return false;
+            return selection.Count == 1 && selection[0].XenObject is VM vm &&
+                   !vm.is_a_snapshot && !vm.Locked;
         }
     }
 }

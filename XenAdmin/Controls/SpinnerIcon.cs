@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -47,7 +45,8 @@ namespace XenAdmin.Controls
         private readonly Timer spinningTimer = new Timer();
         private const int SPEED = 150;
         private int currentPosition;
-        private Image succeededImage;
+        private Image successImage = Images.StaticImages._000_Tick_h32bit_16;
+        private Image failureImage = Images.StaticImages._000_error_h32bit_16;
 
         private readonly Image[] spinningImageFrames =
         {
@@ -66,16 +65,33 @@ namespace XenAdmin.Controls
         #region Properties
 
         /// <summary>
-        /// Image to be displayed when DisplaySucceededImage() was called.
+        /// Image to be displayed when DisplaySuccessImage() is called.
+        /// Default value is _000_Tick_h32bit_16
         /// </summary>
-        [Browsable(true), Category("Appearance"), Description("SucceededImage")]
-        [DefaultValue(typeof(int), "Image that is displayed after DisplaySucceededImage() was invoked.")]
-        public Image SucceededImage
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [DefaultValue(typeof(int), "Image that is displayed after DisplaySuccessImage() is invoked.")]
+        public Image SuccessImage
         {
-            get { return succeededImage; }
+            get => successImage;
             set
             {
-                succeededImage = value;
+                successImage = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Image to be displayed when DisplayFailureImage() is called.
+        /// Default value is _000_error_h32bit_16
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [DefaultValue(typeof(int), "Image that is displayed after DisplayFailureImage() is invoked.")]
+        public Image FailureImage
+        {
+            get => failureImage;
+            set
+            {
+                failureImage = value;
                 Invalidate();
             }
         }
@@ -117,13 +133,24 @@ namespace XenAdmin.Controls
         }
 
         /// <summary>
-        /// Displays SucceededImage image instead of the spinning icon. Sets Visible=true on the control.
+        /// Shows the SuccessImage instead of the spinning icon and sets Visible=true on the control.
         /// </summary>
         /// <remarks>It is not necessary to call StopSpinning() before calling this method.</remarks>
-        public void DisplaySucceededImage()
+        public void ShowSuccessImage()
         {
             StopSpinning();
-            Image = succeededImage;
+            Image = SuccessImage;
+            Visible = true;
+        }
+
+        /// <summary>
+        /// Shows the FailureImage instead of the spinning icon and sets Visible=true on the control
+        /// </summary>
+        /// <remarks>It is not necessary to call StopSpinning() before calling this method.</remarks>
+        public void ShowFailureImage()
+        {
+            StopSpinning();
+            Image = FailureImage;
             Visible = true;
         }
 

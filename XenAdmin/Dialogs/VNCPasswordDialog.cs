@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using System.Windows.Forms;
 using DotNetVnc;
 using System.Security.Cryptography;
 using XenAPI;
@@ -43,7 +41,6 @@ namespace XenAdmin.Dialogs
             : base(vm.Connection)
         {
             InitializeComponent();
-            Icon = Properties.Resources.AppIcon;
             passwordFailure1.Visible = error is VNCAuthenticationException || error is CryptographicException;
         }
 

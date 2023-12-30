@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,17 +30,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Windows.Forms;
-using System.Security.Cryptography.X509Certificates;
-
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Dialogs.RestoreSession;
 using XenAdmin.Network;
-using System.Configuration;
+using XenAPI;
 using XenCenterLib;
-using System.Drawing;
-using System.Linq;
 
 
 namespace XenAdmin
@@ -49,6 +48,15 @@ namespace XenAdmin
     public static class Settings
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        /// <summary>
+        /// Module for authenticating with proxy server using the Basic authentication scheme.
+        /// </summary>
+        private static IAuthenticationModule BasicAuthenticationModule;
+        /// <summary>
+        /// Module for authenticating with proxy server using the Digest authentication scheme.
+        /// </summary>
+        private static IAuthenticationModule DigestAuthenticationModule;
 
         /// <summary>
         /// Used in place of the username, to indicate that a record is for a VM's VNC connection, rather
@@ -61,7 +69,7 @@ namespace XenAdmin
         /// Anybody who chooses this for their password deserves a crash:
         /// MODIFIER LETTER REVERSED GLOTTAL STOP, NKO SYMBOL GBAKURUNEN, CHAM PUNCTUATION DOUBLE DANDA, BOPOMOFO LETTER INNN
         /// </summary>
-        private const string NO_PASSWORD = "\x02c1\x07f7\xaa5e\x31b3";
+        private const string MARKER_VALUE = "\x02c1\x07f7\xaa5e\x31b3";
         private const string DISCONNECTED = "disconnected";
         private const string CONNECTED = "connected";
 
@@ -70,16 +78,51 @@ namespace XenAdmin
         /// </summary>
         private static Dictionary<string, string> VNCPasswords = new Dictionary<string, string>();
 
+
+        static Settings()
+        {
+            // Store the Basic and Digest authentication modules, used for proxy server authentication, 
+            // for later use; this is needed because we cannot create new instances of them and it 
+            // saves us needing to create our own custom authentication modules.
+
+            var authModules = AuthenticationManager.RegisteredModules;
+            while (authModules.MoveNext())
+            {
+                if (!(authModules.Current is IAuthenticationModule module))
+                    continue;
+
+                if (module.AuthenticationType == "Basic")
+                    BasicAuthenticationModule = module;
+                else if (module.AuthenticationType == "Digest")
+                    DigestAuthenticationModule = module;
+            }
+        }
+
         /// <summary>
-        /// MSDN info regarding the path to the user.config file is somewhat confusing. It turns out
-        /// it is not in Application.UserAppDataPath as stated on http://msdn.microsoft.com/en-us/library/8eyb2ct1.aspx
-        /// but rather in a location like BasePath\CompanyName\AppName_EvidenceType_EvidenceHash\Version as described on
+        /// MSDN info regarding the path to the user.config file is somewhat confusing.
+        /// It turns out it is not in Application.UserAppDataPath as stated on
+        /// http://msdn.microsoft.com/en-us/library/8eyb2ct1.aspx. As described on
         /// http://stackoverflow.com/questions/1075204/when-using-a-settings-settings-file-in-net-where-is-the-config-actually-stored
-        /// and on http://msdn.microsoft.com/en-us/library/ms379611.aspx.
-        /// Trying to retrieve the filename at the places where this method's caller caught the ConfigurationErrorsException
-        /// returns null, so this one has to be called.
+        /// and on http://msdn.microsoft.com/en-us/library/ms379611.aspx, it is
+        /// ProfileDirectory\CompanyName\AppName_EvidenceType_EvidenceHash\Version\user.config 
+        /// where
+        /// - ProfileDirectory: either the roaming profile directory or the local one.
+        ///   Settings are stored by default in the local user.config file. To store a
+        ///   setting in the roaming user.config file, you need to mark the setting with
+        ///   the SettingsManageabilityAttribute with SettingsManageability set to Roaming.
+        /// - CompanyName: typically the string specified by the AssemblyCompanyAttribute
+        ///   (with the caveat that the string is escaped and truncated as necessary, and if
+        ///   not specified on the assembly, we have a fallback procedure).
+        /// - AppName: typically the string specified by the AssemblyProductAttribute
+        ///   (same caveats as for company name).
+        /// - EvidenceType and EvidenceHash: information derived from the app domain evidence
+        ///   to provide proper app domain and assembly isolation.
+        /// - Version: typically the version specified in the AssemblyVersionAttribute.
+        ///   This is required to isolate different versions of the app deployed side by side.
+        /// - The file name is always simply 'user.config
+        /// Trying to retrieve the filename at the places where this method's caller caught
+        /// the ConfigurationErrorsException returns null, so this one has to be called.
         /// </summary>
-        /// <returns></returns>
         public static string GetUserConfigPath()
         {
             try
@@ -101,6 +144,7 @@ namespace XenAdmin
                 Properties.Settings.Default.SaveSession = false;
                 return;
             }
+
             if (!Registry.AllowCredentialSave)
             {
                 Program.SkipSessionSave = true;
@@ -109,81 +153,60 @@ namespace XenAdmin
                 RestoreSessionWithPassword(null, false);
                 return;
             }
-            // Only try if the user has specified he actually wants to save sessions...
-            if (Properties.Settings.Default.SaveSession == true || Properties.Settings.Default.RequirePass)
+
+            Program.MainPassword = null;
+
+            if (Properties.Settings.Default.SaveSession || Properties.Settings.Default.RequirePass)
             {
-                // Only try if we actually have a saved session list...
-                if ((Properties.Settings.Default.ServerList != null && Properties.Settings.Default.ServerList.Length > 0) || (Properties.Settings.Default.ServerAddressList != null && Properties.Settings.Default.ServerAddressList.Length > 0))
+                if (Properties.Settings.Default.ServerList != null && Properties.Settings.Default.ServerList.Length > 0 ||
+                    Properties.Settings.Default.ServerAddressList != null && Properties.Settings.Default.ServerAddressList.Length > 0)
                 {
                     if (!Properties.Settings.Default.RequirePass)
                     {
-                        Program.MasterPassword = null;
                         Program.SkipSessionSave = true;
                         RestoreSessionWithPassword(null, true);
                         return;
                     }
-                    byte[] passHash = PromptForMasterPassword(false);
 
-                    // passHash will be null if the user cancelled...
-                    if (passHash != null)
+                    Program.MainWindow.CloseSplashScreen();
+
+                    string password = null;
+                    do
                     {
-                        if (!RestoreSessionWithPassword(passHash, true))
-                        {
-                            // User got the password wrong. Repeat until he gets it
-                            // right or cancels...
-                            while (passHash != null)
-                            {
-                                passHash = PromptForMasterPassword(true);
-                                if (passHash != null)
-                                {
-                                    if (RestoreSessionWithPassword(passHash, true))
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                    // if the user has cancelled we start a new session
-                    if (passHash == null)
-                    {
-                        // an error state which can only occur on cancelled clicked
-                        Properties.Settings.Default.SaveSession = false;
-                        Properties.Settings.Default.RequirePass = true;
-                        RestoreSessionWithPassword(null, false);
-                    }
-                    else
-                    {
-                        // otherwise make sure we have the correct settings
-                        Properties.Settings.Default.SaveSession = true;
-                        Properties.Settings.Default.RequirePass = true;
-                    }
+                        using (var dialog = new LoadSessionDialog(password != null))
+                            password = dialog.ShowDialog(Program.MainWindow) == DialogResult.OK
+                                ? dialog.Password
+                                : null;
+                    } while (password != null && !RestoreSessionWithPassword(password, true));
+
+                    Properties.Settings.Default.SaveSession = password != null;
+                    Properties.Settings.Default.RequirePass = true;
                     Program.SkipSessionSave = true;
-                    Program.MasterPassword = passHash;
+
+                    if (password == null)
+                        RestoreSessionWithPassword(null, false); //if the user has cancelled start a new session
+                    else
+                        Program.MainPassword = EncryptionUtils.ComputeHash(password);
                 }
                 else
                 {
-                    // this is where the user comes in if it is the first time connecting
                     Properties.Settings.Default.RequirePass = false;
                     Properties.Settings.Default.SaveSession = false;
-                    Program.MasterPassword = null;
                 }
             }
             else
             {
-                Program.MasterPassword = null;
                 Program.SkipSessionSave = true;
                 RestoreSessionWithPassword(null, false);
             }
         }
 
         /// <summary>
-        /// Tries to restore the session list using the given password hash as
-        /// the key. Returns true if successful, false otherwise (usu. due to
+        /// Tries to restore the session list using the given password as the key.
+        /// Returns true if successful, false otherwise (usually due to
         /// a decryption failure, in turn due to a wrong password).
         /// </summary>
-        /// <param name="passHash"></param>
-        /// <param name="useOriginalList"></param>
-        /// <returns></returns>
-        private static bool RestoreSessionWithPassword(byte[] passHash, bool useOriginalList)
+        private static bool RestoreSessionWithPassword(string password, bool useOriginalList)
         {
             string[] encServerList;
 
@@ -223,7 +246,7 @@ namespace XenAdmin
                 {
                     foreach (string encEntry in encServerList)
                     {
-                        decryptedList[idx] = EncryptionUtils.DecryptString(encEntry, passHash);
+                        decryptedList[idx] = EncryptionUtils.DecryptString(encEntry, password);
                         idx++;
                     }
                 }
@@ -292,8 +315,8 @@ namespace XenAdmin
                     connection.Username = entryComps[0];
                     connection.Hostname = entryComps[1];
                     connection.Port = port;
-                    // If password is NO_PASSWORD, this indicates we didn't save a password for this connection
-                    if (entryComps[3] == NO_PASSWORD)
+                    // If password is MARKER_VALUE, this indicates we didn't save a password for this connection
+                    if (entryComps[3] == MARKER_VALUE)
                     {
                         connection.Password = null;
                         connection.ExpectPasswordIsCorrect = false;
@@ -305,8 +328,8 @@ namespace XenAdmin
                     connection.SaveDisconnected = entryComps.Length > 4 && entryComps[4] == DISCONNECTED;
                     connection.FriendlyName = entryComps.Length > 5 ? entryComps[5] : entryComps[1];
 
-                    // We save a comma-separated list of hostnames of each of the slaves.
-                    // This enables us to connect to a former slave in the event of master failover while the GUI isn't running.
+                    // We save a comma-separated list of hostnames of each of the supporters.
+                    // This enables us to connect to a former supporter in the event of coordinator failover while the GUI isn't running.
                     if (entryComps.Length == 7 && entryComps[6] != "")
                     {
                         connection.PoolMembers = new List<string>(entryComps[6].Split(new char[] { ',' }));
@@ -321,6 +344,69 @@ namespace XenAdmin
             }
 
             return true;
+        }
+
+        public static void ConfigureExternalSshClientSettings()
+        {
+            var customSshClient = Properties.Settings.Default.CustomSshConsole;
+            var puttyLocation = Properties.Settings.Default.PuttyLocation;
+            var openSshLocation = Properties.Settings.Default.OpenSSHLocation;
+
+            if (string.IsNullOrEmpty(puttyLocation) && customSshClient == SshConsole.Putty ||
+                string.IsNullOrEmpty(openSshLocation) && customSshClient == SshConsole.OpenSSH)
+            {
+                customSshClient = SshConsole.None;
+            }
+
+            // attempt to locate clients in their default locations
+            if (string.IsNullOrEmpty(puttyLocation))
+            {
+                var defaultPaths = new[] {
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "PuTTY\\putty.exe"),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "PuTTY\\putty.exe")
+                };
+                puttyLocation = defaultPaths.Where(File.Exists).FirstOrDefault();
+            }
+            if (string.IsNullOrEmpty(openSshLocation))
+            {
+                // https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_server_configuration
+                var defaultPath = Path.Combine(Environment.SystemDirectory, "OpenSSH\\ssh.exe");
+                openSshLocation = File.Exists(defaultPath) ? defaultPath : openSshLocation;
+            }
+
+            // we prioritize PuTTY since that must have been installed by the user
+            if (customSshClient == SshConsole.None)
+            {
+                if (!string.IsNullOrEmpty(puttyLocation))
+                {
+                    customSshClient = SshConsole.Putty;
+                }
+                else if (!string.IsNullOrEmpty(openSshLocation))
+                {
+                    customSshClient = SshConsole.OpenSSH;
+                }
+            }
+
+            var needToSave = false;
+            // avoid updating settings if they haven't changed
+            if (customSshClient != Properties.Settings.Default.CustomSshConsole)
+            {
+                Properties.Settings.Default.CustomSshConsole = customSshClient;
+                needToSave = true;
+            }
+            if (puttyLocation != null && !puttyLocation.Equals(Properties.Settings.Default.PuttyLocation))
+            {
+                Properties.Settings.Default.PuttyLocation = puttyLocation;
+                needToSave = true;
+            }
+            if (openSshLocation != null && !openSshLocation.Equals(Properties.Settings.Default.OpenSSHLocation))
+            {
+                Properties.Settings.Default.OpenSSHLocation = openSshLocation;
+                needToSave = true;
+            }
+
+            if (needToSave)
+                TrySaveSettings();
         }
 
         private static void AddConnection(IXenConnection connection)
@@ -338,24 +424,6 @@ namespace XenAdmin
             {
                 ConnectionsManager.XenConnections.Add(connection);
             }
-        }
-
-        /// <summary>
-        /// Prompts for the password to use to decrypt the server list.
-        /// Returns the secure hash of the password entered.
-        /// </summary>
-        /// <param name="isRetry"></param>
-        /// <returns></returns>
-        private static byte[] PromptForMasterPassword(bool isRetry)
-        {
-            // close the splash screen before opening the password dialog (the dialog comes up behind the splash screen)
-            Program.CloseSplash();
-
-            using (var dialog = new LoadSessionDialog(isRetry))
-                if (dialog.ShowDialog(Program.MainWindow) == DialogResult.OK)
-                    return dialog.PasswordHash;
-
-            return null;
         }
 
         /// <summary>
@@ -382,7 +450,8 @@ namespace XenAdmin
                     log.Debug("In automated test mode: not showing save session dialog");
                 else
                 {
-                    new Dialogs.RestoreSession.SaveAndRestoreDialog(false).ShowDialog(Program.MainWindow);
+                    using (var dialog = new SaveAndRestoreDialog())
+                        dialog.ShowDialog(Program.MainWindow);
                     Program.SkipSessionSave = true;
                 }
             }
@@ -400,24 +469,19 @@ namespace XenAdmin
             {
                 Properties.Settings.Default.Save();
             }
-            catch (ConfigurationErrorsException ex)
+            catch (Exception ex)
             {
-                // Show a warning to the user and exit the application.
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Error,
-                        string.Format(Messages.MESSAGEBOX_SAVE_CORRUPTED, Settings.GetUserConfigPath()),
-                        Messages.MESSAGEBOX_SAVE_CORRUPTED_TITLE)
-                    ))
+                //catch all as ConfigurationErrorsException does not account for all errors that may happen
+                log.Error("Could not save settings. Exiting application.", ex);
+
+                using (var dlg = new ErrorDialog(string.Format(Messages.MESSAGEBOX_SAVE_CORRUPTED, GetUserConfigPath()))
+                    {WindowTitle = Messages.MESSAGEBOX_SAVE_CORRUPTED_TITLE})
                 {
                     dlg.ShowDialog(Program.MainWindow);
                 }
 
-                log.Error("Could not save settings. Exiting application.", ex);
                 Application.Exit();
             }
-
-            HealthCheck.SendMetadataToHealthCheck();
         }
 
         private static void EncryptServerList()
@@ -440,7 +504,7 @@ namespace XenAdmin
                     }
 
                     // Save the address, port and friendly name in case the user clicks cancel on the resume password dialog
-                    string entryAddress = protectCredentials(connection.Hostname, port, connection.FriendlyName);
+                    string entryAddress = ProtectCredentials(connection.Hostname, port, connection.FriendlyName);
                     encServerAddressList.Add(entryAddress);
                 }
 
@@ -465,14 +529,15 @@ namespace XenAdmin
 
                 // Ugly, but we need to warn the user...
                 if (!Program.RunInAutomatedTestMode)
-                    using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Exclamation, Messages.MESSAGEBOX_SESSION_SAVE_UNABLE, Messages.MESSAGEBOX_SESSION_SAVE_UNABLE_TITLE)))
+                    using (var dlg = new WarningDialog(Messages.MESSAGEBOX_SESSION_SAVE_UNABLE)
+                        {WindowTitle = Messages.MESSAGEBOX_SESSION_SAVE_UNABLE_TITLE})
                     {
                         dlg.ShowDialog();
                     }
             }
         }
 
-        private static string protectCredentials(String serverName, int port, string friendlyName)
+        private static string ProtectCredentials(String serverName, int port, string friendlyName)
         {
             string entryStr = string.Join(SEPARATOR.ToString(), new string[] { serverName, port.ToString(), friendlyName });
             return EncryptionUtils.Protect(entryStr);
@@ -483,7 +548,7 @@ namespace XenAdmin
             if (password == null)
             {
                 // We don't have a password saved for this connection: save a special marker value
-                password = NO_PASSWORD;
+                password = MARKER_VALUE;
             }
             string entryStr = string.Join(SEPARATOR.ToString(), new string[] { username, serverName, port.ToString(), password, (saveDisconnected ? DISCONNECTED : CONNECTED), friendlyName });
             if (poolMembers != null && poolMembers.Count > 0)
@@ -492,26 +557,27 @@ namespace XenAdmin
                 entryStr += SEPARATOR.ToString();
                 entryStr += members;
             }
-            return Properties.Settings.Default.RequirePass && Program.MasterPassword != null ? EncryptionUtils.EncryptString(entryStr, Program.MasterPassword) : EncryptionUtils.Protect(entryStr);
+            return Properties.Settings.Default.RequirePass && Program.MainPassword != null ? EncryptionUtils.EncryptString(entryStr, Program.MainPassword) : EncryptionUtils.Protect(entryStr);
         }
 
-        public static AutoCompleteStringCollection GetServerHistory()
+        public static string[] GetServerHistory()
         {
             if (Properties.Settings.Default.ServerHistory == null)
-                Properties.Settings.Default.ServerHistory = new AutoCompleteStringCollection();
+                Properties.Settings.Default.ServerHistory = Array.Empty<string>();
 
             return Properties.Settings.Default.ServerHistory;
         }
 
         public static void UpdateServerHistory(string hostnameWithPort)
         {
-            AutoCompleteStringCollection history = GetServerHistory();
+            var history = new List<string>(GetServerHistory());
+
             if (!history.Contains(hostnameWithPort))
             {
                 while (history.Count >= 20)
                     history.RemoveAt(0);
                 history.Add(hostnameWithPort);
-                Properties.Settings.Default.ServerHistory = history;
+                Properties.Settings.Default.ServerHistory = history.ToArray();
                 TrySaveSettings();
             }
         }
@@ -559,34 +625,13 @@ namespace XenAdmin
         public static void SetVNCPassword(string vm_uuid, char[] password)
         {
             VNCPasswords[vm_uuid] = password == null ? null : new string(password);
-            EncryptServerList();
             SaveServerList();
         }
 
-        /// <summary>
-        /// Compares the hash of 'p' with the given byte array.
-        /// </summary>
-        /// <param name="p"></param>
-        /// <param name="temporaryPassword"></param>
-        /// <returns></returns>
-        internal static bool PassCorrect(string p, byte[] temporaryPassword)
-        {
-            if (p.Length == 0)
-                return false;
-
-            return Helpers.ArrayElementsEqual(EncryptionUtils.ComputeHash(p), temporaryPassword);
-        }
-
-        public static void SaveIfRequired()
-        {
-            SaveServerList();
-            TrySaveSettings();
-        }
-
-        public static void AddCertificate(X509Certificate certificate, string hostname)
+        public static void AddCertificate(string hashString, string hostname)
         {
             Dictionary<string, string> known_servers = KnownServers;
-            known_servers.Add(hostname, certificate.GetCertHashString());
+            known_servers.Add(hostname, hashString);
             KnownServers = known_servers;
         }
 
@@ -620,10 +665,10 @@ namespace XenAdmin
             }
         }
 
-        public static void ReplaceCertificate(string hostname, X509Certificate certificate)
+        public static void ReplaceCertificate(string hostname, string hashString)
         {
             Dictionary<string, string> known_servers = KnownServers;
-            known_servers[hostname] = certificate.GetCertHashString();
+            known_servers[hostname] = hashString;
             KnownServers = known_servers;
         }
 
@@ -635,11 +680,180 @@ namespace XenAdmin
 
         public static bool IsPluginEnabled(string name, string org)
         {
-            string id = string.Format("{0}::{1}", org, name);
-            foreach (string s in Properties.Settings.Default.DisabledPlugins)
-                if (s == id)
-                    return false;
-            return true;
+            string id = $"{org}::{name}";
+            return Properties.Settings.Default.DisabledPlugins.All(s => s != id);
+            //returns true for empty collection, which is correct
+        }
+
+        public static void Log()
+        {
+            log.Info("Tools Options Settings -");
+
+            log.Info($"=== ProxySetting: {Properties.Settings.Default.ProxySetting}");
+            log.Info($"=== ProxyAddress: {Properties.Settings.Default.ProxyAddress}");
+            log.Info($"=== ProxyPort: {Properties.Settings.Default.ProxyPort}");
+            log.Info($"=== ByPassProxyForServers: {Properties.Settings.Default.BypassProxyForServers}");
+            log.Info($"=== ProvideProxyAuthentication: {Properties.Settings.Default.ProvideProxyAuthentication}");
+            log.Info($"=== ProxyAuthenticationMethod: {Properties.Settings.Default.ProxyAuthenticationMethod}");
+            log.Info($"=== ConnectionTimeout: {Properties.Settings.Default.ConnectionTimeout}");
+
+            log.Info($"=== FullScreenShortcutKey: {Properties.Settings.Default.FullScreenShortcutKey}");
+            log.Info($"=== DockShortcutKey: {Properties.Settings.Default.DockShortcutKey}");
+            log.Info($"=== UncaptureShortcutKey: {Properties.Settings.Default.UncaptureShortcutKey}");
+            log.Info($"=== ClipboardAndPrinterRedirection: {Properties.Settings.Default.ClipboardAndPrinterRedirection}");
+            log.Info($"=== WindowsShortcuts: {Properties.Settings.Default.WindowsShortcuts}");
+            log.Info($"=== ReceiveSoundFromRDP: {Properties.Settings.Default.ReceiveSoundFromRDP}");
+            log.Info($"=== AutoSwitchToRDP: {Properties.Settings.Default.AutoSwitchToRDP}");
+            log.Info($"=== ConnectToServerConsole: {Properties.Settings.Default.ConnectToServerConsole}");
+            log.Info($"=== PreserveScaleWhenUndocked: {Properties.Settings.Default.PreserveScaleWhenUndocked}");
+            log.Info($"=== PreserveScaleWhenSwitchBackToVNC: {Properties.Settings.Default.PreserveScaleWhenSwitchBackToVNC}");
+
+            log.Info($"=== WarnUnrecognizedCertificate: {Properties.Settings.Default.WarnUnrecognizedCertificate}");
+            log.Info($"=== WarnChangedCertificate: {Properties.Settings.Default.WarnChangedCertificate}");
+            log.Info($"=== RemindChangePassword: {Properties.Settings.Default.RemindChangePassword}");
+
+            if (!Helpers.CommonCriteriaCertificationRelease)
+            {
+                //do not log Fileservice settings
+                log.Info($"=== AllowXenCenterUpdates: {Properties.Settings.Default.AllowXenCenterUpdates}");
+                log.Info($"=== AllowPatchesUpdates: {Properties.Settings.Default.AllowPatchesUpdates}");
+                log.Info($"=== AllowXenServerUpdates: {Properties.Settings.Default.AllowXenServerUpdates}");
+            }
+
+            log.Info($"=== FillAreaUnderGraphs: {Properties.Settings.Default.FillAreaUnderGraphs}");
+            log.Info($"=== RememberLastSelectedTab: {Properties.Settings.Default.RememberLastSelectedTab}");
+
+            log.Info($"=== SaveSession: {Properties.Settings.Default.SaveSession}");
+            log.Info($"=== RequirePass: {Properties.Settings.Default.RequirePass}");
+
+            var disabledPlugins = Properties.Settings.Default.DisabledPlugins.Length == 0
+                ? "<None>"
+                : string.Join(", ", Properties.Settings.Default.DisabledPlugins);
+            log.InfoFormat($"=== DisabledPlugins: {disabledPlugins}");
+
+            log.Info($"=== DoNotConfirmDismissAlerts: {Properties.Settings.Default.DoNotConfirmDismissAlerts}");
+            log.Info($"=== DoNotConfirmDismissUpdates: {Properties.Settings.Default.DoNotConfirmDismissUpdates}" );
+            log.Info($"=== DoNotConfirmDismissEvents: {Properties.Settings.Default.DoNotConfirmDismissEvents}" );
+            log.Info($"=== IgnoreOvfValidationWarnings: {Properties.Settings.Default.IgnoreOvfValidationWarnings}");
+        }
+
+        public static void Load()
+        {
+            string appVersionString = Program.Version.ToString();
+            log.InfoFormat("Application version of current settings {0}", appVersionString);
+
+            if (Properties.Settings.Default.ApplicationVersion != appVersionString)
+            {
+                log.Info("Upgrading settings...");
+                Properties.Settings.Default.Upgrade();
+
+                // if program's hash has changed (e.g. by upgrading to .NET 4.0), then Upgrade() doesn't import the previous application settings 
+                // because it cannot locate a previous user.config file. In this case a new user.config file is created with the default settings.
+                // We will try and find a config file from a previous installation and update the settings from it
+
+                if (Properties.Settings.Default.ApplicationVersion == "" && Properties.Settings.Default.DoUpgrade)
+                    UpgradeFromPreviousInstallation();
+
+                log.InfoFormat("Settings upgraded from '{0}' to '{1}'", Properties.Settings.Default.ApplicationVersion, appVersionString);
+                Properties.Settings.Default.ApplicationVersion = appVersionString;
+                TrySaveSettings();
+            }
+        }
+
+        /// <summary>
+        /// Looks for a config file from a previous installation of the application and updates the settings from it.
+        /// </summary>
+        private static void UpgradeFromPreviousInstallation()
+        {
+            try
+            {
+                // The path of the user.config files looks something like this:
+                // <Profile Directory>\<Company Name>\<App Name>_<Evidence Type>_<Evidence Hash>\<Version>\user.config
+                // Get a previous user.config file by enumerating through all the folders in <Profile Directory>\<Company Name> 
+
+                var currentConfigFolder = new DirectoryInfo(GetUserConfigPath()).Parent;
+
+                var companyFolder = currentConfigFolder?.Parent?.Parent;
+                if (companyFolder == null)
+                    return;
+
+                FileInfo previousConfig = null;
+                Version previousVersion = null;
+                Version currentVersion = Program.Version;
+
+                var directories = companyFolder.GetDirectories($"{BrandManager.BrandConsole}*");
+
+                foreach (var dir in directories)
+                {
+                    var configFiles = dir.GetFiles("user.config", SearchOption.AllDirectories);
+
+                    foreach (var file in configFiles)
+                    {
+                        var configFolderName = Path.GetFileName(Path.GetDirectoryName(file.FullName));
+                        if (configFolderName != null)
+                        {
+                            var configVersion = new Version(configFolderName);
+
+                            if (configVersion <= currentVersion && (previousVersion == null || configVersion > previousVersion))
+                            {
+                                previousVersion = configVersion;
+                                previousConfig = file;
+                            }
+                        }
+                    }
+                }
+
+                if (previousConfig != null)
+                {
+                    // copy previous config file to current config location
+                    var destinationFile = Path.GetDirectoryName(currentConfigFolder.FullName);
+
+                    destinationFile = Path.Combine(destinationFile, previousVersion.ToString());
+
+                    if (!Directory.Exists(destinationFile))
+                        Directory.CreateDirectory(destinationFile);
+
+                    destinationFile = Path.Combine(destinationFile, previousConfig.Name);
+
+                    File.Copy(previousConfig.FullName, destinationFile);
+
+                    // upgrade settings
+                    XenAdmin.Properties.Settings.Default.Upgrade();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Debug("Exception while updating settings.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Configures .NET's AuthenticationManager to only use the authentication module that is 
+        /// specified in the ProxyAuthenticationMethod setting. Also sets XenAPI's HTTP class to 
+        /// use the same authentication method.
+        /// </summary>
+        public static void ReconfigureProxyAuthenticationSettings()
+        {
+            var authModules = AuthenticationManager.RegisteredModules;
+            var modulesToUnregister = new List<IAuthenticationModule>();
+
+            while (authModules.MoveNext())
+            {
+                var module = (IAuthenticationModule)authModules.Current;
+                modulesToUnregister.Add(module);
+            }
+
+            foreach (var module in modulesToUnregister)
+                AuthenticationManager.Unregister(module);
+
+            var authSetting = (HTTP.ProxyAuthenticationMethod)Properties.Settings.Default.ProxyAuthenticationMethod;
+            if (authSetting == HTTP.ProxyAuthenticationMethod.Basic)
+                AuthenticationManager.Register(BasicAuthenticationModule);
+            else
+                AuthenticationManager.Register(DigestAuthenticationModule);
+
+            HTTP.CurrentProxyAuthenticationMethod = authSetting;
+            Session.Proxy = XenAdminConfigManager.Provider.GetProxyFromSettings(null);
         }
     }
 }

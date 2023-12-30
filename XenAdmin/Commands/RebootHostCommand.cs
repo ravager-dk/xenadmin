@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Properties;
 using XenAPI;
 using XenAdmin.Dialogs;
 
@@ -62,13 +60,13 @@ namespace XenAdmin.Commands
         public RebootHostCommand(IMainWindow mainWindow, Host host, Control parent)
             : base(mainWindow, host)
         {
-            SetParent(parent);
+            Parent = parent;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             List<AsyncAction> actions = new List<AsyncAction>();
-            foreach (Host host in selection.AsXenObjects<Host>(CanExecute))
+            foreach (Host host in selection.AsXenObjects<Host>(CanRun))
             {
                 MainWindowCommandInterface.CloseActiveWizards(host.Connection);
                 RebootHostAction action = new RebootHostAction( host,AddHostToPoolCommand.NtolDialog);
@@ -78,12 +76,12 @@ namespace XenAdmin.Commands
             RunMultipleActions(actions, null, Messages.ACTION_HOSTS_REBOOTING, Messages.ACTION_HOSTS_REBOOTED, true);
         }
 
-        private static bool CanExecute(Host host)
+        private static bool CanRun(Host host)
         {
             return host != null && host.IsLive();
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (!selection.AllItemsAre<Host>())
             {
@@ -92,7 +90,7 @@ namespace XenAdmin.Commands
 
             foreach (SelectedItem item in selection)
             {
-                if (CanExecute((Host)item.XenObject))
+                if (CanRun((Host)item.XenObject))
                 {
                     return true;
                 }
@@ -100,21 +98,9 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return Images.StaticImages._001_Reboot_h32bit_16;
-            }
-        }
+        public override Image MenuImage => Images.StaticImages._001_Reboot_h32bit_16;
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REBOOT;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_REBOOT;
 
         protected override string ConfirmationDialogText
         {
@@ -150,13 +136,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool ConfirmationRequired
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationRequired => true;
 
         protected override string ConfirmationDialogTitle
         {
@@ -171,54 +151,36 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantExecuteReasons)
+        protected override CommandErrorDialog GetErrorDialogCore(IDictionary<IXenObject, string> cantRunReasons)
         {
             foreach (Host host in GetSelection().AsXenObjects<Host>())
             {
-                if (!CanExecute(host) && host.IsLive())
+                if (!CanRun(host) && host.IsLive())
                 {
-                    return new CommandErrorDialog(Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TITLE, Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TEXT, cantExecuteReasons);
+                    return new CommandErrorDialog(Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TITLE, Messages.ERROR_DIALOG_FORCE_REBOOT_VM_TEXT, cantRunReasons);
                 }
             }
             return null;
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             Host host = item as Host;
             if (host == null)
             {
-                return base.GetCantExecuteReasonCore(item);
+                return base.GetCantRunReasonCore(item);
             }
             if (!host.IsLive())
             {
                 return Messages.HOST_NOT_LIVE;
             }
-            return base.GetCantExecuteReasonCore(item);
+            return base.GetCantRunReasonCore(item);
         }
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REBOOT_HOST_CONTEXT_MENU;
-            }
-        }
+        public override string ContextMenuText => Messages.MAINWINDOW_REBOOT_HOST_CONTEXT_MENU;
 
-        protected override string ConfirmationDialogYesButtonLabel
-        {
-            get
-            {
-                return Messages.CONFIRM_REBOOT_SERVER_YES_BUTTON_LABEL;
-            }
-        }
+        protected override string ConfirmationDialogYesButtonLabel => Messages.CONFIRM_REBOOT_SERVER_YES_BUTTON_LABEL;
 
-        protected override bool ConfirmationDialogNoButtonSelected
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool ConfirmationDialogNoButtonSelected => true;
     }
 }

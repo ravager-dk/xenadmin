@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,7 +38,6 @@ using XenAdmin.Actions;
 using XenAdmin.Alerts;
 using XenAdmin.Controls;
 using XenAdmin.Core;
-using XenAdmin.Properties;
 using XenAdmin.Wizards.NewPolicyWizard;
 using XenAPI;
 
@@ -57,7 +55,7 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
             Pool = pool;
             InitializeComponent();
             ShowHideRunHistoryButton.Text = Messages.SHOW_RUN_HISTORY;
-            ShowHideRunHistoryButton.Image = Properties.Resources.PDChevronDown;
+            ShowHideRunHistoryButton.Image = Images.StaticImages.PDChevronDown;
 
             ColumnExpand.DefaultCellStyle.NullValue = null;
             comboBoxTimeSpan.SelectedIndex = 0;
@@ -134,7 +132,7 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
             private void RefreshRow()
             {
                 PolicyName = Policy.Name();
-                PolicyVmCount = Policy.VMs.FindAll(vm => Policy.Connection.Resolve(vm).is_a_real_vm()).Count;
+                PolicyVmCount = Policy.VMs.FindAll(vm => Policy.Connection.Resolve(vm).IsRealVm()).Count;
                 PolicyStatus = Policy.enabled ? Messages.ENABLED : Messages.DISABLED;
 
                 //the policy is in server's local time zone
@@ -146,16 +144,9 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
 
                 if (AlertMessages.Count > 0)
                 {
-                    if (AlertMessages[0].priority == PolicyAlert.INFO_PRIORITY)
-                    {
-                        PolicyLastResult = Messages.VMSS_SUCCEEDED;
-                        PolicyLastResultImage = Resources._075_TickRound_h32bit_16;
-                    }
-                    else
-                    {
-                        PolicyLastResult = Messages.FAILED;
-                        PolicyLastResultImage = Resources._075_WarningRound_h32bit_16;
-                    }
+                    var paType = PolicyAlert.FromPriority(AlertMessages[0].priority);
+                    PolicyLastResult = paType.GetString();
+                    PolicyLastResultImage = paType.GetImage();
                 }
                 else
                 {
@@ -186,7 +177,7 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
 
             foreach (var vm in pool.Connection.Cache.VMs)
             {
-                if (vm.is_a_real_vm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs))
+                if (vm.IsRealVm() && vm.Show(Properties.Settings.Default.ShowHiddenVMs))
                 {
                     realVMs++;
                     if (vm.Connection.Resolve(vm.snapshot_schedule) != null)
@@ -207,8 +198,8 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
 
         private void LoadPolicies()
         {
-            var master = Helpers.GetMaster(Pool);
-            var action = new GetServerLocalTimeAction(master);
+            var coordinator = Helpers.GetCoordinator(Pool);
+            var action = new GetServerLocalTimeAction(coordinator);
             action.Completed += action_Completed;
             action.RunAsync();
         }
@@ -217,13 +208,9 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
         {
             sender.Completed -= action_Completed;
 
-            var action = sender as GetServerLocalTimeAction;
-            if (action == null)
+            if (!(sender is GetServerLocalTimeAction action) || !action.Succeeded)
                 return;
-
-            if (!action.Succeeded)
-                return;
-
+            
             Program.Invoke(Program.MainWindow, () =>
             {
                 try
@@ -407,10 +394,8 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
                     ? Messages.CONFIRM_DELETE_POLICIES_0
                     : Messages.CONFIRM_DELETE_POLICIES, numberOfProtectedVMs);
 
-            using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, text, Messages.DELETE_VMSS_TITLE),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+            using (var dlg = new WarningDialog(text, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                {WindowTitle = Messages.DELETE_VMSS_TITLE})
             {
                 if (dlg.ShowDialog(this) == DialogResult.Yes)
                 {
@@ -430,35 +415,51 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
             if (tableLayoutPanel2.Visible)
             {
                 ShowHideRunHistoryButton.Text = Messages.HIDE_RUN_HISTORY;
-                ShowHideRunHistoryButton.Image = Resources.PDChevronUp;
+                ShowHideRunHistoryButton.Image = Images.StaticImages.PDChevronUp;
             }
             else
             {
                 ShowHideRunHistoryButton.Text = Messages.SHOW_RUN_HISTORY;
-                ShowHideRunHistoryButton.Image = Resources.PDChevronDown;
+                ShowHideRunHistoryButton.Image = Images.StaticImages.PDChevronDown;
             }
         }
 
         #endregion
 
-        internal override string HelpName
-        {
-            get
-            {
-                return "VMSnapshotSchedulesDialog";
-            }
-        }
+        internal override string HelpName => "VMSnapshotSchedulesDialog";
 
         private void dataGridViewRunHistory_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex >= 0 && e.RowIndex < dataGridViewRunHistory.RowCount)
             {
                 HistoryRow row = (HistoryRow)dataGridViewRunHistory.Rows[e.RowIndex];
-                if (row.Alert.Type != "info")
+                if (row.Alert.Type == PolicyAlertType.Error)
                 {
                     row.Expanded = !row.Expanded;
                     row.RefreshRow();
                 }
+            }
+        }
+
+        private void dataGridViewRunHistory_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.ColumnIndex != ColumnImage.Index)
+            {
+                if (0 <= e.ColumnIndex && e.ColumnIndex < dataGridViewRunHistory.ColumnCount &&
+                    dataGridViewRunHistory.Columns[e.ColumnIndex].SortMode != DataGridViewColumnSortMode.NotSortable)
+                    ColumnImage.HeaderCell.SortGlyphDirection = SortOrder.None;
+                return;
+            }
+
+            if (ColumnImage.HeaderCell.SortGlyphDirection == SortOrder.Ascending)
+            {
+                dataGridViewRunHistory.Sort(new HistoryRowSorter(ListSortDirection.Descending));
+                ColumnImage.HeaderCell.SortGlyphDirection = SortOrder.Descending;
+            }
+            else
+            {
+                dataGridViewRunHistory.Sort(new HistoryRowSorter(ListSortDirection.Ascending));
+                ColumnImage.HeaderCell.SortGlyphDirection = SortOrder.Ascending;
             }
         }
 
@@ -478,7 +479,6 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
                 if (row == null)
                     return;
 
-                var vmss = row.Policy;
                 var messages = row.AlertMessages;
 
                 int hoursFromNow = RunHistoryTimeSpan;
@@ -490,8 +490,7 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
                 {
                     for (int i = 0; i < 10 && i < messages.Count; i++)
                     {
-                        var msg = messages[i];
-                        var alert = new PolicyAlert(msg.priority, msg.name, msg.TimestampLocal(), msg.body, vmss.Name());
+                        var alert = new PolicyAlert(messages[i]);
                         dataGridViewRunHistory.Rows.Add(new HistoryRow(alert));
                     }
                 }
@@ -501,7 +500,7 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
                     {
                         if (msg.TimestampLocal() >= offset)
                         {
-                            var alert = new PolicyAlert(msg.priority, msg.name, msg.TimestampLocal(), msg.body, vmss.Name());
+                            var alert = new PolicyAlert(msg);
                             dataGridViewRunHistory.Rows.Add(new HistoryRow(alert));
                         }
                         else
@@ -538,16 +537,16 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
 
         private class HistoryRow : DataGridViewRow
         {
-            private DataGridViewImageCell _expand = new DataGridViewImageCell();
-            private DataGridViewTextAndImageCell _result = new DataGridViewTextAndImageCell();
-            private DataGridViewTextBoxCell _dateTime = new DataGridViewTextBoxCell();
-            private DataGridViewTextBoxCell _description = new DataGridViewTextBoxCell();
+            private readonly DataGridViewImageCell _expand = new DataGridViewImageCell();
+            private readonly DataGridViewImageCell _image = new DataGridViewImageCell();
+            private readonly DataGridViewTextBoxCell _dateTime = new DataGridViewTextBoxCell();
+            private readonly DataGridViewTextBoxCell _description = new DataGridViewTextBoxCell();
             public readonly PolicyAlert Alert;
 
             public HistoryRow(PolicyAlert alert)
             {
                 Alert = alert;
-                Cells.AddRange(_expand, _result, _dateTime, _description);
+                Cells.AddRange(_expand, _image, _dateTime, _description);
                 RefreshRow();
             }
 
@@ -556,30 +555,57 @@ namespace XenAdmin.Dialogs.ScheduledSnapshots
 
             public void RefreshRow()
             {
-                _expand.Value = Expanded ? Resources.expanded_triangle : Resources.contracted_triangle;
-                if (Alert.Type == "info")
-                    _expand.Value = null;
+                if (Alert.Type == PolicyAlertType.Error)
+                {
+                    _expand.Value = Expanded
+                        ? Images.StaticImages.expanded_triangle
+                        : Images.StaticImages.contracted_triangle;
 
-                if (Alert.Type == "error")
-                {
-                    _result.Image = Properties.Resources._075_WarningRound_h32bit_16;
-                    _result.Value = Messages.ERROR;
+                    _description.Value = Expanded
+                        ? $"{Alert.Title}\r\n\r\n{Alert.Description}"
+                        : Alert.Title;
                 }
-                else if (Alert.Type == "warn")
-                {
-                    _result.Image = Properties.Resources._075_WarningRound_h32bit_16;
-                    _result.Value = Messages.WARNING;
-                }
-                else if (Alert.Type == "info")
-                {
-                    _result.Image = Properties.Resources._075_TickRound_h32bit_16;
-                    _result.Value = Messages.INFORMATION;
-                }
-                _dateTime.Value = Alert.Time;
-                if (Alert.Type == "error")
-                    _description.Value = Expanded ? string.Format("{0}\r\n{1}", Alert.ShortFormatBody, Alert.Text) : Alert.ShortFormatBody.Ellipsise(80);
                 else
-                    _description.Value = Expanded ? Alert.Text : Alert.ShortFormatBody.Ellipsise(90);
+                {
+                    _expand.Value = null;
+                    _description.Value = Alert.Title;
+                }
+
+                _image.Value = Alert.Type.GetImage();
+                _dateTime.Value = HelpersGUI.DateTimeToString(Alert.Time, Messages.DATEFORMAT_DMY_HM, true);
+            }
+        }
+
+        private class HistoryRowSorter : System.Collections.IComparer
+        {
+            private readonly ListSortDirection _direction;
+
+            public HistoryRowSorter(ListSortDirection direction)
+            {
+                _direction = direction;
+            }
+
+            public int Compare(object first, object second)
+            {
+                var row1 = first as HistoryRow;
+                var row2 = second as HistoryRow;
+                int result = 0;
+
+                if (row1 != null && row2 != null)
+                {
+                    result = row1.Alert.Type.CompareTo(row2.Alert.Type);
+                    if (result == 0)
+                        result = Alert.CompareOnDate(row1.Alert, row2.Alert);
+                }
+                else if (row1 != null)
+                    result = -1;
+                else if (row2 != null)
+                    result = 1;
+
+                if (_direction == ListSortDirection.Descending)
+                    return -1 * result;
+
+                return result;
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
 
@@ -74,9 +70,8 @@ namespace XenAdmin.Actions.DR
             {
                 MetadataSession = Session.get_record(Session, MetadataSessionRef);
             }
-            PercentComplete = 100;
-            
-            Description = Messages.ACTION_VDI_OPEN_DATABASE_DONE;
+
+            Tick(100, Messages.ACTION_VDI_OPEN_DATABASE_DONE);
         }
     }
 }

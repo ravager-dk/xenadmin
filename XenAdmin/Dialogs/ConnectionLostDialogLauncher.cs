@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,8 +29,6 @@
  */
 
 using System;
-using System.Drawing;
-using System.Windows.Forms;
 using XenAdmin.Network;
 
 namespace XenAdmin.Dialogs
@@ -89,12 +86,10 @@ namespace XenAdmin.Dialogs
         private void LaunchDialog()
         {
             fired = true;
-            Program.Invoke(Program.MainWindow, () => 
-            {    using (var dlg = new ThreeButtonDialog( new ThreeButtonDialog.Details( SystemIcons.Error, DisplayMessage, Messages.XENCENTER), 
-                                   new ThreeButtonDialog.TBDButton(Messages.OK, DialogResult.OK)))
-                {
+            Program.Invoke(Program.MainWindow, () =>
+            {
+                using (var dlg = new ErrorDialog(DisplayMessage))
                     dlg.ShowDialog(Program.MainWindow);
-                }
             });
         }
     }

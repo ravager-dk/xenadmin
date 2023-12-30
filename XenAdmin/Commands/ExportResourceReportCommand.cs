@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using XenAdmin.Network;
 using System.Windows.Forms;
-using System.IO;
 using XenAdmin.Core;
-using XenAdmin;
 using XenAPI;
 
 namespace XenAdmin.Commands
@@ -59,15 +55,15 @@ namespace XenAdmin.Commands
         {
         }
         
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             if (selection.FirstAsXenObject != null)
             {
-                Execute(selection.FirstAsXenObject.Connection);
+                Run(selection.FirstAsXenObject.Connection);
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null && selection.FirstAsXenObject.Connection.IsConnected &&
                 (selection.PoolAncestor != null || selection.HostAncestor != null)) // this check ensures there's no cross-pool 
@@ -91,7 +87,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        private bool Execute(IXenConnection connection)
+        private bool Run(IXenConnection connection)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "xls files(*.xls)|*.xls|csv files(*.csv)|*.csv";

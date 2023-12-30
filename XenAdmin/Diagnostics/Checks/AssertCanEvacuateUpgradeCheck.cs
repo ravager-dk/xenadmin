@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -51,13 +50,13 @@ namespace XenAdmin.Diagnostics.Checks
             Pool pool = Helpers.GetPoolOfOne(Host.Connection);
             if (pool != null && PoolHasCpuIncompatibilityProblem(pool))
             {
-                if (Host.IsMaster())
+                if (Host.IsCoordinator())
                     return new CPUIncompatibilityProblem(this, pool);
                 return new CPUCIncompatibilityWarning(this, pool, Host);
             }
 
             //vCPU configuration check
-            foreach (var vm in Host.Connection.Cache.VMs.Where(vm => vm.is_a_real_vm()))
+            foreach (var vm in Host.Connection.Cache.VMs.Where(vm => vm.IsRealVm()))
             {
                 if (!vm.HasValidVCPUConfiguration())
                     return new InvalidVCPUConfiguration(this, vm);
@@ -71,14 +70,14 @@ namespace XenAdmin.Diagnostics.Checks
             if (pool == null)
                 return false;
 
-            if (!pool.Connection.Cache.VMs.Any(vm => vm.is_a_real_vm() && vm.power_state != vm_power_state.Halted))
+            if (!pool.Connection.Cache.VMs.Any(vm => vm.IsRealVm() && vm.power_state != vm_power_state.Halted))
                 return false;
 
             foreach (var host1 in pool.Connection.Cache.Hosts)
             {
                 foreach (var host2 in pool.Connection.Cache.Hosts.Where(h => h.uuid != host1.uuid))
                 {
-                    if (!PoolJoinRules.CompatibleCPUs(host1, host2, false))
+                    if (!PoolJoinRules.CompatibleCPUs(host1, host2))
                         return true;
                 }
             }

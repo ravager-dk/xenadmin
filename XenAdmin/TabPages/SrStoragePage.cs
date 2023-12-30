@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,8 +34,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-
-using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.Actions;
 
@@ -102,16 +99,7 @@ namespace XenAdmin.TabPages
 
         private void SetupDeprecationBanner()
         {
-            if (sr != null && SR.IsIslOrIslLegacy(sr))
-            {
-                Banner.AppliesToVersion = string.Format(Messages.XENSERVER_6_5, BrandManager.ProductVersion65);
-                Banner.BannerType = DeprecationBanner.Type.Removal;
-                Banner.FeatureName = Messages.ISL_SR;
-                Banner.LinkUri = HiddenFeatures.LinkLabelHidden ? null : new Uri(InvisibleMessages.ISL_DEPRECATION_URL);
-                Banner.Visible = !HiddenFeatures.LinkLabelHidden;
-            }
-            else
-                Banner.Visible = false;
+            Banner.Visible = false;
         }
 
         public SR SR
@@ -196,21 +184,6 @@ namespace XenAdmin.TabPages
                 return;
 
             dataGridViewBuilder.AddRequest(new RefreshGridRequest(sr, reset));
-        }
-
-        private SelectedItemCollection SelectedVDIs
-        {
-            get
-            {
-                List<SelectedItem> vdis = new List<SelectedItem>();
-                foreach (DataGridViewRow r in dataGridViewVDIs.SelectedRows)
-                {
-                    VDIRow row = r as VDIRow;
-                    if (row != null)
-                        vdis.Add(new SelectedItem(row.VDI));
-                }
-                return new SelectedItemCollection(vdis);
-            }
         }
 
         private void UnregisterHandlers()
@@ -425,47 +398,30 @@ namespace XenAdmin.TabPages
             toolStripSeparator1.Visible = (rescan || add || move || delete) && edit;
         }
 
-        
-
         private void RefreshButtons()
         {
-            SelectedItemCollection vdis = SelectedVDIs;
+            var vdis = dataGridViewVDIs.SelectedRows.Cast<VDIRow>().Select(r => new SelectedItem(r.VDI)).ToList();
 
             // Delete button
             // The user can see that this disk is attached to more than one VMs. Allow deletion of multiple VBDs (non default behaviour),
             // but don't allow them to be deleted if a running vm is using the disk (default behaviour).
 
-            DeleteVirtualDiskCommand deleteCmd = new DeleteVirtualDiskCommand(Program.MainWindow, vdis) {AllowMultipleVBDDelete = true};
-            if (deleteCmd.CanExecute())
-            {
-                RemoveButton.Enabled = true;
-                RemoveButtonContainer.RemoveAll();
-            }
-            else
-            {
-                RemoveButton.Enabled = false;
-                RemoveButtonContainer.SetToolTip(deleteCmd.ToolTipText);
-            }
+            RemoveButton.Command = new DeleteVirtualDiskCommand(Program.MainWindow, vdis) {AllowMultipleVBDDelete = true};
 
             // Move button
-            Command moveCmd = MoveVirtualDiskDialog.MoveMigrateCommand(Program.MainWindow, vdis);
-            if (moveCmd.CanExecute())
-            {
-                buttonMove.Enabled = true;
-                toolTipContainerMove.RemoveAll();
-            }
-            else
-            {
-                buttonMove.Enabled = false;
-                toolTipContainerMove.SetToolTip(moveCmd.ToolTipText);
-            }
+            buttonMove.Command = MoveVirtualDiskDialog.MoveMigrateCommand(Program.MainWindow, new SelectedItemCollection(vdis));
 
             // Rescan button
             if (sr == null || sr.Locked)
             {
                 buttonRescan.Enabled = false;
             }
-            else if (HelpersGUI.BeingScanned(sr))
+            else if (sr.IsDetached())
+            {
+                buttonRescan.Enabled = false;
+                toolTipContainerRescan.SetToolTip(Messages.SR_DETACHED);
+            }
+            else if (HelpersGUI.BeingScanned(sr, out _))
             {
                 buttonRescan.Enabled = false;
                 toolTipContainerRescan.SetToolTip(Messages.SCAN_IN_PROGRESS_TOOLTIP);
@@ -480,13 +436,9 @@ namespace XenAdmin.TabPages
             addVirtualDiskButton.Enabled = sr != null && !sr.Locked;
 
             // Properties button
-            if (vdis.Count == 1)
-            {
-                VDI vdi = vdis.AsXenObjects<VDI>()[0];
-                EditButton.Enabled = sr != null && !sr.Locked && !vdi.is_a_snapshot && !vdi.Locked;
-            }
-            else
-                EditButton.Enabled = false;
+            EditButton.Enabled = vdis.Count == 1 && vdis[0].XenObject is VDI vdi &&
+                                 sr != null && !sr.Locked && !vdi.is_a_snapshot && !vdi.Locked;
+            EditButton.Tag = EditButton.Enabled ? vdis[0].XenObject as VDI : null;
         }
 
         #endregion
@@ -505,33 +457,11 @@ namespace XenAdmin.TabPages
                 Program.MainWindow.ShowPerConnectionWizard(sr.Connection, new NewDiskDialog(sr.Connection, sr));
         }
 
-        private void MoveSelectedVdis()
-        {
-            SelectedItemCollection vdis = SelectedVDIs;
-            Command cmd = MoveVirtualDiskDialog.MoveMigrateCommand(Program.MainWindow, vdis);
-            if (cmd.CanExecute())
-                cmd.Execute();
-        }
-
-        private void RemoveSelectedVdis()
-        {
-            SelectedItemCollection vdis = SelectedVDIs;
-            DeleteVirtualDiskCommand cmd = new DeleteVirtualDiskCommand(Program.MainWindow, vdis) {AllowMultipleVBDDelete = true};
-            if (cmd.CanExecute())
-                cmd.Execute();
-        }
-
         private void EditSelectedVdis()
         {
-            SelectedItemCollection vdis = SelectedVDIs;
-            if (vdis.Count != 1)
-                return;
-
-            VDI vdi = vdis.AsXenObjects<VDI>()[0];
-            if (vdi.is_a_snapshot)
-                return;
-
-            new PropertiesDialog(vdi).ShowDialog(this);
+            if (EditButton.Tag is VDI vdi)
+                using (var dlg = new PropertiesDialog(vdi))
+                    dlg.ShowDialog(this);
         }
 
         #endregion
@@ -543,11 +473,6 @@ namespace XenAdmin.TabPages
             AddVdi();
         }
 
-        private void RemoveButton_Click(object sender, EventArgs e)
-        {
-            RemoveSelectedVdis();
-        }
-
         private void EditButton_Click(object sender, EventArgs e)
         {
             EditSelectedVdis();
@@ -556,11 +481,6 @@ namespace XenAdmin.TabPages
         private void buttonRescan_Click(object sender, EventArgs e)
         {
             Rescan();
-        }
-
-        private void buttonMove_Click(object sender, EventArgs e)
-        {
-            MoveSelectedVdis();
         }
 
 
@@ -581,12 +501,14 @@ namespace XenAdmin.TabPages
 
         private void moveVirtualDiskToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           MoveSelectedVdis();
+            if (buttonMove.Enabled)
+                buttonMove.PerformClick();
         }
 
         private void deleteVirtualDiskToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RemoveSelectedVdis();
+           if (RemoveButton.Enabled)
+               RemoveButton.PerformClick();
         }
 
         #endregion

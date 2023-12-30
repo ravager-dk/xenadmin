@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,56 +30,44 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace XenAdmin.Core
 {
-    // A method for which we might need to run an RBAC test.
+    /// <summary>
+    /// A method for which we might need to run an RBAC test.
+    /// </summary>
     public class RbacMethod
     {
         public const string KEY_SPLITTER = "/key:";
-        private readonly string method;
-        private readonly string key;
-
-        /// <param name="method">The method to be checked. In the form "Object.Method" (e.g., "vm.start")
-        /// or "http/get_host_backup"</param>
-        public RbacMethod(string method)
-        {
-            this.method = method.ToLowerInvariant();
-            this.method = this.method.Replace("async_", "");
-        }
 
         /// <summary>
-        /// An API call that edits a specific key in a hash table
+        /// Creates a new instance of RbacMethod.
         /// </summary>
-        /// <param name="method">The method to be checked. In the form "Object.Method" (e.g., "vm.add_to_other_config").</param>
-        /// <param name="key">The hash key to be altered by the call.</param>
-        public RbacMethod(string method, string key)
-            : this(method)
+        /// <param name="method">The method to be checked. In the form "Object.Method",
+        /// e.g. "vm.start", "http/get_host_backup", "vm.add_to_other_config".</param>
+        /// <param name="key">If the method modifies a hashtable, this is the hash key to be altered by the method.</param>
+        public RbacMethod(string method, string key = null)
         {
-            this.key = key.ToLowerInvariant();
+            Method = method.ToLowerInvariant().Replace("async_", "");
+            Key = key?.ToLowerInvariant();
         }
 
-        public string Method
-        {
-            get { return method; }
-        }
+        public string Method { get; }
 
-        public string Key
-        {
-            get { return key; }
-        }
+        public string Key { get; }
 
         public override string ToString()
         {
-            if (key == null)
-                return method;
-            else
-                return method + KEY_SPLITTER + key;
+            if (Key == null)
+                return Method;
+            
+            return Method + KEY_SPLITTER + Key;
         }
     }
 
-    // Syntactic sugar for making a list of RbacMethod's without doing "new RbacMethod" all the time
+    /// <summary>
+    /// Syntactic sugar for making a list of RbacMethods without calling the constructor all the time
+    /// </summary>
     public class RbacMethodList : List<RbacMethod>
     {
         public RbacMethodList()
@@ -88,7 +75,7 @@ namespace XenAdmin.Core
         }
 
         /// <summary>
-        /// Note that this constructor takes simple API calls, or complex ones with hash table edits and keys deliminated by a RbacMethod.KEY_SPLITTER
+        /// Note that this constructor takes simple API calls, or complex ones with hash table edits and keys delimited by a RbacMethod.KEY_SPLITTER
         /// Silently ignores blank methods, blank keys and entries with too many RbacMethod.KEY_SPLITTER
         /// </summary>
         public RbacMethodList(params string[] methods)
@@ -114,7 +101,7 @@ namespace XenAdmin.Core
                         string key = entrySplit[1].Trim();
                         if (key == "")
                             continue;
-                        Add(method, key);
+                        AddWithKey(method, key);
                         break;
                     default:
                         // ignore lengths of longer than 2, too many splitters
@@ -144,7 +131,7 @@ namespace XenAdmin.Core
         /// </summary>
         /// <param name="method">The method to be checked. In the form "Object.Method" (e.g., "vm.add_to_other_config").</param>
         /// <param name="key">The hash key to be altered by the call.</param>
-        public void Add(string method, string key)
+        public void AddWithKey(string method, string key)
         {
             Add(new RbacMethod(method, key));
         }

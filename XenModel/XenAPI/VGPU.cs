@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -90,69 +90,26 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new VGPU from a Proxy_VGPU.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public VGPU(Proxy_VGPU proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given VGPU.
         /// </summary>
-        public override void UpdateFrom(VGPU update)
+        public override void UpdateFrom(VGPU record)
         {
-            uuid = update.uuid;
-            VM = update.VM;
-            GPU_group = update.GPU_group;
-            device = update.device;
-            currently_attached = update.currently_attached;
-            other_config = update.other_config;
-            type = update.type;
-            resident_on = update.resident_on;
-            scheduled_to_be_resident_on = update.scheduled_to_be_resident_on;
-            compatibility_metadata = update.compatibility_metadata;
-            extra_args = update.extra_args;
-            PCI = update.PCI;
-        }
-
-        internal void UpdateFrom(Proxy_VGPU proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            VM = proxy.VM == null ? null : XenRef<VM>.Create(proxy.VM);
-            GPU_group = proxy.GPU_group == null ? null : XenRef<GPU_group>.Create(proxy.GPU_group);
-            device = proxy.device == null ? null : proxy.device;
-            currently_attached = (bool)proxy.currently_attached;
-            other_config = proxy.other_config == null ? null : Maps.convert_from_proxy_string_string(proxy.other_config);
-            type = proxy.type == null ? null : XenRef<VGPU_type>.Create(proxy.type);
-            resident_on = proxy.resident_on == null ? null : XenRef<PGPU>.Create(proxy.resident_on);
-            scheduled_to_be_resident_on = proxy.scheduled_to_be_resident_on == null ? null : XenRef<PGPU>.Create(proxy.scheduled_to_be_resident_on);
-            compatibility_metadata = proxy.compatibility_metadata == null ? null : Maps.convert_from_proxy_string_string(proxy.compatibility_metadata);
-            extra_args = proxy.extra_args == null ? null : proxy.extra_args;
-            PCI = proxy.PCI == null ? null : XenRef<PCI>.Create(proxy.PCI);
-        }
-
-        public Proxy_VGPU ToProxy()
-        {
-            Proxy_VGPU result_ = new Proxy_VGPU();
-            result_.uuid = uuid ?? "";
-            result_.VM = VM ?? "";
-            result_.GPU_group = GPU_group ?? "";
-            result_.device = device ?? "";
-            result_.currently_attached = currently_attached;
-            result_.other_config = Maps.convert_to_proxy_string_string(other_config);
-            result_.type = type ?? "";
-            result_.resident_on = resident_on ?? "";
-            result_.scheduled_to_be_resident_on = scheduled_to_be_resident_on ?? "";
-            result_.compatibility_metadata = Maps.convert_to_proxy_string_string(compatibility_metadata);
-            result_.extra_args = extra_args ?? "";
-            result_.PCI = PCI ?? "";
-            return result_;
+            uuid = record.uuid;
+            VM = record.VM;
+            GPU_group = record.GPU_group;
+            device = record.device;
+            currently_attached = record.currently_attached;
+            other_config = record.other_config;
+            type = record.type;
+            resident_on = record.resident_on;
+            scheduled_to_be_resident_on = record.scheduled_to_be_resident_on;
+            compatibility_metadata = record.compatibility_metadata;
+            extra_args = record.extra_args;
+            PCI = record.PCI;
         }
 
         /// <summary>
@@ -174,7 +131,7 @@ namespace XenAPI
             if (table.ContainsKey("currently_attached"))
                 currently_attached = Marshalling.ParseBool(table, "currently_attached");
             if (table.ContainsKey("other_config"))
-                other_config = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "other_config"));
+                other_config = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "other_config"));
             if (table.ContainsKey("type"))
                 type = Marshalling.ParseRef<VGPU_type>(table, "type");
             if (table.ContainsKey("resident_on"))
@@ -182,7 +139,7 @@ namespace XenAPI
             if (table.ContainsKey("scheduled_to_be_resident_on"))
                 scheduled_to_be_resident_on = Marshalling.ParseRef<PGPU>(table, "scheduled_to_be_resident_on");
             if (table.ContainsKey("compatibility_metadata"))
-                compatibility_metadata = Maps.convert_from_proxy_string_string(Marshalling.ParseHashTable(table, "compatibility_metadata"));
+                compatibility_metadata = Maps.ToDictionary_string_string(Marshalling.ParseHashTable(table, "compatibility_metadata"));
             if (table.ContainsKey("extra_args"))
                 extra_args = Marshalling.ParseString(table, "extra_args");
             if (table.ContainsKey("PCI"))
@@ -196,27 +153,18 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._VM, other._VM) &&
-                Helper.AreEqual2(this._GPU_group, other._GPU_group) &&
-                Helper.AreEqual2(this._device, other._device) &&
-                Helper.AreEqual2(this._currently_attached, other._currently_attached) &&
-                Helper.AreEqual2(this._other_config, other._other_config) &&
-                Helper.AreEqual2(this._type, other._type) &&
-                Helper.AreEqual2(this._resident_on, other._resident_on) &&
-                Helper.AreEqual2(this._scheduled_to_be_resident_on, other._scheduled_to_be_resident_on) &&
-                Helper.AreEqual2(this._compatibility_metadata, other._compatibility_metadata) &&
-                Helper.AreEqual2(this._extra_args, other._extra_args) &&
-                Helper.AreEqual2(this._PCI, other._PCI);
-        }
-
-        internal static List<VGPU> ProxyArrayToObjectList(Proxy_VGPU[] input)
-        {
-            var result = new List<VGPU>();
-            foreach (var item in input)
-                result.Add(new VGPU(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_VM, other._VM) &&
+                Helper.AreEqual2(_GPU_group, other._GPU_group) &&
+                Helper.AreEqual2(_device, other._device) &&
+                Helper.AreEqual2(_currently_attached, other._currently_attached) &&
+                Helper.AreEqual2(_other_config, other._other_config) &&
+                Helper.AreEqual2(_type, other._type) &&
+                Helper.AreEqual2(_resident_on, other._resident_on) &&
+                Helper.AreEqual2(_scheduled_to_be_resident_on, other._scheduled_to_be_resident_on) &&
+                Helper.AreEqual2(_compatibility_metadata, other._compatibility_metadata) &&
+                Helper.AreEqual2(_extra_args, other._extra_args) &&
+                Helper.AreEqual2(_PCI, other._PCI);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, VGPU server)
@@ -240,6 +188,7 @@ namespace XenAPI
                 return null;
             }
         }
+
         /// <summary>
         /// Get a record containing the current state of the given VGPU.
         /// First published in XenServer 6.0.
@@ -248,10 +197,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static VGPU get_record(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_record(session.opaque_ref, _vgpu);
-            else
-                return new VGPU(session.XmlRpcProxy.vgpu_get_record(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_record(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -262,10 +208,7 @@ namespace XenAPI
         /// <param name="_uuid">UUID of object to return</param>
         public static XenRef<VGPU> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<VGPU>.Create(session.XmlRpcProxy.vgpu_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -276,10 +219,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static string get_uuid(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_uuid(session.opaque_ref, _vgpu);
-            else
-                return session.XmlRpcProxy.vgpu_get_uuid(session.opaque_ref, _vgpu ?? "").parse();
+            return session.JsonRpcClient.vgpu_get_uuid(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -290,10 +230,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<VM> get_VM(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_vm(session.opaque_ref, _vgpu);
-            else
-                return XenRef<VM>.Create(session.XmlRpcProxy.vgpu_get_vm(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_vm(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -304,10 +241,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<GPU_group> get_GPU_group(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_gpu_group(session.opaque_ref, _vgpu);
-            else
-                return XenRef<GPU_group>.Create(session.XmlRpcProxy.vgpu_get_gpu_group(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_gpu_group(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -318,10 +252,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static string get_device(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_device(session.opaque_ref, _vgpu);
-            else
-                return session.XmlRpcProxy.vgpu_get_device(session.opaque_ref, _vgpu ?? "").parse();
+            return session.JsonRpcClient.vgpu_get_device(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -332,10 +263,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static bool get_currently_attached(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_currently_attached(session.opaque_ref, _vgpu);
-            else
-                return (bool)session.XmlRpcProxy.vgpu_get_currently_attached(session.opaque_ref, _vgpu ?? "").parse();
+            return session.JsonRpcClient.vgpu_get_currently_attached(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -346,10 +274,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static Dictionary<string, string> get_other_config(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_other_config(session.opaque_ref, _vgpu);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.vgpu_get_other_config(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_other_config(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -360,10 +285,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<VGPU_type> get_type(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_type(session.opaque_ref, _vgpu);
-            else
-                return XenRef<VGPU_type>.Create(session.XmlRpcProxy.vgpu_get_type(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_type(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -374,10 +296,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<PGPU> get_resident_on(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_resident_on(session.opaque_ref, _vgpu);
-            else
-                return XenRef<PGPU>.Create(session.XmlRpcProxy.vgpu_get_resident_on(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_resident_on(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -388,10 +307,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<PGPU> get_scheduled_to_be_resident_on(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_scheduled_to_be_resident_on(session.opaque_ref, _vgpu);
-            else
-                return XenRef<PGPU>.Create(session.XmlRpcProxy.vgpu_get_scheduled_to_be_resident_on(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_scheduled_to_be_resident_on(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -402,10 +318,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static Dictionary<string, string> get_compatibility_metadata(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_compatibility_metadata(session.opaque_ref, _vgpu);
-            else
-                return Maps.convert_from_proxy_string_string(session.XmlRpcProxy.vgpu_get_compatibility_metadata(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_compatibility_metadata(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -416,10 +329,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static string get_extra_args(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_extra_args(session.opaque_ref, _vgpu);
-            else
-                return session.XmlRpcProxy.vgpu_get_extra_args(session.opaque_ref, _vgpu ?? "").parse();
+            return session.JsonRpcClient.vgpu_get_extra_args(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -430,10 +340,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<PCI> get_PCI(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_pci(session.opaque_ref, _vgpu);
-            else
-                return XenRef<PCI>.Create(session.XmlRpcProxy.vgpu_get_pci(session.opaque_ref, _vgpu ?? "").parse());
+            return session.JsonRpcClient.vgpu_get_pci(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -445,10 +352,7 @@ namespace XenAPI
         /// <param name="_other_config">New value to set</param>
         public static void set_other_config(Session session, string _vgpu, Dictionary<string, string> _other_config)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.vgpu_set_other_config(session.opaque_ref, _vgpu, _other_config);
-            else
-                session.XmlRpcProxy.vgpu_set_other_config(session.opaque_ref, _vgpu ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse();
+            session.JsonRpcClient.vgpu_set_other_config(session.opaque_ref, _vgpu, _other_config);
         }
 
         /// <summary>
@@ -461,10 +365,7 @@ namespace XenAPI
         /// <param name="_value">Value to add</param>
         public static void add_to_other_config(Session session, string _vgpu, string _key, string _value)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.vgpu_add_to_other_config(session.opaque_ref, _vgpu, _key, _value);
-            else
-                session.XmlRpcProxy.vgpu_add_to_other_config(session.opaque_ref, _vgpu ?? "", _key ?? "", _value ?? "").parse();
+            session.JsonRpcClient.vgpu_add_to_other_config(session.opaque_ref, _vgpu, _key, _value);
         }
 
         /// <summary>
@@ -476,10 +377,7 @@ namespace XenAPI
         /// <param name="_key">Key to remove</param>
         public static void remove_from_other_config(Session session, string _vgpu, string _key)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.vgpu_remove_from_other_config(session.opaque_ref, _vgpu, _key);
-            else
-                session.XmlRpcProxy.vgpu_remove_from_other_config(session.opaque_ref, _vgpu ?? "", _key ?? "").parse();
+            session.JsonRpcClient.vgpu_remove_from_other_config(session.opaque_ref, _vgpu, _key);
         }
 
         /// <summary>
@@ -491,10 +389,7 @@ namespace XenAPI
         /// <param name="_extra_args">New value to set</param>
         public static void set_extra_args(Session session, string _vgpu, string _extra_args)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.vgpu_set_extra_args(session.opaque_ref, _vgpu, _extra_args);
-            else
-                session.XmlRpcProxy.vgpu_set_extra_args(session.opaque_ref, _vgpu ?? "", _extra_args ?? "").parse();
+            session.JsonRpcClient.vgpu_set_extra_args(session.opaque_ref, _vgpu, _extra_args);
         }
 
         /// <summary>
@@ -508,10 +403,7 @@ namespace XenAPI
         /// <param name="_other_config"></param>
         public static XenRef<VGPU> create(Session session, string _vm, string _gpu_group, string _device, Dictionary<string, string> _other_config)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config);
-            else
-                return XenRef<VGPU>.Create(session.XmlRpcProxy.vgpu_create(session.opaque_ref, _vm ?? "", _gpu_group ?? "", _device ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse());
+            return session.JsonRpcClient.vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config);
         }
 
         /// <summary>
@@ -525,10 +417,7 @@ namespace XenAPI
         /// <param name="_other_config"></param>
         public static XenRef<Task> async_create(Session session, string _vm, string _gpu_group, string _device, Dictionary<string, string> _other_config)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_vgpu_create(session.opaque_ref, _vm ?? "", _gpu_group ?? "", _device ?? "", Maps.convert_to_proxy_string_string(_other_config)).parse());
+          return session.JsonRpcClient.async_vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config);
         }
 
         /// <summary>
@@ -543,10 +432,7 @@ namespace XenAPI
         /// <param name="_type"> First published in XenServer 6.2 SP1 Tech-Preview.</param>
         public static XenRef<VGPU> create(Session session, string _vm, string _gpu_group, string _device, Dictionary<string, string> _other_config, string _type)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config, _type);
-            else
-                return XenRef<VGPU>.Create(session.XmlRpcProxy.vgpu_create(session.opaque_ref, _vm ?? "", _gpu_group ?? "", _device ?? "", Maps.convert_to_proxy_string_string(_other_config), _type ?? "").parse());
+            return session.JsonRpcClient.vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config, _type);
         }
 
         /// <summary>
@@ -561,10 +447,7 @@ namespace XenAPI
         /// <param name="_type"> First published in XenServer 6.2 SP1 Tech-Preview.</param>
         public static XenRef<Task> async_create(Session session, string _vm, string _gpu_group, string _device, Dictionary<string, string> _other_config, string _type)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config, _type);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_vgpu_create(session.opaque_ref, _vm ?? "", _gpu_group ?? "", _device ?? "", Maps.convert_to_proxy_string_string(_other_config), _type ?? "").parse());
+          return session.JsonRpcClient.async_vgpu_create(session.opaque_ref, _vm, _gpu_group, _device, _other_config, _type);
         }
 
         /// <summary>
@@ -575,10 +458,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static void destroy(Session session, string _vgpu)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.vgpu_destroy(session.opaque_ref, _vgpu);
-            else
-                session.XmlRpcProxy.vgpu_destroy(session.opaque_ref, _vgpu ?? "").parse();
+            session.JsonRpcClient.vgpu_destroy(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -589,10 +469,7 @@ namespace XenAPI
         /// <param name="_vgpu">The opaque_ref of the given vgpu</param>
         public static XenRef<Task> async_destroy(Session session, string _vgpu)
         {
-          if (session.JsonRpcClient != null)
-              return session.JsonRpcClient.async_vgpu_destroy(session.opaque_ref, _vgpu);
-          else
-              return XenRef<Task>.Create(session.XmlRpcProxy.async_vgpu_destroy(session.opaque_ref, _vgpu ?? "").parse());
+          return session.JsonRpcClient.async_vgpu_destroy(session.opaque_ref, _vgpu);
         }
 
         /// <summary>
@@ -602,10 +479,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<VGPU>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_all(session.opaque_ref);
-            else
-                return XenRef<VGPU>.Create(session.XmlRpcProxy.vgpu_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.vgpu_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -615,10 +489,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<VGPU>, VGPU> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.vgpu_get_all_records(session.opaque_ref);
-            else
-                return XenRef<VGPU>.Create<Proxy_VGPU>(session.XmlRpcProxy.vgpu_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.vgpu_get_all_records(session.opaque_ref);
         }
 
         /// <summary>

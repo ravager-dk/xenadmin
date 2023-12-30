@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,6 +48,10 @@ namespace XenAPI
         /// </summary>
         pv_in_pvh,
         /// <summary>
+        /// PVH
+        /// </summary>
+        pvh,
+        /// <summary>
         /// Not specified or unknown domain type
         /// </summary>
         unspecified,
@@ -75,6 +78,8 @@ namespace XenAPI
                     return "pv";
                 case domain_type.pv_in_pvh:
                     return "pv_in_pvh";
+                case domain_type.pvh:
+                    return "pvh";
                 case domain_type.unspecified:
                     return "unspecified";
                 default:

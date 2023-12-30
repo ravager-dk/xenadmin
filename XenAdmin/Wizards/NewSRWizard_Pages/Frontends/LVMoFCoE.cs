@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -44,9 +43,9 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages.Frontends
 
         #region LVMoHBA overrides
 
-        public override bool ShowNicColumn { get { return true; } }
+        protected override bool ShowNicColumn => true;
 
-        public override string HelpID { get { return "Location_FCOE"; } }
+        public override string HelpID => "Location_FCOE";
 
         protected override FibreChannelDescriptor CreateLvmSrDescriptor(FibreChannelDevice device)
         {

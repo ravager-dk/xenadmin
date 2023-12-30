@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,20 +29,21 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using XenAdmin.Actions;
 using XenAdmin.Diagnostics.Checks;
+using XenAdmin.Dialogs;
 
 namespace XenAdmin.Diagnostics.Problems
 {
     public abstract class Problem : IComparable<Problem>, IDisposable
     {
-        private AsyncAction solutionAction;
-        private readonly Check _check;
-
-        public virtual bool IsFixable
+        protected Problem(Check check)
         {
-            get { return true; }
+            Check = check ?? throw new ArgumentNullException();
         }
 
         private void SolutionAction_Completed(ActionBase sender)
@@ -53,27 +53,21 @@ namespace XenAdmin.Diagnostics.Problems
 
         private void RegisterSolutionActionEvent()
         {
-            if (solutionAction != null)
-                solutionAction.Completed += SolutionAction_Completed;
+            if (SolutionAction != null)
+                SolutionAction.Completed += SolutionAction_Completed;
         }
 
         private void DeregisterSolutionActionEvent()
         {
-            if (solutionAction != null)
-                solutionAction.Completed -= SolutionAction_Completed;
+            if (SolutionAction != null)
+                SolutionAction.Completed -= SolutionAction_Completed;
         }
 
-        protected Problem(Check check)
-        {
-            if (check == null)
-                throw new ArgumentNullException();
-            _check = check;
-        }
-
+        public virtual bool IsFixable => true;
         public abstract string Title { get; }
         public abstract string Description { get; }
         public bool SolutionActionCompleted { get; private set; }
-        public AsyncAction SolutionAction { get { return solutionAction; } }
+        public AsyncAction SolutionAction { get; private set; }
 
         protected virtual AsyncAction CreateAction(out bool cancelled)
         {
@@ -84,36 +78,33 @@ namespace XenAdmin.Diagnostics.Problems
         public AsyncAction GetSolutionAction(out bool cancelled)
         {
             DeregisterSolutionActionEvent();
-            solutionAction = CreateAction(out cancelled);
+            SolutionAction = CreateAction(out cancelled);
             SolutionActionCompleted = false;
             RegisterSolutionActionEvent();
-            return solutionAction;
+            return SolutionAction;
         }
 
         public abstract string HelpMessage { get; }
 
-        public Check Check
-        {
-            get { return _check; }
-        }
+        public Check Check { get; }
 
         public virtual AsyncAction CreateUnwindChangesAction()
         {
             return null;
         }
 
-        public int CompareTo(Problem other)
+        public virtual int CompareTo(Problem other)
         {
             if (other == null)
                 return 1;
 
-            var result = string.Compare(Description, other.Description);
+            var result = string.Compare(Description, other.Description, StringComparison.InvariantCulture);
 
             if (result == 0)
-                result = string.Compare(Title, other.Title);
+                result = string.Compare(Title, other.Title, StringComparison.InvariantCulture);
 
-            if (result == 0 && Check != null && Check.XenObject != null && other.Check != null)
-                result = Check.XenObject.CompareTo(other.Check.XenObject);
+            if (result == 0 && Check?.XenObjects != null && other.Check?.XenObjects != null)
+                result = Check.XenObjects.SequenceEqual(other.Check.XenObjects) ? 0 : Check.XenObjects.Count.CompareTo(other.Check.XenObjects.Count);
 
             return result;
         }
@@ -127,21 +118,15 @@ namespace XenAdmin.Diagnostics.Problems
             if (GetType() != other.GetType())
                 return false;
 
-            if (CompareTo(other) != 0)
-                return false;
-
-            return true;
+            return CompareTo(other) == 0;
         }
 
         public override int GetHashCode()
         {
-            return _check.GetHashCode();
+            return Check.GetHashCode();
         }
 
-        public virtual Image Image 
-        {
-            get { return Images.GetImage16For(Icons.Error); }
-        }
+        public virtual Image Image => Images.GetImage16For(Icons.Error);
 
         #region IDisposable Members
 
@@ -151,5 +136,89 @@ namespace XenAdmin.Diagnostics.Problems
         }
 
         #endregion
+
+        public static List<AsyncAction> GetUnwindChangesActions(List<Problem> problems)
+        {
+            if (problems == null)
+                return new List<AsyncAction>();
+
+            var actions = from problem in problems
+                          where problem.SolutionActionCompleted
+                          let action = problem.CreateUnwindChangesAction()
+                          where action != null && action.Connection != null && action.Connection.IsConnected
+                          select action;
+
+            return actions.ToList();
+        }
+    }
+
+
+    public abstract class ProblemWithMoreInfo : Problem
+    {
+        protected ProblemWithMoreInfo(Check check)
+            : base(check)
+        {
+        }
+
+        public override bool IsFixable => false;
+
+        public override string Title => Check.Description;
+        public override string HelpMessage => Messages.MORE_INFO;
+
+        public abstract string Message { get; }
+
+        public virtual string LinkData => null;
+        public virtual string LinkText => LinkData;
+
+        protected override AsyncAction CreateAction(out bool cancelled)
+        {
+            Program.Invoke(Program.MainWindow, delegate
+            {
+                using (var dlg = new ErrorDialog(Message))
+                {
+                    if (!string.IsNullOrEmpty(LinkText) && !string.IsNullOrEmpty(LinkData))
+                    {
+                        dlg.LinkText = LinkText;
+                        dlg.LinkData = LinkData;
+                        dlg.ShowLinkLabel = true;
+                    }
+                    dlg.ShowDialog();
+                }
+            });
+
+            cancelled = true;
+            return null;
+        }
+    }
+
+
+    public abstract class ProblemWithInformationUrl : Problem
+    {
+        protected ProblemWithInformationUrl(Check check) : base(check)
+        {
+        }
+
+        public abstract Uri UriToLaunch { get; }
+
+        public override bool IsFixable => false;
+
+        public virtual string LinkText => UriToLaunch != null ? Messages.DETAILS : string.Empty;
+
+        public void LaunchUrlInBrowser()
+        {
+            try
+            {
+                if (UriToLaunch != null)
+                    Process.Start(UriToLaunch.AbsoluteUri);
+            }
+            catch (Exception)
+            {
+                using (var dlg = new ErrorDialog(string.Format(Messages.COULD_NOT_OPEN_URL,
+                        UriToLaunch != null ? UriToLaunch.AbsoluteUri : string.Empty)))
+                {
+                    dlg.ShowDialog(Program.MainWindow);
+                }
+            }
+        }
     }
 }

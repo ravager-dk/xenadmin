@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,53 +36,29 @@ using XenCenterLib.Compression;
 
 namespace XenAdminTests.CompressionTests
 {
-
-    [TestFixture, Category(TestCategories.UICategoryA), Category(TestCategories.SmokeTest)]
-    public class GzipCompressionTests : ThirdPartyCompressionTests
+    [Category(TestCategories.Unit)]
+    [TestFixture(typeof(GZipInputStream), typeof(GZipOutputStream))]
+    public class ThirdPartyCompressionTests<TI, TO>
+        where TI : CompressionStream, new()
+        where TO : CompressionStream, new()
     {
-        [OneTimeSetUp]
-        public void SetupFixture()
-        {
-            Compressor = new DotNetZipGZipOutputStream();
-            Decompressor = new DotNetZipGZipInputStream();
-        }
-    }
-
-    [TestFixture, Category(TestCategories.UICategoryA), Category(TestCategories.SmokeTest)]
-    public class Bzip2CompressionTests : ThirdPartyCompressionTests
-    {
-        [OneTimeSetUp]
-        public void SetupFixture()
-        {
-            Compressor = new DotNetZipBZip2OutputStream();
-            Decompressor = new DotNetZipBZip2InputStream();
-        }
-
-    }
-
-    public abstract class ThirdPartyCompressionTests
-    {
-        private CompressionStream compressor;
-        private CompressionStream decompressor;
-
-        protected CompressionStream Compressor
-        {
-            set { compressor = value; }
-            get { return compressor;  }
-        }
-
-        protected CompressionStream Decompressor
-        {
-            set { decompressor = value; }
-            get { return decompressor;  }
-        }
+        private TO compressor;
+        private TI decompressor;
 
         private const string loremIpsum =
-            @"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
- tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
- nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
- eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit 
- anim id est laborum.";
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod " +
+            "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, " +
+            "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo " +
+            "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse " +
+            "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat " +
+            "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
+        [SetUp]
+        public void TestSetup()
+        {
+            compressor = new TO();
+            decompressor = new TI();
+        }
 
         [Test]
         public void TestFileCompressionAndDecompression()
@@ -115,10 +90,9 @@ namespace XenAdminTests.CompressionTests
             Assert.IsTrue(File.ReadAllBytes(uncompressedFileName).SequenceEqual(File.ReadAllBytes(decompressedFileName)));
 
             Directory.Delete(basePath, true);
-
         }
 
-        private void DecompressAFile( string targetFileName, string compressedFileName)
+        private void DecompressAFile(string targetFileName, string compressedFileName)
         {
             using (FileStream ifs = File.OpenRead(compressedFileName))
             {
@@ -131,7 +105,6 @@ namespace XenAdminTests.CompressionTests
                 decompressor.Dispose();
             }
         }
-
 
         private void CompressAFile(string targetFileName, string uncompressedFileName)
         {
@@ -146,7 +119,6 @@ namespace XenAdminTests.CompressionTests
 
                 compressor.Dispose();
             }
-            
         }
 
         private void CreateADummyFile(string uncompressedFileName)

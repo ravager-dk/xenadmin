@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,8 +31,6 @@
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
 
-using System.Collections.Generic;
-
 namespace XenAdmin.Diagnostics.Problems.HostProblem
 {
     public class PrerequisiteUpdateMissing : HostProblem
@@ -46,17 +43,8 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
             this.requiredUpdates = requiredUpdates;
         }
 
-        public override string Description
-        {
-            get 
-            {
-                return string.Format(Messages.UPDATES_WIZARD_PRECHECK_FAILED_REQUIRED_UPDATE_MISSING, ServerName, requiredUpdates);
-            }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_PRECHECK_FAILED_REQUIRED_UPDATE_MISSING, ServerName, requiredUpdates);
 
-        public override string HelpMessage
-        {
-            get { return string.Empty; }
-        }
+        public override string HelpMessage => string.Empty;
     }
 }

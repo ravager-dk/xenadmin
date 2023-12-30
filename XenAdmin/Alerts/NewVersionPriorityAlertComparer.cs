@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,11 +28,7 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace XenAdmin.Alerts
 {
@@ -44,25 +39,20 @@ namespace XenAdmin.Alerts
             if (alert1 == null || alert2 == null)
                 return 0;
 
-            int sortResult = 0;
-
             if (IsVersionOrVersionUpdateAlert(alert1) && !IsVersionOrVersionUpdateAlert(alert2))
-                sortResult = 1;
+                return -1;
 
             if (!IsVersionOrVersionUpdateAlert(alert1) && IsVersionOrVersionUpdateAlert(alert2))
-                sortResult = -1;
+                return 1;
 
-            if (sortResult == 0)
-                sortResult = Alert.CompareOnDate(alert1, alert2);
-
-            return -sortResult;
+            return -Alert.CompareOnDate(alert1, alert2); //descending date
         }
 
         private bool IsVersionOrVersionUpdateAlert(Alert alert)
         {
-            return alert is XenServerPatchAlert && (alert as XenServerPatchAlert).ShowAsNewVersion
+            return alert is XenServerPatchAlert xspAlert && xspAlert.ShowAsNewVersion
                 || alert is XenServerVersionAlert
-                || alert is XenCenterUpdateAlert;
+                || alert is ClientUpdateAlert;
         }
     }
 }

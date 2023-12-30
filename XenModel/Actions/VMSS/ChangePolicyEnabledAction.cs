@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,14 +34,16 @@ using XenAdmin.Core;
 
 namespace XenAdmin.Actions
 {
-    public class ChangePolicyEnabledAction : PureAsyncAction
+    public class ChangePolicyEnabledAction : AsyncAction
     {
-        private VMSS _policy;
+        private readonly VMSS _policy;
+
         public ChangePolicyEnabledAction(VMSS policy)
             : base(policy.Connection, string.Format(Messages.CHANGE_POLICY_STATUS, policy.Name()))
         {
             _policy = policy;
             Pool = Helpers.GetPool(_policy.Connection);
+            ApiMethodsToRoleCheck.Add("VMSS.set_enabled");
         }
 
         protected override void Run()

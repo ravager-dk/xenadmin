@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -66,7 +65,7 @@ namespace XenAdmin.Actions
 
         public ISCSIPopulateLunsAction(IXenConnection connection, string targetHost,
             UInt16 targetPort, string targetIQN, string chapUsername, string chapPassword)
-            : base(connection, string.Format(Messages.ACTION_ISCSI_LUN_SCANNING, targetHost))
+            : base(connection, string.Format(Messages.ACTION_ISCSI_LUN_SCANNING, targetHost), true)
         {
             this.targetHost = targetHost;
             this.targetPort = targetPort;
@@ -97,7 +96,7 @@ namespace XenAdmin.Actions
         {
             Pool pool = Helpers.GetPoolOfOne(Connection);
             if (pool == null)
-                throw new Failure(Failure.INTERNAL_ERROR, Messages.POOL_GONE);
+                throw new Failure(Failure.INTERNAL_ERROR, string.Format(Messages.POOL_GONE, BrandManager.BrandConsole));
 
             Dictionary<string, string> settings = new Dictionary<string, string>();
 
@@ -199,7 +198,7 @@ namespace XenAdmin.Actions
         {
             Pool pool = Helpers.GetPoolOfOne(Connection);
             if (pool == null)
-                throw new Failure(Failure.INTERNAL_ERROR, Messages.POOL_GONE);
+                throw new Failure(Failure.INTERNAL_ERROR, string.Format(Messages.POOL_GONE, BrandManager.BrandConsole));
 
             var deviceConfig = new Dictionary<string, string>();
             deviceConfig["provider"] = "iscsi";
@@ -212,8 +211,24 @@ namespace XenAdmin.Actions
                 deviceConfig["chappassword"] = chapPassword;
             }
 
-            var probeResults = SR.probe_ext(Session, pool.master.opaque_ref,
-                     deviceConfig, SR.SRTypes.gfs2.ToString().ToLowerInvariant(), new Dictionary<string, string>());
+            List<Probe_result> probeResults;
+            try
+            {
+                probeResults = SR.probe_ext(Session, pool.master.opaque_ref,
+                    deviceConfig, SR.SRTypes.gfs2.ToString().ToLowerInvariant(), new Dictionary<string, string>());
+            }
+            catch (Failure f)
+            {
+                if (f.ErrorDescription.Count > 1 && f.ErrorDescription[0] == "ISCSILogin")
+                {
+                    if (deviceConfig.ContainsKey("chapuser") && deviceConfig.ContainsKey("chappassword"))
+                        throw new Failure(Messages.ACTION_ISCSI_IQN_SCANNING_GFS2);
+                    
+                    throw new Failure("SR_BACKEND_FAILURE_68");
+                }
+
+                throw;
+            }
 
             var results = new List<ISCSIInfo>();
             foreach (var probeResult in probeResults)

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,6 +38,7 @@ using XenAdmin.Core;
 using XenAdmin.Controls.CustomDataGraph;
 using XenAdmin.Dialogs;
 using XenAdmin.Actions;
+using XenAdmin.Controls.GradientPanel;
 
 
 namespace XenAdmin.TabPages
@@ -48,27 +48,25 @@ namespace XenAdmin.TabPages
         private IXenObject _xenObject;
         private bool _disposed;
         private readonly CollectionChangeEventHandler Message_CollectionChangedWithInvoke;
-        private readonly ArchiveMaintainer ArchiveMaintainer = new ArchiveMaintainer();
+
+        private ArchiveMaintainer _archiveMaintainer;
 
         public PerformancePage()
         {
             InitializeComponent();
-
-            ArchiveMaintainer.ArchivesUpdated += ArchiveMaintainer_ArchivesUpdated;
             Message_CollectionChangedWithInvoke = Program.ProgramInvokeHandler(Message_CollectionChanged);
-            GraphList.ArchiveMaintainer = ArchiveMaintainer;
             GraphList.SelectedGraphChanged += GraphList_SelectedGraphChanged;
             GraphList.MouseDown += GraphList_MouseDown;
-            DataPlotNav.ArchiveMaintainer = ArchiveMaintainer;
+
             this.DataEventList.SetPlotNav(this.DataPlotNav);
             SetStyle(ControlStyles.ResizeRedraw, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             //set text colour for gradient bar
-            EventsLabel.ForeColor = Program.TitleBarForeColor;
+            EventsLabel.ForeColor = VerticalGradientPanel.TextColor;
             base.Text = Messages.PERFORMANCE_TAB_TITLE;
             UpdateMoveButtons();
         }
-
+         
         public override string HelpID => "TabPagePerformance";
 
         /// <summary> 
@@ -80,14 +78,11 @@ namespace XenAdmin.TabPages
             if (_disposed)
                 return;
             
-            ArchiveMaintainer.Stop();
-
             if (disposing)
             {
-                ArchiveMaintainer.ArchivesUpdated -= ArchiveMaintainer_ArchivesUpdated;
-
-                if (components != null)
-                    components.Dispose();
+                DeregisterEvents();
+                _archiveMaintainer?.Dispose();
+                components?.Dispose();
 
                 _disposed = true;
             }
@@ -172,20 +167,31 @@ namespace XenAdmin.TabPages
             }
             set
             {
-                ArchiveMaintainer.Pause();
                 DataEventList.Clear();
-
-                DeregEvents();
+                DeregisterEvents();
                 _xenObject = value;
-                RegEvents();
+                RegisterEvents();
 
-                ArchiveMaintainer.XenObject = value;
+                var newArchiveMaintainer = new ArchiveMaintainer(value);
+                newArchiveMaintainer.ArchivesUpdated += ArchiveMaintainer_ArchivesUpdated;
+                GraphList.ArchiveMaintainer = newArchiveMaintainer;
+                DataPlotNav.ArchiveMaintainer = newArchiveMaintainer;
+                try
+                {
+                    _archiveMaintainer?.Dispose();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // we have already called a dispose
+                }
+
+                _archiveMaintainer = newArchiveMaintainer;
 
                 if (_xenObject != null)
                 {
                     GraphList.LoadGraphs(XenObject);
                     LoadEvents();
-                    ArchiveMaintainer.Start(); 
+                    newArchiveMaintainer.Start();
                 }
                 RefreshAll();
             }
@@ -194,6 +200,16 @@ namespace XenAdmin.TabPages
         private bool FeatureForbidden
         {
             get { return Helpers.FeatureForbidden(XenObject, Host.RestrictPerformanceGraphs); }
+        }
+
+        private void LoadDataSources()
+        {
+            if (XenObject == null)
+                return;
+
+            var action = new GetDataSourcesAction(XenObject);
+            action.Completed += SaveGraphs;
+            action.RunAsync();
         }
 
         private void LoadEvents()
@@ -239,7 +255,7 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void RegEvents()
+        private void RegisterEvents()
         {
             if (XenObject == null)
                 return;
@@ -290,25 +306,28 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void DeregEvents()
+        private void DeregisterEvents()
         {
             if (XenObject == null)
                 return;
 
-            Pool pool = Helpers.GetPoolOfOne(XenObject.Connection);
+            var pool = Helpers.GetPoolOfOne(XenObject.Connection);
 
             if (pool != null)
                 pool.PropertyChanged -= pool_PropertyChanged;
 
+            if (_archiveMaintainer != null)
+            {
+                _archiveMaintainer.ArchivesUpdated -= ArchiveMaintainer_ArchivesUpdated;
+            } 
+            
             XenObject.Connection.Cache.DeregisterCollectionChanged<XenAPI.Message>(Message_CollectionChangedWithInvoke);
         }
 
         public override void PageHidden()
         {
-            DeregEvents();
-
-            if (ArchiveMaintainer != null)
-                ArchiveMaintainer.Pause();
+            DeregisterEvents();
+            _archiveMaintainer?.Dispose();
         }
 
         private void ArchiveMaintainer_ArchivesUpdated()
@@ -323,9 +342,7 @@ namespace XenAdmin.TabPages
 
         private void ShowUpsell()
         {
-            using (var upsellDialog = new UpsellDialog(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_PERFORMANCE : Messages.UPSELL_BLURB_PERFORMANCE + Messages.UPSELL_BLURB_TRIAL,
-                                                        InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL))
-                upsellDialog.ShowDialog(this);
+            UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_PERFORMANCE, this);
         }
 
         private void MoveGraphUp()
@@ -337,7 +354,7 @@ namespace XenAdmin.TabPages
             if (GraphList.AuthorizedRole)
             {
                 GraphList.ExchangeGraphs(index, index - 1);
-                GraphList.SaveGraphs(null);
+                GraphList.SaveGraphs();
             }
         }
 
@@ -350,7 +367,7 @@ namespace XenAdmin.TabPages
             if (GraphList.AuthorizedRole)
             {
                 GraphList.ExchangeGraphs(index, index + 1);
-                GraphList.SaveGraphs(null);
+                GraphList.SaveGraphs();
             }
         }
 
@@ -361,8 +378,8 @@ namespace XenAdmin.TabPages
             
             if (GraphList.AuthorizedRole)
             {
-                GraphDetailsDialog dialog = new GraphDetailsDialog(GraphList, null);
-                dialog.ShowDialog();
+                using (var dialog = new GraphDetailsDialog(GraphList))
+                    dialog.ShowDialog();
             }
         }
 
@@ -373,57 +390,48 @@ namespace XenAdmin.TabPages
 
             if (GraphList.AuthorizedRole)
             {
-                GraphDetailsDialog dialog = new GraphDetailsDialog(GraphList, GraphList.SelectedGraph);
-                dialog.ShowDialog();
+                using (var dialog = new GraphDetailsDialog(GraphList, GraphList.SelectedGraph))
+                    dialog.ShowDialog();
             }
         }
 
         private void DeleteGraph()
         {
-            using (ThreeButtonDialog dlog = new ThreeButtonDialog(
-                new ThreeButtonDialog.Details(SystemIcons.Warning,
-                    string.Format(Messages.DELETE_GRAPH_MESSAGE, GraphList.SelectedGraph.DisplayName.EscapeAmpersands()),
-                    Messages.XENCENTER),
-                ThreeButtonDialog.ButtonYes,
-                ThreeButtonDialog.ButtonNo))
+            using (ThreeButtonDialog dlog = new WarningDialog(string.Format(Messages.DELETE_GRAPH_MESSAGE, GraphList.SelectedGraph.DisplayName.EscapeAmpersands()),
+                ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
             {
                 if (dlog.ShowDialog(this) == DialogResult.Yes)
                     if (GraphList.AuthorizedRole)
                     {
                         GraphList.DeleteGraph(GraphList.SelectedGraph);
-                        GraphList.LoadDataSources(SaveGraphs);
+                        LoadDataSources();
                     }
             }
         }
 
         private void RestoreDefaultGraphs()
         {
-            using (ThreeButtonDialog dlog = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning,
-                        Messages.GRAPHS_RESTORE_DEFAULT_MESSAGE,
-                        Messages.XENCENTER),
-                    ThreeButtonDialog.ButtonYes,
-                    ThreeButtonDialog.ButtonNo))
+            using (ThreeButtonDialog dlog = new WarningDialog(Messages.GRAPHS_RESTORE_DEFAULT_MESSAGE,
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
             {
                 if (dlog.ShowDialog(this) == DialogResult.Yes)
                     if (GraphList.AuthorizedRole)
                     {
                         GraphList.RestoreDefaultGraphs();
-                        GraphList.LoadDataSources(SaveGraphs);
+                        LoadDataSources();
                     }
             }
         }
 
         private void SaveGraphs(ActionBase sender)
         {
-            Program.Invoke(Program.MainWindow, delegate
+            if (!(sender is GetDataSourcesAction action))
+                return;
+
+            Program.Invoke(Program.MainWindow, () =>
             {
-                var action = sender as GetDataSourcesAction;
-                if (action != null)
-                {
-                    var dataSources = DataSourceItemList.BuildList(action.IXenObject, action.DataSources);
-                    GraphList.SaveGraphs(dataSources);
-                }
+                var dataSourceItems = DataSourceItemList.BuildList(action.XenObject, action.DataSources);
+                GraphList.SaveGraphs(dataSourceItems);
             });
         }
 

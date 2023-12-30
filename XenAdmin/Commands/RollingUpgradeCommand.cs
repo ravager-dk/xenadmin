@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,8 +30,6 @@
 
 using XenAdmin.Core;
 using XenAdmin.Network;
-using XenAdmin.Properties;
-using System.Drawing;
 using XenAdmin.Wizards.RollingUpgradeWizard;
 
 namespace XenAdmin.Commands
@@ -55,12 +52,12 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             MainWindowCommandInterface.ShowForm(typeof (RollingUpgradeWizard));
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             foreach (IXenConnection xenConnection in ConnectionsManager.XenConnectionsCopy)
             {

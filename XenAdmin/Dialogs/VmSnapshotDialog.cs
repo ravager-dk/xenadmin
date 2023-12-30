@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -139,10 +138,10 @@ namespace XenAdmin.Dialogs
                 labelQuiesceInfo.Text = Messages.FIELD_DISABLED;
             else if (_VM.power_state != vm_power_state.Running)
                 labelQuiesceInfo.Text = Messages.INFO_QUIESCE_MODE_POWER_STATE;
-            else if (!_VM.GetVirtualisationStatus().HasFlag(VM.VirtualisationStatus.MANAGEMENT_INSTALLED))
-                labelQuiesceInfo.Text = _VM.HasNewVirtualisationStates()
+            else if (!_VM.GetVirtualizationStatus(out _).HasFlag(VM.VirtualizationStatus.ManagementInstalled))
+                labelQuiesceInfo.Text = _VM.HasNewVirtualizationStates()
                     ? Messages.INFO_QUIESCE_MODE_NO_MGMNT
-                    : Messages.INFO_QUIESCE_MODE_NO_TOOLS;
+                    : string.Format(Messages.INFO_QUIESCE_MODE_NO_TOOLS, BrandManager.VmTools);
             else
                 labelQuiesceInfo.Text = Messages.INFO_QUIESCE_MODE; // This says that VSS must be enabled. This is a guess, because we can't tell whether it is or not.
 
@@ -150,8 +149,10 @@ namespace XenAdmin.Dialogs
                 labelCheckpointInfo.Text = Messages.FIELD_DISABLED;
             else if (_VM.power_state != vm_power_state.Running)
                 labelCheckpointInfo.Text = Messages.INFO_DISKMEMORY_MODE_POWER_STATE;
-            else if (!_VM.GetVirtualisationStatus().HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED))
-                labelCheckpointInfo.Text = (_VM.HasNewVirtualisationStates() ? Messages.INFO_DISKMEMORY_MODE_NO_IO_DRIVERS : Messages.INFO_DISKMEMORY_MODE_NO_TOOLS);
+            else if (!_VM.GetVirtualizationStatus(out _).HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
+                labelCheckpointInfo.Text = _VM.HasNewVirtualizationStates()
+                    ? Messages.INFO_DISKMEMORY_MODE_NO_IO_DRIVERS
+                    : string.Format(Messages.INFO_DISKMEMORY_MODE_NO_TOOLS, BrandManager.VmTools);
             else
                 labelCheckpointInfo.Text = Messages.INFO_DISKMEMORY_MODE_MISC;
         }

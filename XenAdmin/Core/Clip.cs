@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -232,7 +231,9 @@ namespace XenAdmin.Core
             }
             catch
             {
+                // ignored
             }
+
             GettingClipboard = false;
         }
 

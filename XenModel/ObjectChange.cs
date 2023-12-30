@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 
 namespace XenAdmin.Core
@@ -70,7 +68,7 @@ namespace XenAdmin.Core
             return null;
         }
 
-        public static Host GetMaster(IEnumerable<ObjectChange> changes)
+        public static Host GetCoordinator(IEnumerable<ObjectChange> changes)
         {
             String _;
             Pool pool = GetPool(changes, out _);

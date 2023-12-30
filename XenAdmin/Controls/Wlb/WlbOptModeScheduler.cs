@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,12 +29,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 using XenAdmin.Core;
@@ -175,39 +170,35 @@ namespace XenAdmin.Controls.Wlb
             weekView1.ClearTriggerPoints();
             lvTaskList.Items.Clear();
 
-            //foreach (int key in _scheduledTasks.SortedTaskList.Keys)
             foreach (int key in _scheduledTasks.VirtualTaskList.Keys)
             {
                 //WlbScheduledTask task = _scheduledTasks.SortedTaskList[key];
                 WlbScheduledTask task = _scheduledTasks.VirtualTaskList[key];
                 WlbScheduledTask parentTask = _scheduledTasks.TaskList[_scheduledTasks.VirtualTaskList[key].TaskId.ToString()];
 
-                DateTime localExecuteTime;
+                DateTime localRunTime;
                 WlbScheduledTask.WlbTaskDaysOfWeek localDaysOfWeek;
-                WlbScheduledTask.GetLocalTaskTimes((task.DaysOfWeek), task.ExecuteTime, out localDaysOfWeek, out localExecuteTime);
+                WlbScheduledTask.GetLocalTaskTimes((task.DaysOfWeek), task.RunTime, out localDaysOfWeek, out localRunTime);
 
                 ListViewItem item = new ListViewItem();
                 item.Text = key.ToString();
                 item.SubItems.Add(GetTaskOptMode(task) == WlbPoolPerformanceMode.MaximizeDensity ? Messages.WLB_OPT_MODE_MAXIMIZEDENSITY : Messages.WLB_OPT_MODE_MAXIMIZEPERFORMANCE);
                 item.SubItems.Add(GetTaskDayOfWeek(localDaysOfWeek, parentTask.DaysOfWeek));
-                item.SubItems.Add(GetTaskExecuteTime(localExecuteTime));
+                item.SubItems.Add(GetTaskRunTime(localRunTime));
                 item.SubItems.Add(task.Enabled ? Messages.YES : Messages.NO);
                 item.Tag = task;
                 lvTaskList.Items.Add(item);
-            //}
 
-            //foreach (WlbScheduledTask task in _scheduledTasks.VirtualTaskList.Values)
-            //{
                 if (task.Enabled)
                 {
-                    //DateTime localExecuteTime;
+                    //DateTime localRunTime;
                     //WlbScheduledTask.WlbTaskDaysOfWeek localDaysOfWeek;
-                    WlbScheduledTask.GetLocalTaskTimes((task.DaysOfWeek), task.ExecuteTime, out localDaysOfWeek, out localExecuteTime);
-                    string toolTipText = string.Format("Change to {0} mode at {1} on {2}", WlbScheduledTask.GetTaskOptMode(task), WlbScheduledTask.GetTaskExecuteTime(localExecuteTime), WlbScheduledTask.DaysOfWeekL10N(localDaysOfWeek));
+                    WlbScheduledTask.GetLocalTaskTimes((task.DaysOfWeek), task.RunTime, out localDaysOfWeek, out localRunTime);
+                    string toolTipText = string.Format("Change to {0} mode at {1} on {2}", WlbScheduledTask.GetTaskOptMode(task), GetTaskRunTime(localRunTime), WlbScheduledTask.DaysOfWeekL10N(localDaysOfWeek));
                     
                     TriggerPoint triggerPoint = new TriggerPoint();
                     triggerPoint.Day = WlbScheduledTask.ConvertFromWlbTaskDayOfWeek(localDaysOfWeek);
-                    triggerPoint.Hour = localExecuteTime.Hour;
+                    triggerPoint.Hour = localRunTime.Hour;
                     triggerPoint.Color = GetTaskOptMode(task) == WlbPoolPerformanceMode.MaximizePerformance ? Color.Blue : Color.Green;
                     triggerPoint.ToolTip = toolTipText;
                     triggerPoint.Tag = task.TaskId;
@@ -219,34 +210,6 @@ namespace XenAdmin.Controls.Wlb
             lvTaskList.Sort();
             EnableButtons();
        }
-
-        //private void AddTaskToList(WlbScheduledTask task)
-        //{
-        //    foreach (WlbScheduledTask.WlbTaskDaysOfWeek dayValue in Enum.GetValues(typeof(WlbScheduledTask.WlbTaskDaysOfWeek)))
-        //    {
-        //        if (dayValue != WlbScheduledTask.WlbTaskDaysOfWeek.None && 
-        //            dayValue != WlbScheduledTask.WlbTaskDaysOfWeek.All &&
-        //            dayValue != WlbScheduledTask.WlbTaskDaysOfWeek.Weekdays &&
-        //            dayValue != WlbScheduledTask.WlbTaskDaysOfWeek.Weekends &&
-        //            ((task.DaysOfWeek & dayValue) == dayValue))
-        //        {
-        //            DateTime localExecuteTime;
-        //            WlbScheduledTask.WlbTaskDaysOfWeek localDaysOfWeek;
-        //            WlbScheduledTask.GetLocalTaskTimes((task.DaysOfWeek & dayValue), task.ExecuteTime, out localDaysOfWeek, out localExecuteTime);
-
-        //            int sortValue = (int)localDaysOfWeek * 10000 + (int)localExecuteTime.TimeOfDay.TotalMinutes;
-
-        //            ListViewItem item = new ListViewItem();
-        //            item.Text = sortValue.ToString();
-        //            item.SubItems.Add(GetTaskOptMode(task) == WlbPoolPerformanceMode.MaximizeDensity ? Messages.WLB_OPT_MODE_MAXIMIZEDENSITY : Messages.WLB_OPT_MODE_MAXIMIZEPERFORMANCE);
-        //            item.SubItems.Add(GetTaskDayOfWeek(localDaysOfWeek));
-        //            item.SubItems.Add(GetTaskExecuteTime(localExecuteTime));
-        //            item.SubItems.Add(task.Enabled ? Messages.YES : Messages.NO);
-        //            item.Tag = task;
-        //            lvTaskList.Items.Add(item);
-        //        }
-        //    }
-        //}
 
         private void FixColumnWidths()
         {
@@ -282,11 +245,8 @@ namespace XenAdmin.Controls.Wlb
                 WlbScheduledTask checkTask = CheckForDuplicateTask(newTask);
                 if (null != checkTask)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                       new ThreeButtonDialog.Details(
-                           SystemIcons.Warning,
-                           Messages.WLB_TASK_SCHEDULE_CONFLICT_BLURB,
-                           Messages.WLB_TASK_SCHEDULE_CONFLICT_TITLE)))
+                    using (var dlg = new WarningDialog(Messages.WLB_TASK_SCHEDULE_CONFLICT_BLURB)
+                        {WindowTitle = Messages.WLB_TASK_SCHEDULE_CONFLICT_TITLE})
                     {
                         dlg.ShowDialog(this);
                     }
@@ -311,11 +271,8 @@ namespace XenAdmin.Controls.Wlb
                 WlbScheduledTask checkTask = CheckForDuplicateTask(editTask);
                 if (null != checkTask)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                       new ThreeButtonDialog.Details(
-                           SystemIcons.Warning,
-                           Messages.WLB_TASK_SCHEDULE_CONFLICT_BLURB,
-                           Messages.WLB_TASK_SCHEDULE_CONFLICT_TITLE)))
+                    using (var dlg = new WarningDialog(Messages.WLB_TASK_SCHEDULE_CONFLICT_BLURB)
+                        {WindowTitle = Messages.WLB_TASK_SCHEDULE_CONFLICT_TITLE})
                     {
                         dlg.ShowDialog(this);
                     }
@@ -343,7 +300,7 @@ namespace XenAdmin.Controls.Wlb
                     if ((checkTask.ActionType == newTask.ActionType) &&
                         ((checkTask.DaysOfWeek & newTask.DaysOfWeek) == checkTask.DaysOfWeek ||
                         (checkTask.DaysOfWeek & newTask.DaysOfWeek) == newTask.DaysOfWeek) &&
-                        (string.Compare(HelpersGUI.DateTimeToString(checkTask.ExecuteTime, "t", false), HelpersGUI.DateTimeToString(newTask.ExecuteTime, "t", false)) == 0) &&
+                        (string.Compare(HelpersGUI.DateTimeToString(checkTask.RunTime, "t", false), HelpersGUI.DateTimeToString(newTask.RunTime, "t", false)) == 0) &&
                         (checkTask.TaskId != newTask.TaskId))
                     {
                         return checkTask; // taskExists = true;
@@ -381,11 +338,8 @@ namespace XenAdmin.Controls.Wlb
                //if it's a duplicate task, display warning and return
                if (null != checkTask)
                {
-                   using (var dlg = new ThreeButtonDialog(
-                       new ThreeButtonDialog.Details(
-                           SystemIcons.Warning,
-                           Messages.WLB_TASK_SCHEDULE_CONFLICT_BLURB,
-                           Messages.WLB_TASK_SCHEDULE_CONFLICT_TITLE)))
+                   using (var dlg = new WarningDialog(Messages.WLB_TASK_SCHEDULE_CONFLICT_BLURB)
+                       {WindowTitle = Messages.WLB_TASK_SCHEDULE_CONFLICT_TITLE})
                    {
                        dlg.ShowDialog(this);
                    }
@@ -478,42 +432,33 @@ namespace XenAdmin.Controls.Wlb
         }
 
 
-        private static string GetTaskDayOfWeek(WlbScheduledTask.WlbTaskDaysOfWeek taskDaysOfWeek)
-        {
-            return WlbScheduledTask.DaysOfWeekL10N(taskDaysOfWeek);
-        }
-
         private static string GetTaskDayOfWeek(WlbScheduledTask.WlbTaskDaysOfWeek taskDaysOfWeek,
             WlbScheduledTask.WlbTaskDaysOfWeek taskDaysofWeekSortedList)
         {
-            string returnStr = "";
-            returnStr += WlbScheduledTask.DaysOfWeekL10N(taskDaysOfWeek);
+            string day = WlbScheduledTask.DaysOfWeekL10N(taskDaysOfWeek);
 
             //count the bits set in days of week.
             //this workaround had to be made to determine whether the original task was set for
             //weekends/weekdays/alldays
             uint bitCount = Bitcount((int)taskDaysofWeekSortedList);
-            if (bitCount == 2)
+
+            switch (bitCount)
             {
-                returnStr += " (" + Messages.ResourceManager.GetString("WLB_DAY_WEEKENDS") + ")";
+                case 2:
+                    return $"{day} ({Messages.WLB_DAY_WEEKENDS})";
+                case 5:
+                    return $"{day} ({Messages.WLB_DAY_WEEKDAYS})";
+                case 7:
+                    return $"{day} ({Messages.WLB_DAY_ALL})";
+                default:
+                    return day;
             }
-            else if (bitCount == 5)
-            {
-                returnStr += " (" + Messages.ResourceManager.GetString("WLB_DAY_WEEKDAYS") + ")";
-            }
-            else if (bitCount == 7)
-            {
-                returnStr += " (" + Messages.ResourceManager.GetString("WLB_DAY_ALL") + ")";
-            }
-            
-            return returnStr;
         }
 
-        private static string GetTaskExecuteTime(DateTime TaskExecuteTime)
+        public static string GetTaskRunTime(DateTime time)
         {
-            return HelpersGUI.DateTimeToString(TaskExecuteTime, Messages.DATEFORMAT_HM, true);
+            return HelpersGUI.DateTimeToString(time, Messages.DATEFORMAT_HM, true);
         }
-
 
         #endregion Private Static Methods
 
@@ -656,12 +601,9 @@ namespace XenAdmin.Controls.Wlb
             if (lvTaskList.SelectedItems.Count > 0)
             {
                 DialogResult confirmResult;
-                using (var dlg = new ThreeButtonDialog(
-                                                new ThreeButtonDialog.Details(SystemIcons.Warning,
-                                                                                Messages.DELETE_WLB_OPTIMIZATION_SCHEDULE_WARNING,
-                                                                                Messages.DELETE_WLB_OPTIMIZATION_SCHEDULE_CAPTION),
-                                                ThreeButtonDialog.ButtonYes,
-                                                ThreeButtonDialog.ButtonNo))
+                using (var dlg = new WarningDialog(Messages.DELETE_WLB_OPTIMIZATION_SCHEDULE_WARNING,
+                    ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                    {WindowTitle = Messages.DELETE_WLB_OPTIMIZATION_SCHEDULE_CAPTION})
                 {
                     confirmResult = dlg.ShowDialog(this);
                 }
@@ -799,17 +741,6 @@ namespace XenAdmin.Controls.Wlb
             public int Compare(object x, object y)
             {
                 return CompareDouble(double.Parse(((ListViewItem)x).Text), double.Parse(((ListViewItem)y).Text));
-                //WlbScheduledTask taskX = (WlbScheduledTask)((ListViewItem)x).Tag;
-                //WlbScheduledTask taskY = (WlbScheduledTask)((ListViewItem)y).Tag;
-
-                //int returnVal = -1;
-                //returnVal = CompareInt((int)taskX.DaysOfWeek, (int)taskY.DaysOfWeek);
-
-                //if (returnVal == 0)
-                //{
-                //    returnVal = CompareDouble(taskX.ExecuteTime.TimeOfDay.TotalMinutes, taskY.ExecuteTime.TimeOfDay.TotalMinutes);
-                //}
-                //return returnVal;
             }
             
             private int CompareDouble(double x, double y)
@@ -851,11 +782,5 @@ namespace XenAdmin.Controls.Wlb
         }
 #endregion
 
-        //private void lvTaskList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
-        //{
-        //    if(e.IsSelected)
-        //        SelectTask(TaskFromItem(e.Item).TaskId);            
-        //}
-        
     }
 }

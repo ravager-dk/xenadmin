@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,17 +28,11 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Actions;
 using System.Windows.Forms;
-using XenAdmin.Network;
-using System.Collections.ObjectModel;
-using XenAdmin.Core;
-using System.Threading;
-using XenAdmin.Actions.VMActions;
+
 
 namespace XenAdmin.Commands
 {
@@ -66,12 +59,12 @@ namespace XenAdmin.Commands
         protected VMLifeCycleCommand(IMainWindow mainWindow, VM vm, Control parent)
             : base(mainWindow, new SelectedItem(vm))
         {
-            SetParent(parent);
+            Parent = parent;
         }
 
-        protected abstract bool CanExecute(VM vm);
+        protected abstract bool CanRun(VM vm);
 
-        protected abstract void Execute(List<VM> vms);
+        protected abstract void Run(List<VM> vms);
 
         protected void CancelAllTasks(IEnumerable<VM> vms)
         {
@@ -133,18 +126,18 @@ namespace XenAdmin.Commands
 
         protected abstract AsyncAction BuildAction(VM vm);
 
-        protected sealed override void ExecuteCore(SelectedItemCollection selection)
+        protected sealed override void RunCore(SelectedItemCollection selection)
         {
-            List<VM> vms = selection.AsXenObjects<VM>(CanExecute);
+            List<VM> vms = selection.AsXenObjects<VM>(CanRun);
 
-            // sort so actions execute in correct order.
+            // sort so actions run in correct order.
             vms.Sort();
-            Execute(vms);
+            Run(vms);
         }
 
-        protected sealed override bool CanExecuteCore(SelectedItemCollection selection)
+        protected sealed override bool CanRunCore(SelectedItemCollection selection)
         {
-            bool atLeastOneCanExecute = false;
+            bool atLeastOneCanRun = false;
 
             foreach (SelectedItem item in selection)
             {
@@ -154,34 +147,34 @@ namespace XenAdmin.Commands
                 {
                     return false;
                 }
-                else if (CanExecute(vm))
+                else if (CanRun(vm))
                 {
-                    atLeastOneCanExecute = true;
+                    atLeastOneCanRun = true;
                 }
             }
 
-            return atLeastOneCanExecute;
+            return atLeastOneCanRun;
         }
 
-        protected string GetCantExecuteNoToolsOrDriversReasonCore(IXenObject item)
+        protected string GetCantRunNoToolsOrDriversReasonCore(IXenObject item)
         {
             VM vm = item as VM;
             if (vm == null)
                 return null;
 
-            var status = vm.GetVirtualisationStatus();
+            var status = vm.GetVirtualizationStatus(out _);
             //trying to guess the reason
-            if (vm.HasNewVirtualisationStates())
+            if (vm.HasNewVirtualizationStates())
             {
-                if (!status.HasFlag(VM.VirtualisationStatus.IO_DRIVERS_INSTALLED)) //note: this will also be true when the enum is in Unknown state
+                if (!status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled)) //note: this will also be true when the enum is in Unknown state
                     return Messages.VM_MISSING_IO_DRIVERS;
             }
             else
             {
-                if (status == 0 || status.HasFlag(VM.VirtualisationStatus.UNKNOWN))
+                if (status == VM.VirtualizationStatus.NotInstalled || status.HasFlag(VM.VirtualizationStatus.Unknown))
                     return FriendlyErrorNames.VM_MISSING_PV_DRIVERS;
 
-                if (status.HasFlag(VM.VirtualisationStatus.PV_DRIVERS_OUT_OF_DATE))
+                if (status.HasFlag(VM.VirtualizationStatus.PvDriversOutOfDate))
                     return FriendlyErrorNames.VM_OLD_PV_DRIVERS;
             }
 

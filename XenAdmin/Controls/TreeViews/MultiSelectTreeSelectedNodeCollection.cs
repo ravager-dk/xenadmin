@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
 using System.Collections.ObjectModel;
 
@@ -97,7 +95,7 @@ namespace XenAdmin.Controls
 
             public int IndexOf(MultiSelectTreeNode item)
             {
-                return _parent._selectedNodes.IndexOf(item);
+                return _parent._internalSelectedNodes.IndexOf(item);
             }
 
             public void Insert(int index, MultiSelectTreeNode item)
@@ -109,7 +107,7 @@ namespace XenAdmin.Controls
 
             public void RemoveAt(int index)
             {
-                MultiSelectTreeNode item = _parent._selectedNodes[index];
+                MultiSelectTreeNode item = _parent._internalSelectedNodes[index];
                 _parent._selectionChanged = false;
                 _parent.SelectNode(item, false, TreeViewAction.Unknown);
                 _parent.OnSelectionsChanged();
@@ -119,7 +117,7 @@ namespace XenAdmin.Controls
             {
                 get
                 {
-                    return _parent._selectedNodes[index];
+                    return _parent._internalSelectedNodes[index];
                 }
                 set
                 {
@@ -147,17 +145,17 @@ namespace XenAdmin.Controls
 
             public bool Contains(MultiSelectTreeNode item)
             {
-                return _parent._selectedNodes.Contains(item);
+                return _parent._internalSelectedNodes.Contains(item);
             }
 
             public void CopyTo(MultiSelectTreeNode[] array, int arrayIndex)
             {
-                _parent._selectedNodes.CopyTo(array, arrayIndex);
+                _parent._internalSelectedNodes.CopyTo(array, arrayIndex);
             }
 
             public int Count
             {
-                get { return _parent._selectedNodes.Count; }
+                get { return _parent._internalSelectedNodes.Count; }
             }
 
             public bool IsReadOnly
@@ -180,7 +178,7 @@ namespace XenAdmin.Controls
 
             public IEnumerator<MultiSelectTreeNode> GetEnumerator()
             {
-                return _parent._selectedNodes.GetEnumerator();
+                return _parent._internalSelectedNodes.GetEnumerator();
             }
 
             #endregion

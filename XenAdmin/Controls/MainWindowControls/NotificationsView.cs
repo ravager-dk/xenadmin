@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,11 +29,8 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using XenAdmin.Core;
@@ -43,12 +39,16 @@ namespace XenAdmin.Controls.MainWindowControls
 {
     class NotificationsView : FlickerFreeListBox
     {
+        private const int IMG_LEFT_MARGIN = 16;
+        private const int IMG_RIGHT_MARGIN = 8;
+
         [Browsable(true)]
         public event Action<NotificationsSubModeItem> NotificationsSubModeChanged;
 
         public NotificationsView()
         {
             Items.Add(new NotificationsSubModeItem(NotificationsSubMode.Alerts));
+            Items.Add(new NotificationsSubModeItem(NotificationsSubMode.UpdatesFromCdn));
             if (!Helpers.CommonCriteriaCertificationRelease)
                 Items.Add(new NotificationsSubModeItem(NotificationsSubMode.Updates));
             Items.Add(new NotificationsSubModeItem(NotificationsSubMode.Events));
@@ -59,9 +59,7 @@ namespace XenAdmin.Controls.MainWindowControls
             int total = 0;
             foreach (var item in Items)
             {
-                var subModeItem = item as NotificationsSubModeItem;
-
-                if (subModeItem != null)
+                if (item is NotificationsSubModeItem subModeItem)
                     total += subModeItem.UnreadEntries;
             }
             return total;
@@ -71,9 +69,7 @@ namespace XenAdmin.Controls.MainWindowControls
         {
             foreach (var item in Items)
             {
-                var subModeItem = item as NotificationsSubModeItem;
-
-                if (subModeItem != null && subModeItem.SubMode == subMode)
+                if (item is NotificationsSubModeItem subModeItem && subModeItem.SubMode == subMode)
                 {
                     subModeItem.UnreadEntries = entries;
                     break;
@@ -87,9 +83,7 @@ namespace XenAdmin.Controls.MainWindowControls
         {
             foreach (var item in Items)
             {
-                var subModeItem = item as NotificationsSubModeItem;
-               
-                if (subModeItem != null && subModeItem.SubMode == subMode)
+                if (item is NotificationsSubModeItem subModeItem && subModeItem.SubMode == subMode)
                 {
                     var lastSelected = SelectedItem;
                     SelectedItem = item;
@@ -102,16 +96,19 @@ namespace XenAdmin.Controls.MainWindowControls
             }
         }
 
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            ItemHeight = 40;
+        }
+
         protected override void OnDrawItem(DrawItemEventArgs e)
         {
             base.OnDrawItem(e);
 
-            var item = Items[e.Index] as NotificationsSubModeItem;
-            if (item == null)
+            if (!(Items[e.Index] is NotificationsSubModeItem item))
                 return;
 
-            const int IMG_LEFT_MARGIN = 16;
-            const int IMG_RIGHT_MARGIN = 8;
             int itemHeight = e.Bounds.Height;
             int imgWidth = item.Image.Width;
             int imgHeight = item.Image.Height;
@@ -132,7 +129,11 @@ namespace XenAdmin.Controls.MainWindowControls
                 var textRec = new Rectangle(textLeft, e.Bounds.Top,
                                             e.Bounds.Right - textLeft, itemHeight);
 
-                Drawing.DrawText(e.Graphics, item.Text, font, textRec, e.ForeColor,
+                var txt = item.Text;
+                if (!string.IsNullOrWhiteSpace(item.SubText))
+                    txt = $"{txt}\n{item.SubText}";
+
+                Drawing.DrawText(e.Graphics, txt, font, textRec, e.ForeColor,
                     TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
             }
         }
@@ -141,22 +142,20 @@ namespace XenAdmin.Controls.MainWindowControls
         {
             base.OnSelectedIndexChanged(e);
 
-            var item = Items[SelectedIndex] as NotificationsSubModeItem;
-
-            if (item != null && NotificationsSubModeChanged != null)
+            if (Items[SelectedIndex] is NotificationsSubModeItem item && NotificationsSubModeChanged != null)
                 NotificationsSubModeChanged(item);
         }
     }
 
-    public enum NotificationsSubMode { Alerts, Updates, Events }
+    public enum NotificationsSubMode { Alerts, Updates, UpdatesFromCdn, Events }
 
     public class NotificationsSubModeItem
     {
         public readonly NotificationsSubMode SubMode;
         
-        public NotificationsSubModeItem(NotificationsSubMode submode)
+        public NotificationsSubModeItem(NotificationsSubMode subMode)
         {
-            SubMode = submode;
+            SubMode = subMode;
         }
 
         /// <summary>
@@ -165,54 +164,65 @@ namespace XenAdmin.Controls.MainWindowControls
         /// </summary>
         public int UnreadEntries { get; set; }
 
-        public Image Image
-        {
-            get { return GetImage(SubMode, UnreadEntries); }
-        }
+        public Image Image => GetImage(SubMode, UnreadEntries);
 
-        public string Text
-        {
-            get { return GetText(SubMode, UnreadEntries); }
-        }
+        public string Text => GetText(SubMode, UnreadEntries);
 
-        public static Image GetImage(NotificationsSubMode submode, int unreadEntries)
+        public string SubText => GetSubText(SubMode);
+
+        public static Image GetImage(NotificationsSubMode subMode, int unreadEntries)
         {
-            switch (submode)
+            switch (subMode)
             {
                 case NotificationsSubMode.Alerts:
-                    return Properties.Resources._000_Alert2_h32bit_16;
+                    return Images.StaticImages._000_Alert2_h32bit_16;
                 case NotificationsSubMode.Updates:
-                    return Properties.Resources.notif_updates_16;
+                    return Images.StaticImages._000_Patch_h32bit_16;
+                case NotificationsSubMode.UpdatesFromCdn:
+                    return Images.StaticImages.notif_updates_16;
                 case NotificationsSubMode.Events:
                     return unreadEntries == 0
-                               ? Properties.Resources.notif_events_16
-                               : Properties.Resources.notif_events_errors_16;
+                        ? Images.StaticImages.notif_events_16
+                        : Images.StaticImages.notif_events_errors_16;
                 default:
                     return null;
             }
         }
 
-        public static string GetText(NotificationsSubMode submode, int unreadEntries)
+        public static string GetText(NotificationsSubMode subMode, int unreadEntries)
         {
-            switch (submode)
+            switch (subMode)
             {
                 case NotificationsSubMode.Alerts:
                     return unreadEntries == 0
-                               ? Messages.NOTIFICATIONS_SUBMODE_ALERTS_READ
-                               : string.Format(Messages.NOTIFICATIONS_SUBMODE_ALERTS_UNREAD, unreadEntries);
+                        ? Messages.NOTIFICATIONS_SUBMODE_ALERTS_READ
+                        : string.Format(Messages.NOTIFICATIONS_SUBMODE_ALERTS_UNREAD, unreadEntries);
                 case NotificationsSubMode.Updates:
+                case NotificationsSubMode.UpdatesFromCdn:
                     return unreadEntries == 0
-                               ? Messages.NOTIFICATIONS_SUBMODE_UPDATES_READ
-                               : string.Format(Messages.NOTIFICATIONS_SUBMODE_UPDATES_UNREAD, unreadEntries);
+                        ? Messages.NOTIFICATIONS_SUBMODE_UPDATES_READ
+                        : string.Format(Messages.NOTIFICATIONS_SUBMODE_UPDATES_UNREAD, unreadEntries);
                 case NotificationsSubMode.Events:
                     if (unreadEntries == 0)
                         return Messages.NOTIFICATIONS_SUBMODE_EVENTS_READ;
-                    else if (unreadEntries == 1)
+                    if (unreadEntries == 1)
                         return Messages.NOTIFICATIONS_SUBMODE_EVENTS_UNREAD_ONE;
-                    else
-                        return string.Format(Messages.NOTIFICATIONS_SUBMODE_EVENTS_UNREAD_MANY, unreadEntries);
+                    return string.Format(Messages.NOTIFICATIONS_SUBMODE_EVENTS_UNREAD_MANY, unreadEntries);
                 default:
-                    return "";
+                    return string.Empty;
+            }
+        }
+
+        public static string GetSubText(NotificationsSubMode subMode)
+        {
+            switch (subMode)
+            {
+                case NotificationsSubMode.Updates:
+                    return string.Format(Messages.CONFIG_LCM_UPDATES_TAB_TITLE, BrandManager.ProductVersion821);
+                case NotificationsSubMode.UpdatesFromCdn:
+                    return string.Format(Messages.CONFIG_CDN_UPDATES_TAB_TITLE, BrandManager.ProductBrand, BrandManager.ProductVersionPost82);
+                default:
+                    return string.Empty;
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using XenAdmin.Properties;
+using XenAdmin.Core;
 using XenAPI;
 using XenCenterLib;
 
@@ -40,27 +39,28 @@ namespace XenAdmin.Dialogs.OptionsPages
 {
     public partial class ConnectionOptionsPage : UserControl, IOptionsPage
     {
-        private const string ConnectionTabSettingsHeader = "Connection Tab Settings -";
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private OptionsDialog optionsDialog;
+
+        private readonly ToolTip validationToolTip;
+        private Control invalidControl;
 
         // used for preventing the event handlers from doing anything when changing controls through code
-        private bool eventsDisabled = true;
+        private bool eventsDisabled;
 
         public ConnectionOptionsPage()
         {
             InitializeComponent();
-
-            build();
+            validationToolTip = new ToolTip
+            {
+                IsBalloon = true,
+                ToolTipIcon = ToolTipIcon.Warning
+            };
         }
 
-        public OptionsDialog OptionsDialog
+        public void Build()
         {
-            set { this.optionsDialog = value; }
-        }
+            eventsDisabled = true;
 
-        private void build()
-        {
             // Proxy server
             switch ((HTTPHelper.ProxyStyle)Properties.Settings.Default.ProxySetting)
             {
@@ -98,22 +98,29 @@ namespace XenAdmin.Dialogs.OptionsPages
             }
 
             // checks for empty default username/password which starts out unencrypted
-            string protectedUsername = Properties.Settings.Default.ProxyUsername;
-            ProxyUsernameTextBox.Text = string.IsNullOrEmpty(protectedUsername) ? "" : EncryptionUtils.Unprotect(Properties.Settings.Default.ProxyUsername);
-            string protectedPassword = Properties.Settings.Default.ProxyPassword;
-            ProxyPasswordTextBox.Text = string.IsNullOrEmpty(protectedPassword) ? "" : EncryptionUtils.Unprotect(Properties.Settings.Default.ProxyPassword);
-            
-            ConnectionTimeoutNud.Value = Properties.Settings.Default.ConnectionTimeout / 1000;
+            try
+            {
+                string protectedUsername = Properties.Settings.Default.ProxyUsername;
+                ProxyUsernameTextBox.Text = string.IsNullOrEmpty(protectedUsername) ? "" : EncryptionUtils.Unprotect(protectedUsername);
+            }
+            catch (Exception e)
+            {
+                log.Warn("Could not unprotect internet proxy username.", e);
+            }
+
+            try
+            {
+                string protectedPassword = Properties.Settings.Default.ProxyPassword;
+                ProxyPasswordTextBox.Text = string.IsNullOrEmpty(protectedPassword) ? "" : EncryptionUtils.Unprotect(protectedPassword);
+            }
+            catch (Exception e)
+            {
+                log.Warn("Could not unprotect internet proxy password.", e);
+            }
+
+            ConnectionTimeoutNud.Value = (decimal) Properties.Settings.Default.ConnectionTimeout / 1000;
 
             eventsDisabled = false;
-        }
-
-        private void UseProxyRadioButton_CheckedChanged(object sender, EventArgs e)
-        {
-            if (eventsDisabled)
-                return;
-
-            enableOK();
         }
 
         private void AuthenticationCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -131,8 +138,6 @@ namespace XenAdmin.Dialogs.OptionsPages
             SelectUseThisProxyServer();
 
             eventsDisabled = false;
-
-            enableOK();
         }
 
         private void GeneralProxySettingsChanged(object sender, EventArgs e)
@@ -140,7 +145,6 @@ namespace XenAdmin.Dialogs.OptionsPages
             if (eventsDisabled)
                 return;
             SelectUseThisProxyServer();
-            enableOK();
         }
 
         private void ProxyAuthenticationSettingsChanged(object sender, EventArgs e)
@@ -148,7 +152,6 @@ namespace XenAdmin.Dialogs.OptionsPages
             if (eventsDisabled)
                 return;
             SelectProvideCredentials();
-            enableOK();
         }
 
         private void SelectUseThisProxyServer()
@@ -162,63 +165,67 @@ namespace XenAdmin.Dialogs.OptionsPages
             UseProxyRadioButton.Checked = true;
         }
 
-        private void enableOK()
-        {
-            if (optionsDialog == null)
-                return;
+        #region IOptionsPage Members
 
+        public bool IsValidToSave(out Control control, out string invalidReason)
+        {
             if (!UseProxyRadioButton.Checked)
             {
-                optionsDialog.okButton.Enabled = true;
-                return;
-            }
-            else if (AuthenticationCheckBox.Checked && string.IsNullOrEmpty(ProxyUsernameTextBox.Text))
-            {
-                optionsDialog.okButton.Enabled = false;
-                return;
+                invalidReason = null;
+                control = null;
+                return true;
             }
 
-            try
-            {
-                if (!Util.IsValidPort(ProxyPortTextBox.Text))
-                {
-                    optionsDialog.okButton.Enabled = false;
-                    return;
-                }
+            invalidReason = Messages.INVALID_PARAMETER;
 
-                var uriHostNameType = Uri.CheckHostName(ProxyAddressTextBox.Text);
-
-                optionsDialog.okButton.Enabled =  uriHostNameType != UriHostNameType.Unknown && uriHostNameType != UriHostNameType.IPv6;
-                return;
-            }
-            catch
+            var uriHostNameType = Uri.CheckHostName(ProxyAddressTextBox.Text);
+            if (uriHostNameType == UriHostNameType.Unknown || uriHostNameType == UriHostNameType.IPv6)
             {
-                optionsDialog.okButton.Enabled = false;
+                control = ProxyAddressTextBox;
+                return false;
             }
+
+            if (!Util.IsValidPort(ProxyPortTextBox.Text))
+            {
+                control = ProxyPortTextBox;
+                return false;
+            }
+
+            if (AuthenticationCheckBox.Checked && string.IsNullOrEmpty(ProxyUsernameTextBox.Text))
+            {
+                control = ProxyUsernameTextBox;
+                return false;
+            }
+
+            control = null;
+            return true;
         }
 
-        public static void Log()
+        public void ShowValidationMessages(Control control, string message)
         {
-            log.Info(ConnectionTabSettingsHeader);
-            // Proxy server
-            log.Info("=== ProxySetting: " + Properties.Settings.Default.ProxySetting.ToString());
-            log.Info("=== ProxyAddress: " + Properties.Settings.Default.ProxyAddress.ToString());
-            log.Info("=== ProxyPort: " + Properties.Settings.Default.ProxyPort.ToString());
-            log.Info("=== ByPassProxyForServers: " + Properties.Settings.Default.BypassProxyForServers.ToString());
-            log.Info("=== ProvideProxyAuthentication: " + Properties.Settings.Default.ProvideProxyAuthentication.ToString());
-            log.Info("=== ProxyAuthenticationMethod: " + Properties.Settings.Default.ProxyAuthenticationMethod.ToString());
-            log.Info("=== ConnectionTimeout: " + Properties.Settings.Default.ConnectionTimeout.ToString());
+            if (control != null && !string.IsNullOrEmpty(message))
+            {
+                invalidControl = control;
+                validationToolTip.ToolTipTitle = message;
+                HelpersGUI.ShowBalloonMessage(control, validationToolTip);
+            }
         }
 
-        #region IOptionsPage Members
+        public void HideValidationMessages()
+        {
+            if (invalidControl != null)
+                validationToolTip.Hide(invalidControl);
+        }
 
         public void Save()
         {
             // Proxy server settings
             HTTPHelper.ProxyStyle new_proxy_style =
-                DirectConnectionRadioButton.Checked ? HTTPHelper.ProxyStyle.DirectConnection :
-                UseIERadioButton.Checked ? HTTPHelper.ProxyStyle.SystemProxy :
-                                                      HTTPHelper.ProxyStyle.SpecifiedProxy;
+                DirectConnectionRadioButton.Checked
+                    ? HTTPHelper.ProxyStyle.DirectConnection
+                    : UseIERadioButton.Checked
+                        ? HTTPHelper.ProxyStyle.SystemProxy
+                        : HTTPHelper.ProxyStyle.SpecifiedProxy;
             
             if (Properties.Settings.Default.ProxySetting != (int)new_proxy_style)
                 Properties.Settings.Default.ProxySetting = (int)new_proxy_style;
@@ -230,55 +237,41 @@ namespace XenAdmin.Dialogs.OptionsPages
             Properties.Settings.Default.ProxyPassword = EncryptionUtils.Protect(ProxyPasswordTextBox.Text);
             Properties.Settings.Default.ProvideProxyAuthentication = AuthenticationCheckBox.Checked;
 
-            HTTP.ProxyAuthenticationMethod new_auth_method = BasicRadioButton.Checked ?
-                HTTP.ProxyAuthenticationMethod.Basic : HTTP.ProxyAuthenticationMethod.Digest;
+            HTTP.ProxyAuthenticationMethod new_auth_method = BasicRadioButton.Checked
+                ? HTTP.ProxyAuthenticationMethod.Basic
+                : HTTP.ProxyAuthenticationMethod.Digest;
+
             if (Properties.Settings.Default.ProxyAuthenticationMethod != (int)new_auth_method)
                 Properties.Settings.Default.ProxyAuthenticationMethod = (int)new_auth_method;
 
-            try
+            if (int.TryParse(ProxyPortTextBox.Text, out int port))
             {
-                int port = int.Parse(ProxyPortTextBox.Text);
                 if (port != Properties.Settings.Default.ProxyPort)
                     Properties.Settings.Default.ProxyPort = port;
             }
-            catch
-            {
+            else
                 Properties.Settings.Default.ProxyPort = 80;
-            }
 
             if (BypassForServersCheckbox.Checked != Properties.Settings.Default.BypassProxyForServers)
                 Properties.Settings.Default.BypassProxyForServers = BypassForServersCheckbox.Checked;
 
             // timeout settings
-            int timeout = (int)ConnectionTimeoutNud.Value;
-            if (timeout * 1000 != Properties.Settings.Default.ConnectionTimeout)
-            {
-                Properties.Settings.Default.ConnectionTimeout = timeout * 1000;
-            }
+            int timeout = 1000* (int)ConnectionTimeoutNud.Value;
+            if (timeout != Properties.Settings.Default.ConnectionTimeout)
+                Properties.Settings.Default.ConnectionTimeout = timeout;
 
-            Program.ReconfigureConnectionSettings();
-
-            Core.HealthCheck.SendProxySettingsToHealthCheck();
-        }
+            Settings.ReconfigureProxyAuthenticationSettings();
+        }              
 
         #endregion
 
         #region IVerticalTab Members
 
-        public override string Text
-        {
-            get { return Messages.CONNECTION; }
-        }
+        public override string Text => Messages.CONNECTION;
 
-        public string SubText
-        {
-            get { return Messages.CONNECTION_DESC; }
-        }
+        public string SubText => Messages.CONNECTION_DESC;
 
-        public Image Image
-        {
-            get { return Resources._000_Network_h32bit_16; }
-        }
+        public Image Image => Images.StaticImages._000_Network_h32bit_16;
 
         #endregion
     }

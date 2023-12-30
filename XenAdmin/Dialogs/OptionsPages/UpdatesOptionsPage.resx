@@ -112,244 +112,232 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="UpdatesTableLayoutPanel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="UpdatesTableLayoutPanel.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
     <value>GrowAndShrink</value>
   </data>
   <data name="UpdatesTableLayoutPanel.ColumnCount" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
-  <data name="XenCenterGroupBox.AutoSize" type="System.Boolean, mscorlib">
+  <data name="_checkBoxClientUpdates.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="XenCenterGroupBox.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
-    <value>GrowAndShrink</value>
-  </data>
-  <data name="AllowXenCenterUpdatesCheckBox.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="AllowXenCenterUpdatesCheckBox.Font" type="System.Drawing.Font, System.Drawing">
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="_checkBoxClientUpdates.Font" type="System.Drawing.Font, System.Drawing">
     <value>Tahoma, 8pt</value>
   </data>
-  <data name="AllowXenCenterUpdatesCheckBox.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+  <data name="_checkBoxClientUpdates.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
-  <data name="AllowXenCenterUpdatesCheckBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 21</value>
-  </data>
-  <data name="AllowXenCenterUpdatesCheckBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 5, 3, 0</value>
-  </data>
-  <data name="AllowXenCenterUpdatesCheckBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 17</value>
-  </data>
-  <data name="AllowXenCenterUpdatesCheckBox.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="AllowXenCenterUpdatesCheckBox.Text" xml:space="preserve">
-    <value>Check for &amp;new [XenCenter] versions</value>
-  </data>
-  <data name="&gt;&gt;AllowXenCenterUpdatesCheckBox.Name" xml:space="preserve">
-    <value>AllowXenCenterUpdatesCheckBox</value>
-  </data>
-  <data name="&gt;&gt;AllowXenCenterUpdatesCheckBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;AllowXenCenterUpdatesCheckBox.Parent" xml:space="preserve">
-    <value>XenCenterGroupBox</value>
-  </data>
-  <data name="&gt;&gt;AllowXenCenterUpdatesCheckBox.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="XenCenterGroupBox.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Fill</value>
-  </data>
-  <data name="XenCenterGroupBox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 8pt</value>
-  </data>
-  <data name="XenCenterGroupBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 121</value>
-  </data>
-  <data name="XenCenterGroupBox.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 0</value>
-  </data>
-  <data name="XenCenterGroupBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>441, 51</value>
-  </data>
-  <data name="XenCenterGroupBox.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
-  </data>
-  <data name="XenCenterGroupBox.Text" xml:space="preserve">
-    <value>Automatically check for [XenCenter] updates</value>
-  </data>
-  <data name="&gt;&gt;XenCenterGroupBox.Name" xml:space="preserve">
-    <value>XenCenterGroupBox</value>
-  </data>
-  <data name="&gt;&gt;XenCenterGroupBox.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.DecentGroupBox, XenCenterMain, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;XenCenterGroupBox.Parent" xml:space="preserve">
-    <value>UpdatesTableLayoutPanel</value>
-  </data>
-  <data name="&gt;&gt;XenCenterGroupBox.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="XenServerGroupBox.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="XenServerGroupBox.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
-    <value>GrowAndShrink</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 8pt</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 21</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 5, 3, 3</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>204, 17</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="AllowXenServerUpdatesCheckBox.Text" xml:space="preserve">
-    <value>Check for new &amp;versions of [XenServer]</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerUpdatesCheckBox.Name" xml:space="preserve">
-    <value>AllowXenServerUpdatesCheckBox</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerUpdatesCheckBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerUpdatesCheckBox.Parent" xml:space="preserve">
-    <value>XenServerGroupBox</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerUpdatesCheckBox.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 8pt</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 44</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 0</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>167, 17</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="AllowXenServerPatchesCheckBox.Text" xml:space="preserve">
-    <value>Check for [XenServer] &amp;updates</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerPatchesCheckBox.Name" xml:space="preserve">
-    <value>AllowXenServerPatchesCheckBox</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerPatchesCheckBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerPatchesCheckBox.Parent" xml:space="preserve">
-    <value>XenServerGroupBox</value>
-  </data>
-  <data name="&gt;&gt;AllowXenServerPatchesCheckBox.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="XenServerGroupBox.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Fill</value>
-  </data>
-  <data name="XenServerGroupBox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 8pt</value>
-  </data>
-  <data name="XenServerGroupBox.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="_checkBoxClientUpdates.Location" type="System.Drawing.Point, System.Drawing">
     <value>3, 41</value>
   </data>
-  <data name="XenServerGroupBox.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 0</value>
+  <data name="_checkBoxClientUpdates.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 0, 0, 0</value>
   </data>
-  <data name="XenServerGroupBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>441, 74</value>
+  <data name="_checkBoxClientUpdates.Size" type="System.Drawing.Size, System.Drawing">
+    <value>173, 17</value>
   </data>
-  <data name="XenServerGroupBox.TabIndex" type="System.Int32, mscorlib">
+  <data name="_checkBoxClientUpdates.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
-  <data name="XenServerGroupBox.Text" xml:space="preserve">
-    <value>Automatically check for [XenServer] updates and new versions</value>
+  <data name="_checkBoxClientUpdates.Text" xml:space="preserve">
+    <value>Check for &amp;new versions of {0}</value>
   </data>
-  <data name="&gt;&gt;XenServerGroupBox.Name" xml:space="preserve">
-    <value>XenServerGroupBox</value>
+  <data name="&gt;&gt;_checkBoxClientUpdates.Name" xml:space="preserve">
+    <value>_checkBoxClientUpdates</value>
   </data>
-  <data name="&gt;&gt;XenServerGroupBox.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.DecentGroupBox, XenCenterMain, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  <data name="&gt;&gt;_checkBoxClientUpdates.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;XenServerGroupBox.Parent" xml:space="preserve">
+  <data name="&gt;&gt;_checkBoxClientUpdates.Parent" xml:space="preserve">
     <value>UpdatesTableLayoutPanel</value>
   </data>
-  <data name="&gt;&gt;XenServerGroupBox.ZOrder" xml:space="preserve">
-    <value>1</value>
+  <data name="&gt;&gt;_checkBoxClientUpdates.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
-  <data name="UpdatesBlurb.AutoSize" type="System.Boolean, mscorlib">
+  <data name="labelClientUpdates.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="UpdatesBlurb.Font" type="System.Drawing.Font, System.Drawing">
+  <data name="labelClientUpdates.Font" type="System.Drawing.Font, System.Drawing">
     <value>Tahoma, 8pt</value>
   </data>
-  <data name="UpdatesBlurb.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+  <data name="labelClientUpdates.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
-  <data name="UpdatesBlurb.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
+  <data name="labelClientUpdates.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 0</value>
   </data>
-  <data name="UpdatesBlurb.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>0, 0, 0, 12</value>
+  <data name="labelClientUpdates.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 0, 3, 12</value>
   </data>
-  <data name="UpdatesBlurb.Size" type="System.Drawing.Size, System.Drawing">
-    <value>432, 26</value>
+  <data name="labelClientUpdates.Size" type="System.Drawing.Size, System.Drawing">
+    <value>451, 26</value>
   </data>
-  <data name="UpdatesBlurb.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
+  <data name="labelClientUpdates.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
   </data>
-  <data name="UpdatesBlurb.Text" xml:space="preserve">
-    <value>You can configure [XenCenter] to periodically check for available updates and prompt you when an update or new [XenServer] version is available for download.</value>
+  <data name="labelClientUpdates.Text" xml:space="preserve">
+    <value>{0} can check periodically and prompt you when a new version of the application is available for download.</value>
   </data>
-  <data name="&gt;&gt;UpdatesBlurb.Name" xml:space="preserve">
-    <value>UpdatesBlurb</value>
+  <data name="&gt;&gt;labelClientUpdates.Name" xml:space="preserve">
+    <value>labelClientUpdates</value>
   </data>
-  <data name="&gt;&gt;UpdatesBlurb.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="&gt;&gt;labelClientUpdates.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;UpdatesBlurb.Parent" xml:space="preserve">
+  <data name="&gt;&gt;labelClientUpdates.Parent" xml:space="preserve">
     <value>UpdatesTableLayoutPanel</value>
   </data>
-  <data name="&gt;&gt;UpdatesBlurb.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;labelClientUpdates.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="tableLayoutPanel3.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="tableLayoutPanel3.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
+  </data>
+  <data name="tableLayoutPanel3.ColumnCount" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="labelInfoCdn.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Left</value>
+  </data>
+  <data name="labelInfoCdn.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="labelInfoCdn.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Tahoma, 8pt</value>
+  </data>
+  <data name="labelInfoCdn.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="labelInfoCdn.Location" type="System.Drawing.Point, System.Drawing">
+    <value>25, 4</value>
+  </data>
+  <data name="labelInfoCdn.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 0, 0, 0</value>
+  </data>
+  <data name="labelInfoCdn.Size" type="System.Drawing.Size, System.Drawing">
+    <value>248, 13</value>
+  </data>
+  <data name="labelInfoCdn.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="labelInfoCdn.Text" xml:space="preserve">
+    <value>For configuration of server updates use the dialog</value>
+  </data>
+  <data name="&gt;&gt;labelInfoCdn.Name" xml:space="preserve">
+    <value>labelInfoCdn</value>
+  </data>
+  <data name="&gt;&gt;labelInfoCdn.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;labelInfoCdn.Parent" xml:space="preserve">
+    <value>tableLayoutPanel3</value>
+  </data>
+  <data name="&gt;&gt;labelInfoCdn.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="pictureBox1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="pictureBox1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 3</value>
+  </data>
+  <data name="pictureBox1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>16, 16</value>
+  </data>
+  <data name="pictureBox1.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;pictureBox1.Name" xml:space="preserve">
+    <value>pictureBox1</value>
+  </data>
+  <data name="&gt;&gt;pictureBox1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBox1.Parent" xml:space="preserve">
+    <value>tableLayoutPanel3</value>
+  </data>
+  <data name="&gt;&gt;pictureBox1.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="linkLabelConfigUpdates.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Left</value>
+  </data>
+  <data name="linkLabelConfigUpdates.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="linkLabelConfigUpdates.Location" type="System.Drawing.Point, System.Drawing">
+    <value>273, 4</value>
+  </data>
+  <data name="linkLabelConfigUpdates.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>0, 0, 3, 0</value>
+  </data>
+  <data name="linkLabelConfigUpdates.Size" type="System.Drawing.Size, System.Drawing">
+    <value>97, 13</value>
+  </data>
+  <data name="linkLabelConfigUpdates.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
+  </data>
+  <data name="linkLabelConfigUpdates.Text" xml:space="preserve">
+    <value>Configure Updates</value>
+  </data>
+  <data name="&gt;&gt;linkLabelConfigUpdates.Name" xml:space="preserve">
+    <value>linkLabelConfigUpdates</value>
+  </data>
+  <data name="&gt;&gt;linkLabelConfigUpdates.Type" xml:space="preserve">
+    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;linkLabelConfigUpdates.Parent" xml:space="preserve">
+    <value>tableLayoutPanel3</value>
+  </data>
+  <data name="&gt;&gt;linkLabelConfigUpdates.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="tableLayoutPanel3.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="tableLayoutPanel3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 91</value>
+  </data>
+  <data name="tableLayoutPanel3.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 30, 3, 3</value>
+  </data>
+  <data name="tableLayoutPanel3.RowCount" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="tableLayoutPanel3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>464, 22</value>
+  </data>
+  <data name="tableLayoutPanel3.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel3.Name" xml:space="preserve">
+    <value>tableLayoutPanel3</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TableLayoutPanel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel3.Parent" xml:space="preserve">
+    <value>UpdatesTableLayoutPanel</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel3.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="tableLayoutPanel3.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="labelInfoCdn" Row="0" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="pictureBox1" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="linkLabelConfigUpdates" Row="0" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,AutoSize,0,Percent,100" /&gt;&lt;Rows Styles="AutoSize,0" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
   <data name="UpdatesTableLayoutPanel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
@@ -364,16 +352,16 @@
     <value>4</value>
   </data>
   <data name="UpdatesTableLayoutPanel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>447, 225</value>
+    <value>470, 258</value>
   </data>
   <data name="UpdatesTableLayoutPanel.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
+    <value>0</value>
   </data>
   <data name="&gt;&gt;UpdatesTableLayoutPanel.Name" xml:space="preserve">
     <value>UpdatesTableLayoutPanel</value>
   </data>
   <data name="&gt;&gt;UpdatesTableLayoutPanel.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TableLayoutPanel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Windows.Forms.TableLayoutPanel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;UpdatesTableLayoutPanel.Parent" xml:space="preserve">
     <value>$this</value>
@@ -382,21 +370,21 @@
     <value>0</value>
   </data>
   <data name="UpdatesTableLayoutPanel.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="XenCenterGroupBox" Row="2" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="XenServerGroupBox" Row="1" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="UpdatesBlurb" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="Percent,100" /&gt;&lt;Rows Styles="AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0" /&gt;&lt;/TableLayoutSettings&gt;</value>
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="_checkBoxClientUpdates" Row="1" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="labelClientUpdates" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="tableLayoutPanel3" Row="2" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="Percent,100" /&gt;&lt;Rows Styles="AutoSize,0,AutoSize,0,AutoSize,0,Percent,100" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>96, 96</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>447, 225</value>
+    <value>470, 258</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>UpdatesOptionsPage</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

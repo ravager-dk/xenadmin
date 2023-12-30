@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,6 +28,7 @@
  * SUCH DAMAGE.
  */
 
+using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAPI;
 
@@ -40,17 +40,9 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
         public PVDriversOutOfDate(Check check, VM vm)
             : base(check, vm) { }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.UPDATES_WIZARD_OUT_OF_DATE_TOOLS, ServerName, VM.Name()); }
-        }
+        public override string Description => string.Format(Messages.UPDATES_WIZARD_OUT_OF_DATE_TOOLS,
+            ServerName, VM.Name(), BrandManager.VmTools);
 
-        public override string HelpMessage
-        {
-            get
-            {
-                return Messages.INSTALL_XENSERVER_TOOLS;
-            }
-        }
+        public override string HelpMessage => string.Format(Messages.INSTALL_XENSERVER_TOOLS, BrandManager.VmTools);
     }
 }

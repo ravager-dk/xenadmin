@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,7 +35,6 @@ using XenAPI;
 using XenAdmin.Core;
 using System.Windows.Forms;
 using XenAdmin.Dialogs;
-using System.Drawing;
 using XenAdmin.Actions.VMActions;
 
 
@@ -54,47 +52,43 @@ namespace XenAdmin.Commands
         {
             get
             {
-                if (!CanExecute())
+                var targetHost = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Host>();
+                if (targetHost == null)
+                    return null;
+
+                var draggedVMs = GetDraggedItemsAsXenObjects<VM>();
+
+                foreach (VM vm in draggedVMs)
                 {
-                    Host targetHost = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Host>();
-                    
-                    if (targetHost != null)
+                    if (vm == null)
+                        continue;
+
+                    if (!vm.allowed_operations.Contains(vm_operations.migrate_send))
                     {
-                        foreach (VM draggedVM in GetDraggedItemsAsXenObjects<VM>())
-                        {
-                            Pool draggedVMPool = Helpers.GetPool(draggedVM.Connection);
-                            Host draggedVMHome = draggedVM.Home();
-
-                            if (draggedVM == null || draggedVMPool == null || 
-                                draggedVMHome == null || 
-                                !draggedVM.allowed_operations.Contains(vm_operations.migrate_send))
-                            {
-                                if (draggedVM.power_state == vm_power_state.Running)
-                                    return Messages.MIGRATION_NOT_ALLOWED;
-                                return null;
-                            }
-
-                            if(!LiveMigrateAllowedInVersion(targetHost, draggedVM))
-                            {
-                                if (IsACrossPoolMigrate(targetHost, draggedVM))
-                                {
-                                    return Messages.MIGRATION_NOT_ALLOWED_OUTSIDE_POOL;
-                                }
-                                if (draggedVM.GetStorageHost(true) != null)
-                                {
-                                    // Non-agile.
-                                    return Messages.MIGRATION_NOT_ALLOWED_NO_SHARED_STORAGE;
-                                }
-                            }
-
-                            if (Helpers.productVersionCompare(Helpers.HostProductVersion(targetHost), Helpers.HostProductVersion(draggedVMHome)) < 0)
-                                return Messages.OLDER_THAN_CURRENT_SERVER;
-
-                            if (targetHost != draggedVMHome && VMOperationHostCommand.VmCpuIncompatibleWithHost(targetHost, draggedVM))
-                                return Messages.MIGRATION_NOT_ALLOWED_CPU_FEATURES;
-                        }
+                        if (vm.power_state == vm_power_state.Running)
+                            return string.Format(Messages.MIGRATION_NOT_ALLOWED, vm.Name().Ellipsise(50), BrandManager.VmTools);
+                        return null;
                     }
+
+                    if (!LiveMigrateAllowedInVersion(targetHost, vm))
+                    {
+                        if (IsACrossPoolMigrate(targetHost, vm))
+                            return string.Format(Messages.MIGRATION_NOT_ALLOWED_OUTSIDE_POOL, vm.Name().Ellipsise(50));
+
+                        if (vm.GetStorageHost(true) != null) //Non-agile
+                            return string.Format(Messages.MIGRATION_NOT_ALLOWED_NO_SHARED_STORAGE, vm.Name().Ellipsise(50));
+                    }
+
+                    var homeHost = vm.Home();
+
+                    if (Helpers.ProductVersionCompare(Helpers.HostProductVersion(targetHost),
+                            Helpers.HostProductVersion(homeHost ?? Helpers.GetCoordinator(vm.Connection))) < 0)
+                        return Messages.OLDER_THAN_CURRENT_SERVER;
+
+                    if (targetHost != homeHost && VMOperationHostCommand.VmCpuIncompatibleWithHost(targetHost, vm))
+                        return string.Format(Messages.MIGRATION_NOT_ALLOWED_CPU_FEATURES, vm.Name().Ellipsise(50));
                 }
+
                 return null;
             }
         }
@@ -119,78 +113,72 @@ namespace XenAdmin.Commands
             return targetHost != null && (targetPool == null || draggedVMPool == null || targetPool.opaque_ref != draggedVMPool.opaque_ref);
         }
 
-        protected override bool CanExecuteCore()
+        protected override bool CanRunCore()
         {
             Host targetHost = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Host>();
+            if (targetHost == null || !targetHost.IsLive()|| !targetHost.Connection.IsConnected)
+                return false;
 
+            List<VM> draggedVMs = GetDraggedItemsAsXenObjects<VM>();
+            if (draggedVMs.Count <= 0)
+                return false;
 
-            if (targetHost != null)
+            foreach (VM vm in draggedVMs)
             {
-                List<VM> draggedVMs = GetDraggedItemsAsXenObjects<VM>();
+                if (vm.Connection == null || !vm.Connection.IsConnected)
+                    return false;
 
-                if (draggedVMs.Count > 0)
+                if (!LiveMigrateAllowedInVersion(targetHost, vm))
                 {
-                    foreach (VM draggedVM in draggedVMs)
+                    Pool targetPool = Helpers.GetPool(targetHost.Connection);
+                    if (targetPool == null)
+                        return false;
+
+                    Pool sourcePool = Helpers.GetPool(vm.Connection);
+
+                    if (sourcePool == null || sourcePool.opaque_ref != targetPool.opaque_ref)
                     {
-                        Host draggedVMHome = draggedVM.Home();
-
-                        if (draggedVM.Connection == null || !draggedVM.Connection.IsConnected)
-                        {
-                            return false;
-                        }
-
-                        if(!LiveMigrateAllowedInVersion(targetHost, draggedVM))
-                        {
-                            Pool targetPool = targetHost == null ? null : Helpers.GetPool(targetHost.Connection);
-                            
-                            if(targetPool == null)
-                                return false;
-
-                            Pool draggedVMPool = Helpers.GetPool(draggedVM.Connection);
-                            
-                            if (draggedVMPool == null || draggedVMPool.opaque_ref != targetPool.opaque_ref)
-                            {
-                                // dragged VM must be in same pool as target
-                                return false;
-                            }
-                            if (draggedVM.GetStorageHost(true) != null)
-                            {
-                                // dragged VM must be agile
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            if (Helpers.FeatureForbidden(draggedVM.Connection, Host.RestrictIntraPoolMigrate))
-                                return false;
-                        }
-
-                        if (draggedVM.allowed_operations == null || !draggedVM.allowed_operations.Contains(vm_operations.pool_migrate))
-                        {
-                            // migrate not allowed
-                            return false;
-                        }
-                        
-                        if (draggedVMHome == null || draggedVMHome == targetHost)
-                        {
-                            // dragged VM must currently be shown below a host
-                            return false;
-                        }
-
-                        if (Helpers.productVersionCompare(Helpers.HostProductVersion(targetHost), Helpers.HostProductVersion(draggedVMHome)) < 0)
-                            return false;
-
-                        if (VMOperationHostCommand.VmCpuIncompatibleWithHost(targetHost, draggedVM))
-                            return false;
+                        // dragged VM must be in same pool as target
+                        return false;
                     }
 
-                    return true;
+                    if (vm.GetStorageHost(true) != null)
+                    {
+                        // dragged VM must be agile
+                        return false;
+                    }
                 }
+                else
+                {
+                    if (Helpers.FeatureForbidden(vm.Connection, Host.RestrictIntraPoolMigrate))
+                        return false;
+                }
+
+                if (vm.allowed_operations == null || !vm.allowed_operations.Contains(vm_operations.pool_migrate))
+                {
+                    // migrate not allowed
+                    return false;
+                }
+
+                Host homeHost = vm.Home();
+
+                if (homeHost == null || homeHost == targetHost)
+                {
+                    // dragged VM must currently be shown below a host
+                    return false;
+                }
+
+                if (Helpers.ProductVersionCompare(Helpers.HostProductVersion(targetHost), Helpers.HostProductVersion(homeHost)) < 0)
+                    return false;
+
+                if (VMOperationHostCommand.VmCpuIncompatibleWithHost(targetHost, vm))
+                    return false;
             }
-            return false;
+
+            return true;
         }
 
-        protected override void ExecuteCore()
+        protected override void RunCore()
         {
             Host targetHost = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Host>();
             List<VM> draggedVMs = GetDraggedItemsAsXenObjects<VM>();
@@ -207,9 +195,8 @@ namespace XenAdmin.Commands
                         SR sr = cd.Connection.Resolve<SR>(vdi.SR);
                         if (sr != null && !sr.shared)
                         {
-                            using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Exclamation,
-                                                                                Messages.DRAG_DROP_LOCAL_CD_LOADED,
-                                                                                Messages.DRAG_DROP_LOCAL_CD_LOADED_TITLE)))
+                            using (var dlg = new WarningDialog(Messages.DRAG_DROP_LOCAL_CD_LOADED)
+                                {WindowTitle = Messages.DRAG_DROP_LOCAL_CD_LOADED_TITLE})
                             {
                                 dlg.ShowDialog(MainWindowCommandInterface.Form);
                             }
@@ -226,7 +213,7 @@ namespace XenAdmin.Commands
                 {
                     List<SelectedItem> selectedItems = new List<SelectedItem>();
                     draggedVMs.ForEach(vm => selectedItems.Add(new SelectedItem(vm)));
-                    new CrossPoolMigrateCommand(MainWindowCommandInterface, selectedItems, targetHost, false).Execute();
+                    new CrossPoolMigrateCommand(MainWindowCommandInterface, selectedItems, targetHost).Run();
                     return;
                 } 
             }
@@ -245,23 +232,23 @@ namespace XenAdmin.Commands
 
         private bool Confirm()
         {
+            if (Program.RunInAutomatedTestMode)
+                return true;
+
             List<VM> draggedVMs = GetDraggedItemsAsXenObjects<VM>();
             Host targetHost = GetTargetNodeAncestorAsXenObjectOrGroupingTag<Host>();
 
-            if (draggedVMs.Count == 1)
-            {
-                return Program.MainWindow.Confirm(null, Messages.MESSAGEBOX_CONFIRM, Messages.MAINWINDOW_CONFIRM_MIGRATE, draggedVMs[0].Name(), targetHost.Name());
-            }
+            var msg = draggedVMs.Count == 1
+                ? string.Format(Messages.MAINWINDOW_CONFIRM_MIGRATE, draggedVMs[0].Name().Ellipsise(50), targetHost.Name().Ellipsise(50))
+                : string.Format(Messages.MAINWINDOW_CONFIRM_MIGRATE_MULTIPLE, targetHost.Name().Ellipsise(50));
 
-            return Program.MainWindow.Confirm(null, Messages.MESSAGEBOX_CONFIRM, Messages.MAINWINDOW_CONFIRM_MIGRATE_MULTIPLE, targetHost.Name());
-        }
-
-        public override VirtualTreeNode HighlightNode
-        {
-            get
+            using (var dialog = new WarningDialog(msg, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
+                {WindowTitle = Messages.MESSAGEBOX_CONFIRM})
             {
-                return CanExecute() ? GetTargetNodeAncestor<Host>() : null;
+                return dialog.ShowDialog(Program.MainWindow) == DialogResult.Yes;
             }
         }
+
+        public override VirtualTreeNode HighlightNode => GetTargetNodeAncestor<Host>();
     }
 }

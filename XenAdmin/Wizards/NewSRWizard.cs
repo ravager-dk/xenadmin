@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -42,7 +41,6 @@ using XenAdmin.Dialogs;
 using XenAdmin.Wizards.NewSRWizard_Pages;
 using XenAdmin.Wizards.NewSRWizard_Pages.Frontends;
 using XenAdmin.Controls;
-using System.Drawing;
 using XenAdmin.Actions.DR;
 
 namespace XenAdmin.Wizards
@@ -55,18 +53,12 @@ namespace XenAdmin.Wizards
         private readonly NewSrWizardNamePage xenTabPageSrName;
         private readonly CIFS_ISO xenTabPageCifsIso;
         private readonly CifsFrontend xenTabPageCifs;
-        private readonly CSLG xenTabPageCslg;
         private readonly VHDoNFS xenTabPageVhdoNFS;
         private readonly NFS_ISO xenTabPageNfsIso;
-        private readonly NetApp xenTabPageNetApp;
-        private readonly EqualLogic xentabPageEqualLogic;
         private readonly LVMoISCSI xenTabPageLvmoIscsi;
         private readonly LVMoHBA xenTabPageLvmoHba;
         private readonly LVMoFCoE xenTabPageLvmoFcoe;
         private readonly LVMoHBASummary xenTabPageLvmoHbaSummary;
-        private readonly CslgSettings xenTabPageCslgSettings;
-        private readonly CslgLocation xenTabPageCslgLocation;
-        private readonly FilerDetails xenTabPageFilerDetails;
         private readonly ChooseSrTypePage xenTabPageChooseSrType;
         private readonly ChooseSrProvisioningPage xenTabPageChooseSrProv;
         private readonly RBACWarningPage xenTabPageRbacWarning;
@@ -106,18 +98,12 @@ namespace XenAdmin.Wizards
             xenTabPageSrName = new NewSrWizardNamePage();
             xenTabPageCifsIso = new CIFS_ISO();
             xenTabPageCifs = new CifsFrontend();
-            xenTabPageCslg = new CSLG();
             xenTabPageVhdoNFS = new VHDoNFS();
             xenTabPageNfsIso = new NFS_ISO();
-            xenTabPageNetApp = new NetApp();
-            xentabPageEqualLogic = new EqualLogic();
             xenTabPageLvmoIscsi = new LVMoISCSI();
             xenTabPageLvmoHba = new LVMoHBA();
             xenTabPageLvmoFcoe = new LVMoFCoE();
             xenTabPageLvmoHbaSummary = new LVMoHBASummary();
-            xenTabPageCslgSettings = new CslgSettings();
-            xenTabPageCslgLocation = new CslgLocation();
-            xenTabPageFilerDetails = new FilerDetails();
             xenTabPageChooseSrType = new ChooseSrTypePage();
             xenTabPageChooseSrProv = new ChooseSrProvisioningPage();
             xenTabPageRbacWarning = new RBACWarningPage((srToReattach == null && !disasterRecoveryTask)
@@ -142,7 +128,7 @@ namespace XenAdmin.Wizards
 
             // RBAC warning page 
             _rbac = (xenConnection != null && !xenConnection.Session.IsLocalSuperuser) &&
-                   Helpers.GetMaster(xenConnection).external_auth_type != Auth.AUTH_TYPE_NONE;            
+                   Helpers.GetCoordinator(xenConnection).external_auth_type != Auth.AUTH_TYPE_NONE;            
             if (_rbac)
             {
                 // if reattaching, add "Permission checks" page after "Name" page, otherwise as first page (Ref. CA-61525)
@@ -161,38 +147,33 @@ namespace XenAdmin.Wizards
 
             xenTabPageRbacWarning.Connection = xenConnection;
 
-            xenTabPageRbacWarning.ClearPermissionChecks();
-
-            var warningMessage = (_srToReattach == null && !disasterRecoveryTask)
+            var warningMessage = _srToReattach == null && !disasterRecoveryTask
                              ? Messages.RBAC_WARNING_SR_WIZARD_CREATE
                              : Messages.RBAC_WARNING_SR_WIZARD_ATTACH;
 
-            RBACWarningPage.WizardPermissionCheck check =
-                new RBACWarningPage.WizardPermissionCheck(warningMessage) { Blocking = true };
+            var check = new WizardRbacCheck(warningMessage) { Blocking = true };
+            check.AddApiMethods("SR.probe");
 
-            
-
-            check.AddApiCheckRange(new RbacMethodList("SR.probe"));
-            if (Helpers.KolkataOrGreater(xenConnection) && !Helpers.FeatureForbidden(xenConnection, Host.RestrictCorosync))
-                check.AddApiCheckRange(new RbacMethodList("SR.probe_ext"));
+            if (Helpers.KolkataOrGreater(xenConnection) && !Helpers.FeatureForbidden(xenConnection, Host.CorosyncDisabled))
+                check.AddApiMethods("SR.probe_ext");
 
             if (_srToReattach == null)
             {
                 // create
-                check.AddApiCheckRange(SrCreateAction.StaticRBACDependencies);
+                check.AddApiMethods(SrCreateAction.StaticRBACDependencies);
             }
             else if (disasterRecoveryTask && SR.SupportsDatabaseReplication(xenConnection, _srToReattach))
             {
                 // "Attach SR needed for DR" case
-                check.AddApiCheckRange(DrTaskCreateAction.StaticRBACDependencies);
+                check.AddApiMethods(DrTaskCreateAction.StaticRBACDependencies);
             } 
             else 
             {
                 // reattach
-                check.AddApiCheckRange(SrReattachAction.StaticRBACDependencies);
+                check.AddApiMethods(SrReattachAction.StaticRBACDependencies);
             }
 
-            xenTabPageRbacWarning.AddPermissionChecks(xenConnection, check);
+            xenTabPageRbacWarning.SetPermissionChecks(xenConnection, check);
         }
 
         private bool SetFCDevicesOnLVMoHBAPage(LVMoHBA page)
@@ -228,8 +209,7 @@ namespace XenAdmin.Wizards
             xenTabPageLvmoHbaSummary.SuccessfullyCreatedSRs.Clear();
             xenTabPageLvmoHbaSummary.FailedToCreateSRs.Clear();
 
-            bool closeWizard;
-            RunFinalAction(out closeWizard);
+            RunFinalAction(out var closeWizard);
             return closeWizard;
         }
 
@@ -243,7 +223,6 @@ namespace XenAdmin.Wizards
 
             if (runPrechecks)
             {
-
                 if (m_srWizardType is SrWizardType_Fcoe)
                 {
                     xenTabPageLvmoFcoe.SrType = showProvisioningPage && xenTabPageChooseSrProv.IsGfs2 ? SR.SRTypes.gfs2 : SR.SRTypes.lvmofcoe;
@@ -253,11 +232,6 @@ namespace XenAdmin.Wizards
                 {
                     xenTabPageLvmoHba.SrType = showProvisioningPage && xenTabPageChooseSrProv.IsGfs2 ? SR.SRTypes.gfs2 : SR.SRTypes.lvmohba;
                     return SetFCDevicesOnLVMoHBAPage(xenTabPageLvmoHba);
-                }
-                if (m_srWizardType is SrWizardType_Cslg || m_srWizardType is SrWizardType_NetApp || m_srWizardType is SrWizardType_EqualLogic)
-                {
-                    xenTabPageCslg.SrWizardType = m_srWizardType;
-                    return xenTabPageCslg.PerformStorageSystemScan();
                 }
             }
 			
@@ -311,26 +285,6 @@ namespace XenAdmin.Wizards
                     AddPage(xenTabPageLvmoFcoe);
                     AddPage(xenTabPageLvmoHbaSummary);
                 }
-                else if (m_srWizardType is SrWizardType_Cslg)
-                {
-                    AddPage(xenTabPageCslg);
-                    AddPages(xenTabPageCslgLocation, xenTabPageCslgSettings);
-                }
-                else if (m_srWizardType is SrWizardType_NetApp || m_srWizardType is SrWizardType_EqualLogic)
-                {
-                    AddPages(xenTabPageCslg, xenTabPageFilerDetails);
-
-                    if (m_srWizardType is SrWizardType_NetApp)
-                    {
-                        xenTabPageFilerDetails.IsNetApp = true;
-                        AddPage(xenTabPageNetApp);
-                    }
-                    else if (m_srWizardType is SrWizardType_EqualLogic)
-                    {
-                        xenTabPageFilerDetails.IsNetApp = false;
-                        AddPage(xentabPageEqualLogic);
-                    }
-                }
                 else if (m_srWizardType is SrWizardType_CifsIso)
                     AddPage(xenTabPageCifsIso);
                 else if (m_srWizardType is SrWizardType_Cifs)
@@ -357,8 +311,6 @@ namespace XenAdmin.Wizards
                     xenTabPageLvmoIscsi.SrWizardType = m_srWizardType;
                 else if (m_srWizardType is SrWizardType_Hba)
                     xenTabPageLvmoHba.SrWizardType = m_srWizardType;
-                else if (m_srWizardType is SrWizardType_Cslg || m_srWizardType is SrWizardType_NetApp || m_srWizardType is SrWizardType_EqualLogic)
-                    xenTabPageCslg.SrWizardType = m_srWizardType;
                 else if (m_srWizardType is SrWizardType_CifsIso)
                     xenTabPageCifsIso.SrWizardType = m_srWizardType;
                 else if (m_srWizardType is SrWizardType_NfsIso)
@@ -406,65 +358,6 @@ namespace XenAdmin.Wizards
                 m_srWizardType.DeviceConfig = xenTabPageVhdoNFS.DeviceConfig;
                 SetCustomDescription(m_srWizardType, xenTabPageVhdoNFS.SrDescription);
             }
-            else if (senderPagetype == typeof(CSLG))
-            {
-                xenTabPageCslgLocation.SelectedStorageAdapter = xenTabPageCslg.SelectedStorageAdapter;
-                xenTabPageCslgSettings.SelectedStorageAdapter = xenTabPageCslg.SelectedStorageAdapter;
-                NotifyNextPagesOfChange(xenTabPageCslgLocation, xenTabPageCslgSettings);
-
-                foreach (var entry in xenTabPageCslg.DeviceConfigParts)
-                    m_srWizardType.DeviceConfig[entry.Key] = entry.Value;
-            }
-            else if (senderPagetype == typeof(CslgLocation))
-            {
-                xenTabPageCslgSettings.StorageLinkCredentials = xenTabPageCslgLocation.StorageLinkCredentials;
-                xenTabPageCslgSettings.SystemStorage = xenTabPageCslgLocation.SystemStorage;
-                xenTabPageCslgSettings.StoragePools = xenTabPageCslgLocation.StoragePools;
-
-                foreach (var entry in xenTabPageCslgLocation.DeviceConfigParts)
-                    m_srWizardType.DeviceConfig[entry.Key] = entry.Value;
-                NotifyNextPagesOfChange(xenTabPageCslgSettings);
-            }
-            else if (senderPagetype == typeof(CslgSettings))
-            {
-                foreach (var entry in xenTabPageCslgSettings.DeviceConfigParts)
-                    m_srWizardType.DeviceConfig[entry.Key] = entry.Value;
-                SetCustomDescription(m_srWizardType, xenTabPageCslgSettings.SrDescription);
-            }
-            else if (senderPagetype == typeof(FilerDetails))
-            {
-                #region
-                foreach (var entry in xenTabPageFilerDetails.DeviceConfigParts)
-                    m_srWizardType.DeviceConfig[entry.Key] = entry.Value;
-
-                if (xenTabPageFilerDetails.IsNetApp)
-                {
-                    xenTabPageNetApp.SrScanAction = xenTabPageFilerDetails.SrScanAction;
-                    xenTabPageNetApp.SrWizardType = m_srWizardType;
-                    NotifyNextPagesOfChange(xenTabPageNetApp);
-                }
-                else
-                {
-                    xentabPageEqualLogic.SrScanAction = xenTabPageFilerDetails.SrScanAction;
-                    xentabPageEqualLogic.SrWizardType = m_srWizardType;
-                    NotifyNextPagesOfChange(xentabPageEqualLogic);
-                }
-                #endregion
-            }
-            else if (senderPagetype == typeof(NetApp))
-            {
-                m_srWizardType.UUID = xenTabPageNetApp.UUID;
-                foreach (var entry in xenTabPageNetApp.DeviceConfigParts)
-                    m_srWizardType.DeviceConfig[entry.Key] = entry.Value;
-                SetCustomDescription(m_srWizardType, xenTabPageNetApp.SrDescription);
-            }
-            else if (senderPagetype == typeof(EqualLogic))
-            {
-                m_srWizardType.UUID = xentabPageEqualLogic.UUID;
-                foreach (var entry in xentabPageEqualLogic.DeviceConfigParts)
-                    m_srWizardType.DeviceConfig[entry.Key] = entry.Value;
-                SetCustomDescription(m_srWizardType, xentabPageEqualLogic.SrDescription);
-            }
         }
 
         private static void SetCustomDescription(SrWizardType srwizardtype, string description)
@@ -498,8 +391,7 @@ namespace XenAdmin.Wizards
             if (pool == null)
             {
                 log.Error("New SR Wizard: Pool has disappeared");
-                using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(SystemIcons.Warning, string.Format(Messages.NEW_SR_CONNECTION_LOST, Helpers.GetName(xenConnection)), Messages.XENCENTER)))
+                using (var dlg = new WarningDialog(string.Format(Messages.NEW_SR_CONNECTION_LOST, Helpers.GetName(xenConnection))))
                 {
                     dlg.ShowDialog(this);
                 }
@@ -508,12 +400,11 @@ namespace XenAdmin.Wizards
                 return;
             }
 
-            Host master = xenConnection.Resolve(pool.master);
-            if (master == null)
+            Host coordinator = xenConnection.Resolve(pool.master);
+            if (coordinator == null)
             {
-                log.Error("New SR Wizard: Master has disappeared");
-                using (var dlg = new ThreeButtonDialog(
-                   new ThreeButtonDialog.Details(SystemIcons.Warning, string.Format(Messages.NEW_SR_CONNECTION_LOST, Helpers.GetName(xenConnection)), Messages.XENCENTER)))
+                log.Error("New SR Wizard: Coordinator has disappeared");
+                using (var dlg = new WarningDialog(string.Format(Messages.NEW_SR_CONNECTION_LOST, Helpers.GetName(xenConnection))))
                 {
                     dlg.ShowDialog(this);
                 }
@@ -540,14 +431,14 @@ namespace XenAdmin.Wizards
                 return;
             }
 
-            List<AsyncAction> actionList = GetActions(master, m_srWizardType.DisasterRecoveryTask);
+            List<AsyncAction> actionList = GetActions(coordinator, m_srWizardType.DisasterRecoveryTask);
 
             if (actionList.Count == 1)
                 FinalAction = actionList[0];
             else
-                FinalAction = new ParallelAction(xenConnection, Messages.NEW_SR_WIZARD_FINAL_ACTION_TITLE,
-                                                 Messages.NEW_SR_WIZARD_FINAL_ACTION_START,
-                                                 Messages.NEW_SR_WIZARD_FINAL_ACTION_END, actionList);
+                FinalAction = new ParallelAction(Messages.NEW_SR_WIZARD_FINAL_ACTION_TITLE,
+                    Messages.NEW_SR_WIZARD_FINAL_ACTION_START,
+                    Messages.NEW_SR_WIZARD_FINAL_ACTION_END, actionList, xenConnection);
 
             // if this is a Disaster Recovery Task, it could be either a "Find existing SRs" or an "Attach SR needed for DR" case
             if (m_srWizardType.DisasterRecoveryTask)
@@ -584,7 +475,7 @@ namespace XenAdmin.Wizards
             if (!FinalAction.Succeeded && FinalAction is SrReattachAction && _srToReattach.HasPBDs())
             {
                 // reattach failed. Ensure PBDs are now unplugged and destroyed.
-                using (var dialog = new ActionProgressDialog(new SrAction(SrActionKind.UnplugAndDestroyPBDs, _srToReattach), progressBarStyle))
+                using (var dialog = new ActionProgressDialog(new DetachSrAction(_srToReattach, true), progressBarStyle))
                 {
                     dialog.ShowCancel = false;
                     dialog.ShowDialog();
@@ -631,7 +522,7 @@ namespace XenAdmin.Wizards
                 xenTabPageLvmoHbaSummary.FailedToCreateSRs.Add(srDescriptor);
         }
 
-        private List<AsyncAction> GetActions(Host master, bool disasterRecoveryTask)
+        private List<AsyncAction> GetActions(Host coordinator, bool disasterRecoveryTask)
         {
             // Now we need to decide what to do.
             // This will be one off create, introduce, reattach
@@ -646,7 +537,7 @@ namespace XenAdmin.Wizards
                 {
                     // Don't need to show any warning, as the only destructive creates
                     // are in iSCSI and HBA, where they show their own warning
-                    finalActions.Add(new SrCreateAction(xenConnection, master,
+                    finalActions.Add(new SrCreateAction(xenConnection, coordinator,
                                                         srDescriptor.Name,
                                                         srDescriptor.Description,
                                                         srType,
@@ -711,10 +602,10 @@ namespace XenAdmin.Wizards
                     if (m_srWizardType.ShowIntroducePrompt)
                     {
                         DialogResult dialogResult;
-                        using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(SystemIcons.Warning, String.Format(Messages.NEWSR_MULTI_POOL_WARNING, m_srWizardType.UUID), Text),
+                        using (var dlg = new WarningDialog(string.Format(Messages.NEWSR_MULTI_POOL_WARNING, BrandManager.BrandConsole, m_srWizardType.UUID),
                                 ThreeButtonDialog.ButtonYes,
-                                new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                                new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                            {WindowTitle = Text})
                         {
                             dialogResult = dlg.ShowDialog(this);
                         }
@@ -728,10 +619,10 @@ namespace XenAdmin.Wizards
                     if (m_srWizardType.ShowReattachWarning)
                     {
                         DialogResult dialogResult;
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(SystemIcons.Warning, String.Format(Messages.NEWSR_MULTI_POOL_WARNING, _srToReattach.Name()), Text),
+                        using (var dlg = new WarningDialog(string.Format(Messages.NEWSR_MULTI_POOL_WARNING, BrandManager.BrandConsole, _srToReattach.Name()),
                             ThreeButtonDialog.ButtonYes,
-                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, ThreeButtonDialog.ButtonType.CANCEL, true)))
+                            new ThreeButtonDialog.TBDButton(Messages.NO_BUTTON_CAPTION, DialogResult.No, selected: true))
+                            {WindowTitle = Text})
                         {
                             dialogResult = dlg.ShowDialog(this);
                         }
@@ -748,11 +639,7 @@ namespace XenAdmin.Wizards
                     // Warn user SR is already attached to other pool, and then introduce to this pool 
 
                     DialogResult dialogResult;
-                        using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Warning,
-                            string.Format(Messages.ALREADY_ATTACHED_ELSEWHERE, _srToReattach.Name(), Helpers.GetName(xenConnection), 
-                            Text)),
+                        using (var dlg = new WarningDialog(string.Format(Messages.ALREADY_ATTACHED_ELSEWHERE, _srToReattach.Name(), Helpers.GetName(xenConnection), Text, BrandManager.BrandConsole),
                         ThreeButtonDialog.ButtonOK,
                         ThreeButtonDialog.ButtonCancel))
                         {
@@ -776,14 +663,9 @@ namespace XenAdmin.Wizards
 
             if (xenTabPageChooseSrType.MatchingFrontends <= 0)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Error,
-                        String.Format(Messages.CANNOT_FIND_SR_WIZARD_TYPE, _srToReattach.type),
-                        Messages.XENCENTER)))
-                {
+                using (var dlg = new ErrorDialog(string.Format(Messages.CANNOT_FIND_SR_WIZARD_TYPE,
+                    _srToReattach.type, BrandManager.BrandConsole)))
                     dlg.ShowDialog(this);
-                }
 
                 Close();
             }
@@ -797,9 +679,6 @@ namespace XenAdmin.Wizards
                 if (_rbac)
                     return;
             }
-
-            if (_srToReattach.type == "cslg" && xenTabPageCslg.SelectedStorageAdapter != null)
-                NextStep();
         }
 
         protected override string WizardPaneHelpID()

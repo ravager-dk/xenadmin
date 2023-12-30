@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -114,9 +113,9 @@ namespace XenAdmin.SettingsPanels
                 ListViewItem thisItem = new ListViewItem();
                 thisItem.Tag = host;
                 thisItem.Checked = participatesInPowerManagement;
-                if (host.IsMaster())
+                if (host.IsCoordinator())
                 {
-                    thisItem.SubItems.Add(string.Format("{0} ({1})", host.Name(), Messages.POOL_MASTER));
+                    thisItem.SubItems.Add(string.Format("{0} ({1})", host.Name(), Messages.POOL_COORDINATOR));
                 }
                 else
                 {
@@ -215,10 +214,9 @@ namespace XenAdmin.SettingsPanels
                              !_poolConfiguration.HostConfigurations[host.uuid].LastPowerOnSucceeded))
                         {
                             DialogResult dr;
-                            using (var dlg = new ThreeButtonDialog(
-                                new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.WLB_UNTESTED_HOST_WARNING, Messages.WLB_UNTESTED_HOST_CAPTION),
+                            using (var dlg = new WarningDialog(Messages.WLB_UNTESTED_HOST_WARNING,
                                 ThreeButtonDialog.ButtonYes,
-                                ThreeButtonDialog.ButtonNo))
+                                ThreeButtonDialog.ButtonNo){WindowTitle = Messages.WLB_UNTESTED_HOST_CAPTION})
                             {
                                 dr = dlg.ShowDialog();
                             }
@@ -253,7 +251,7 @@ namespace XenAdmin.SettingsPanels
         private void listViewExPowerManagementHosts_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
             Host host = (Host)e.Item.Tag;
-            // disallow checking when the host is pool master or PowerOn is disabled (empty string)
+            // disallow checking when the host is pool coordinator or PowerOn is disabled (empty string)
             // we have to allow checking when PowerOn is null (unknown) to support PM on older versions of XS
             if (HostCannotParticipateInPowerManagement(host))
             {
@@ -270,7 +268,7 @@ namespace XenAdmin.SettingsPanels
 
         private bool HostCannotParticipateInPowerManagement(Host host)
         {
-            return host.IsMaster() || string.IsNullOrEmpty(host.power_on_mode);
+            return host.IsCoordinator() || string.IsNullOrEmpty(host.power_on_mode);
         }
 
         private void listViewExPowerManagementHosts_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
@@ -310,7 +308,7 @@ namespace XenAdmin.SettingsPanels
                     _poolConfiguration.HostConfigurations.Add(hostConfiguration.Uuid, hostConfiguration);
                 }
 
-                if ((listItem.Checked == true) && (!host.IsMaster()))
+                if ((listItem.Checked == true) && (!host.IsCoordinator()))
                 {
                     hostConfiguration.ParticipatesInPowerManagement = true;
                 }
@@ -335,6 +333,9 @@ namespace XenAdmin.SettingsPanels
             throw new NotImplementedException();
         }
 
+        public void HideLocalValidationMessages()
+        { }
+
         public void Cleanup()
         {
             throw new NotImplementedException();
@@ -346,10 +347,9 @@ namespace XenAdmin.SettingsPanels
 
         #region IVerticalTab Members
 
-
         public string SubText => Messages.WLB_AUTOMATION_SUBTEXT;
 
-        public Image Image => Properties.Resources._000_EnablePowerControl_h32bit_16;
+        public Image Image => Images.StaticImages._000_EnablePowerControl_h32bit_16;
 
         #endregion
 

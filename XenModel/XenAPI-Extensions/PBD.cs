@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using XenAdmin;
-using XenAdmin.Core;
 using XenAdmin.Network;
 
 
@@ -160,25 +158,6 @@ namespace XenAPI
                 return Messages.HOST_NOT_LIVE;
 
             return Messages.CONNECTED;
-        }
-
-        public StorageLinkCredentials GetStorageLinkCredentials()
-        {
-            var deviceConfig = new Dictionary<string, string>(device_config);
-            
-            SR sr = Connection.Resolve<SR>(SR);
-            
-            if (sr != null && sr.type == "cslg")
-            {
-                string host, username, passwordSecret;
-
-                deviceConfig.TryGetValue("target", out host);
-                deviceConfig.TryGetValue("username", out username);
-                deviceConfig.TryGetValue("password_secret", out passwordSecret);
-
-                return new StorageLinkCredentials(Connection, host, username, null, passwordSecret);
-            }
-            return null;
         }
     }
 }

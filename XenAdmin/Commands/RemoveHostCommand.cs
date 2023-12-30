@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,6 +31,7 @@
 using System.Collections.Generic;
 using XenAPI;
 using XenAdmin.Actions;
+using XenAdmin.Core;
 
 
 namespace XenAdmin.Commands
@@ -61,7 +61,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             MainWindowCommandInterface.SelectObjectInTree(null);
 
@@ -69,7 +69,7 @@ namespace XenAdmin.Commands
             {
                 string msg = string.Format(Messages.MAINWINDOW_LOG_REMOVECONNECTION, host.Connection.Hostname);
                 log.Info($"Removed connection to {host.Connection.Hostname}");
-                new ActionBase(msg, msg, false, true);
+                new DummyAction(msg, msg).Run();
                 MainWindowCommandInterface.CloseActiveWizards(host.Connection);
                 host.Connection.EndConnect();
                 MainWindowCommandInterface.RemoveConnection(host.Connection);
@@ -78,23 +78,17 @@ namespace XenAdmin.Commands
             MainWindowCommandInterface.SaveServerList();
         }
 
-        private static bool CanExecute(Host host)
+        private static bool CanRun(Host host)
         {
             bool disconnected = host.Connection != null && !host.Connection.IsConnected;
-            return disconnected || host.IsMaster();
+            return disconnected || host.IsCoordinator();
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<Host>(CanExecute);
+            return selection.AllItemsAre<Host>(CanRun);
         }
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REMOVE_HOST;
-            }
-        }
+        public override string MenuText => string.Format(Messages.MAINWINDOW_REMOVE_HOST, BrandManager.BrandConsole);
     }
 }

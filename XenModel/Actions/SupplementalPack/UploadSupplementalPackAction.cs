@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using XenAdmin.Network;
 using XenAdmin.Core;
 using XenAPI;
@@ -68,7 +66,7 @@ namespace XenAdmin.Actions
         public UploadSupplementalPackAction(IXenConnection connection, List<Host> selectedServers, string path, bool suppressHistory)
             : base(connection, null, Messages.SUPP_PACK_UPLOADING, suppressHistory)
         {
-            Host = Helpers.GetMaster(connection) ?? throw new NullReferenceException();
+            Host = Helpers.GetCoordinator(connection) ?? throw new NullReferenceException();
 
             ApiMethodsToRoleCheck.Add("VDI.create");
             ApiMethodsToRoleCheck.Add("VDI.destroy");
@@ -144,22 +142,28 @@ namespace XenAdmin.Actions
                 };
 
                 Session session = NewSession();
-                RelatedTask = Task.create(Session, "uploadTask", hostUrl);
+                RelatedTask = Task.create(Session, "put_import_raw_vdi_task", hostUrl);
+                log.DebugFormat("HTTP PUTTING file from {0} to {1}", suppPackFilePath, hostUrl);
 
-                result = HTTPHelper.Put(progressDelegate, GetCancelling, true, Connection, RelatedTask, ref session,  suppPackFilePath, hostUrl,
-                                        (HTTP_actions.put_sss)HTTP_actions.put_import_raw_vdi,
-                                        session.opaque_ref, vdiRef.opaque_ref);
+                HTTP_actions.put_import_raw_vdi(progressDelegate,
+                    () => XenAdminConfigManager.Provider.ForcedExiting || GetCancelling(),
+                    XenAdminConfigManager.Provider.GetProxyTimeout(true),
+                    hostUrl,
+                    XenAdminConfigManager.Provider.GetProxyFromSettings(Connection),
+                    suppPackFilePath, RelatedTask.opaque_ref, session.opaque_ref, vdiRef.opaque_ref);
+
+                PollToCompletion();
+                result = Result;
             }
             catch (Exception ex)
             {
-                log.Error("Failed to import a virtual disk over HTTP", ex);
+                PollToCompletion(suppressFailures: true);
 
                 if (vdiRef != null)
                 {
                     try
                     {
-                        log.ErrorFormat("Deleting VDI '{0}' on a best effort basis.", vdiRef.opaque_ref);
-                        Thread.Sleep(1000);
+                        log.ErrorFormat("Failed to import a virtual disk over HTTP. Deleting VDI '{0}' on a best effort basis.", vdiRef.opaque_ref);
                         VDI.destroy(Session, vdiRef);
                     }
                     catch (Exception removeEx)
@@ -168,16 +172,16 @@ namespace XenAdmin.Actions
                     }
                 }
 
+                if (ex is CancelledException || ex is HTTP.CancelledException || ex.InnerException is CancelledException)
+                    throw new CancelledException();
+
+                log.Error("Failed to import a virtual disk over HTTP", ex);
+
                 //after having tried to remove the VDI, the original exception is thrown for the UI
                 if (ex is TargetInvocationException && ex.InnerException != null)
                     throw ex.InnerException;
                 else
                     throw; 
-            }
-            finally
-            {
-                Task.destroy(Session, RelatedTask);
-                RelatedTask = null;
             }
 
             //introduce ISO for Ely and higher
@@ -258,8 +262,8 @@ namespace XenAdmin.Actions
 
         private List<SR> SelectTargetSr()
         {
-            /* For ely or greater (update ISOs) we need an SR that can be seen from master;
-             * that would be a shared SR or the master's local SR.
+            /* For ely or greater (update ISOs) we need an SR that can be seen from coordinator;
+             * that would be a shared SR or the coordinator's local SR.
              * 
              * For earlier (supplemental packs) we need an SR that can be seen from all hosts;
              * that would be a shared SR, otherwise we have to upload to each hosts's local SR
@@ -270,7 +274,7 @@ namespace XenAdmin.Actions
             SR defaultSr = Pool != null ? Pool.Connection.Resolve(Pool.default_SR) : null;
             
             var serversToConsider = Helpers.ElyOrGreater(Connection)
-                ? new List<Host> {Helpers.GetMaster(Connection)}
+                ? new List<Host> {Helpers.GetCoordinator(Connection)}
                 : new List<Host>(servers);
 
             var srList = new List<SR>();

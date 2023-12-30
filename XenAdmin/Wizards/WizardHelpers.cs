@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using DiscUtils.Iso9660;
@@ -55,7 +53,8 @@ namespace XenAdmin.Wizards
                 {
                     Multiselect = false,
                     ShowReadOnly = false,
-                    Filter = string.Format(Messages.PATCHINGWIZARD_SELECTPATCHPAGE_UPDATESEXT, BrandManager.ExtensionUpdate),
+                    Filter = string.Format(Messages.PATCHINGWIZARD_SELECTPATCHPAGE_UPDATESEXT,
+                        BrandManager.ProductBrand),
                     FilterIndex = 0,
                     CheckFileExists = true,
                     CheckPathExists = true,
@@ -84,8 +83,7 @@ namespace XenAdmin.Wizards
                 return;
 
             if (!IsValidFile(dlg.FileName, out var failureReason))
-                using (var popup = new ThreeButtonDialog(new ThreeButtonDialog.Details(
-                    SystemIcons.Error, failureReason, Messages.UPDATES)))
+                using (var popup = new ErrorDialog(failureReason) {WindowTitle =  Messages.UPDATES})
                 {
                     popup.ShowDialog();
                     e.Cancel = true;
@@ -95,8 +93,7 @@ namespace XenAdmin.Wizards
         public static string ParseSuppPackFile(string path, Control control, ref bool cancel)
         {
             if (!IsValidFile(path, out var pathFailure))
-                using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(
-                    SystemIcons.Error, pathFailure, Messages.UPDATES)))
+                using (var dlg = new ErrorDialog(pathFailure) {WindowTitle = Messages.UPDATES})
                 {
                     cancel = true;
                     dlg.ShowDialog();
@@ -108,8 +105,7 @@ namespace XenAdmin.Wizards
                 var unzippedPath = ExtractUpdate(path, control);
 
                 if (!IsValidFile(unzippedPath, out var zipFailure))
-                    using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(
-                        SystemIcons.Error, zipFailure, Messages.UPDATES)))
+                    using (var dlg = new ErrorDialog(zipFailure) {WindowTitle = Messages.UPDATES})
                     {
                         cancel = true;
                         dlg.ShowDialog();
@@ -127,15 +123,14 @@ namespace XenAdmin.Wizards
             if (string.IsNullOrEmpty(zippedUpdatePath))
                 return null;
 
-            var unzipAction = new DownloadAndUnzipXenServerPatchAction(Path.GetFileNameWithoutExtension(zippedUpdatePath),
-                null, zippedUpdatePath, true, BrandManager.ExtensionUpdate, InvisibleMessages.ISO_UPDATE);
+            var unzipAction = new UnzipUpdateAction(zippedUpdatePath, BrandManager.ExtensionUpdate, "iso");
 
             using (var dlg = new ActionProgressDialog(unzipAction, ProgressBarStyle.Marquee))
             {
                 dlg.ShowDialog(control);
             }
 
-            return !string.IsNullOrEmpty(unzipAction.PatchPath) ? unzipAction.PatchPath : null;
+            return !string.IsNullOrEmpty(unzipAction.UpdatePath) ? unzipAction.UpdatePath : null;
         }
 
         public static bool IsValidFile(string fileName, out string failureReason)

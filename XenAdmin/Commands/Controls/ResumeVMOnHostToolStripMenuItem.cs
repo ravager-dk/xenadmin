@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 using XenAPI;
 using XenAdmin.Network;
-using System.Collections.ObjectModel;
 
 
 namespace XenAdmin.Commands
@@ -73,7 +69,7 @@ namespace XenAdmin.Commands
             {
             }
 
-            private bool CanExecute(SelectedItem selection)
+            private bool CanRun(SelectedItem selection)
             {
                 VM vm = selection.XenObject as VM;
                 
@@ -93,32 +89,29 @@ namespace XenAdmin.Commands
                 return false;
             }
 
-            protected override bool CanExecuteCore(SelectedItemCollection selection)
+            protected override bool CanRunCore(SelectedItemCollection selection)
             {
-                if (!selection.AllItemsAre<VM>())
-                {
-                    return false;
-                }
-
                 IXenConnection connection = null;
 
-                bool atLeaseOneCanExecute = false;
-                foreach (SelectedItem item in selection)
+                var atLeastOneCanRun = false;
+                foreach (var item in selection)
                 {
-                    VM vm = (VM)item.XenObject;
-
+                    if (!(item.XenObject is VM vm))
+                        return false;
+                    
                     // all VMs must be on the same connection
                     if (connection != null && vm.Connection != connection)
                     {
                         return false;
                     }
+                    connection = vm.Connection;
 
-                    if (CanExecute(item))
+                    if (CanRun(item))
                     {
-                        atLeaseOneCanExecute = true;
+                        atLeastOneCanRun = true;
                     }
                 }
-                return atLeaseOneCanExecute;
+                return atLeastOneCanRun;
             }
 
             private static bool EnabledTargetExists(Host host, IXenConnection connection)

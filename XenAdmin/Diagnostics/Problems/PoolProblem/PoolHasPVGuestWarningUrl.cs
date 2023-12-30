@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,27 +28,68 @@
  * SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
+using System.Linq;
+using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
-using System;
 using XenAPI;
 
 namespace XenAdmin.Diagnostics.Problems.PoolProblem
 {
-    class PoolHasPVGuestWarningUrl : WarningWithInformationUrl
+    class PoolHasPVGuestWarningUrl : WarningWithMoreInfo
     {
         private readonly Pool _pool;
+        private readonly List<VM> _pvGuests;
 
-        public PoolHasPVGuestWarningUrl(Check check, Pool pool)
+        public PoolHasPVGuestWarningUrl(Check check, Pool pool, List<VM> pvGuests)
             : base(check)
         {
             _pool = pool;
+            _pvGuests = pvGuests;
         }
 
-        private string PVGuestCheckUrl => string.Format(InvisibleMessages.PV_GUESTS_CHECK_URL);
-        public override Uri UriToLaunch => new Uri(PVGuestCheckUrl);
-        public override string Title => Description;
-        public override string Description => string.Format(Messages.POOL_HAS_PV_GUEST_WARNING, _pool.Name());
-        public override string HelpMessage => LinkText;
+        public override string Title => Check.Description;
+
+        public override string Description =>
+            string.Format(Messages.POOL_HAS_PV_GUEST_WARNING, _pool.Name(), BrandManager.ProductVersion81);
+
+        public override string HelpMessage => Messages.MORE_INFO;
+
+        public override string Message =>
+            string.Format(Messages.POOL_HAS_PV_GUEST_WARNING_DETAIL,
+                string.Join(", ", _pvGuests.Select(g => g.Name())),
+                BrandManager.ProductVersion81);
+
         public override string LinkText => Messages.LEARN_MORE;
+        public override string LinkData => InvisibleMessages.PV_GUESTS_CHECK_URL;
+    }
+
+
+    class PoolHasPVGuestProblem : ProblemWithMoreInfo
+    {
+        private readonly Pool _pool;
+        private readonly List<VM> _pvGuests;
+
+        public PoolHasPVGuestProblem(Check check, Pool pool, List<VM> pvGuests)
+            : base(check)
+        {
+            _pool = pool;
+            _pvGuests = pvGuests;
+        }
+
+        public override string Title => Check.Description;
+
+        public override string Description =>
+            string.Format(Messages.POOL_HAS_PV_GUEST_WARNING, _pool.Name(), BrandManager.ProductVersion81);
+
+        public override string HelpMessage => Messages.MORE_INFO;
+
+        public override string Message =>
+            string.Format(Messages.POOL_HAS_PV_GUEST_WARNING_DETAIL,
+                string.Join(", ", _pvGuests.Select(g => g.Name())),
+                BrandManager.ProductVersion81);
+
+        public override string LinkText => Messages.LEARN_MORE;
+        public override string LinkData => InvisibleMessages.PV_GUESTS_CHECK_URL;
     }
 }

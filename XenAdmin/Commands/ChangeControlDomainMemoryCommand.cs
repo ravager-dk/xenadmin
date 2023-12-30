@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,19 +28,10 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using XenAPI;
 using XenAdmin.Core;
-using XenAdmin.Network;
-using XenAdmin.Wizards.NewVMWizard;
-using XenAdmin.Properties;
-using System.Drawing;
-using System.Collections.ObjectModel;
-using System.Windows.Forms;
 using XenAdmin.Dialogs;
-using XenAdmin.Actions;
 
 
 namespace XenAdmin.Commands
@@ -65,9 +55,12 @@ namespace XenAdmin.Commands
         }
 
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            Host host = selection[0].HostAncestor;
+            var host = selection[0].HostAncestor;
+            if (host == null)
+                return;
+
             using (var dlg = new ControlDomainMemoryDialog(host))
                 dlg.ShowDialog(Program.MainWindow);
         }
@@ -77,14 +70,14 @@ namespace XenAdmin.Commands
             get { return false; }
         }
         
-        private bool CanExecute(Host host)
+        private bool CanRun(Host host)
         {
             return host != null && host.IsLive() && Helpers.ElyOrGreater(host);
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.ContainsOneItemOfType<Host>() && selection.AtLeastOneXenObjectCan<Host>(CanExecute);
+            return selection.ContainsOneItemOfType<Host>() && selection.AtLeastOneXenObjectCan<Host>(CanRun);
         }
 
         public override string MenuText

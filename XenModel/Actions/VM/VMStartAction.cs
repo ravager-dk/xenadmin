@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -85,7 +84,7 @@ namespace XenAdmin.Actions.VMActions
                         // Warn the user about this and ask if they want to fix it.
                         log.Debug("VM is not agile, but protected", exn);
                         _WarningDialogHAInvalidConfig(VM,IsStart);
-                        new HAUnprotectVMAction(VM).RunExternal(Session);
+                        new HAUnprotectVMAction(VM).RunSync(Session);
                     }
                 }
 

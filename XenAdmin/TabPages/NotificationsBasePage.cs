@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,13 +29,22 @@
  */
 
 
+using System;
 using System.Windows.Forms;
+using XenAdmin.Controls.MainWindowControls;
 using XenAdmin.Help;
 
 namespace XenAdmin.TabPages
 {
     public class NotificationsBasePage : UserControl, IControlWithHelp
     {
+        public event Action FiltersChanged;
+
+        protected void OnFiltersChanged()
+        {
+            FiltersChanged?.Invoke();
+        }
+
         protected virtual void RefreshPage()
         { }
 
@@ -59,6 +67,10 @@ namespace XenAdmin.TabPages
             DeregisterEventHandlers();
         }
 
+        public virtual NotificationsSubMode NotificationsSubMode { get; }
+
         public virtual string HelpID => "";
+
+        public virtual bool FilterIsOn => false;
     }
 }

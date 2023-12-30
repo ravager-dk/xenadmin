@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -28,12 +27,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
  * SUCH DAMAGE.
  */
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace XenAdmin.Core
 {
@@ -81,12 +74,6 @@ namespace XenAdmin.Core
             { return Registry.HiddenFeatures != null && Registry.HiddenFeatures.Contains(COPYRIGHT_HIDDEN); }
         }
 
-        internal static bool HealthCheckHidden
-        {
-            get
-            { return Registry.HiddenFeatures != null && Registry.HiddenFeatures.Contains(HEALTH_CHECK_HIDDEN); }
-        }
-
         internal static bool UploadOptionHidden
         {
             get
@@ -117,7 +104,6 @@ namespace XenAdmin.Core
         private const string TOOL_STRIP_MENU_ITEM_HIDDEN = "tool_strip_menu_item";
         private const string CROSS_SERVER_PRIVATE_NETWORK_HIDDEN = "cross_server_private_network";
         private const string COPYRIGHT_HIDDEN = "copyright";
-        private const string HEALTH_CHECK_HIDDEN = "health_check";
         private const string UPLOAD_OPTION_HIDDEN = "upload_option";
         private const string LICENSE_NAG = "license_nag";
         private const string LICENSE_OPERATIONS_HIDDEN = "license_operations";

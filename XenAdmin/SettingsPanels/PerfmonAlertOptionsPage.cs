@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,37 +29,31 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
 using XenAPI;
-using XenAdmin;
-using XenAdmin.SettingsPanels;
-using XenAdmin.Alerts;
-using XenAdmin.Network;
 using XenAdmin.Actions;
 using XenAdmin.Core;
+using XenCenterLib;
 
 
 namespace XenAdmin.SettingsPanels
 {
     public partial class PerfmonAlertOptionsPage : UserControl, IEditPage
     {
-        private IXenObject _XenModelObject;
-        private PerfmonOptionsDefinition _PerfmonOptions;
+        // match anything with an @ sign in the middle
+        private static readonly Regex emailRegex = new Regex(@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", RegexOptions.IgnoreCase);
 
-        private bool _OrigEmailNotificationCheckBox;
-        private string _OrigEmailAddressTextBox;
-        private string _OrigSmtpServerAddrTextBox;
-        private string _OrigSmtpServerPortTextBox;
-        private string _OrigMailLanguageCode;
-        private bool _bSupportMailLanguage;
+        private IXenObject _XenModelObject;
+
+        private bool _origEmailNotificationCheckBox;
+        private string _origEmailAddressTextBox;
+        private string _origSmtpServerAddrTextBox;
+        private string _origSmtpServerPortTextBox;
+        private int _origMailLanguageIndex;
 
         private readonly ToolTip InvalidParamToolTip;
 
@@ -70,150 +63,147 @@ namespace XenAdmin.SettingsPanels
 
             Text = Messages.EMAIL_OPTIONS;
 
-            InvalidParamToolTip = new ToolTip();
-            InvalidParamToolTip.IsBalloon = true;
-            InvalidParamToolTip.ToolTipIcon = ToolTipIcon.Warning;
-            InvalidParamToolTip.ToolTipTitle = Messages.INVALID_PARAMETER;
-
-            MailLanguageComboBox.DataSource = new BindingSource(PerfmonOptionsDefinition.MailLanguageDataSource(), null);
-            MailLanguageComboBox.DisplayMember = "Value";
-            MailLanguageComboBox.ValueMember = "Key";
-
-            EmailNotificationCheckBox_CheckedChanged(null, null);
-        }
-
-        public String SubText
-        {
-            get
+            InvalidParamToolTip = new ToolTip
             {
-                if (!EmailNotificationCheckBox.Checked)
-                    return Messages.NONE_DEFINED;
+                IsBalloon = true,
+                ToolTipIcon = ToolTipIcon.Warning,
+                ToolTipTitle = Messages.INVALID_PARAMETER
+            };
 
-                return EmailAddressTextBox.Text;
-            }
+            MailLanguageComboBox.Items.Add(new ToStringWrapper<string>(Messages.MAIL_LANGUAGE_ENGLISH_CODE, Messages.MAIL_LANGUAGE_ENGLISH_NAME));
+            MailLanguageComboBox.Items.Add(new ToStringWrapper<string>(Messages.MAIL_LANGUAGE_CHINESE_CODE, Messages.MAIL_LANGUAGE_CHINESE_NAME));
+            MailLanguageComboBox.Items.Add(new ToStringWrapper<string>(Messages.MAIL_LANGUAGE_JAPANESE_CODE, Messages.MAIL_LANGUAGE_JAPANESE_NAME));
         }
 
-        public Image Image
-        {
-            get
-            {
-                return Properties.Resources._000_Email_h32bit_16;
-            }
-        }
+        public string SubText => EmailNotificationCheckBox.Checked ? EmailAddressTextBox.Text : Messages.NONE_DEFINED;
 
-        // match anything with an @ sign in the middle
-        private static readonly Regex emailRegex = new Regex(@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", RegexOptions.IgnoreCase);
-        public static bool IsValidEmail(string s)
+        public Image Image => Images.StaticImages._000_Email_h32bit_16;
+
+        private static bool IsValidEmail(string s)
         {
             return emailRegex.IsMatch(s);
         }
 
         private bool IsValidSmtpAddress()
         {
-            return !SmtpServerAddrTextBox.Text.ToCharArray().Any((c) => c >= 128) && SmtpServerAddrTextBox.Text.Trim().Length > 0;
-        }
-
-        public void SetMailLanguageComboBoxValue(String code)
-        {
-            if (_bSupportMailLanguage && PerfmonOptionsDefinition.MailLanguageHasCode(code))
-                MailLanguageComboBox.SelectedValue = code;  // Feature supported and code is valid
-            else
-            {
-                // Set default value
-                if (PerfmonOptionsDefinition.MailLanguageHasCode(BrandManager.PerfAlertMailDefaultLanguage))
-                    MailLanguageComboBox.SelectedValue = BrandManager.PerfAlertMailDefaultLanguage;
-                else
-                    MailLanguageComboBox.SelectedIndex = 0;
-            }
+            return !SmtpServerAddrTextBox.Text.ToCharArray().Any(c => c >= 128) && SmtpServerAddrTextBox.Text.Trim().Length > 0;
         }
 
         public void SetXenObjects(IXenObject orig, IXenObject clone)
         {
             _XenModelObject = clone;
 
-            _bSupportMailLanguage = Helpers.InvernessOrGreater(_XenModelObject.Connection);
-
-            Repopulate();
+            Populate();
 
             // Save original settings for change detection
-            _OrigEmailNotificationCheckBox = EmailNotificationCheckBox.Checked;
-            _OrigEmailAddressTextBox = EmailAddressTextBox.Text;
-            _OrigSmtpServerAddrTextBox = SmtpServerAddrTextBox.Text;
-            _OrigSmtpServerPortTextBox = SmtpServerPortTextBox.Text;
+            _origEmailNotificationCheckBox = EmailNotificationCheckBox.Checked;
+            _origEmailAddressTextBox = EmailAddressTextBox.Text;
+            _origSmtpServerAddrTextBox = SmtpServerAddrTextBox.Text;
+            _origSmtpServerPortTextBox = SmtpServerPortTextBox.Text;
+            _origMailLanguageIndex = MailLanguageComboBox.SelectedIndex;
         }
-        public void Repopulate()
+
+        private void Populate()
         {
-            if (_XenModelObject == null)
+            var pool = Helpers.GetPoolOfOne(_XenModelObject?.Connection);
+            if (pool == null)
                 return;
-            try
+
+            pool.other_config.TryGetValue(Pool.MAIL_DESTINATION_KEY_NAME, out var mailDestination);
+            pool.other_config.TryGetValue(Pool.SMTP_MAILHUB_KEY_NAME, out var mailHub);
+            pool.other_config.TryGetValue(Pool.MAIL_LANGUAGE_KEY_NAME, out var mailLanguageCode);
+
+            EmailNotificationCheckBox.Checked = !string.IsNullOrWhiteSpace(mailDestination) && !string.IsNullOrWhiteSpace(mailHub);
+
+            if (!string.IsNullOrWhiteSpace(mailDestination))
+                EmailAddressTextBox.Text = mailDestination.Trim();
+
+            if (!string.IsNullOrWhiteSpace(mailHub))
             {
-                MailLanguageLabel.Visible = MailLanguageComboBox.Visible = _bSupportMailLanguage;
+                string[] words = mailHub.Trim().Split(':');
 
-                _PerfmonOptions = PerfmonOptionsDefinition.GetPerfmonOptionsDefinitions(_XenModelObject);
-                if (_PerfmonOptions != null)
-                {
-                    EmailNotificationCheckBox.Checked = true;
-                    EmailAddressTextBox.Text = _PerfmonOptions.MailDestination;
-                    SmtpServerAddrTextBox.Text = PerfmonOptionsDefinition.GetSmtpServerAddress(_PerfmonOptions.MailHub);
-                    SmtpServerPortTextBox.Text = PerfmonOptionsDefinition.GetSmtpPort(_PerfmonOptions.MailHub);
-
-                    SetMailLanguageComboBoxValue(_PerfmonOptions.MailLanguageCode);
-                    if (_bSupportMailLanguage)  // Save original MailLanguageCode for change detection
-                        _OrigMailLanguageCode = _PerfmonOptions.MailLanguageCode;
-                    else
-                        _OrigMailLanguageCode = null;
-                }
-                else
-                {
-                    SetMailLanguageComboBoxValue(null);
-                    _OrigMailLanguageCode = null;
-                }
+                if (words.Length > 0)
+                    SmtpServerAddrTextBox.Text = words[0];
+                
+                if (words.Length > 1)
+                    SmtpServerPortTextBox.Text = words[1];
             }
-            catch { }
-        } // Repopulate()
 
-        public bool HasChanged
-        {
-            get
-            {
-                return ((_OrigEmailNotificationCheckBox != EmailNotificationCheckBox.Checked) ||
-                        (_OrigEmailAddressTextBox != EmailAddressTextBox.Text) ||
-                        (_OrigSmtpServerAddrTextBox != SmtpServerAddrTextBox.Text) ||
-                        (_OrigSmtpServerPortTextBox != SmtpServerPortTextBox.Text) ||
-                        (_bSupportMailLanguage && _OrigMailLanguageCode != MailLanguageComboBox.SelectedValue.ToString()));
-            }
+            bool isLangSupported = Helpers.InvernessOrGreater(pool.Connection);
+
+            MailLanguageLabel.Visible = MailLanguageComboBox.Visible = isLangSupported;
+
+            int index = -1;
+            
+            if (isLangSupported && !string.IsNullOrWhiteSpace(mailLanguageCode))
+                index = IndexOfLangItem(mailLanguageCode.Trim());
+
+            if (index == -1)
+                index = IndexOfLangItem(BrandManager.PerfAlertMailDefaultLanguage);
+
+            if (index == -1)
+                index = 0;
+
+            MailLanguageComboBox.SelectedIndex = index;
         }
+
+        private int IndexOfLangItem(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return -1;
+
+            for (var index = 0; index < MailLanguageComboBox.Items.Count; index++)
+            {
+                var obj = MailLanguageComboBox.Items[index];
+                if (obj is ToStringWrapper<string> wrapper && wrapper.item.ToLower() == code.ToLower())
+                    return index;
+            }
+
+            return -1;
+        }
+
+        public bool HasChanged =>
+            _origEmailNotificationCheckBox != EmailNotificationCheckBox.Checked ||
+            _origEmailAddressTextBox != EmailAddressTextBox.Text ||
+            _origSmtpServerAddrTextBox != SmtpServerAddrTextBox.Text ||
+            _origSmtpServerPortTextBox != SmtpServerPortTextBox.Text ||
+            _origMailLanguageIndex != MailLanguageComboBox.SelectedIndex;
 
         public void ShowLocalValidationMessages()
         {
             if (!IsValidEmail(EmailAddressTextBox.Text))
             {
-                HelpersGUI.ShowBalloonMessage(EmailAddressTextBox, Messages.INVALID_PARAMETER, InvalidParamToolTip);
+                HelpersGUI.ShowBalloonMessage(EmailAddressTextBox, InvalidParamToolTip, Messages.INVALID_PARAMETER);
             }
             else if (!IsValidSmtpAddress())
             {
-                HelpersGUI.ShowBalloonMessage(SmtpServerAddrTextBox, Messages.INVALID_PARAMETER, InvalidParamToolTip);
+                HelpersGUI.ShowBalloonMessage(SmtpServerAddrTextBox, InvalidParamToolTip, Messages.INVALID_PARAMETER);
             }
             else if (!Util.IsValidPort(SmtpServerPortTextBox.Text))
             {
-                HelpersGUI.ShowBalloonMessage(SmtpServerPortTextBox, Messages.INVALID_PARAMETER, InvalidParamToolTip);
+                HelpersGUI.ShowBalloonMessage(SmtpServerPortTextBox, InvalidParamToolTip, Messages.INVALID_PARAMETER);
             }
         }
 
-        public bool ValidToSave
+        public void HideLocalValidationMessages()
         {
-            get
+            if (EmailAddressTextBox != null)
             {
-                if (EmailNotificationCheckBox.Checked)
-                {
-                    return IsValidEmail(EmailAddressTextBox.Text) && Util.IsValidPort(SmtpServerPortTextBox.Text) && IsValidSmtpAddress();
-                }
-                else
-                {
-                    return true;
-                }
+                InvalidParamToolTip.Hide(EmailAddressTextBox);
+            }
+            if (SmtpServerAddrTextBox != null)
+            {
+                InvalidParamToolTip.Hide(SmtpServerAddrTextBox);
+            }
+            if (SmtpServerPortTextBox != null)
+            {
+                InvalidParamToolTip.Hide(SmtpServerPortTextBox);
             }
         }
+
+        public bool ValidToSave =>
+            !EmailNotificationCheckBox.Checked ||
+            IsValidEmail(EmailAddressTextBox.Text) && Util.IsValidPort(SmtpServerPortTextBox.Text) && IsValidSmtpAddress();
 
         public void Cleanup()
         {
@@ -222,25 +212,21 @@ namespace XenAdmin.SettingsPanels
 
         public AsyncAction SaveSettings()
         {
-            PerfmonOptionsDefinition perfmonOptions = null; // a null value will clear the definitions
+            // a null value will clear the definitions
+            string mailDestination = null;
+            string mailHub = null;
+            string mailLangCode = null;
+
             if (EmailNotificationCheckBox.Checked)
             {
-                string smtpMailHub = SmtpServerAddrTextBox.Text + ":" + SmtpServerPortTextBox.Text;
-                string mailLanguageCode = null;
-                if (_bSupportMailLanguage && null != MailLanguageComboBox.SelectedValue)
-                    mailLanguageCode = MailLanguageComboBox.SelectedValue.ToString();
-                perfmonOptions = new PerfmonOptionsDefinition(smtpMailHub, EmailAddressTextBox.Text, mailLanguageCode);
+                mailDestination = EmailAddressTextBox.Text;
+                mailHub = SmtpServerAddrTextBox.Text + ":" + SmtpServerPortTextBox.Text;
+
+                if (MailLanguageComboBox.Visible && MailLanguageComboBox.SelectedItem is ToStringWrapper<string> stringWrapper && !string.IsNullOrEmpty(stringWrapper.item))
+                    mailLangCode = stringWrapper.item;
             }
 
-            return new PerfmonOptionsDefinitionAction(_XenModelObject.Connection, perfmonOptions, true);
-        }
-
-        private void EmailNotificationCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            EmailAddressTextBox.Enabled = EmailNotificationCheckBox.Checked;
-            SmtpServerAddrTextBox.Enabled = EmailNotificationCheckBox.Checked;
-            SmtpServerPortTextBox.Enabled = EmailNotificationCheckBox.Checked;
-            MailLanguageComboBox.Enabled = EmailNotificationCheckBox.Checked;
+            return new PerfmonOptionsDefinitionAction(_XenModelObject.Connection, mailDestination, mailHub, mailLangCode, true);
         }
     }
 }

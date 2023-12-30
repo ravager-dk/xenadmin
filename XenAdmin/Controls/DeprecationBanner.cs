@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -48,24 +47,22 @@ namespace XenAdmin.Controls
         public Type BannerType { private get; set; }
         public string FeatureName { private get; set; }
         public string AppliesToVersion { private get; set; }
-        public string LinkText { set { helperLink.Text = value; } }
+        public string WarningMessage { private get; set; }
+        public string LinkText { set => helperLink.Text = value; }
         public Uri LinkUri { set; private get; }
-        public bool HelperLinkVisible { set { helperLink.Visible = value; } }
-        public Color BackgroundColour { set; private get; }
-        private readonly Color defaultBackgroundColour = Color.LemonChiffon;
+        public bool HelperLinkVisible { set => helperLink.Visible = value; }
 
         public DeprecationBanner()
         {
             InitializeComponent();
-            HelperLinkVisible = !XenAdmin.Core.HiddenFeatures.LinkLabelHidden;
+            HelperLinkVisible = !Core.HiddenFeatures.LinkLabelHidden;
+            LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
             Visible = false;
-            helperLink.Click += helperLink_Click;
-            BackgroundColour = defaultBackgroundColour;
         }
 
         private void helperLink_Click(object sender, EventArgs e)
         {
-            if(LinkUri == null)
+            if (LinkUri == null)
                 return;
 
             try
@@ -74,15 +71,8 @@ namespace XenAdmin.Controls
             }
             catch (Exception)
             {
-                using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(
-                        SystemIcons.Error,
-                        string.Format(Messages.COULD_NOT_OPEN_URL,
-                                      LinkUri.AbsoluteUri),
-                        Messages.XENCENTER)))
-                {
+                using (var dlg = new ErrorDialog(string.Format(Messages.COULD_NOT_OPEN_URL, LinkUri.AbsoluteUri)))
                     dlg.ShowDialog(Program.MainWindow);
-                }
             }
         }
 
@@ -90,29 +80,33 @@ namespace XenAdmin.Controls
         {
             set
             {
-                BackColor = BackgroundColour;
-                SetMessageText();
+                if (value)
+                {
+                    SetMessageText();
+                    BackColor = BannerType == Type.Removal ? Color.LightCoral : Color.LemonChiffon;
+                }
+
                 base.Visible = value;
             }
         }
 
         private void SetMessageText()
         {
-            if (BannerType == Type.Deprecation)
-            {
-                message.Text = String.Format(Messages.X_IS_DEPRECATED_IN_X, FeatureName, AppliesToVersion);
-                return;
-            }
-                
-            
-            if (BannerType == Type.Removal)
-            {
-                message.Text = String.Format(Messages.X_IS_REMOVED_IN_X, FeatureName, AppliesToVersion);
-                return;
-            } 
-            
-            message.Text = String.Empty;
+            if (!string.IsNullOrEmpty(WarningMessage))
+                message.Text = WarningMessage;
+            else
+                switch (BannerType)
+                {
+                    case Type.Deprecation:
+                        message.Text = string.Format(Messages.X_IS_DEPRECATED_IN_X, FeatureName, AppliesToVersion);
+                        break;
+                    case Type.Removal:
+                        message.Text = string.Format(Messages.X_IS_REMOVED_IN_X, FeatureName, AppliesToVersion);
+                        break;
+                    default:
+                        message.Text = string.Empty;
+                        break;
+                }
         }
-
     }
 }

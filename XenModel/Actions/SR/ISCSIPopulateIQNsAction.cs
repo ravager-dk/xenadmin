@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -114,7 +113,7 @@ namespace XenAdmin.Actions
         {
             Pool pool = Helpers.GetPoolOfOne(Connection);
             if (pool == null)
-                throw new Failure(Failure.INTERNAL_ERROR, Messages.POOL_GONE);
+                throw new Failure(Failure.INTERNAL_ERROR, string.Format(Messages.POOL_GONE, BrandManager.BrandConsole));
 
             Dictionary<string, string> settings = new Dictionary<string, string>();
             settings["target"] = targetHost;
@@ -214,7 +213,7 @@ namespace XenAdmin.Actions
         {
             Pool pool = Helpers.GetPoolOfOne(Connection);
             if (pool == null)
-                throw new Failure(Failure.INTERNAL_ERROR, Messages.POOL_GONE);
+                throw new Failure(Failure.INTERNAL_ERROR, string.Format(Messages.POOL_GONE, BrandManager.BrandConsole));
             var deviceConfig = new Dictionary<string, string>();
             deviceConfig["provider"] = "iscsi";
             deviceConfig["target"] = targetHost;
@@ -225,8 +224,25 @@ namespace XenAdmin.Actions
                 deviceConfig["chappassword"] = chapPassword;
             }
 
-            var probeResults = SR.probe_ext(Session, pool.master.opaque_ref,
-                     deviceConfig, SR.SRTypes.gfs2.ToString(), new Dictionary<string, string>());
+            List<Probe_result> probeResults;
+            try
+            {
+                probeResults = SR.probe_ext(Session, pool.master.opaque_ref,
+                    deviceConfig, SR.SRTypes.gfs2.ToString(), new Dictionary<string, string>());
+            }
+            catch (Failure f)
+            {
+                //this will probably not happen for this scan, but be defensive
+                if (f.ErrorDescription.Count > 1 && f.ErrorDescription[0] == "ISCSILogin")
+                {
+                    if (deviceConfig.ContainsKey("chapuser") && deviceConfig.ContainsKey("chappassword"))
+                        throw new Exception(Messages.ACTION_ISCSI_IQN_SCANNING_GFS2);
+                    
+                    throw new Failure("SR_BACKEND_FAILURE_68");
+                }
+
+                throw;
+            }
 
             var results = new List<IScsiIqnInfo>();
             var index = -1;

@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,14 +30,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using XenAPI;
-using System.Collections;
-using XenAdmin.Properties;
 using XenAdmin.Actions;
 using XenCenterLib;
 using XenAdmin.Core;
@@ -50,9 +44,7 @@ namespace XenAdmin.SettingsPanels
 	{
 		#region Private fields
 		private VM vm;
-        private Pool pool;
-        private bool clusteringEnabled;
-        private bool bootFromCD;
+		private bool bootFromCD;
 		#endregion
 
 		public BootOptionsEditPage()
@@ -70,6 +62,12 @@ namespace XenAdmin.SettingsPanels
 		/// </summary>
 		public void ShowLocalValidationMessages()
 		{ }
+
+		/// <summary>
+		/// Hide local validation balloon tooltips
+		/// </summary>
+		public void HideLocalValidationMessages()
+        { }
 
 		/// <summary>
 		/// Unregister listeners, dispose balloon tooltips, etc.
@@ -178,13 +176,7 @@ namespace XenAdmin.SettingsPanels
 			}
 		}
 
-		public Image Image
-		{
-			get
-			{
-				return Resources._001_PowerOn_h32bit_16;
-			}
-		}
+        public Image Image => Images.StaticImages._001_PowerOn_h32bit_16;
 
 		#endregion
 

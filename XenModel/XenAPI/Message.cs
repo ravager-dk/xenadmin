@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Newtonsoft.Json;
 
 
@@ -80,54 +80,21 @@ namespace XenAPI
             UpdateFrom(table);
         }
 
-        /// <summary>
-        /// Creates a new Message from a Proxy_Message.
-        /// </summary>
-        /// <param name="proxy"></param>
-        public Message(Proxy_Message proxy)
-        {
-            UpdateFrom(proxy);
-        }
-
         #endregion
 
         /// <summary>
         /// Updates each field of this instance with the value of
         /// the corresponding field of a given Message.
         /// </summary>
-        public override void UpdateFrom(Message update)
+        public override void UpdateFrom(Message record)
         {
-            uuid = update.uuid;
-            name = update.name;
-            priority = update.priority;
-            cls = update.cls;
-            obj_uuid = update.obj_uuid;
-            timestamp = update.timestamp;
-            body = update.body;
-        }
-
-        internal void UpdateFrom(Proxy_Message proxy)
-        {
-            uuid = proxy.uuid == null ? null : proxy.uuid;
-            name = proxy.name == null ? null : proxy.name;
-            priority = proxy.priority == null ? 0 : long.Parse(proxy.priority);
-            cls = proxy.cls == null ? (cls) 0 : (cls)Helper.EnumParseDefault(typeof(cls), (string)proxy.cls);
-            obj_uuid = proxy.obj_uuid == null ? null : proxy.obj_uuid;
-            timestamp = proxy.timestamp;
-            body = proxy.body == null ? null : proxy.body;
-        }
-
-        public Proxy_Message ToProxy()
-        {
-            Proxy_Message result_ = new Proxy_Message();
-            result_.uuid = uuid ?? "";
-            result_.name = name ?? "";
-            result_.priority = priority.ToString();
-            result_.cls = cls_helper.ToString(cls);
-            result_.obj_uuid = obj_uuid ?? "";
-            result_.timestamp = timestamp;
-            result_.body = body ?? "";
-            return result_;
+            uuid = record.uuid;
+            name = record.name;
+            priority = record.priority;
+            cls = record.cls;
+            obj_uuid = record.obj_uuid;
+            timestamp = record.timestamp;
+            body = record.body;
         }
 
         /// <summary>
@@ -161,22 +128,13 @@ namespace XenAPI
             if (ReferenceEquals(this, other))
                 return true;
 
-            return Helper.AreEqual2(this._uuid, other._uuid) &&
-                Helper.AreEqual2(this._name, other._name) &&
-                Helper.AreEqual2(this._priority, other._priority) &&
-                Helper.AreEqual2(this._cls, other._cls) &&
-                Helper.AreEqual2(this._obj_uuid, other._obj_uuid) &&
-                Helper.AreEqual2(this._timestamp, other._timestamp) &&
-                Helper.AreEqual2(this._body, other._body);
-        }
-
-        internal static List<Message> ProxyArrayToObjectList(Proxy_Message[] input)
-        {
-            var result = new List<Message>();
-            foreach (var item in input)
-                result.Add(new Message(item));
-
-            return result;
+            return Helper.AreEqual2(_uuid, other._uuid) &&
+                Helper.AreEqual2(_name, other._name) &&
+                Helper.AreEqual2(_priority, other._priority) &&
+                Helper.AreEqual2(_cls, other._cls) &&
+                Helper.AreEqual2(_obj_uuid, other._obj_uuid) &&
+                Helper.AreEqual2(_timestamp, other._timestamp) &&
+                Helper.AreEqual2(_body, other._body);
         }
 
         public override string SaveChanges(Session session, string opaqueRef, Message server)
@@ -191,6 +149,7 @@ namespace XenAPI
               throw new InvalidOperationException("This type has no read/write properties");
             }
         }
+
         /// <summary>
         /// 
         /// First published in XenServer 5.0.
@@ -203,10 +162,7 @@ namespace XenAPI
         /// <param name="_body">The body of the message</param>
         public static XenRef<Message> create(Session session, string _name, long _priority, cls _cls, string _obj_uuid, string _body)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_create(session.opaque_ref, _name, _priority, _cls, _obj_uuid, _body);
-            else
-                return XenRef<Message>.Create(session.XmlRpcProxy.message_create(session.opaque_ref, _name ?? "", _priority.ToString(), cls_helper.ToString(_cls), _obj_uuid ?? "", _body ?? "").parse());
+            return session.JsonRpcClient.message_create(session.opaque_ref, _name, _priority, _cls, _obj_uuid, _body);
         }
 
         /// <summary>
@@ -217,10 +173,29 @@ namespace XenAPI
         /// <param name="_message">The opaque_ref of the given message</param>
         public static void destroy(Session session, string _message)
         {
-            if (session.JsonRpcClient != null)
-                session.JsonRpcClient.message_destroy(session.opaque_ref, _message);
-            else
-                session.XmlRpcProxy.message_destroy(session.opaque_ref, _message ?? "").parse();
+            session.JsonRpcClient.message_destroy(session.opaque_ref, _message);
+        }
+
+        /// <summary>
+        /// 
+        /// Experimental. First published in 22.19.0.
+        /// </summary>
+        /// <param name="session">The session</param>
+        /// <param name="_messages">Messages to destroy</param>
+        public static void destroy_many(Session session, List<XenRef<Message>> _messages)
+        {
+            session.JsonRpcClient.message_destroy_many(session.opaque_ref, _messages);
+        }
+
+        /// <summary>
+        /// 
+        /// Experimental. First published in 22.19.0.
+        /// </summary>
+        /// <param name="session">The session</param>
+        /// <param name="_messages">Messages to destroy</param>
+        public static XenRef<Task> async_destroy_many(Session session, List<XenRef<Message>> _messages)
+        {
+          return session.JsonRpcClient.async_message_destroy_many(session.opaque_ref, _messages);
         }
 
         /// <summary>
@@ -233,10 +208,7 @@ namespace XenAPI
         /// <param name="_since">The cutoff time</param>
         public static Dictionary<XenRef<Message>, Message> get(Session session, cls _cls, string _obj_uuid, DateTime _since)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_get(session.opaque_ref, _cls, _obj_uuid, _since);
-            else
-                return XenRef<Message>.Create<Proxy_Message>(session.XmlRpcProxy.message_get(session.opaque_ref, cls_helper.ToString(_cls), _obj_uuid ?? "", _since).parse());
+            return session.JsonRpcClient.message_get(session.opaque_ref, _cls, _obj_uuid, _since);
         }
 
         /// <summary>
@@ -246,10 +218,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static List<XenRef<Message>> get_all(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_get_all(session.opaque_ref);
-            else
-                return XenRef<Message>.Create(session.XmlRpcProxy.message_get_all(session.opaque_ref).parse());
+            return session.JsonRpcClient.message_get_all(session.opaque_ref);
         }
 
         /// <summary>
@@ -260,10 +229,7 @@ namespace XenAPI
         /// <param name="_since">The cutoff time</param>
         public static Dictionary<XenRef<Message>, Message> get_since(Session session, DateTime _since)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_get_since(session.opaque_ref, _since);
-            else
-                return XenRef<Message>.Create<Proxy_Message>(session.XmlRpcProxy.message_get_since(session.opaque_ref, _since).parse());
+            return session.JsonRpcClient.message_get_since(session.opaque_ref, _since);
         }
 
         /// <summary>
@@ -274,10 +240,7 @@ namespace XenAPI
         /// <param name="_message">The opaque_ref of the given message</param>
         public static Message get_record(Session session, string _message)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_get_record(session.opaque_ref, _message);
-            else
-                return new Message(session.XmlRpcProxy.message_get_record(session.opaque_ref, _message ?? "").parse());
+            return session.JsonRpcClient.message_get_record(session.opaque_ref, _message);
         }
 
         /// <summary>
@@ -288,10 +251,7 @@ namespace XenAPI
         /// <param name="_uuid">The uuid of the message</param>
         public static XenRef<Message> get_by_uuid(Session session, string _uuid)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_get_by_uuid(session.opaque_ref, _uuid);
-            else
-                return XenRef<Message>.Create(session.XmlRpcProxy.message_get_by_uuid(session.opaque_ref, _uuid ?? "").parse());
+            return session.JsonRpcClient.message_get_by_uuid(session.opaque_ref, _uuid);
         }
 
         /// <summary>
@@ -301,10 +261,7 @@ namespace XenAPI
         /// <param name="session">The session</param>
         public static Dictionary<XenRef<Message>, Message> get_all_records(Session session)
         {
-            if (session.JsonRpcClient != null)
-                return session.JsonRpcClient.message_get_all_records(session.opaque_ref);
-            else
-                return XenRef<Message>.Create<Proxy_Message>(session.XmlRpcProxy.message_get_all_records(session.opaque_ref).parse());
+            return session.JsonRpcClient.message_get_all_records(session.opaque_ref);
         }
 
         /// <summary>

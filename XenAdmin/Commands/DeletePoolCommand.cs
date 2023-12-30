@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using XenAdmin.Actions;
 using XenAPI;
 using XenAdmin.Network;
 using XenAdmin.Dialogs;
-using System.Drawing;
 using System.Linq;
 
 
@@ -63,7 +61,7 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             IXenConnection conn = selection[0].Connection;
 
@@ -77,20 +75,15 @@ namespace XenAdmin.Commands
 
             if (msg != null)
             {
-                using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Exclamation,
-                    string.Format(msg, pool.Name()), Messages.XENCENTER)))
-                {
+                using (var dlg = new WarningDialog(string.Format(msg, pool.Name())))
                     dlg.ShowDialog(Program.MainWindow);
-                }
                 return;
             }
 
             if (conn.Cache.HostCount > 1)
             {
-                using (var dlg = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Exclamation, Messages.MESSAGEBOX_SLAVES_EJECT, Messages.XENCENTER)))
-                {
+                using (var dlg = new WarningDialog(Messages.MESSAGEBOX_POOL_MEMBERS_EJECT))
                     dlg.ShowDialog(Program.MainWindow);
-                } 
                 return;
             }
 
@@ -100,7 +93,7 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (selection.Count == 1)
             {

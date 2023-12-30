@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,9 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAdmin;
-using XenAdmin.Core;
 using XenAdmin.Network;
 
 
@@ -43,6 +39,7 @@ namespace XenAPI
     {
         public const string CANNOT_EVACUATE_HOST = "CANNOT_EVACUATE_HOST";
         public const string DEVICE_ALREADY_DETACHED = "DEVICE_ALREADY_DETACHED";
+        public const string DYNAMIC_MEMORY_CONTROL_UNAVAILABLE = "DYNAMIC_MEMORY_CONTROL_UNAVAILABLE";
         public const string HANDLE_INVALID = "HANDLE_INVALID";
         public const string HA_NO_PLAN = "HA_NO_PLAN";
         public const string HA_OPERATION_WOULD_BREAK_FAILOVER_PLAN = "HA_OPERATION_WOULD_BREAK_FAILOVER_PLAN";
@@ -93,7 +90,9 @@ namespace XenAPI
         public const string PATCH_ALREADY_APPLIED = "PATCH_ALREADY_APPLIED";
         public const string UPDATE_ALREADY_APPLIED = "UPDATE_ALREADY_APPLIED";
         public const string UPDATE_ALREADY_EXISTS = "UPDATE_ALREADY_EXISTS";
+        public const string UPDATES_REQUIRE_RECOMMENDED_GUIDANCE = "UPDATES_REQUIRE_RECOMMENDED_GUIDANCE";
         public const string MEMORY_CONSTRAINT_VIOLATION = "MEMORY_CONSTRAINT_VIOLATION";
+        public const string VIF_NOT_IN_MAP = "VIF_NOT_IN_MAP";
 
         /// <summary>
         /// Changes a techy RBAC Failure into a pretty print one that shows the roles that would be required to complete the failed action.
@@ -109,33 +108,8 @@ namespace XenAPI
             // Current Role(s)
             failure.ErrorDescription[1] = Session.FriendlyRoleDescription();
             // Authorized roles
-            failure.ErrorDescription[2] = Role.FriendlyCSVRoleList(authRoles);
-            failure.Setup();
-        }
-
-        /// <summary>
-        /// This overload is for the special case of us doing an action over multiple connections. Assumes the role requirement is the same across all conections.
-        /// </summary>
-        /// <param name="failure">The Failure to update</param>
-        /// <param name="Sessions">One session per connection, the ones used to perform the action. Passed separately because they could be elevated sessions, different to the heartbeat</param>
-        public static void ParseRBACFailure(Failure failure, Session[] Sessions)
-        {
-            List<Role> authRoles = Role.ValidRoleList(failure.ErrorDescription[1], Sessions[0].Connection);
-            failure.ErrorDescription[0] = Failure.RBAC_PERMISSION_DENIED_FRIENDLY;
-            // Current Role(s)
-            StringBuilder sb = new StringBuilder();
-            foreach (Session s in Sessions)
-            {
-                sb.Append(string.Format(Messages.ROLE_ON_CONNECTION, s.FriendlyRoleDescription(), Helpers.GetName(s.Connection).Ellipsise(50)));
-                sb.Append(", ");
-            }
-            string output = sb.ToString();
-            // remove trailing comma and space
-            output = output.Substring(0, output.Length - 2);
-            failure.ErrorDescription[1] = output;
-            // Authorized roles
-            failure.ErrorDescription[2] = Role.FriendlyCSVRoleList(authRoles);
-            failure.Setup();
+            failure.ErrorDescription[2] = Role.FriendlyCsvRoleList(authRoles);
+            failure.ParseExceptionMessage();
         }
     }
 }

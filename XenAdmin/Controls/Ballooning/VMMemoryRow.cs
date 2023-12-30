@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,6 +30,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using XenAPI;
 
@@ -43,28 +43,20 @@ namespace XenAdmin.Controls.Ballooning
             InitializeComponent();
         }
 
-        private List<VM> vms;
-        public List<VM> VMs
-        {
-            get { return vms; }
-        }
+        public List<VM> VMs { get; }
 
         public VMMemoryRow(List<VM> vms, bool expanded)
             : this()
         {
-            this.vms = vms;
-            memoryRowLabel.Initialize(expanded, vms.ToArray());
-            memoryRowLabel.BackColor = Program.TabPageRowHeader;
+            VMs = vms;
+            memoryRowLabel.Initialize(expanded, vms.Cast<IXenObject>().ToArray());
             vmMemoryControls.VMs = vms;
 
             SetHeight();
             Refresh();
         }
 
-        public bool Expanded
-        {
-            get { return memoryRowLabel.MultiLine; }
-        }
+        public bool Expanded => memoryRowLabel.MultiLine;
 
         private void memoryRowLabel_SizeChanged(object sender, EventArgs e)
         {

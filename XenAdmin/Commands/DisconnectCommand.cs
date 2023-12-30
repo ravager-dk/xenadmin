@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,12 +29,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 using XenAdmin.Actions.GUIActions;
 using XenAdmin.Network;
-using System.Collections.ObjectModel;
 using XenAdmin.Actions;
 using System.Windows.Forms;
 using XenAPI;
@@ -69,87 +64,85 @@ namespace XenAdmin.Commands
             _connection = connection;
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return _connection != null && (_connection.IsConnected || _connection.InProgress);
         }
 
         /// <summary>
-        /// Executes this instance.
+        /// Runs this instance.
         /// </summary>
         /// <returns>false if the user cancels the disconnect.</returns>
-        public new bool Execute()
+        public new bool Run()
         {
-            return CanExecute() && Execute(_connection, _prompt);
+            return CanRun() && Run(_connection, _prompt);
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            Execute(_connection, _prompt);
+            Run(_connection, _prompt);
         }
 
-        private bool Execute(IXenConnection connection, bool prompt)
+        private bool Run(IXenConnection connection, bool prompt)
         {
-            if (prompt)
-            {
-                return PromptAndDisconnectServer(connection);
-            }
-            
-            // no prompt. All tasks are cancelled and the server disconnected
-            ConnectionsManager.CancelAllActions(connection);
+            if (!ConfirmCancelRunningActions(MainWindowCommandInterface, Parent, connection, prompt))
+                return false;
+
             DoDisconnect(connection);
             return true;
         }
 
-        /// <summary>
-        /// First prompts the user if there are any actions running, then cancels and d/c if they give the OK.
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns>True if the user agreed to d/c and cancel their tasks, false if we are going to remain connected</returns>
-        private bool PromptAndDisconnectServer(IXenConnection connection)
+        public static bool ConfirmCancelRunningActions(IMainWindow mainWindow, IWin32Window parent, IXenConnection connection, bool prompt)
         {
-            if (!AllActionsFinished(connection, true))
+            if (prompt)
             {
-                if (MainWindowCommandInterface.RunInAutomatedTestMode ||
-                    new CloseXenCenterWarningDialog(connection).ShowDialog(Parent) == DialogResult.OK)
+                if (!AllActionsFinished(connection, true))
                 {
-                    ConnectionsManager.CancelAllActions(connection);
-
-                    DelegatedAsyncAction waitForCancelAction = new DelegatedAsyncAction(connection,
-                        Messages.CANCELING_TASKS, Messages.CANCELING, Messages.COMPLETED,
-                        delegate
-                        {
-                            DateTime startTime = DateTime.Now;
-                            while ((DateTime.Now - startTime).TotalSeconds < 6.0)
-                            {
-                                if (AllActionsFinished(connection, false))
-                                    break;
-
-                                Thread.Sleep(2000);
-                            }
-                        });
-
-                    using (var pd = new ActionProgressDialog(waitForCancelAction, ProgressBarStyle.Marquee))
+                    if (mainWindow.RunInAutomatedTestMode ||
+                        new CloseXenCenterWarningDialog(false, connection).ShowDialog(parent) == DialogResult.OK)
                     {
-                        pd.ShowDialog(Parent);
+                        ConnectionsManager.CancelAllActions(connection);
+
+                        var waitForCancelAction = new DelegatedAsyncAction(connection,
+                            Messages.CANCELING_TASKS, Messages.CANCELING, Messages.COMPLETED,
+                            delegate
+                            {
+                                DateTime startTime = DateTime.Now;
+                                while ((DateTime.Now - startTime).TotalSeconds < 6.0)
+                                {
+                                    if (AllActionsFinished(connection, false))
+                                        break;
+
+                                    Thread.Sleep(2000);
+                                }
+                            });
+
+                        using (var pd = new ActionProgressDialog(waitForCancelAction, ProgressBarStyle.Marquee))
+                            pd.ShowDialog(parent);
+                    }
+                    else
+                    {
+                        return false;
                     }
                 }
-                else
-                {
-                    return false;
-                }
+            }
+            else
+            {
+                // no prompt. All tasks are cancelled and the server disconnected
+                ConnectionsManager.CancelAllActions(connection);
             }
 
-            DoDisconnect(connection);
             return true;
         }
 
         private void DoDisconnect(IXenConnection connection)
         {
             string msg = string.Format(Messages.CONNECTION_CLOSED_NOTICE_TEXT, connection.Hostname);
-            ActionBase notice = new ActionBase(msg, msg, false, true);
-            notice.Pool = Helpers.GetPoolOfOne(connection);
-            notice.Host = Helpers.GetMaster(connection);
+            new DummyAction(msg, msg)
+            {
+                Pool = Helpers.GetPoolOfOne(connection),
+                Host = Helpers.GetCoordinator(connection)
+            }.Run();
             log.Warn($"Connection to {connection.Hostname} closed.");
 
             MainWindowCommandInterface.CloseActiveWizards(connection);
@@ -158,7 +151,7 @@ namespace XenAdmin.Commands
             MainWindowCommandInterface.SaveServerList();
         }
 
-        private bool AllActionsFinished(IXenConnection connection, bool treatCancelingAsFinished)
+        private static bool AllActionsFinished(IXenConnection connection, bool treatCancelingAsFinished)
         {
             foreach (ActionBase action in ConnectionsManager.History)
             {
@@ -167,8 +160,7 @@ namespace XenAdmin.Commands
 
                 if (treatCancelingAsFinished)
                 {
-                    AsyncAction a = action as AsyncAction;
-                    if (a != null && a.Cancelling)
+                    if (action is AsyncAction a && a.Cancelling)
                         continue;
                 }
 

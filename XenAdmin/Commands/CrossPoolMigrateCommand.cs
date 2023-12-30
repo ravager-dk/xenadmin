@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,15 +28,11 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
-using XenAdmin.Network;
-using XenAdmin.Properties;
 using XenAdmin.Wizards.CrossPoolMigrateWizard;
 using XenAdmin.Wizards.CrossPoolMigrateWizard.Filters;
 using XenAPI;
@@ -47,22 +42,20 @@ namespace XenAdmin.Commands
 {
     internal class CrossPoolMigrateCommand : VMOperationCommand
     {
-        private bool _resumeAfter;
-        internal bool _force = false;
+        private readonly Dictionary<string, Dictionary<string, string>> cantRunReasons = new Dictionary<string, Dictionary<string, string>>();
 
-        public CrossPoolMigrateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, bool force)
+        private readonly bool _resumeAfter;
+        protected Host preSelectedHost;
+
+        public CrossPoolMigrateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection)
             : base(mainWindow, selection)
-        {
-            _force = force;
-        }
+        { }
 
-        protected Host preSelectedHost = null;
-        public CrossPoolMigrateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, Host preSelectedHost, bool force, bool resumeAfter=false)
+        public CrossPoolMigrateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, Host preSelectedHost, bool resumeAfter=false)
             : base(mainWindow, selection)
         {
             this.preSelectedHost = preSelectedHost;
             _resumeAfter = resumeAfter;
-            _force = force;
         }
 
         public override string MenuText
@@ -70,101 +63,77 @@ namespace XenAdmin.Commands
             get
             {
                 if (preSelectedHost == null)
-                {
-                    if (_force)
-                        return "Force " + Messages.HOST_MENU_CPM_TEXT;
                     return Messages.HOST_MENU_CPM_TEXT;
-                }
 
-                var cantExecuteReason = CantExecuteReason;
-                return string.IsNullOrEmpty(cantExecuteReason)
+                var cantRunReason = CantRunReason;
+                return string.IsNullOrEmpty(cantRunReason)
                     ? preSelectedHost.Name().EscapeAmpersands()
-                    : string.Format(Messages.MAINWINDOW_CONTEXT_REASON, preSelectedHost.Name().EscapeAmpersands(), cantExecuteReason);
+                    : string.Format(Messages.MAINWINDOW_CONTEXT_REASON, preSelectedHost.Name().EscapeAmpersands(), cantRunReason);
             }
         }
 
-        public override string ContextMenuText { get { return Messages.HOST_MENU_CPM_TEXT; } }
+        public override string ContextMenuText => Messages.HOST_MENU_CPM_TEXT;
 
-        public override Image MenuImage
-        {
-            get { return preSelectedHost == null ? Images.StaticImages._000_MigrateVM_h32bit_16 : Images.StaticImages._000_TreeConnected_h32bit_16; }
-        }
+        public override Image MenuImage => preSelectedHost == null
+            ? Images.StaticImages._000_MigrateVM_h32bit_16
+            : Images.StaticImages._000_TreeConnected_h32bit_16;
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             var con = selection.GetConnectionOfFirstItem();
 
             if (Helpers.FeatureForbidden(con, Host.RestrictCrossPoolMigrate))
             {
-                ShowUpsellDialog(Parent);
+                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_CPM, Parent);
             }
             else
             {
-                var wizard = new CrossPoolMigrateWizard(con, selection, preSelectedHost, WizardMode.Migrate, _force, _resumeAfter);
+                var wizard = new CrossPoolMigrateWizard(con, selection, preSelectedHost, WizardMode.Migrate, _resumeAfter);
                 MainWindowCommandInterface.ShowPerConnectionWizard(con, wizard); 
             }
         }
 
         protected override Host GetHost(VM vm)
         {
-            return Helpers.GetMaster(vm.Connection);
+            return Helpers.GetCoordinator(vm.Connection);
         }
 
-        public static void ShowUpsellDialog(IWin32Window parent)
+        protected override bool CanRun(VM vm)
         {
-            using (var dlg = new UpsellDialog(HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_CPM : Messages.UPSELL_BLURB_CPM + Messages.UPSELL_BLURB_TRIAL,
-                                                InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL))
-                dlg.ShowDialog(parent);
+            var canRun = CanRun(vm, preSelectedHost, out var failureReason, cantRunReasons);
+            CantRunReason = failureReason;
+            return canRun;
         }
 
-        private readonly Dictionary<VM, string> cantExecuteReasons = new Dictionary<VM, string>();
-
-        protected override bool CanExecute(VM vm)
+        public static bool CanRun(VM vm, Host preselectedHost, out string failureReason, Dictionary<string, Dictionary<string, string>> cache = null)
         {
-            if (preSelectedHost == null)
-                return CanExecute(vm, preSelectedHost, _force);
+            if (vm.allowed_operations == null || !vm.allowed_operations.Contains(vm_operations.migrate_send))
+            {
+                failureReason = Messages.MIGRATION_NOT_ALLOWED;
+                return false;
+            }
 
-            var filter = new CrossPoolMigrateCanMigrateFilter(preSelectedHost, new List<VM> {vm}, WizardMode.Migrate, _force);
-            var canExecute = CanExecute(vm, preSelectedHost, _force, filter);
-            if (string.IsNullOrEmpty(filter.Reason))
-                cantExecuteReasons.Remove(vm);
-            else
-                cantExecuteReasons[vm] = filter.Reason;
-            return canExecute;
-        }
-
-        public static bool CanExecute(VM vm, Host preselectedHost, bool force, CrossPoolMigrateCanMigrateFilter filter = null)
-        {
-            bool failureFound = false;
+            if (!vm.SRs().All(sr => sr != null && !sr.HBALunPerVDI()))
+            {
+                failureReason = Messages.MIGRATION_NOT_ALLOWED_USUPPORTED_SR;
+                return false;
+            }
 
             if (preselectedHost != null)
             {
-                failureFound = filter == null 
-                    ? new CrossPoolMigrateCanMigrateFilter(preselectedHost, new List<VM> {vm}, WizardMode.Migrate, force).FailureFound
-                    : filter.FailureFound;
+                var vms = new List<VM> {vm};
+
+                if (new ResidentHostIsSameAsSelectionFilter(preselectedHost, vms).FailureFound(out failureReason))
+                    return false;
+
+                if (new CrossPoolMigrateFilter(preselectedHost, vms, WizardMode.Migrate, cache).FailureFound(out failureReason))
+                    return false;
             }
 
-            return !failureFound &&
-                   vm.allowed_operations != null &&
-                   vm.allowed_operations.Contains(vm_operations.migrate_send) &&
-                   !Helpers.CrossPoolMigrationRestrictedWithWlb(vm.Connection) &&
-                   vm.SRs().ToList().All(sr=> sr != null && !sr.HBALunPerVDI()) &&
-                   (preselectedHost == null || vm.Connection.Resolve(vm.resident_on) != preselectedHost); //Not the same as the pre-selected host
+            failureReason = string.Empty;
+            return true;
         }
 
-        public string CantExecuteReason
-        {
-            get
-            {
-                if (cantExecuteReasons.Count == GetSelection().Count) // none can execute
-                {
-                    var uniqueReasons = cantExecuteReasons.Values.Distinct().ToList();
-
-                    if (uniqueReasons.Count == 1)
-                        return uniqueReasons[0];
-                }
-                return null;
-            }
-        }
+        public string CantRunReason { get; private set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,6 +31,7 @@
 using System.Collections.Generic;
 using XenAPI;
 using XenAdmin.Core;
+using XenAdmin.Dialogs;
 using XenAdmin.Wizards.CrossPoolMigrateWizard;
 
 
@@ -40,11 +40,11 @@ namespace XenAdmin.Commands
     internal class CrossPoolMoveVMCommand : CrossPoolMigrateCommand
     {
         public CrossPoolMoveVMCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection)
-            : this(mainWindow, selection, null, false)
+            : this(mainWindow, selection, null)
         { }
 
-        public CrossPoolMoveVMCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, Host preSelectedHost, bool force)
-            : base(mainWindow, selection, preSelectedHost, force)
+        public CrossPoolMoveVMCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, Host preSelectedHost)
+            : base(mainWindow, selection, preSelectedHost)
         {
         }
 
@@ -53,33 +53,33 @@ namespace XenAdmin.Commands
             get { return Messages.MAINWINDOW_MOVEVM; }
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             var con = selection.GetConnectionOfFirstItem();
 
             if (Helpers.FeatureForbidden(con, Host.RestrictCrossPoolMigrate))
             {
-                ShowUpsellDialog(Parent);
+                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_CPM, Parent);
             }
             else
             {
                 MainWindowCommandInterface.ShowPerConnectionWizard(con,
-                    new CrossPoolMigrateWizard(con, selection, preSelectedHost, GetWizardMode(selection), _force));
+                    new CrossPoolMigrateWizard(con, selection, preSelectedHost, GetWizardMode(selection)));
             }
 
         }
 
-        protected override bool CanExecute(VM vm)
+        protected override bool CanRun(VM vm)
         {
-            return CanExecute(vm, preSelectedHost, _force);
+            return CanRun(vm, preSelectedHost);
         }
 
-        public static bool CanExecute(VM vm, Host preSelectedHost, bool force)
+        public static bool CanRun(VM vm, Host preSelectedHost)
         {
             if (vm == null || vm.is_a_template || vm.Locked || vm.power_state == vm_power_state.Running)
                 return false;
 
-            return CrossPoolMigrateCommand.CanExecute(vm, preSelectedHost, force);
+            return CrossPoolMigrateCommand.CanRun(vm, preSelectedHost, out _);
         }
 
         public static WizardMode GetWizardMode(SelectedItemCollection selection)

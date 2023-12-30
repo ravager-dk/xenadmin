@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,8 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -40,38 +37,29 @@ namespace XenAdmin.Controls.CustomGridView
 {
     public class GridRow : IComparable<GridRow>
     {
-        public readonly Dictionary<String, GridItemBase> Items = new Dictionary<string, GridItemBase>();
-        public readonly List<GridRow> Rows = new List<GridRow>();
+        public Dictionary<string, GridItemBase> Items { get; } = new Dictionary<string, GridItemBase>();
+        public List<GridRow> Rows { get; } = new List<GridRow>();
 
-        public static Image ExpandedImage = Properties.Resources.expanded_triangle;
-        public static Image ShrunkenImage = Properties.Resources.contracted_triangle;
+        private Image Image => Expanded
+            ? Images.StaticImages.expanded_triangle
+            : Images.StaticImages.contracted_triangle;
 
-        public string OpaqueRef;
-        public object Tag;
+        public string OpaqueRef { get; }
+        public object Tag { get; set; }
 
-        public int Priority = -1; // -1 => dont care, 0 => highest
+        public int Priority { get; set; } = -1; // -1 => don't care, 0 => highest
 
-        public readonly Color BackColor;
-        public Pen BorderPen;
+        public RowState State { get; set; } = RowState.Expanded;
 
-        protected RowState state = RowState.Expanded;
+        public int RowHeight { get; set; }
 
-        private readonly int rowHeight;
+        public GridRow ParentRow { get; set; }
 
-        private GridRow parentrow;
         private GridView gridview;
 
-        public GridRow(int rowHeight)
-            : this(rowHeight, SystemColors.Window, null)
+        public GridRow(string opaqueRef = null)
         {
-        }
-
-        public GridRow(int rowHeight, Color BackColor, Pen Borderpen)
-        {
-            this.rowHeight = rowHeight;
-            this.BackColor = BackColor;
-            this.BorderPen = Borderpen;
-            this.Tag = null;
+            OpaqueRef = opaqueRef;
         }
 
         // Set the row's gridview and add the row to the gridview's row list
@@ -92,17 +80,6 @@ namespace XenAdmin.Controls.CustomGridView
             }
         }
 
-        public GridRow ParentRow
-        {
-            get 
-            { 
-                return parentrow; 
-            }
-            set
-            {
-                parentrow = value;
-            }
-        }
 
         public bool Expanded
         {
@@ -130,12 +107,6 @@ namespace XenAdmin.Controls.CustomGridView
                     return;
                 State ^= RowState.Selected;
             }
-        }
-
-        public RowState State
-        {
-            get { return state; }
-            set { state = value; }
         }
 
         // We return the path as a string like "foo::bar::baz". It would be more theoretically
@@ -226,14 +197,6 @@ namespace XenAdmin.Controls.CustomGridView
             row.ParentRow = this;
         }
 
-        public int RowHeight
-        {
-            get
-            {
-                return rowHeight;
-            }
-        }
-
         public int RowAndChildrenHeight
         {
             get
@@ -265,16 +228,11 @@ namespace XenAdmin.Controls.CustomGridView
             if (HasLeftExpander)
             {
                 // paint background
-                using (Brush brush = new SolidBrush(BackColor))
-                {
+                using (Brush brush = new SolidBrush(SystemColors.Window))
                     e.Graphics.FillRectangle(brush, e.Rectangle);
-                }
 
-                if (BorderPen != null)
-                    e.Graphics.DrawRectangle(BorderPen, e.Rectangle);
-
-                Image im = Expanded ? ExpandedImage : ShrunkenImage;
-                e.Graphics.DrawImage(im, e.Rectangle.X + im.Width, e.Rectangle.Y + im.Height, im.Width, im.Height);
+                e.Graphics.DrawImage(Image, e.Rectangle.X + Image.Width,
+                    e.Rectangle.Y + Image.Height, Image.Width, Image.Height);
             }
 
             // paint this row
@@ -395,8 +353,7 @@ namespace XenAdmin.Controls.CustomGridView
         {
             if (HasLeftExpander)
             {
-                Image image = Expanded ? ExpandedImage : ShrunkenImage;
-                Size s = new Size(image.Width * 3, image.Height * 3);
+                Size s = new Size(Image.Width * 3, Image.Height * 3);
                 Rectangle r = new Rectangle(new Point(), s);
 
                 if (r.Contains(point))
@@ -521,11 +478,9 @@ namespace XenAdmin.Controls.CustomGridView
 
         internal void OnMouseMove(Point point)
         {
-
             if (HasLeftExpander)
             {
-                Image image = Expanded ? ExpandedImage : ShrunkenImage;
-                Rectangle r = new Rectangle(image.Width, image.Height, image.Width, image.Height);
+                Rectangle r = new Rectangle(Image.Width, Image.Height, Image.Width, Image.Height);
                 Cursor = r.Contains(point) ? Cursors.Hand : Cursors.Default;
             }
 
@@ -660,34 +615,16 @@ namespace XenAdmin.Controls.CustomGridView
             }
         }
 
-        internal void SaveExpandedState(List<String> state)
-        {
-            if (!Expanded)
-                state.Add(OpaqueRef);
-
-            foreach (GridRow row in Rows)
-                row.SaveExpandedState(state);
-        }
-
-        internal void RestoreExpandedState(List<string> expandedState)
-        {
-            if (Rows.Count > 0 && expandedState.Contains(OpaqueRef))
-                Expanded = false;
-
-            foreach (GridRow row in Rows)
-                row.RestoreExpandedState(expandedState);
-        }
-
         public override bool Equals(object obj)
         {
-            if(!(obj is GridRow))
-                return base.Equals(obj);
-            return OpaqueRef == ((GridRow)obj).OpaqueRef;
+            if (!(obj is GridRow row))
+                return false;
+            return OpaqueRef == row.OpaqueRef;
         }
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return OpaqueRef != null ? OpaqueRef.GetHashCode() : 0;
         }
     }
 

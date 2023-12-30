@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,6 +67,10 @@ namespace XenAPI
         /// This host is the migration target of a VM
         /// </summary>
         vm_migrate,
+        /// <summary>
+        /// Indicates this host is being updated
+        /// </summary>
+        apply_updates,
         unknown
     }
 
@@ -101,6 +104,8 @@ namespace XenAPI
                     return "vm_resume";
                 case host_allowed_operations.vm_migrate:
                     return "vm_migrate";
+                case host_allowed_operations.apply_updates:
+                    return "apply_updates";
                 default:
                     return "unknown";
             }

@@ -41,10 +41,11 @@ namespace XenAdmin.Wizards.PatchingWizard
             this.ColumnExpander = new System.Windows.Forms.DataGridViewImageColumn();
             this.ColumnPoolIconHostCheck = new System.Windows.Forms.DataGridViewImageColumn();
             this.ColumnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnNotes = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label1 = new System.Windows.Forms.Label();
-            this.applyUpdatesCheckBox = new System.Windows.Forms.CheckBox();
             this.buttonSelectAll = new System.Windows.Forms.Button();
+            this.applyUpdatesCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewHosts)).BeginInit();
             this.SuspendLayout();
@@ -55,8 +56,8 @@ namespace XenAdmin.Wizards.PatchingWizard
             this.tableLayoutPanel1.Controls.Add(this.buttonClearAll, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.dataGridViewHosts, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.applyUpdatesCheckBox, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.buttonSelectAll, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.applyUpdatesCheckBox, 0, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // buttonClearAll
@@ -77,6 +78,7 @@ namespace XenAdmin.Wizards.PatchingWizard
             this.ColumnExpander,
             this.ColumnPoolIconHostCheck,
             this.ColumnName,
+            this.ColumnNotes,
             this.ColumnVersion});
             this.tableLayoutPanel1.SetColumnSpan(this.dataGridViewHosts, 2);
             this.dataGridViewHosts.Name = "dataGridViewHosts";
@@ -105,10 +107,14 @@ namespace XenAdmin.Wizards.PatchingWizard
             // 
             // ColumnName
             // 
-            this.ColumnName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.ColumnName.FillWeight = 110.2538F;
             resources.ApplyResources(this.ColumnName, "ColumnName");
             this.ColumnName.Name = "ColumnName";
+            // 
+            // ColumnNotes
+            // 
+            resources.ApplyResources(this.ColumnNotes, "ColumnNotes");
+            this.ColumnNotes.Name = "ColumnNotes";
+            this.ColumnNotes.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // ColumnVersion
             // 
@@ -123,22 +129,20 @@ namespace XenAdmin.Wizards.PatchingWizard
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
-            // applyUpdatesCheckBox
-            // 
-            resources.ApplyResources(this.applyUpdatesCheckBox, "applyUpdatesCheckBox");
-            this.applyUpdatesCheckBox.Checked = true;
-            this.applyUpdatesCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.tableLayoutPanel1.SetColumnSpan(this.applyUpdatesCheckBox, 2);
-            this.applyUpdatesCheckBox.Name = "applyUpdatesCheckBox";
-            this.applyUpdatesCheckBox.UseVisualStyleBackColor = true;
-            this.applyUpdatesCheckBox.CheckedChanged += new System.EventHandler(this.applyUpdatesCheckBox_CheckedChanged);
-            // 
             // buttonSelectAll
             // 
             resources.ApplyResources(this.buttonSelectAll, "buttonSelectAll");
             this.buttonSelectAll.Name = "buttonSelectAll";
             this.buttonSelectAll.UseVisualStyleBackColor = true;
             this.buttonSelectAll.Click += new System.EventHandler(this.buttonSelectAll_Click);
+            // 
+            // applyUpdatesCheckBox
+            // 
+            resources.ApplyResources(this.applyUpdatesCheckBox, "applyUpdatesCheckBox");
+            this.tableLayoutPanel1.SetColumnSpan(this.applyUpdatesCheckBox, 2);
+            this.applyUpdatesCheckBox.Name = "applyUpdatesCheckBox";
+            this.applyUpdatesCheckBox.UseVisualStyleBackColor = true;
+            this.applyUpdatesCheckBox.CheckedChanged += new System.EventHandler(this.applyUpdatesCheckBox_CheckedChanged);
             // 
             // PatchingWizard_SelectServers
             // 
@@ -158,13 +162,14 @@ namespace XenAdmin.Wizards.PatchingWizard
         private Button buttonSelectAll;
         private Button buttonClearAll;
         private TableLayoutPanel tableLayoutPanel1;
-        private CheckBox applyUpdatesCheckBox;
         private PatchingWizard_SelectServers.PatchingHostsDataGridView dataGridViewHosts;
         private DataGridViewCheckBoxColumn ColumnPoolCheckBox;
         private DataGridViewImageColumn ColumnExpander;
         private DataGridViewImageColumn ColumnPoolIconHostCheck;
         private DataGridViewTextBoxColumn ColumnName;
+        private DataGridViewTextBoxColumn ColumnNotes;
         private DataGridViewTextBoxColumn ColumnVersion;
         private Label label1;
+        private CheckBox applyUpdatesCheckBox;
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -45,7 +44,6 @@ namespace XenAdmin.Dialogs
             : base(connection)
         {
             InitializeComponent();
-            Icon = Properties.Resources.AppIcon;
             lblStatus.Text = string.Format(Messages.LABEL_ATTEMPT, connection.Hostname);
         }
 
@@ -90,16 +88,16 @@ namespace XenAdmin.Dialogs
         /// </summary>
         /// <param name="owner">The form that connecting dialogs will be displayed in front of.
         /// May be null, in which case Program.MainWindow is used.</param>
-        /// <param name="initiateMasterSearch">If true, if connection to the master fails we will start trying to connect to
-        /// each remembered slave in turn.</param>
-        internal bool BeginConnect(Form owner, bool initiateMasterSearch)
+        /// <param name="initiateCoordinatorSearch">If true, if connection to the coordinator fails we will start trying to connect to
+        /// each remembered supporter in turn.</param>
+        internal bool BeginConnect(Form owner, bool initiateCoordinatorSearch)
         {
             if (connection is XenConnection conn)
             {
                 ownerForm = owner;
 
                 RegisterEventHandlers();
-                conn.BeginConnect(initiateMasterSearch, HideAndPromptForNewPassword);
+                conn.BeginConnect(initiateCoordinatorSearch, HideAndPromptForNewPassword);
 
                 if (conn.InProgress && !IsDisposed && !Disposing && !Program.Exiting) //CA-328267
                 {

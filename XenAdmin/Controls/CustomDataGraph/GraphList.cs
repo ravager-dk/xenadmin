@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -167,8 +166,8 @@ namespace XenAdmin.Controls.CustomDataGraph
             }
             DataKey newkey =
                 CreateKey(new Point(left - HorizontalScroll.Value, CONTROL_PADDING + y + GRAPH_PADDING));
-            foreach (DataSourceItem item in designedGraph.DataSources)
-                newkey.DataSourceUUIDsToShow.Add(item.Uuid);
+            foreach (DataSourceItem item in designedGraph.DataSourceItems)
+                newkey.DataSourceUUIDsToShow.Add(item.Id);
             newplot.DataKey = newkey;
             newkey.Enter += new EventHandler(dataKey_Enter);
             newkey.MouseDown += new MouseEventHandler(dataKey_MouseDown);
@@ -364,11 +363,9 @@ namespace XenAdmin.Controls.CustomDataGraph
         private void LoadDefaultGraphs()
         {
             List<string> dsuuids = new List<string>();
-            if (XenObject is Host)
+            if (XenObject is Host host)
             {
                 List<DesignedGraph> dg = new List<DesignedGraph>();
-
-                Host host = (Host)XenObject;
 
                 DesignedGraph cpudg = new DesignedGraph();
                 cpudg.DisplayName = Messages.GRAPHS_DEFAULT_NAME_CPU;
@@ -396,11 +393,9 @@ namespace XenAdmin.Controls.CustomDataGraph
                 SetGraphs(dg);
             }
 
-            if (XenObject is VM)
+            if (XenObject is VM vm)
             {
                 List<DesignedGraph> dg = new List<DesignedGraph>();
-
-                VM vm = (VM)XenObject;
 
                 DesignedGraph cpudg = new DesignedGraph();
                 cpudg.DisplayName = Messages.GRAPHS_DEFAULT_NAME_CPU;
@@ -443,21 +438,12 @@ namespace XenAdmin.Controls.CustomDataGraph
         void AddDataSource(string uuid, List<string> dsuuids, DesignedGraph dg)
         {
             dsuuids.Add(uuid);
-            dg.DataSources.Add(new DataSourceItem(new Data_source(), "", Palette.GetColour(uuid), uuid));
+            dg.DataSourceItems.Add(new DataSourceItem(new Data_source(), "", Palette.GetColour(uuid), uuid));
         }
 
         private string elevatedUsername;
         private string elevatedPassword;
         private Session elevatedSession;
-
-        private bool RbacRequired
-        {
-            get
-            {
-                return !XenObject.Connection.Session.IsLocalSuperuser &&
-                       !Registry.DontSudo;
-            }
-        }
 
         public bool AuthorizedRole
         {
@@ -467,75 +453,72 @@ namespace XenAdmin.Controls.CustomDataGraph
                 elevatedUsername = string.Empty;
                 elevatedSession = null;
 
-                if (RbacRequired)
+                if (!XenObject.Connection.Session.IsLocalSuperuser && !Registry.DontSudo)
                 {
-                    SaveDataSourceStateAction action = new SaveDataSourceStateAction(XenObject.Connection, XenObject,
-                                                                                     null, null);
-                    List<Role> validRoles = new List<Role>();
-                    if (!Role.CanPerform(action.GetApiMethodsToRoleCheck, XenObject.Connection, out validRoles))
+                    var action = new SaveDataSourceStateAction(XenObject.Connection, XenObject, null, null);
+                    
+                    if (!Role.CanPerform(action.GetApiMethodsToRoleCheck, XenObject.Connection, out var validRoles))
                     {
-                        var sudoDialog = XenAdminConfigManager.Provider.SudoDialogDelegate;
-                        var result = sudoDialog(validRoles, action.Connection, action.Title);
-                        if (!result.Result)
-                            return false;
-
-                        elevatedPassword = result.ElevatedUsername;
-                        elevatedUsername = result.ElevatedPassword;
-                        elevatedSession = result.ElevatedSession;
+                        using (var d = new RoleElevationDialog(action.Connection, action.Connection.Session, validRoles, action.Title))
+                            if (d.ShowDialog(this) == DialogResult.OK)
+                            {
+                                elevatedPassword = d.elevatedPassword;
+                                elevatedUsername = d.elevatedUsername;
+                                elevatedSession = d.elevatedSession;
+                            }
+                            else
+                                return false;
                     }
                 }
                 return true;
             }
         }
 
-        private void UpdateDataSources(List<DataSourceItem> datasources)
+        private void UpdateDataSources(List<DataSourceItem> datasourceItems)
         {
-            foreach (DataSourceItem dsi in datasources)
+            foreach (DataSourceItem dsi in datasourceItems)
             {
                 bool found = false;
                 foreach (DesignedGraph graph in Graphs)
                 {
-                    found = graph.DataSources.Contains(dsi);
+                    found = graph.DataSourceItems.Contains(dsi);
                     if (found)
                     {
-                        if (!Palette.HasCustomColour(dsi.Uuid))
+                        if (!Palette.HasCustomColour(dsi.Id))
                         {
                             dsi.ColorChanged = true;
-                            Palette.SetCustomColor(dsi.Uuid, dsi.Color);
+                            Palette.SetCustomColor(dsi.Id, dsi.Color);
                         }
                         break;
                     }
                 }
 
-                if (!dsi.DataSource.standard && dsi.DataSource.name_label != "avg_cpu")
+                if (!dsi.DataSource.standard)
                     dsi.Enabled = found;
             }
         }
 
         private List<DataSourceItem> GetGraphsDataSources()
         {
-            List<DataSourceItem> dataSources = new List<DataSourceItem>();
+            List<DataSourceItem> dataSourceItems = new List<DataSourceItem>();
             foreach (DesignedGraph designedGraph in Graphs)
             {
-                foreach (DataSourceItem dsi in designedGraph.DataSources)
+                foreach (DataSourceItem dsi in designedGraph.DataSourceItems)
                 {
                     string datasourceName = dsi.GetDataSource();
                     if (datasourceName == "memory_total_kib" || datasourceName == "memory")
                         continue;
 
-                    if (!Palette.HasCustomColour(dsi.Uuid))
+                    if (!Palette.HasCustomColour(dsi.Id))
                     {
                         dsi.DataSource.name_label = datasourceName;
                         dsi.ColorChanged = true;
-                        Palette.SetCustomColor(dsi.Uuid, dsi.Color);
-                        dataSources.Add(dsi);
+                        Palette.SetCustomColor(dsi.Id, dsi.Color);
+                        dataSourceItems.Add(dsi);
                     }
                 }
             }
-            if (dataSources.Count > 0)
-                return dataSources;
-
-            return null;
+            return dataSourceItems.Count > 0 ? dataSourceItems : null;
         }
 
         private void SetSessionDetails(AsyncAction action)
@@ -556,26 +539,20 @@ namespace XenAdmin.Controls.CustomDataGraph
             action.RunAsync();
         }
 
-        public void SaveGraphs(List<DataSourceItem> dataSources)
+        public void SaveGraphs(List<DataSourceItem> dataSourceItems = null)
         {
-            if (dataSources != null)
+            if (dataSourceItems != null)
             {
-                UpdateDataSources(dataSources);
+                UpdateDataSources(dataSourceItems);
             }
             else
             {
-                dataSources = GetGraphsDataSources();
+                dataSourceItems = GetGraphsDataSources();
             }
 
-            List<DesignedGraph> graphs;
-            if (ShowingDefaultGraphs)
-            {
-                graphs = new List<DesignedGraph>();
-            }
-            else
-                graphs = Graphs;
+            List<DesignedGraph> graphs = ShowingDefaultGraphs ? new List<DesignedGraph>() : Graphs;
 
-            RunSaveGraphsAction(graphs, dataSources);
+            RunSaveGraphsAction(graphs, dataSourceItems);
         }
 
         private void SwapGraphDetails(int index1, int index2)
@@ -694,8 +671,8 @@ namespace XenAdmin.Controls.CustomDataGraph
 
                 Plots[index].DisplayName = newGraph.DisplayName;
                 Keys[index].DataSourceUUIDsToShow.Clear();
-                foreach (DataSourceItem item in newGraph.DataSources)
-                    Keys[index].DataSourceUUIDsToShow.Add(item.Uuid);
+                foreach (DataSourceItem item in newGraph.DataSourceItems)
+                    Keys[index].DataSourceUUIDsToShow.Add(item.Id);
                 Keys[index].UpdateItems();
 
                 if (isSelected)
@@ -708,15 +685,6 @@ namespace XenAdmin.Controls.CustomDataGraph
             {
                 ResumeLayout();
             }
-        }
-
-        public void LoadDataSources(Action<ActionBase> completedEventHandler)
-        {
-            if (XenObject == null)
-                return;
-            GetDataSourcesAction action = new GetDataSourcesAction(XenObject.Connection, XenObject);
-            action.Completed += completedEventHandler;
-            action.RunAsync();
         }
 
         public void RestoreDefaultGraphs()

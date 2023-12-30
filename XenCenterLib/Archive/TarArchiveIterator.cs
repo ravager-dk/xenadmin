@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -37,19 +36,24 @@ using XenCenterLib.Compression;
 namespace XenCenterLib.Archive
 {
 
-    public class SharpZipTarArchiveIterator : ArchiveIterator
+    public class TarArchiveIterator : ArchiveIterator
     {
         private TarInputStream tarStream;
         private CompressionStream compressionStream;
         private TarEntry tarEntry;
         private bool disposed;
 
-        public SharpZipTarArchiveIterator(Stream compressedTarFile, CompressionFactory.Type compressionType)
+        /// <summary>
+        /// Parameterless constructor needed by tests
+        /// </summary>
+        public TarArchiveIterator()
+        {
+        }
+
+        public TarArchiveIterator(Stream compressedTarFile, CompressionFactory.Type compressionType)
         {
             if (compressionType == CompressionFactory.Type.Gz)
                 compressionStream = CompressionFactory.Reader(CompressionFactory.Type.Gz, compressedTarFile);
-            else if (compressionType == CompressionFactory.Type.Bz2)
-                compressionStream = CompressionFactory.Reader(CompressionFactory.Type.Bz2, compressedTarFile);
             else
                 throw new NotSupportedException($"Type {compressionType} is not supported by ArchiveIterator");
 
@@ -57,7 +61,7 @@ namespace XenCenterLib.Archive
             disposed = false;
         }
 
-        public SharpZipTarArchiveIterator(Stream tarFile)
+        public TarArchiveIterator(Stream tarFile)
         {
             tarStream = new TarInputStream(tarFile);
             disposed = false;
@@ -69,7 +73,7 @@ namespace XenCenterLib.Archive
             disposed = false;
         }
 
-        ~SharpZipTarArchiveIterator()
+        ~TarArchiveIterator()
         {
             Dispose();
         }
@@ -116,12 +120,18 @@ namespace XenCenterLib.Archive
             return tarEntry.IsDirectory;
         }
 
-        public override void ExtractCurrentFile(Stream extractedFileContents)
+        public override void ExtractCurrentFile(Stream extractedFileContents, Action cancellingDelegate)
         {
             if (IsDirectory())
                 return;
 
-            tarStream.CopyEntryContents(extractedFileContents);
+            byte[] buffer = new byte[32768];
+            int count;
+            while ((count = tarStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                cancellingDelegate?.Invoke();
+                extractedFileContents.Write(buffer, 0, count);
+            }
         }
 
         protected override void Dispose(bool disposing)

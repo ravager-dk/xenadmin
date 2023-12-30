@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,13 +30,8 @@
 
 namespace XenAdmin.RDP
 {
-    public class MsRdpClient9 : AxMSTSCLib.AxMsRdpClient9
+    public class MsRdpClient9 : AxMSTSCLib.AxMsRdpClient9, IRdpClient
     {
-        public MsRdpClient9()
-            : base()
-        {
-        }
-
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {
             //Fix for the missing focus issue on the rdp client component

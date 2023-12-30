@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,7 +38,6 @@ namespace XenAdmin.Diagnostics.Checks
 {
     class HostHasHotfixCheck : HostPostLivenessCheck
     {
-        private readonly HotfixFactory hotfixFactory = new HotfixFactory();
         public HostHasHotfixCheck(Host host)
             : base(host)
         {
@@ -47,16 +45,13 @@ namespace XenAdmin.Diagnostics.Checks
 
         protected override Problem RunHostCheck()
         {
-            var hotfix = hotfixFactory.Hotfix(Host);
+            var hotfix = HotfixFactory.Hotfix(Host);
             if (hotfix != null && hotfix.ShouldBeAppliedTo(Host))
                 return new HostDoesNotHaveHotfix(this, Host);
 
             return null;
         }
 
-        public override string Description
-        {
-            get { return Messages.HOTFIX_CHECK; }
-        }
+        public override string Description => Messages.HOTFIX_CHECK;
     }
 }

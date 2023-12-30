@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,7 +35,6 @@ using System.Linq;
 using System.Text;
 
 using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Network;
 
 using XenAPI;
@@ -60,7 +58,10 @@ namespace XenAdmin.Core
         internal static string GetDetails(this ActionBase action)
         {
             var sb = new StringBuilder(GetTitle(action));
-            sb.Append("\n").Append(GetDescription(action));
+
+            var description = GetDescription(action);
+            if (!string.IsNullOrEmpty(description))
+                sb.Append("\n").Append(description);
 
             string timeString = GetTimeElapsed(action);
             if (!string.IsNullOrEmpty(timeString))

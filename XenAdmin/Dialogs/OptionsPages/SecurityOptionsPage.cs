@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,8 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Properties;
 using XenAdmin.Core;
 
 
@@ -44,16 +37,16 @@ namespace XenAdmin.Dialogs.OptionsPages
 {
     public partial class SecurityOptionsPage : UserControl, IOptionsPage
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         public SecurityOptionsPage()
         {
             InitializeComponent();
-
-            build();
+            SSLLabel.Text = string.Format(SSLLabel.Text, BrandManager.BrandConsole);
+            labelReminder.Text = string.Format(labelReminder.Text, BrandManager.BrandConsole);
         }
 
-        private void build()
+        #region IOptionsPage Members
+
+        public void Build()
         {
             // SSL Certificates
             CertificateFoundCheckBox.Checked = Properties.Settings.Default.WarnUnrecognizedCertificate ||
@@ -62,17 +55,24 @@ namespace XenAdmin.Dialogs.OptionsPages
                                                  Registry.SSLCertificateTypes != SSLCertificateTypes.None;
             CertificateFoundCheckBox.Enabled = Registry.SSLCertificateTypes != SSLCertificateTypes.All;
             CertificateChangedCheckBox.Enabled = Registry.SSLCertificateTypes == SSLCertificateTypes.None;
+
+            checkBoxReminder.Checked = Properties.Settings.Default.RemindChangePassword;
         }
 
-        public static void Log()
+        public bool IsValidToSave(out Control control, out string invalidReason)
         {
-            // SSL Certificates
-            log.Info("=== WarnUnrecognizedCertificate: " + Properties.Settings.Default.WarnUnrecognizedCertificate.ToString());
-            log.Info("=== WarnChangedCertificate: " + Properties.Settings.Default.WarnChangedCertificate.ToString());
+            control = null;
+            invalidReason = null;
+            return true;
         }
 
-        #region IOptionsPage Members
+        public void ShowValidationMessages(Control control, string message)
+        {
+        }
 
+        public void HideValidationMessages()
+        {
+        }
         public void Save()
         {
             // SSL Certificates
@@ -80,6 +80,9 @@ namespace XenAdmin.Dialogs.OptionsPages
                 Properties.Settings.Default.WarnUnrecognizedCertificate = CertificateFoundCheckBox.Checked;
             if (CertificateChangedCheckBox.Enabled && CertificateChangedCheckBox.Checked != Properties.Settings.Default.WarnChangedCertificate)
                 Properties.Settings.Default.WarnChangedCertificate = CertificateChangedCheckBox.Checked;
+
+            if (Properties.Settings.Default.RemindChangePassword != checkBoxReminder.Checked)
+                Properties.Settings.Default.RemindChangePassword = checkBoxReminder.Checked;
         }
 
         #endregion
@@ -90,7 +93,7 @@ namespace XenAdmin.Dialogs.OptionsPages
 
         public string SubText => Messages.SECURITY_DESC;
 
-        public Image Image => Resources.padlock;
+        public Image Image => Images.StaticImages.padlock;
 
         #endregion
     }

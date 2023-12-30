@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,11 +29,14 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using XenAdmin.Actions;
+using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
-using XenAdmin.Core;
+using XenCenterLib;
 
 
 namespace XenAdmin.Controls
@@ -42,26 +44,43 @@ namespace XenAdmin.Controls
     public class SrPicker : CustomTreeView
     {
         // Migrate is the live VDI move operation
-        public enum SRPickerType { VM, InstallFromTemplate, MoveOrCopy, Migrate, LunPerVDI };
-        private SRPickerType usage = SRPickerType.VM;
-        
-        //Used in the MovingVDI usage
-        private VDI[] existingVDIs;
-        public void SetExistingVDIs(VDI[] vdis)
-        {
-            existingVDIs = vdis;
-        }
+        public enum SRPickerType { VM, InstallFromTemplate, Move, Copy, Migrate, LunPerVDI }
 
-        private IXenConnection connection;
-        private Host affinity;
+        #region Private fields
 
-        public long DiskSize = 0;
+        private const int MAX_SCANS_PER_CONNECTION = 3;
+        private readonly ChangeableList<SrRefreshAction> _refreshQueue = new ChangeableList<SrRefreshAction>();
+        private SRPickerType _usage = SRPickerType.VM;
+        private VDI[] _existingDisks;
+        private IXenConnection _connection;
+        private Host _affinity;
+        private SR _defaultSr;
+        private SR _preselectedSr;
+        private readonly CollectionChangeEventHandler _srCollectionChangedWithInvoke;
 
-        private readonly CollectionChangeEventHandler SR_CollectionChangedWithInvoke;
+        #endregion
+
+        public event Action CanBeScannedChanged;
 
         public SrPicker()
         {
-            SR_CollectionChangedWithInvoke = Program.ProgramInvokeHandler(SR_CollectionChanged);
+            _srCollectionChangedWithInvoke = Program.ProgramInvokeHandler(SR_CollectionChanged);
+        }
+
+        #region Properties
+
+        public bool CanBeScanned
+        {
+            get
+            {
+                foreach (var item in Items)
+                {
+                    if (item is SrPickerItem it && !it.Scanning && !it.TheSR.IsDetached())
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         public override bool ShowCheckboxes => false;
@@ -72,244 +91,312 @@ namespace XenAdmin.Controls
 
         public override int NodeIndent => 3;
 
-        public SRPickerType Usage
-        {
-            set => usage = value;
-        }
-
-        /// <summary>
-        /// For new disk dialog only
-        /// </summary>
-        public IXenConnection Connection
-        {
-            get
-            {
-                return connection;
-            }
-            set
-            {
-                if (value == null)
-                    return;
-                connection = value;
-
-                Pool pool = Helpers.GetPoolOfOne(connection);
-                if (pool != null)
-                {
-                    pool.PropertyChanged -= Server_PropertyChanged;
-                    pool.PropertyChanged += Server_PropertyChanged;
-                }
-
-                connection.Cache.RegisterCollectionChanged<SR>(SR_CollectionChangedWithInvoke);
-
-                refresh();
-                foreach (SrPickerItem srItem in Items)
-                {
-                    SrRefreshAction a = new SrRefreshAction(srItem.TheSR, true);
-                    a.RunAsync();
-                }
-            }
-        }
-
         public SR SR => SelectedItem is SrPickerItem srpITem && srpITem.Enabled ? srpITem.TheSR : null;
 
-        public SR DefaultSR = null;
+        #endregion
 
-		public void SetAffinity(Host host)
-		{
-			affinity = host;
-			refresh();
-		}
-
-    	private void refresh()
+        public void Populate(SRPickerType usage, IXenConnection connection, Host affinity,
+            SR preselectedSr, VDI[] existingDisks)
         {
-            Program.AssertOnEventThread();
+            foreach (var action in _refreshQueue)
+                action.Completed -= SrRefreshAction_Completed;
 
-            SR selectedSr = SR;
-            bool selected = false;
-            BeginUpdate();
-            try
+            _refreshQueue.Clear();
+            ClearAllNodes();
+
+            _usage = usage;
+            _connection = connection;
+            _affinity = affinity;
+            _existingDisks = existingDisks;
+            _preselectedSr = preselectedSr;
+
+            if (_connection == null)
+                return;
+
+            Pool pool = Helpers.GetPoolOfOne(_connection);
+            if (pool != null)
             {
-                ClearAllNodes();
+                _defaultSr = _connection.Resolve(pool.default_SR);
+                pool.PropertyChanged -= pool_PropertyChanged;
+                pool.PropertyChanged += pool_PropertyChanged;
+            }
 
-                foreach (SR sr in connection.Cache.SRs)
+            _connection.Cache.RegisterCollectionChanged<SR>(_srCollectionChangedWithInvoke);
+
+            foreach (var sr in _connection.Cache.SRs)
+                AddNewSr(sr);
+        }
+
+        public void ScanSRs()
+        {
+            foreach (var item in Items)
+            {
+                if (item is SrPickerItem it && !it.Scanning && !it.TheSR.IsDetached())
                 {
-                    var item = SrPickerItem.Create(sr, usage, affinity, DiskSize, existingVDIs);
-                    if (item.Show)
-                        AddNode(item);
-                    foreach (PBD pbd in sr.Connection.ResolveAll(sr.PBDs))
-                    {
-                        if (pbd != null)
-                        {
-                            pbd.PropertyChanged -= Server_PropertyChanged;
-                            pbd.PropertyChanged += Server_PropertyChanged;
-                        }
-                    }
-                    sr.PropertyChanged -= Server_PropertyChanged;
-                    sr.PropertyChanged += Server_PropertyChanged;
+                    it.Scanning = true;
+                    var srRefreshAction = new SrRefreshAction(it.TheSR);
+                    srRefreshAction.Completed += SrRefreshAction_Completed;
+
+                    _refreshQueue.Add(srRefreshAction);
+
+                    if (_refreshQueue.Count(a => a.StartedRunning && !a.IsCompleted) < MAX_SCANS_PER_CONNECTION)
+                        srRefreshAction.RunAsync();
                 }
             }
-            finally
+            OnCanBeScannedChanged();
+        }
+
+        public void UpdateDisks(params VDI[] vdi)
+        {
+            Program.AssertOnEventThread();
+            foreach (SrPickerItem node in Items)
+                node.UpdateDisks(vdi);
+        }
+
+        private void AddNewSr(SR sr)
+        {
+            var item = SrPickerItem.Create(sr, _usage, _affinity, _existingDisks);
+            if (!item.Show)
+                return;
+
+            foreach (PBD pbd in sr.Connection.ResolveAll(sr.PBDs))
             {
-                EndUpdate();
+                if (pbd != null)
+                {
+                    pbd.PropertyChanged -= pbd_PropertyChanged;
+                    pbd.PropertyChanged += pbd_PropertyChanged;
+                }
             }
 
-            if (selectedSr != null)
+            sr.PropertyChanged -= sr_PropertyChanged;
+            sr.PropertyChanged += sr_PropertyChanged;
+
+            item.ItemUpdated += Item_ItemUpdated;
+            if (HelpersGUI.BeingScanned(item.TheSR, out var scanAction))
             {
-                foreach (SrPickerItem node in Items)
+                item.Scanning = true;
+                scanAction.Completed += SrRefreshAction_Completed;
+                _refreshQueue.Add(scanAction);
+            }
+            
+            AddNode(item);
+
+            if (!item.Scanning)
+            {
+                if (_preselectedSr != null)
                 {
-                    if (node.TheSR != null && node.TheSR.uuid == selectedSr.uuid)
+                    if (item.TheSR.opaque_ref == _preselectedSr.opaque_ref)
+                        SelectedItem = item;
+                }
+                else if (_defaultSr != null)
+                {
+                    if (item.TheSR.opaque_ref == _defaultSr.opaque_ref)
+                        SelectedItem = item;
+                }
+                else if (SelectedItem == null)
+                {
+                    SelectedItem = item;
+                }
+            }
+
+            OnCanBeScannedChanged();
+        }
+
+        private void OnCanBeScannedChanged()
+        {
+            Program.Invoke(this, () => CanBeScannedChanged?.Invoke());
+        }
+
+        private void Item_ItemUpdated(SrPickerItem item)
+        {
+            Invalidate();
+        }
+
+        private void SrRefreshAction_Completed(ActionBase obj)
+        {
+            if (!(obj is SrRefreshAction action))
+                return;
+
+            Program.Invoke(this, () =>
+            {
+                _refreshQueue.Remove(action);
+
+                var srRefreshAction = _refreshQueue.FirstOrDefault(a => !a.StartedRunning && !a.IsCompleted);
+
+                if (srRefreshAction != null && _refreshQueue.Count(a => a.StartedRunning && !a.IsCompleted) < MAX_SCANS_PER_CONNECTION)
+                    srRefreshAction.RunAsync();
+
+                foreach (var item in Items)
+                {
+                    if (item is SrPickerItem it && it.TheSR.opaque_ref == action.SR.opaque_ref)
                     {
-                        SelectedItem = node;
-                        selected = true;
+                        it.Scanning = false;
+                        OnCanBeScannedChanged();
+
+                        if (_preselectedSr != null)
+                        {
+                            if (it.TheSR.opaque_ref == _preselectedSr.opaque_ref)
+                                SelectedItem = item;
+                        }
+                        else if (_defaultSr != null)
+                        {
+                            if (it.TheSR.opaque_ref == _defaultSr.opaque_ref)
+                                SelectedItem = item;
+                        }
+                        else if (SelectedItem == null)
+                        {
+                            SelectedItem = item;
+                        }
+
                         break;
                     }
                 }
-            }
-
-            if (!selected && Items.Count > 0)
-            {// If no selection made, select default SR
-                if (!selectDefaultSR())
-                {
-                    // If no default SR, select first entry in list
-                    SelectedIndex = 0;
-                }
-            }
+            });
         }
 
-        public void UpdateDiskSize()
+        private void pool_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Program.AssertOnEventThread();
-            try
+            if (sender is Pool && e.PropertyName == "default_SR")
             {
-                foreach (SrPickerItem node in Items)
+                Program.Invoke(this, () =>
                 {
-                    node.UpdateDiskSize(DiskSize);
-                }
+                    foreach (var item in Items)
+                    {
+                        if (item is SrPickerItem it && !it.Scanning)
+                            it.Update();
+                    }
+                });
             }
-            finally
+        }
+
+        private void pbd_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is PBD pbd && e.PropertyName == "currently_attached")
             {
-                Refresh();
+                Program.Invoke(this, () =>
+                {
+                    foreach (var item in Items)
+                    {
+                        if (item is SrPickerItem it && !it.Scanning && it.TheSR.opaque_ref == pbd.SR.opaque_ref)
+                        {
+                            it.Update();
+                            OnCanBeScannedChanged();
+                            break;
+                        }
+                    }
+                });
             }
         }
 
-        private void Server_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void sr_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "name_label" || e.PropertyName == "PBDs" || e.PropertyName == "physical_utilisation" || e.PropertyName == "currently_attached" || e.PropertyName == "default_SR")
-                Program.Invoke(this, refresh);
+            if (sender is SR sr &&
+                (e.PropertyName == "name_label" || e.PropertyName == "PBDs" ||
+                 e.PropertyName == "physical_utilisation" || e.PropertyName == "virtual_allocation"))
+            {
+                Program.Invoke(this, () =>
+                {
+                    foreach (var item in Items)
+                    {
+                        if (item is SrPickerItem it && !it.Scanning && it.TheSR.opaque_ref == sr.opaque_ref)
+                        {
+                            it.Update();
+                            break;
+                        }
+                    }
+                });
+            }
         }
 
-        void SR_CollectionChanged(object sender, CollectionChangeEventArgs e)
+        private void SR_CollectionChanged(object sender, CollectionChangeEventArgs e)
         {
-            Program.Invoke(this, refresh);
+            if (e.Action == CollectionChangeAction.Add && e.Element is SR addedSr)
+            {
+                Program.Invoke(this, () =>
+                {
+                    foreach (var item in Items)
+                    {
+                        if (item is SrPickerItem it && it.TheSR.opaque_ref == addedSr.opaque_ref)
+                            return;
+                    }
+
+                    AddNewSr(addedSr);
+                });
+                return;
+            }
+            
+            if (e.Action == CollectionChangeAction.Remove)
+            {
+                var removedSrs = new List<string>();
+
+                if (e.Element is SR storage)
+                    removedSrs.Add(storage.opaque_ref);
+                else if (e.Element is List<SR> range)
+                    removedSrs = range.Select(sr => sr.opaque_ref).ToList();
+                else
+                    return;
+
+                Program.Invoke(this, () =>
+                {
+                    var itemsToRemove = new List<SrPickerItem>();
+
+                    foreach (var item in Items)
+                    {
+                        if (item is SrPickerItem it && removedSrs.Contains(it.TheSR.opaque_ref))
+                        {
+                            foreach (var pbdRef in it.TheSR.PBDs)
+                            {
+                                var pbd = it.TheSR.Connection.Resolve(pbdRef);
+                                if (pbd != null)
+                                    pbd.PropertyChanged -= pbd_PropertyChanged;
+                            }
+                            it.TheSR.PropertyChanged -= sr_PropertyChanged;
+
+                            it.ItemUpdated -= Item_ItemUpdated;
+                            itemsToRemove.Add(it);
+                            break;
+                        }
+                    }
+
+                    foreach (var item in itemsToRemove)
+                        RemoveNode(item);
+
+                    OnCanBeScannedChanged();
+                });
+            }
         }
 
         private void UnregisterHandlers()
         {
-            if (connection == null)
+            if (_connection == null)
                 return;
 
-            var pool = Helpers.GetPoolOfOne(connection);
+            var pool = Helpers.GetPoolOfOne(_connection);
             if (pool != null)
-                pool.PropertyChanged -= Server_PropertyChanged;
+                pool.PropertyChanged -= pool_PropertyChanged;
 
-            foreach (var sr in connection.Cache.SRs)
+            foreach (var sr in _connection.Cache.SRs)
             {
                 foreach (var pbd in sr.Connection.ResolveAll(sr.PBDs))
                 {
                     if (pbd != null)
-                        pbd.PropertyChanged -= Server_PropertyChanged;
+                        pbd.PropertyChanged -= pbd_PropertyChanged;
                 }
-                sr.PropertyChanged -= Server_PropertyChanged;
+                sr.PropertyChanged -= sr_PropertyChanged;
             }
 
-            connection.Cache.DeregisterCollectionChanged<SR>(SR_CollectionChangedWithInvoke);
-        }
-
-        /// <summary>
-        /// Selects the default SR, if it exists.
-        /// </summary>
-        /// <returns>true if the default SR was selected, otherwise false.</returns>
-        public bool selectDefaultSR()
-        {
-            if (DefaultSR == null)
-                return false;
-
-            foreach (SrPickerItem node in Items)
-            {
-                if (node.TheSR != null && node.TheSR == DefaultSR && node.Enabled)
-                {
-                    SelectedItem = node;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        internal void selectSRorNone(SR TheSR)
-        {
-            foreach (SrPickerItem node in Items)
-            {
-                if (node.TheSR != null && node.TheSR.opaque_ref == TheSR.opaque_ref)
-                {
-                    SelectedItem = node;
-                    return;
-                }
-            }
-        }
-
-        internal void selectDefaultSROrAny()
-        {
-            if (selectDefaultSR())
-                return;
-            foreach (SrPickerItem item in Items)
-            {
-                if (item == null)
-                    continue;
-                if (item.Enabled)
-                {
-                    selectSRorNone(item.TheSR);
-                    return;
-                }
-            }
-        }
-
-        public void selectSRorDefaultorAny(SR sr)
-        {
-            if (sr != null)
-            {
-                foreach (SrPickerItem node in Items)
-                {
-                    if (node.TheSR != null && node.TheSR.opaque_ref == sr.opaque_ref)
-                    {
-                        SelectedItem = node;
-                        return;
-                    }
-                }
-            }
-            selectDefaultSROrAny();
-        }
-
-        public bool ValidSelectionExists
-        {
-            get
-            {
-                foreach (SrPickerItem item in Items)
-                {
-                    if (item == null)
-                        continue;
-                    if (item.Enabled)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
+            _connection.Cache.DeregisterCollectionChanged<SR>(_srCollectionChangedWithInvoke);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
+            {
+                foreach (var action in _refreshQueue)
+                    action.Completed -= SrRefreshAction_Completed;
+
                 UnregisterHandlers();
+            }
 
             base.Dispose(disposing);
         }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,8 +32,8 @@ using System;
 using System.Threading;
 using System.Windows.Forms;
 using XenAdmin.Actions;
+using XenAdmin.Commands;
 using XenAdmin.Controls;
-using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Network;
 using XenAPI;
@@ -45,8 +44,6 @@ namespace XenAdmin.Wizards.ImportWizard
 	public partial class StoragePickerPage : XenTabPage
 	{
 		#region Private fields
-		private Host m_targetHost;
-		private IXenConnection m_targetConnection;
 		private volatile Task m_importTask;
 		private bool m_alreadyFoundVM;
 		private ActionProgressDialog m_actionDialog;
@@ -98,10 +95,9 @@ namespace XenAdmin.Wizards.ImportWizard
 				SetButtonNextEnabled(false);
                 m_buttonPreviousEnabled = false;
                 OnPageUpdated();
-				ImportXvaAction = new ImportVmAction(m_targetHost == null ? m_targetConnection : m_targetHost.Connection,
-				                                       m_targetHost,
-				                                       FilePath,
-				                                       SR);
+                ImportXvaAction = new ImportVmAction(TargetHost == null ? TargetConnection : TargetHost.Connection,
+                    TargetHost, FilePath, SR,
+                    VMOperationCommand.WarningDialogHAInvalidConfig, VMOperationCommand.StartDiagnosisForm);
 				ImportXvaAction.Completed += m_importXvaAction_Completed;
 
 				m_actionDialog = new ActionProgressDialog(ImportXvaAction, ProgressBarStyle.Blocks) {ShowCancel = true};
@@ -118,15 +114,11 @@ namespace XenAdmin.Wizards.ImportWizard
         }
 
         public override void PopulatePage()
-		{
-			// Select default SR
-			Pool pool = Helpers.GetPoolOfOne(m_targetConnection);
-			if (pool != null)
-				m_srPicker.DefaultSR = m_targetConnection.Resolve(pool.default_SR);
-
-			m_srPicker.selectDefaultSROrAny();
-			IsDirty = true;
-		}
+        {
+            SetButtonNextEnabled(false);
+            m_srPicker.Populate(SrPicker.SRPickerType.VM, TargetConnection, TargetHost, null, null);
+            IsDirty = true;
+        }
 
         public override bool EnablePrevious()
         {
@@ -142,6 +134,10 @@ namespace XenAdmin.Wizards.ImportWizard
 
 		#region Accessors
 
+        internal IXenConnection TargetConnection { get; set; }
+
+        internal Host TargetHost { get; set; }
+
 		public ImportVmAction ImportXvaAction { get; private set; }
 
 		public string FilePath { private get; set; }
@@ -151,21 +147,6 @@ namespace XenAdmin.Wizards.ImportWizard
 		public VM ImportedVm { get; private set; }
 
 		#endregion
-
-		/// <summary>
-		/// Should be called before the Affinity is set.
-		/// </summary>
-		public void SetConnection(IXenConnection con)
-		{
-			m_targetConnection = con;
-			m_srPicker.Connection = con;
-		}
-
-		public void SetTargetHost(Host host)
-		{
-			m_targetHost = host;
-			m_srPicker.SetAffinity(host);
-		}
 
 		#region Private methods
 
@@ -203,12 +184,12 @@ namespace XenAdmin.Wizards.ImportWizard
 			while (ImportXvaAction.RelatedTask == null)
 				Thread.Sleep(100);
 
-			while ((m_importTask = m_targetConnection.Resolve(ImportXvaAction.RelatedTask)) == null)
+			while ((m_importTask = TargetConnection.Resolve(ImportXvaAction.RelatedTask)) == null)
 				Thread.Sleep(100);
 
             // We register a XenObjectsUpdated event handler where we check that the import task has the object creation phase marked as "complete"; 
             // Once the object creation is complete, we look for the vm; When we found the vm we unregister this event handler;
-            m_targetConnection.XenObjectsUpdated += targetConnection_XenObjectsUpdated;
+            TargetConnection.XenObjectsUpdated += targetConnection_XenObjectsUpdated;
 
 			Program.Invoke(this, CheckTask);
 		}
@@ -240,11 +221,11 @@ namespace XenAdmin.Wizards.ImportWizard
             {
                 // Should never get here (as we unregister XenObjectsUpdated event handler after we find the vm) but just in case,
                 // unregister XenObjectsUpdated event handler
-                m_targetConnection.XenObjectsUpdated -= targetConnection_XenObjectsUpdated;
+                TargetConnection.XenObjectsUpdated -= targetConnection_XenObjectsUpdated;
                 return;
             }
 
-            foreach (VM vm in m_targetConnection.Cache.VMs)
+            foreach (VM vm in TargetConnection.Cache.VMs)
             {
                 if (!vm.other_config.ContainsKey(ImportVmAction.IMPORT_TASK))
                     continue;
@@ -257,7 +238,7 @@ namespace XenAdmin.Wizards.ImportWizard
                     ImportedVm = vm;
 
                     // We found the VM, unregister XenObjectsUpdated event handler
-                    m_targetConnection.XenObjectsUpdated -= targetConnection_XenObjectsUpdated;
+                    TargetConnection.XenObjectsUpdated -= targetConnection_XenObjectsUpdated;
 
                     // And close the dialog, flick to next page.
                     m_actionDialog.Close();
@@ -286,7 +267,7 @@ namespace XenAdmin.Wizards.ImportWizard
 				if (!(ImportXvaAction.Succeeded) || ImportXvaAction.Cancelled)
 				{
                     // task failed or has been cancelled, unregister XenObjectsUpdated event handler
-                    m_targetConnection.XenObjectsUpdated -= targetConnection_XenObjectsUpdated;
+                    TargetConnection.XenObjectsUpdated -= targetConnection_XenObjectsUpdated;
 
 					// Give the user a chance to correct any errors
 					m_actionDialog = null;
@@ -296,7 +277,7 @@ namespace XenAdmin.Wizards.ImportWizard
 			});
 		}
 
-		private void srPicker1_SelectedIndexChanged(object sender, EventArgs e)
+        private void m_srPicker_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if (ImportInProgress())
 				return;
@@ -305,6 +286,17 @@ namespace XenAdmin.Wizards.ImportWizard
 			IsDirty = true;
 		}
 
-		#endregion
-	}
+        private void m_srPicker_CanBeScannedChanged()
+        {
+            buttonRescan.Enabled = m_srPicker.CanBeScanned;
+            SetButtonNextEnabled(m_srPicker.SR != null);
+        }
+
+        private void buttonRescan_Click(object sender, EventArgs e)
+        {
+            m_srPicker.ScanSRs();
+        }
+
+        #endregion
+    }
 }

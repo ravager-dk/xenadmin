@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,11 +29,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel;
-using System.Drawing.Design;
 using XenAdmin.Controls;
 
 namespace XenAdmin.Commands
@@ -48,17 +44,10 @@ namespace XenAdmin.Commands
         private SelectionBroadcaster _selectionBroadcaster;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommandButton"/> class.
-        /// </summary>
-        public CommandButton()
-        {
-        }
-
-        /// <summary>
         /// Gets or sets the command which is being used by the Command control.
         /// </summary>
-        [DefaultValue(null)]
-        [Editor(typeof(CommandEditor<Command>), typeof(UITypeEditor))]
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Command Command
         {
             get
@@ -86,17 +75,16 @@ namespace XenAdmin.Commands
 
         private new void Update()
         {
+            Enabled = _command != null && _command.CanRun();
             base.Enabled = DesignMode || Enabled;
 
             if (_command != null)
             {
                 if (_command.ButtonText != null)
-                {
                     Text = _command.ButtonText;
-                }
 
-                if (Parent is ToolTipContainer)
-                    (Parent as ToolTipContainer).SetToolTip(_command.ToolTipText);
+                if (Parent is ToolTipContainer ttContainer)
+                    ttContainer.SetToolTip(Enabled ? _command.EnabledToolTipText : _command.DisabledToolTipText);
             }
         }
 
@@ -104,7 +92,7 @@ namespace XenAdmin.Commands
         {
             if (Enabled)
             {
-                _command.Execute();
+                _command.Run();
             }
             base.OnClick(e);
         }
@@ -121,18 +109,11 @@ namespace XenAdmin.Commands
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public new bool Enabled
-        {
-            get
-            {
-                return _command != null && _command.CanExecute();
-            }
-        }
+        public new bool Enabled { get; private set; }
 
         /// <summary>
         /// Sets the <see cref="SelectionBroadcaster"/> that should be listened to for selection changes.
         /// </summary>
-        /// <value></value>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public SelectionBroadcaster SelectionBroadcaster

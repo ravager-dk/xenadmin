@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,15 +30,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using System.Drawing.Text;
-using XenAdmin.Core;
-using XenAdmin.XenSearch;
 
 namespace XenAdmin.Controls.CustomGridView
 {
@@ -852,9 +844,7 @@ namespace XenAdmin.Controls.CustomGridView
             }
         }
 
-
-
-        public virtual void StartDragDrop()
+        public void StartDragDrop()
         {
             GridRowCollection rows = new GridRowCollection();
             foreach (GridRow row in RowsAndChildren)
@@ -866,7 +856,7 @@ namespace XenAdmin.Controls.CustomGridView
                 DoDragDrop(rows, DragDropEffects.Move);
         }
 
-        public virtual bool IsDraggableRow(GridRow row)
+        protected virtual bool IsDraggableRow(GridRow row)
         {
             return true;
         }

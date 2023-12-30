@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,8 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Network;
 using XenAPI;
 
@@ -79,14 +76,13 @@ namespace XenAdmin.Actions.DR
                 DestroyVM(Session, vm);
                 PercentComplete += increment;
             }
-            Description = Messages.ACTION_VM_DESTROYED;
-            PercentComplete = 100;
+
+            Tick(100, Messages.ACTION_VM_DESTROYED);
         }
 
 
         internal static void DestroyVM(Session session, VM vm)
         {
-            Exception caught = null;
             log.DebugFormat("Destroying VM '{0}'", vm.Name());
 
             if (vm.snapshots.Count > 0)
@@ -145,9 +141,6 @@ namespace XenAdmin.Actions.DR
             }
 
             log.DebugFormat("VM '{0}' destroyed", vm.Name());
-
-            if (caught != null)
-                throw caught;
         }
     }
 }

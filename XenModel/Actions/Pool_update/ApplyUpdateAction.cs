@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using XenAPI;
 using System.Linq;
+using XenAdmin.Core;
 
 
 namespace XenAdmin.Actions
@@ -65,17 +65,25 @@ namespace XenAdmin.Actions
             var poolUpdate = poolUpdates.FirstOrDefault(u => u != null && string.Equals(u.uuid, update.uuid, StringComparison.OrdinalIgnoreCase));
 
             if (poolUpdate == null)
-                throw new Failure(Failure.INTERNAL_ERROR, Messages.POOL_UPDATE_GONE);
+                throw new Failure(Failure.INTERNAL_ERROR, string.Format(Messages.POOL_UPDATE_GONE, BrandManager.BrandConsole));
 
-            if (!poolUpdate.AppliedOn(host))
+            if (poolUpdate.AppliedOn(host))
+            {
+                Description = string.Format(Messages.PATCH_APPLIED_ALREADY, update.Name(), host.Name());
+                return;
+            }
+
+            try
             {
                 RelatedTask = Pool_update.async_apply(Session, poolUpdate.opaque_ref, host.opaque_ref);
                 PollToCompletion();
                 Description = string.Format(Messages.PATCH_APPLIED, update.Name(), host.Name());
             }
-            else
+            catch (Failure f)
             {
-                Description = string.Format(Messages.PATCH_APPLIED_ALREADY, update.Name(), host.Name());
+                log.ErrorFormat("Failed to apply update '{0}' on server '{1}': '{2}'",
+                    update.Name(), host.Name(), string.Join(", ", f.ErrorDescription)); //CA-339237
+                throw;
             }
         }
     }

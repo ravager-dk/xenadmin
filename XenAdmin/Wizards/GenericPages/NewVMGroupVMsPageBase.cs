@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,14 +29,10 @@
  */
 
 using System;
-using System.ComponentModel;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Commands;
 using XenAdmin.Controls;
-using XenAdmin.Core;
 using XenAdmin.SettingsPanels;
 using XenAPI;
 
@@ -74,6 +69,7 @@ namespace XenAdmin.Wizards.GenericPages
         public abstract void SetXenObjects(IXenObject orig, IXenObject clone);
         public abstract bool ValidToSave { get; }
         public abstract void ShowLocalValidationMessages();
+        public abstract void HideLocalValidationMessages();
         public abstract void Cleanup();
         public abstract bool HasChanged { get; }
         #endregion

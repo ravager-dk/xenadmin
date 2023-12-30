@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -33,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using XenAPI;
-using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAdmin.Help;
 using System.Text.RegularExpressions;
@@ -44,7 +42,10 @@ namespace XenAdmin.Alerts
 {
     public class MessageAlert : Alert
     {
-        public XenAPI.Message Message;
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public Message Message { get; }
+
         public IXenObject XenObject;
 
         private const int DEFAULT_PRIORITY = 0;
@@ -63,14 +64,14 @@ namespace XenAdmin.Alerts
                 _priority = DEFAULT_PRIORITY;
             }
             Connection = m.Connection;
-            XenObject = Helpers.XenObjectFromMessage(m);
+            XenObject = m.GetXenObject();
 
             // TODO: This would be better if there was some way of getting the actual host that the XenObject belongs to
-            // Currently if the applies to object is not a host or pool and belongs to a slave it is filtered under the master. 
+            // Currently if the applies to object is not a host or pool and belongs to a supporter it is filtered under the coordinator. 
 
             Host h = XenObject as Host;
             if (h == null)
-                h = Helpers.GetMaster(m.Connection);
+                h = Helpers.GetCoordinator(m.Connection);
 
             if (h != null)
                 HostUuid = h.uuid;
@@ -114,7 +115,7 @@ namespace XenAdmin.Alerts
                         }
                         break;
 
-                    // applies to is hosts, vms and pools where only the name is required
+                    // applies to hosts, vms and pools where only the name is required
                     case Message.MessageType.HA_HEARTBEAT_APPROACHING_TIMEOUT:
                     case Message.MessageType.HA_HOST_FAILED:
                     case Message.MessageType.HA_HOST_WAS_FENCED:
@@ -151,6 +152,7 @@ namespace XenAdmin.Alerts
                     case Message.MessageType.CLUSTER_HOST_FENCING:
                     case Message.MessageType.CLUSTER_HOST_ENABLE_FAILED:
                     case Message.MessageType.VM_SECURE_BOOT_FAILED:
+                    case Message.MessageType.TLS_VERIFICATION_EMERGENCY_DISABLED:
                         if (XenObject != null)
                             return string.Format(FriendlyFormat(), Helpers.GetName(XenObject));
                         break;
@@ -174,7 +176,7 @@ namespace XenAdmin.Alerts
                     case Message.MessageType.LICENSE_EXPIRES_SOON:
                         if (XenObject != null)
                         {
-                            Host host = XenObject as Host ?? Helpers.GetMaster(Connection);
+                            Host host = XenObject as Host ?? Helpers.GetCoordinator(Connection);
                             return string.Format(FriendlyFormat(), Helpers.GetName(XenObject));
                         }
                         break;
@@ -231,15 +233,10 @@ namespace XenAdmin.Alerts
                         }
                         break;
 
-                    case Message.MessageType.VMSS_SNAPSHOT_MISSED_EVENT:
-                    case Message.MessageType.VMSS_XAPI_LOGON_FAILURE:
-                    case Message.MessageType.VMSS_LICENSE_ERROR:
-                    case Message.MessageType.VMSS_SNAPSHOT_FAILED:
-                    case Message.MessageType.VMSS_SNAPSHOT_SUCCEEDED:
-                    case Message.MessageType.VMSS_SNAPSHOT_LOCK_FAILED:
-                        VMSS vmss = Helpers.XenObjectFromMessage(Message) as VMSS;
-                        var policyAlertVMSS = new PolicyAlert(Message.priority, Message.name, Message.timestamp, Message.body, (vmss == null) ? "" : vmss.Name());
-                        return policyAlertVMSS.Text;
+                    case Message.MessageType.unknown when Message.name == "GFS2_CAPACITY":
+                        if (XenObject != null)
+                            return string.Format(Message.FriendlyBody(Message.name), XenObject.Name());
+                        break;
                 }
 
                 return Message.body;
@@ -331,7 +328,7 @@ namespace XenAdmin.Alerts
 
         private string GetManagementBondName()
         {
-            Bond bond = NetworkingHelper.GetMasterManagementBond(Connection);
+            Bond bond = NetworkingHelper.GetCoordinatorManagementBond(Connection);
             return bond == null ? Messages.UNKNOWN : bond.Name();
         }
 
@@ -355,11 +352,11 @@ namespace XenAdmin.Alerts
 					case Message.MessageType.HA_STATEFILE_APPROACHING_TIMEOUT:
 					case Message.MessageType.HA_STATEFILE_LOST:
 					case Message.MessageType.HA_XAPI_HEALTHCHECK_APPROACHING_TIMEOUT:
-						return () => new HACommand(Program.MainWindow, XenObject.Connection).Execute();
+						return () => new HAConfigureCommand(Program.MainWindow, XenObject.Connection).Run();
 
 					case Message.MessageType.LICENSE_EXPIRES_SOON:
 					case Message.MessageType.LICENSE_DOES_NOT_SUPPORT_POOLING:
-                        return () => Program.OpenURL(HiddenFeatures.LinkLabelHidden ? null : InvisibleMessages.LICENSE_EXPIRY_WEBPAGE);
+                        return () => Program.OpenURL(HiddenFeatures.LinkLabelHidden ? null : InvisibleMessages.LICENSE_BUY_URL);
 					case Message.MessageType.VBD_QOS_FAILED:
 					case Message.MessageType.VCPU_QOS_FAILED:
 					case Message.MessageType.VIF_QOS_FAILED:
@@ -370,9 +367,10 @@ namespace XenAdmin.Alerts
 
 					case Message.MessageType.PBD_PLUG_FAILED_ON_SERVER_START:
 						var repairSrCommand = new RepairSRCommand(Program.MainWindow, XenObject.Connection.Cache.SRs);
-						if (repairSrCommand.CanExecute())
-							return () => repairSrCommand.Execute();
+						if (repairSrCommand.CanRun())
+							return () => repairSrCommand.Run();
 						return null;
+
 					default:
 						return null;
 				}
@@ -407,6 +405,9 @@ namespace XenAdmin.Alerts
         {
             get
             {
+                if (Message.name == "GFS2_CAPACITY")
+                    return Message.FriendlyName(Message.name);
+
                 string title = Message.FriendlyName(Message.MessageTypeString());
                 if (string.IsNullOrEmpty(title))
                     title = Message.name;
@@ -418,7 +419,7 @@ namespace XenAdmin.Alerts
                     {
                         string name = Helpers.GetName(XenObject);
                         if (!string.IsNullOrEmpty(name))
-                            title = string.Format(Messages.MESSAGE_ALERT_TITLE, name, title);
+                            title = string.Format(Messages.STRING_COLON_SPACE_STRING, name, title);
                     }
                 }
 
@@ -430,48 +431,95 @@ namespace XenAdmin.Alerts
 
         public override void Dismiss()
         {
-            new DestroyMessageAction(Message.Connection, Message.opaque_ref).RunAsync();
-            base.Dismiss();
+            try
+            {
+                Message.destroy(Connection.Session, Message.opaque_ref);
+            }
+            catch (Failure exn)
+            {
+                if (exn.ErrorDescription[0] != Failure.HANDLE_INVALID)
+                    throw;
+
+                log.Error(exn);
+            }
+
+            RemoveAlert(this);
         }
 
-        public override void DismissSingle(Session s)
+        public override bool AllowedToDismiss()
         {
-            Message.destroy(s, Message.opaque_ref);
-            base.Dismiss();
-        }
+            if (Dismissing)
+                return false;
 
-        /// <summary>
-        /// Find the MessageAlert corresponding to the given Message, or null if none exists.
-        /// </summary>
-        /// <param name="m"></param>
-        public static Alert FindAlert(Message m)
-        {
-            return FindAlert(a => a is MessageAlert &&
-                                  ((MessageAlert)a).Message.opaque_ref == m.opaque_ref &&
-                                  m.Connection == a.Connection);
+            // this shouldn't happen for this type of alert, but check for safety
+            if (Connection == null)
+                return true;
+
+            // if we are disconnected do not dismiss as the alert will disappear soon
+            if (Connection.Session == null)
+                return false;
+
+            if (Connection.Session.IsLocalSuperuser)
+                return true;
+
+            var allowedRoles = Role.ValidRoleList("Message.destroy", Connection);
+            return allowedRoles.Any(r => Connection.Session.Roles.Contains(r));
         }
 
         public static void RemoveAlert(Message m)
         {
-            Alert a = FindAlert(m);
-            if (a != null)
-                RemoveAlert(a);
+            var alert = FindAlert(a => a is MessageAlert msgAlert &&
+                                       msgAlert.Message.opaque_ref == m.opaque_ref &&
+                                       msgAlert.Connection == m.Connection);
+            if (alert != null)
+                RemoveAlert(alert);
         }
 
-        /// <summary>
-        /// Parses a XenAPI.Message into an Alert object.
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <returns></returns>
         public static Alert ParseMessage(Message msg)
         {
-            if (msg.IsPerfmonAlarm())
+            switch (msg.Type)
             {
-                return new AlarmMessageAlert(msg);
-            }
+                case Message.MessageType.ALARM:
+                    return new AlarmMessageAlert(msg);
 
-            // For all other kinds of alert
-            return new MessageAlert(msg);
+                case Message.MessageType.VMSS_SNAPSHOT_MISSED_EVENT:
+                case Message.MessageType.VMSS_XAPI_LOGON_FAILURE:
+                case Message.MessageType.VMSS_LICENSE_ERROR:
+                case Message.MessageType.VMSS_SNAPSHOT_FAILED:
+                case Message.MessageType.VMSS_SNAPSHOT_SUCCEEDED:
+                case Message.MessageType.VMSS_SNAPSHOT_LOCK_FAILED:
+                    return new PolicyAlert(msg);
+
+                case Message.MessageType.POOL_CA_CERTIFICATE_EXPIRED:
+                case Message.MessageType.POOL_CA_CERTIFICATE_EXPIRING_07:
+                case Message.MessageType.POOL_CA_CERTIFICATE_EXPIRING_14:
+                case Message.MessageType.POOL_CA_CERTIFICATE_EXPIRING_30:
+                case Message.MessageType.HOST_SERVER_CERTIFICATE_EXPIRED:
+                case Message.MessageType.HOST_SERVER_CERTIFICATE_EXPIRING_07:
+                case Message.MessageType.HOST_SERVER_CERTIFICATE_EXPIRING_14:
+                case Message.MessageType.HOST_SERVER_CERTIFICATE_EXPIRING_30:
+                case Message.MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRED:
+                case Message.MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRING_07:
+                case Message.MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRING_14:
+                case Message.MessageType.HOST_INTERNAL_CERTIFICATE_EXPIRING_30:
+                    return new CertificateAlert(msg);
+
+                case Message.MessageType.UPDATES_FEATURE_EXPIRED:
+                case Message.MessageType.UPDATES_FEATURE_EXPIRING_CRITICAL:
+                case Message.MessageType.UPDATES_FEATURE_EXPIRING_MAJOR:
+                case Message.MessageType.UPDATES_FEATURE_EXPIRING_WARNING:
+                    return new CssExpiryAlert(msg);
+
+                case Message.MessageType.FAILED_LOGIN_ATTEMPTS:
+                    return new FailedLoginAttemptAlert(msg);
+                case Message.MessageType.LEAF_COALESCE_START_MESSAGE:
+                case Message.MessageType.LEAF_COALESCE_COMPLETED:
+                case Message.MessageType.LEAF_COALESCE_FAILED:
+                    return new LeafCoalesceAlert(msg);
+                default:
+                    // For all other kinds of alert
+                    return new MessageAlert(msg);
+            }
         }
     }
 }

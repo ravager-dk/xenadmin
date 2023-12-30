@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAPI;
@@ -67,26 +65,19 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            
             var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
             if (pool != null)
             {
-                if (Helpers.FeatureForbidden(pool.Connection, VMGroup<T>.FeatureRestricted)) 
-                    ShowUpsellDialog(Parent);
+                if (Helpers.FeatureForbidden(pool.Connection, VMGroup<T>.FeatureRestricted))
+                    UpsellDialog.ShowUpsellDialog(VMGroup<T>.UpsellBlurb, Parent);
                 else
                     this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, VMGroup<T>.ManageGroupsDialog(pool));
             }
         }
 
-        public static void ShowUpsellDialog(IWin32Window parent)
-        {
-            using (var dlg = new UpsellDialog(VMGroup<T>.UpsellBlurb, VMGroup<T>.UpsellLearnMoreUrl))
-                dlg.ShowDialog(parent);
-        }
-
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             if (typeof(T) == typeof(VMSS) && selection.Any(s => !Helpers.FalconOrGreater(s.Connection)))
             {

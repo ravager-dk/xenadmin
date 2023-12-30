@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,7 @@
  */
 
 using System.Collections.Generic;
-using System.Drawing;
 using XenAdmin.Actions;
-using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAPI;
 using XenAdmin.Actions.VMActions;
@@ -64,17 +61,13 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             VM vm = (VM)selection[0].XenObject;
 
-            using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(
-                            SystemIcons.Warning,
-                            string.Format(Messages.CONVERT_TEMPLATE_DIALOG_TEXT, vm.Name().Ellipsise(25)),
-                            Messages.CONVERT_TO_TEMPLATE),
-                        new ThreeButtonDialog.TBDButton(Messages.CONVERT, DialogResult.OK, ThreeButtonDialog.ButtonType.ACCEPT, true),
-                        ThreeButtonDialog.ButtonCancel))
+            using (var dlg = new WarningDialog(string.Format(Messages.CONVERT_TEMPLATE_DIALOG_TEXT, vm.Name().Ellipsise(25)),
+                        new ThreeButtonDialog.TBDButton(Messages.CONVERT, DialogResult.OK, selected: true),
+                        ThreeButtonDialog.ButtonCancel){WindowTitle = Messages.CONVERT_TO_TEMPLATE})
             {
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -90,12 +83,12 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.ContainsOneItemOfType<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanExecute);
+            return selection.ContainsOneItemOfType<VM>() && selection.AtLeastOneXenObjectCan<VM>(CanRun);
         }
 
-        private static bool CanExecute(VM vm)
+        private static bool CanRun(VM vm)
         {
             return vm != null && !vm.is_a_template && !vm.Locked && vm.allowed_operations != null && vm.allowed_operations.Contains(vm_operations.make_into_template);
         }

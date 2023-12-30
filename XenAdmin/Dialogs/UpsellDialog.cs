@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,8 @@
  * SUCH DAMAGE.
  */
 
+
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using XenAdmin.Core;
 
@@ -42,13 +37,25 @@ namespace XenAdmin.Dialogs
 {
     public partial class UpsellDialog : XenDialogBase
     {
-        public UpsellDialog(string blurb, string learnMoreUrl)
+        public UpsellDialog(string blurb)
         {
             InitializeComponent();
-            upsellPage1.SetAllTexts(blurb, learnMoreUrl);
-            upsellPage1.enableOkButton();
-            this.CancelButton = upsellPage1.OKButton;
+            upsellPage1.BlurbText = blurb;
+            upsellPage1.EnableOkButton();
+            CancelButton = upsellPage1.OKButton;
             Height = upsellPage1.Height;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Text = BrandManager.BrandConsole;
+        }
+
+        public static void ShowUpsellDialog(string message, IWin32Window parent)
+        {
+            using (var upsellDialog = new UpsellDialog(message))
+                upsellDialog.ShowDialog(parent);
         }
     }  
 }

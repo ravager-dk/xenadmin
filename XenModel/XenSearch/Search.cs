@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,6 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using XenAPI;
 
 using XenAdmin.Core;
@@ -280,8 +280,8 @@ namespace XenAdmin.XenSearch
             if (uuid == null)
                 uuid = System.Guid.NewGuid().ToString();
 
-            String key = SearchPrefix + uuid;
-            String value = GetXML();
+            var key = SearchPrefix + uuid;
+            var value = GetXML();
 
             if (connection == null)
                 return false;
@@ -289,16 +289,16 @@ namespace XenAdmin.XenSearch
             if (!connection.IsConnected)
                 return false;
 
-            Session session = connection.DuplicateSession();
-            foreach (Pool pool in connection.Cache.Pools)
-            {
-                Pool.remove_from_gui_config(session, pool.opaque_ref, key);
-                Pool.add_to_gui_config(session, pool.opaque_ref, key, value);
+            var session = connection.DuplicateSession();
 
-                return true;
-            }
+            var pools = connection.Cache.Pools;
+            if (pools.Length <= 0)
+                return false;
 
-            return false;
+            var pool = pools.First();
+            Pool.remove_from_gui_config(session, pool.opaque_ref, key);
+            Pool.add_to_gui_config(session, pool.opaque_ref, key, value);
+            return true;
         }
 
         public void Save(String filename)
@@ -656,7 +656,6 @@ namespace XenAdmin.XenSearch
         }
 
         private static Dictionary<String, Search> searches =new Dictionary<string, Search>();
-        public static string BrandedSearchKey { get; private set; }
         public static event Action SearchesChanged;
 
         private static void OnSearchesChanged()
@@ -678,10 +677,9 @@ namespace XenAdmin.XenSearch
             }
         }
 
-        public static void InitSearch(string brandedSearchKey)
+        public static void InitSearch()
         {
-            searches = new Dictionary<String, Search>();
-            BrandedSearchKey = brandedSearchKey;
+            searches = new Dictionary<string, Search>();
 
             InitDefaultSearches();
 
@@ -700,10 +698,7 @@ namespace XenAdmin.XenSearch
             SynchroniseSearches();
         }
 
-        private static string SearchPrefix
-        {
-            get { return BrandedSearchKey + ".Search-"; }
-        }
+        private static string SearchPrefix => BrandManager.ExtensionSearch + ".Search-";
 
         private static void SynchroniseSearches()
         {
@@ -790,10 +785,11 @@ namespace XenAdmin.XenSearch
                     new GroupQuery(
                         new QueryFilter[] {
                             new EnumPropertyQuery<vm_power_state>(PropertyNames.power_state, vm_power_state.Running, true),
-                            new EnumPropertyQuery<VM.VirtualisationStatus>(PropertyNames.virtualisation_status, VM.VirtualisationStatus.IO_DRIVERS_INSTALLED | VM.VirtualisationStatus.MANAGEMENT_INSTALLED, false)
+                            new EnumPropertyQuery<VM.VirtualizationStatus>(PropertyNames.virtualisation_status, VM.VirtualizationStatus.IoDriversInstalled | VM.VirtualizationStatus.ManagementInstalled, false)
                         }, GroupQuery.GroupQueryType.And)),
-                new PropertyGrouping<VM.VirtualisationStatus>(PropertyNames.virtualisation_status, null),
-                Messages.DEFAULT_SEARCH_VMS_WO_XS_TOOLS, "dead-beef-1234-vmswotools", true
+                new PropertyGrouping<VM.VirtualizationStatus>(PropertyNames.virtualisation_status, null),
+                string.Format(Messages.DEFAULT_SEARCH_VMS_WO_XS_TOOLS, BrandManager.VmTools),
+                "dead-beef-1234-vmswotools", true
             );
 
             searches["dead-beef-1234-vmswotools"] = VMsWithoutTools;

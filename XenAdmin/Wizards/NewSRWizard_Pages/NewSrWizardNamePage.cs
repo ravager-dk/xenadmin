@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,7 @@
  */
 
 using System;
-using System.Text.RegularExpressions;
 using XenAdmin.Controls;
-using XenAdmin.Core;
 
 
 namespace XenAdmin.Wizards.NewSRWizard_Pages
@@ -74,7 +71,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {
             if (direction == PageLoadedDirection.Forward)
-                HelpersGUI.FocusFirstControl(Controls);
+                textBoxName.Focus();
         }
 
         public override void PopulatePage()

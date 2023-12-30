@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,8 +30,6 @@
 
 using XenAPI;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Timers;
 using System.Windows.Forms;
 using XenAdmin.Core;
@@ -45,6 +42,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
 {
     public abstract class UpgradeHostPlanAction : RebootPlanAction
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         protected bool rebooting;
         private readonly Timer timer;
         protected readonly Control invokingControl;
@@ -64,8 +63,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
                 return;
 
             ReplaceProgressStep(_upgradeVersion == null
-                ? string.Format(Messages.ROLLING_UPGRADE_TIMEOUT, CurrentHost.Name())
-                : string.Format(Messages.ROLLING_UPGRADE_TIMEOUT_VERSION, _upgradeVersion, CurrentHost.Name()));
+                ? string.Format(Messages.ROLLING_UPGRADE_TIMEOUT, BrandManager.ProductBrand, CurrentHost.Name())
+                : string.Format(Messages.ROLLING_UPGRADE_TIMEOUT_VERSION, BrandManager.ProductBrand, _upgradeVersion, CurrentHost.Name()));
         }
 
         protected void Upgrade(ref Session session, string upgradeVersion = null)
@@ -88,8 +87,8 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
 
                 log.DebugFormat("Upgrading host {0}", hostObj.Name());
                 AddProgressStep(_upgradeVersion == null
-                    ? string.Format(Messages.PLAN_ACTION_STATUS_INSTALLING_XENSERVER, hostObj.Name())
-                    : string.Format(Messages.PLAN_ACTION_STATUS_INSTALLING_XENSERVER_VERSION, _upgradeVersion, hostObj.Name()));
+                    ? string.Format(Messages.PLAN_ACTION_STATUS_INSTALLING_XENSERVER, BrandManager.ProductBrand, hostObj.Name())
+                    : string.Format(Messages.PLAN_ACTION_STATUS_INSTALLING_XENSERVER_VERSION, BrandManager.ProductBrand, _upgradeVersion, hostObj.Name()));
 
                 log.DebugFormat("Waiting for host {0} to reboot", hostObj.Name());
                 WaitForReboot(ref session, Host.BootTime, s => Host.async_reboot(s, HostXenRef.opaque_ref));
@@ -122,15 +121,17 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
 
             Program.Invoke(invokingControl, () =>
             {
-                using (var dialog = new NonModalThreeButtonDialog(SystemIcons.Information,
-                    string.Format(Messages.ROLLING_UPGRADE_REBOOT_MESSAGE, GetResolvedHost().Name()),
-                    Messages.ROLLING_POOL_UPGRADE, Messages.REBOOT, Messages.SKIP_SERVER))
+                using (var dialog = new InformationDialog(string.Format(Messages.ROLLING_UPGRADE_REBOOT_MESSAGE,
+                            BrandManager.ProductBrand, GetResolvedHost().Name()),
+                    new ThreeButtonDialog.TBDButton(Messages.REBOOT, DialogResult.OK),
+                    new ThreeButtonDialog.TBDButton(Messages.SKIP_SERVER, DialogResult.Cancel))
+                    {WindowTitle = Messages.ROLLING_POOL_UPGRADE})
                 {
                     if (dialog.ShowDialog(invokingControl) != DialogResult.OK) // Cancel or Unknown
                     {
-                        if (GetResolvedHost().IsMaster())
+                        if (GetResolvedHost().IsCoordinator())
                         {
-                            Error = new ApplicationException(Messages.EXCEPTION_USER_CANCELLED_MASTER);
+                            Error = new ApplicationException(Messages.EXCEPTION_USER_CANCELLED_COORDINATOR);
                             throw Error;
                         }
 
@@ -159,15 +160,15 @@ namespace XenAdmin.Wizards.RollingUpgradeWizard.PlanActions
                     var obj = hostObj;
                     Program.Invoke(invokingControl, () =>
                     {
-                        using (var dialog = new NonModalThreeButtonDialog(SystemIcons.Exclamation,
-                            string.Format(Messages.ROLLING_UPGRADE_REBOOT_AGAIN_MESSAGE, hostName),
-                            Messages.ROLLING_POOL_UPGRADE,
-                            Messages.REBOOT_AGAIN_BUTTON_LABEL, Messages.SKIP_SERVER))
+                        using (var dialog = new WarningDialog(string.Format(Messages.ROLLING_UPGRADE_REBOOT_AGAIN_MESSAGE, hostName),
+                            new ThreeButtonDialog.TBDButton(Messages.REBOOT_AGAIN_BUTTON_LABEL, DialogResult.OK),
+                            new ThreeButtonDialog.TBDButton(Messages.SKIP_SERVER, DialogResult.Cancel))
+                            {WindowTitle = Messages.ROLLING_POOL_UPGRADE})
                         {
                             if (dialog.ShowDialog(invokingControl) == DialogResult.OK)
                                 return;
                             
-                            if (obj.IsMaster())
+                            if (obj.IsCoordinator())
                             {
                                 Error = new Exception(Messages.HOST_REBOOTED_SAME_VERSION);
                                 throw Error;

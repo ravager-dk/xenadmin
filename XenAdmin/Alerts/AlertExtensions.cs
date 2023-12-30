@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -77,6 +76,20 @@ namespace XenAdmin.Alerts
                                  a.AppliesTo.EscapeQuotes(),
                                  date.EscapeQuotes(),
                                  a.WebPageLabel.EscapeQuotes());
+        }
+
+        public static string GetGuiDate(DateTime? dateTime)
+        {
+            string date = string.Empty;
+
+            Program.Invoke(Program.MainWindow,
+                () =>
+                {
+                    if (dateTime.HasValue)
+                        date = HelpersGUI.DateTimeToString(dateTime.Value.ToLocalTime(), Messages.DATEFORMAT_DMY_HM, true);
+                });
+
+            return date;
         }
     }
 }

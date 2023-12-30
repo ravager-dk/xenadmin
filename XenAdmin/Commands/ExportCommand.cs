@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -49,7 +48,7 @@ namespace XenAdmin.Commands
 
         public override string MenuText { get { return Messages.MENU_EXPORT; } }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
             Host hostAncestor = selection.HostAncestorFromConnection;
             Pool poolAncestor = selection.PooAncestorFromConnection;
@@ -77,7 +76,7 @@ namespace XenAdmin.Commands
                 if ((hostAncestor != null && hostAncestor.enabled && hostAncestor.IsLive() && selection[0].Connection.IsConnected)
                     || (poolAncestor != null && Helpers.PoolHasEnabledHosts(poolAncestor)))
                 {
-                    var vms = selection.FirstAsXenObject.Connection.Cache.VMs.Where(vm => vm.is_a_real_vm() && CanExportVm(vm) && vm.Show(Properties.Settings.Default.ShowHiddenVMs)).ToList();
+                    var vms = selection.FirstAsXenObject.Connection.Cache.VMs.Where(vm => vm.IsRealVm() && CanExportVm(vm) && vm.Show(Properties.Settings.Default.ShowHiddenVMs)).ToList();
                     if (vms.Count > 0)
                         return vms.Any(CanExportVm);
                 }
@@ -86,7 +85,7 @@ namespace XenAdmin.Commands
             return false;
         }
 
-        protected override string GetCantExecuteReasonCore(IXenObject item)
+        protected override string GetCantRunReasonCore(IXenObject item)
         {
             VM vm = item as VM;
             if (vm != null && vm.power_state != vm_power_state.Halted)
@@ -95,7 +94,7 @@ namespace XenAdmin.Commands
             if (item != null && item.Connection != null)
             {
                 var vms = item.Connection.Cache.VMs.Where(xvm =>
-                    xvm.is_a_real_vm() && CanExportVm(xvm) &&
+                    xvm.IsRealVm() && CanExportVm(xvm) &&
                     xvm.Show(Properties.Settings.Default.ShowHiddenVMs)).ToList();
 
                 if (vms.Count == 0)
@@ -104,7 +103,7 @@ namespace XenAdmin.Commands
             return string.Empty;
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             var con = selection.GetConnectionOfFirstItem();
             MainWindowCommandInterface.ShowPerConnectionWizard(con, new ExportApplianceWizard(con, selection));

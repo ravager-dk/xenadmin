@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,9 +29,7 @@
  */
 
 using System;
-using System.Windows.Forms;
 using XenAdmin.Diagnostics.Checks;
-using XenAdmin.Network;
 using XenAPI;
 
 
@@ -42,15 +39,12 @@ namespace XenAdmin.Diagnostics.Problems.VMProblem
     {
         private readonly XenAPI.Network Network;
 
-        public VMCannotSeeNetwork(Check check,  VM vm, XenAPI.Network network)
-            : base(check,  vm)
+        public VMCannotSeeNetwork(Check check, VM vm, XenAPI.Network network)
+            : base(check, vm)
         {
             Network = network;
         }
 
-        public override string Description
-        {
-            get { return String.Format(Messages.UPDATES_WIZARD_CANNOT_SEE_NETWORK, ServerName, VM.Name(), Network.Name()); }
-        }
+        public override string Description => String.Format(Messages.UPDATES_WIZARD_CANNOT_SEE_NETWORK, ServerName, VM.Name(), Network.Name());
     }
 }

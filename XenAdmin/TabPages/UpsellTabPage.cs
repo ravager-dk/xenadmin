@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,6 +28,7 @@
  * SUCH DAMAGE.
  */
 
+using System.ComponentModel;
 using XenAdmin.Core;
 
 
@@ -36,21 +36,29 @@ namespace XenAdmin.TabPages
 {
     public partial class UpsellTabPage : BaseTabPage
     {
-        protected UpsellTabPage(string title, string blurb, string learnMoreUrl)
+        protected UpsellTabPage()
         {
             InitializeComponent();
-            base.Text = title;
+        }
 
-            upsellPage1.SetAllTexts(blurb, learnMoreUrl);
+        protected string BlurbText
+        {
+            set => upsellPage1.BlurbText = value;
+        }
+
+        protected string Title
+        {
+            set => Text = value;
         }
     }
 
     public class ADUpsellPage : UpsellTabPage
     {
         public ADUpsellPage()
-            : base(Messages.ACTIVE_DIRECTORY_TAB_TITLE, HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_AD :
-            Messages.UPSELL_BLURB_AD + Messages.UPSELL_BLURB_TRIAL, InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL)
-        { }
+        {
+            Title = Messages.ACTIVE_DIRECTORY_TAB_TITLE;
+            BlurbText = string.Format(Messages.UPSELL_BLURB_AD, BrandManager.ProductBrand);
+        }
 
         public override string HelpID => "TabPageADUpsell";
     }
@@ -58,9 +66,10 @@ namespace XenAdmin.TabPages
     public class HAUpsellPage : UpsellTabPage
     {
         public HAUpsellPage()
-            : base(Messages.HIGH_AVAILABILITY, HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_HA :
-            Messages.UPSELL_BLURB_HA + Messages.UPSELL_BLURB_TRIAL, InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL)
-        { }
+        {
+            Title = Messages.HIGH_AVAILABILITY;
+            BlurbText = Messages.UPSELL_BLURB_HA;
+        }
 
         public override string HelpID => "TabPageHAUpsell";
     }
@@ -68,9 +77,10 @@ namespace XenAdmin.TabPages
     public class WLBUpsellPage : UpsellTabPage
     {
         public WLBUpsellPage()
-            : base(Messages.WORKLOAD_BALANCING, HiddenFeatures.LinkLabelHidden ? Messages.UPSELL_BLURB_WLB :
-            Messages.UPSELL_BLURB_WLB + Messages.UPSELL_BLURB_TRIAL, InvisibleMessages.UPSELL_LEARNMOREURL_TRIAL)
-        { }
+        {
+            Title = Messages.WORKLOAD_BALANCING;
+            BlurbText = Messages.UPSELL_BLURB_WLB;
+        }
 
         public override string HelpID => "TabPageWLBUpsell";
     }

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) Citrix Systems, Inc.
- * All rights reserved.
+ * Copyright (c) Cloud Software Group, Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,9 +28,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 
@@ -40,10 +37,10 @@ namespace XenAPI
     public abstract partial class XenObject<S> : IXenObject where S : XenObject<S>
     {
         /// <summary>
-        /// Copies properties from 'update' into this object. It uses property setters so that
+        /// Copies properties from a given object into this object. It uses property setters so that
         /// event handlers are triggered if the value is changing.
         /// </summary>
-        public abstract void UpdateFrom(S update);
+        public abstract void UpdateFrom(S record);
 
         /// <summary>
         /// Save any changed fields to the server.
@@ -57,17 +54,6 @@ namespace XenAPI
         public abstract string SaveChanges(Session session, string serverOpaqueRef, S serverObject);
 
         public string opaque_ref { get; set; }
-
-        [JsonIgnore]
-        [Obsolete("This property can no longer be used to deduce that a XenObject has changed: " +
-                  "now it always returns true and new values assigned to it are ignored. " +
-                  "To be notified when the XenObject has changed (i.e. its properties have new values)," +
-                  "handle the event PropertyChanged instead.")]
-        public bool Changed
-        {
-            get { return true; }
-            set { }
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

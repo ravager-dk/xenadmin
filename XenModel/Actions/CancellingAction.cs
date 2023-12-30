@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,13 +29,12 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Reflection;
 using System.Threading;
 using XenAdmin.Network;
 using XenAPI;
-using System.Collections.Generic;
-using System.Net;
-using CookComputing.XmlRpc;
-using System.Reflection;
 
 namespace XenAdmin.Actions
 {
@@ -65,11 +63,6 @@ namespace XenAdmin.Actions
 
         protected CancellingAction(string title, string description, bool suppressHistory) 
             : base(title, description, suppressHistory)
-        {
-        }
-
-        protected CancellingAction(string title, string description, bool suppressHistory, bool completeImmediately)
-            : base(title, description, suppressHistory, completeImmediately)
         {
         }
 
@@ -228,7 +221,7 @@ namespace XenAdmin.Actions
         /// 2. Will return if Cancelling = true
         /// 3. Runs RecomputeCanCancel() on a bg thread, then if CanCancel == true, sets Cancelling to true and runs Cancel_()
         /// </summary>
-        public override sealed void Cancel()
+        public sealed override void Cancel()
         {
             log.Debug("Cancel() was called. Attempting to cancel action");
 
@@ -358,20 +351,18 @@ namespace XenAdmin.Actions
         
 
         /// <summary>
-        /// If there has been an exception this code will always execute after the action has finished, use for tidyup
+        /// If there has been an exception this code will always run after the action has finished, use for tidyup
         /// </summary>
         protected virtual void CleanOnError() { }
 
         /// <summary>
-        /// This code will always execute after the action has finished, use for tidyup
+        /// This code will always run after the action has finished, use for tidyup
         /// </summary>
         protected virtual void Clean() { }
 
-        public virtual Session NewSession()
+        protected virtual Session NewSession()
         {
-            if (Connection == null)
-                return null;
-            return Connection.DuplicateSession();
+            return Connection?.DuplicateSession();
         }
 
         /// <summary>
@@ -409,18 +400,6 @@ namespace XenAdmin.Actions
                     {
                         throw exn.InnerException;
                     }
-                }
-                catch (XmlRpcNullParameterException xmlExcept)
-                {
-                    log.Error($"XmlRpcNullParameterException in DoWithSessionRetry, retry {retries}.", xmlExcept);
-                    throw new Exception(Messages.INVALID_SESSION);
-                }
-                catch (XmlRpcIllFormedXmlException xmlRpcIllFormedXmlException)
-                {
-                    log.Error($"XmlRpcIllFormedXmlException in DoWithSessionRetry, retry {retries}.", xmlRpcIllFormedXmlException);
-
-                    if (!Connection.ExpectDisruption || retries <= 0)
-                        throw;
                 }
                 catch (WebException we)
                 {

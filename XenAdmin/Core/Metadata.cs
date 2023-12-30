@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,7 +38,6 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Web.Script.Serialization;
-using XenAdmin.Model;
 using XenAdmin.Plugins;
 using XenAPI;
 
@@ -91,7 +89,7 @@ namespace XenAdmin.Core
         internal struct SaveAndRestore
         {
             public bool SaveSessionCredentials;
-            public bool RequireMasterPassword;
+            public bool RequireMainPassword;
         }
 
         internal struct XenCenterSettings
@@ -115,7 +113,7 @@ namespace XenAdmin.Core
             public bool Enabled;
         }
 
-        public static string Generate(PluginManager pluginManager, bool isForXenCenter)
+        public static string Generate(PluginManager pluginManager)
         {
             var metadata = new XenCenterMetadata
             {
@@ -127,8 +125,7 @@ namespace XenAdmin.Core
                     OsVersion = Environment.OSVersion.ToString(),
                     OsCulture = CultureInfo.CurrentUICulture.EnglishName,
                     IpAddress = GetLocalIPAddress(),
-                    Uuid = Updates.GetUniqueIdHash(),
-                    Uptime = isForXenCenter ? (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString() : string.Empty
+                    Uptime = (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString()
                 },
                 Settings = new XenCenterSettings
                 {
@@ -149,7 +146,7 @@ namespace XenAdmin.Core
                     SaveAndRestore = new SaveAndRestore
                     {
                         SaveSessionCredentials = Properties.Settings.Default.SaveSession,
-                        RequireMasterPassword = Properties.Settings.Default.RequirePass
+                        RequireMainPassword = Properties.Settings.Default.RequirePass
                     },
                     HelpLastUsed = Properties.Settings.Default.HelpLastUsed
                 },
@@ -159,9 +156,9 @@ namespace XenAdmin.Core
                     Connected = ConnectionsManager.XenConnectionsCopy.Count(c => c.IsConnected)
                 },
                 Plugins = new List<Plugin>(),
-                SourceOfData = isForXenCenter ? Messages.XENCENTER : Messages.HEALTH_CHECK,
+                SourceOfData = BrandManager.BrandConsole,
                 Created = DateTime.UtcNow.ToString("u"),
-                Reported = isForXenCenter ? DateTime.UtcNow.ToString("u") : HealthCheckSettings.REPORT_TIME_PLACEHOLDER
+                Reported = DateTime.UtcNow.ToString("u")
             };
 
             if (pluginManager != null)
@@ -177,7 +174,7 @@ namespace XenAdmin.Core
                 }
             }
 
-            var obj = new Dictionary<string, object> {{Messages.XENCENTER, metadata}};
+            var obj = new Dictionary<string, object> {{BrandManager.BrandConsole, metadata}};
             return new JavaScriptSerializer().Serialize(obj);
         }
 

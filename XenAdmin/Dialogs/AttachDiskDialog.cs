@@ -1,5 +1,4 @@
-/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,7 +30,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAPI;
@@ -220,10 +218,8 @@ namespace XenAdmin.Dialogs
                 {
                     Program.Invoke(Program.MainWindow, delegate()
                     {
-                        using (var dlg = new ThreeButtonDialog(
-                            new ThreeButtonDialog.Details(
-                                SystemIcons.Error,
-                                FriendlyErrorNames.VBDS_MAX_ALLOWED, Messages.DISK_ATTACH)))
+                        using (var dlg = new ErrorDialog(FriendlyErrorNames.VBDS_MAX_ALLOWED)
+                            {WindowTitle = Messages.DISK_ATTACH})
                         {
                             dlg.ShowDialog(Program.MainWindow);
                         }
@@ -246,7 +242,7 @@ namespace XenAdmin.Dialogs
                 vbd.unpluggable = true;
 
                 // Try to hot plug the VBD.
-                var action = new VbdSaveAndPlugAction(TheVM, vbd, TheVDI.Name(), null, false);
+                var action = new VbdCreateAndPlugAction(TheVM, vbd, TheVDI.Name(), false);
                 action.ShowUserInstruction += Action_ShowUserInstruction;
                 action.RunAsync();
             });
@@ -260,11 +256,8 @@ namespace XenAdmin.Dialogs
             {
                 if (!Program.RunInAutomatedTestMode)
                 {
-                    using (var dlg = new ThreeButtonDialog(
-                        new ThreeButtonDialog.Details(SystemIcons.Information, message)))
-                    {
+                    using (var dlg = new InformationDialog(message))
                         dlg.ShowDialog(Program.MainWindow);
-                    }
                 }
             });
         }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,9 +30,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
-using XenAdmin.Core;
 using XenAdmin.Plugins;
 
 namespace XenAdmin.Commands
@@ -177,7 +174,7 @@ namespace XenAdmin.Commands
 
         public void AddIfEnabled(Command command, bool bold = false)
         {
-            if (command.CanExecute())
+            if (command.CanRun())
             {
                 Add(command, bold);
             }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,7 +31,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -46,11 +44,12 @@ using XenCenterLib;
 using XenCenterLib.Compression;
 using XenAdmin.Dialogs;
 using XenAdmin.Controls.Common;
+using XenAdmin.Core;
 using XenCenterLib.Archive;
 using XenOvf;
 using XenOvf.Definitions.VMC;
 using XenOvf.Utilities;
-
+using XenModel;
 
 namespace XenAdmin.Wizards.ImportWizard
 {
@@ -60,7 +59,7 @@ namespace XenAdmin.Wizards.ImportWizard
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private readonly string[] m_supportedImageTypes = { ".vhd", ".vmdk" };//CA-61385: remove ".vdi", ".wim" support for Boston
         private readonly string[] m_supportedApplianceTypes = { ".ovf", ".ova", ".ova.gz" };
-        private readonly string[] m_supportedXvaTypes = {".xva", ".xva.gz", "ova.xml"};
+        private readonly string[] m_supportedXvaTypes = {".xva", ".xva.gz"};
 
 		/// <summary>
 		/// Stores the last valid selected appliance
@@ -82,6 +81,7 @@ namespace XenAdmin.Wizards.ImportWizard
 		public ImportSourcePage()
 		{
 			InitializeComponent();
+            autoHeightLabel1.Text = string.Format(autoHeightLabel1.Text, BrandManager.BrandConsole);
             m_ctrlError.HideError();
 			m_tlpEncryption.Visible = false;
             m_tlpError.Visible = false;
@@ -94,17 +94,17 @@ namespace XenAdmin.Wizards.ImportWizard
 		/// <summary>
 		/// Gets the page's title (headline)
 		/// </summary>
-		public override string PageTitle { get { return Messages.IMPORT_SOURCE_PAGE_TITLE; } }
+        public override string PageTitle => Messages.IMPORT_SOURCE_PAGE_TITLE;
 
 		/// <summary>
 		/// Gets the page's label in the (left hand side) wizard progress panel
 		/// </summary>
-		public override string Text { get { return Messages.IMPORT_SOURCE_PAGE_TEXT; } }
+        public override string Text => Messages.IMPORT_SOURCE_PAGE_TEXT;
 
 		/// <summary>
 		/// Gets the value by which the help files section for this page is identified
 		/// </summary>
-		public override string HelpID { get { return "Source"; } }
+        public override string HelpID => "Source";
 
         protected override bool ImplementsIsDirty()
         {
@@ -206,8 +206,6 @@ namespace XenAdmin.Wizards.ImportWizard
 
 		public bool IsWIM { get; private set; }
 
-		public bool IsXvaVersion1 { get; private set; }
-
 		public ulong DiskCapacity { get; private set; }
 
 		#endregion
@@ -239,29 +237,13 @@ namespace XenAdmin.Wizards.ImportWizard
                 FileInfo info = new FileInfo(FilePath);
 				ImageLength = info.Length > 0 ? (ulong)info.Length : 0;
 
-				DiskCapacity = IsXvaVersion1
-				               	? GetTotalSizeFromXmlGeneva() //Geneva style
-				               	: GetTotalSizeFromXmlXva(GetXmlStringFromTarXVA()); //xva style
+                DiskCapacity = GetTotalSizeFromXmlXva(GetXmlStringFromTarXVA());
 			}
 			catch (Exception)
 			{
 				DiskCapacity = ImageLength;
 			}
 			return true;
-		}
-
-		private ulong GetTotalSizeFromXmlGeneva()
-		{
-			ulong totalSize = 0;
-			XmlDocument xmlMetadata = new XmlDocument();
-            xmlMetadata.Load(FilePath);
-			XPathNavigator nav = xmlMetadata.CreateNavigator();
-			XPathNodeIterator nodeIterator = nav.Select(".//vdi");
-
-			while (nodeIterator.MoveNext())
-				totalSize += UInt64.Parse(nodeIterator.Current.GetAttribute("size", ""));
-
-			return totalSize;
 		}
 
 		private string GetXmlStringFromTarXVA()
@@ -272,7 +254,7 @@ namespace XenAdmin.Wizards.ImportWizard
                     if (iterator.HasNext())
                     {
                         Stream ofs = new MemoryStream();
-                        iterator.ExtractCurrentFile(ofs);
+                        iterator.ExtractCurrentFile(ofs, null);
                         return new StreamReader(ofs).ReadToEnd();
                     }
 
@@ -387,21 +369,20 @@ namespace XenAdmin.Wizards.ImportWizard
 		/// </summary>
 		private bool CheckPathValid(out string error)
 		{
-			error = string.Empty;
-
+            error = string.Empty;
             if (String.IsNullOrEmpty(FilePath))
 				return false;
 
             if (IsUri())
                 return CheckDownloadFromUri(out error);
 
-            if (!PathValidator.IsPathValid(FilePath))
+            if (!PathValidator.IsPathValid(FilePath, out string invalidNameMsg))
 			{
-				error = Messages.IMPORT_SELECT_APPLIANCE_PAGE_ERROR_INVALID_PATH;
-				return false;
+			    error = invalidNameMsg;
+                return false;
 			}
-
-			return true;
+            
+            return true;
 		}
 
 		/// <summary>
@@ -423,9 +404,6 @@ namespace XenAdmin.Wizards.ImportWizard
 						error = Messages.IMPORT_SOURCE_PAGE_ERROR_OVF_ONLY;
 						return false;
 					}
-
-					if (ext == "ova.xml")
-						IsXvaVersion1 = true;
 
 					TypeOfImport = ImportWizard.ImportType.Xva;
 					return true;
@@ -472,7 +450,7 @@ namespace XenAdmin.Wizards.ImportWizard
             if (File.Exists(FilePath))
 				return true;
 
-			error = Messages.IMPORT_SELECT_APPLIANCE_PAGE_ERROR_NONE_EXIST_PATH;
+			error = Messages.PATH_DOES_NOT_EXIST;
 			return false;
 		}
 
@@ -554,7 +532,8 @@ namespace XenAdmin.Wizards.ImportWizard
                     _filesToDownload.Enqueue(file);
 
                     LongProcessWrapper(() => _webClient.DownloadFileAsync(_uri, downloadedPath, file),
-                        string.Format(Messages.IMPORT_WIZARD_DOWNLOADING, Path.GetFileName(downloadedPath).Ellipsise(50)));
+                        string.Format(Messages.IMPORT_WIZARD_DOWNLOADING, Path.GetFileName(downloadedPath).Ellipsise(50)),
+                        ProgressBarStyle.Blocks);
                     return m_textBoxFile.Text == downloadedPath;
                 }
                 return false;
@@ -569,17 +548,16 @@ namespace XenAdmin.Wizards.ImportWizard
 
             _unzipFileOut = Path.Combine(Path.GetDirectoryName(_unzipFileIn), Path.GetFileNameWithoutExtension(_unzipFileIn));
 
-            var msg = string.Format(Messages.UNCOMPRESS_APPLIANCE_DESCRIPTION,
+            var msg = string.Format(Messages.UNCOMPRESS_APPLIANCE_DESCRIPTION, BrandManager.BrandConsole,
                 Path.GetFileName(_unzipFileOut), Path.GetFileName(_unzipFileIn));
 
-            using (var dlog = new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Exclamation, msg, Messages.XENCENTER),
-                new ThreeButtonDialog.TBDButton(Messages.YES, DialogResult.Yes),
-                new ThreeButtonDialog.TBDButton(Messages.NO, DialogResult.No)))
+            using (var dlog = new WarningDialog(msg, ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
             {
                 if (dlog.ShowDialog(this) == DialogResult.Yes)
                 {
                     LongProcessWrapper(() => _unzipWorker.RunWorkerAsync(),
-                        string.Format(Messages.IMPORT_WIZARD_UNCOMPRESSING, Path.GetFileName(_unzipFileIn).Ellipsise(50)));
+                        string.Format(Messages.IMPORT_WIZARD_UNCOMPRESSING, Path.GetFileName(_unzipFileIn).Ellipsise(50), Util.DiskSizeString(0)),
+                        ProgressBarStyle.Marquee);
                     return m_textBoxFile.Text == _unzipFileOut;
                 }
 
@@ -587,7 +565,7 @@ namespace XenAdmin.Wizards.ImportWizard
             }
         }
 
-        private void LongProcessWrapper(Action process, string processMessage)
+        private void LongProcessWrapper(Action process, string processMessage, ProgressBarStyle style)
         {
             m_textBoxFile.Enabled = false;
             m_buttonBrowse.Enabled = false;
@@ -599,6 +577,7 @@ namespace XenAdmin.Wizards.ImportWizard
             labelProgress.Visible = true;
             progressBar1.Visible = true;
             progressBar1.Value = 0;
+            progressBar1.Style = style;
 
             longProcessInProgress = true;
             process.Invoke();
@@ -641,9 +620,6 @@ namespace XenAdmin.Wizards.ImportWizard
 
         private void _unzipWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            FileInfo info = new FileInfo(_unzipFileIn);
-            long length = info.Length;
-
             using (Stream inStream = File.Open(_unzipFileIn, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             using (Stream outStream = File.Open(_unzipFileOut, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
@@ -654,18 +630,15 @@ namespace XenAdmin.Wizards.ImportWizard
                         byte[] buffer = new byte[4 * 1024];
 
                         int bytesRead;
+                        ulong totalBytesRead = 0;
+
                         while ((bytesRead = bzis.Read(buffer, 0, buffer.Length)) > 0)
                         {
+                            totalBytesRead += (ulong)bytesRead;
                             outStream.Write(buffer, 0, bytesRead);
 
-                            int percentage = (int)Math.Floor((double)bzis.Position * 100 / length);
-
-                            if (percentage < 0)
-                                _unzipWorker.ReportProgress(0);
-                            else if (percentage > 100)
-                                _unzipWorker.ReportProgress(100);
-                            else
-                                _unzipWorker.ReportProgress(percentage);
+                            if (totalBytesRead % (128 * Util.BINARY_MEGA) == 0)
+                                _unzipWorker.ReportProgress(0, totalBytesRead);
 
                             if (_unzipWorker.CancellationPending)
                             {
@@ -691,7 +664,8 @@ namespace XenAdmin.Wizards.ImportWizard
 
         private void _unzipWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            progressBar1.Value = e.ProgressPercentage;
+            labelProgress.Text = string.Format(Messages.IMPORT_WIZARD_UNCOMPRESSING,
+                Path.GetFileName(_unzipFileIn).Ellipsise(50), Util.DiskSizeString((ulong)e.UserState));
         }
 
         private void _unzipWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -773,14 +747,17 @@ namespace XenAdmin.Wizards.ImportWizard
 
                         if (envType != null)
                         {
-                            int index = _uri.OriginalString.LastIndexOf('/') + 1;
+                            var index = _uri.OriginalString.LastIndexOf('/') + 1;
                             var remoteDir = _uri.OriginalString.Substring(0, index);
 
-                            foreach (var file in envType.References.File)
+                            if (envType.References?.File != null)
                             {
-                                var remoteUri = new Uri(remoteDir + file.href);
-                                var localPath = Path.Combine(_downloadFolder, file.href);
-                                _filesToDownload.Enqueue(new ApplianceFile(remoteUri, localPath));
+                                foreach (var file in envType.References.File)
+                                {
+                                    var remoteUri = new Uri(remoteDir + file.href);
+                                    var localPath = Path.Combine(_downloadFolder, file.href);
+                                    _filesToDownload.Enqueue(new ApplianceFile(remoteUri, localPath));
+                                }
                             }
                         }
                     }
@@ -815,9 +792,9 @@ namespace XenAdmin.Wizards.ImportWizard
                 LocalPath = localPath;
             }
 
-            public Uri RemoteUri { get; private set; }
+            public Uri RemoteUri { get; }
 
-            public string LocalPath { get; private set; }
+            public string LocalPath { get; }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,8 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Xml;
 
 using XenAdmin.Core;
@@ -62,7 +59,7 @@ namespace XenAdmin.Actions
         public SrScanAction(IXenConnection connection, string hostname, string username, 
             string password, SR.SRTypes type)
             : base(connection, String.Format(Messages.ACTION_SR_SCAN_NAME, hostname),
-            String.Format(Messages.ACTION_SR_SCAN_DESCRIPTION, XenAPI.SR.getFriendlyTypeName(type), hostname), true)
+            String.Format(Messages.ACTION_SR_SCAN_DESCRIPTION, SR.GetFriendlyTypeName(type), hostname), true)
         {
             this.hostname = hostname;
             this.username = username;
@@ -113,7 +110,7 @@ namespace XenAdmin.Actions
 
             log.DebugFormat("Attempting to find SRs on {0} filer {1}.", type, hostname);
 
-            RelatedTask = XenAPI.SR.async_probe(Session, Helpers.GetMaster(Connection).opaque_ref,
+            RelatedTask = XenAPI.SR.async_probe(Session, Helpers.GetCoordinator(Connection).opaque_ref,
                 dconf, type.ToString(), new Dictionary<String, String>());
             this.PollToCompletion();
             srs = XenAPI.SR.ParseSRListXML(this.Result);

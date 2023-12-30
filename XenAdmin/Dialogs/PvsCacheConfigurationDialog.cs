@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -149,11 +148,8 @@ namespace XenAdmin.Dialogs
                 var pvsProxies = connection.Cache.PVS_proxies.Where(s => s.site.opaque_ref == site.opaque_ref).ToList();
                 if (pvsProxies.Count > 0)
                 {
-                    using (var dlg = 
-                        new ThreeButtonDialog(new ThreeButtonDialog.Details(SystemIcons.Warning, Messages.PVS_SITE_CANNOT_BE_REMOVED, Messages.XENCENTER)))
-                    {
+                    using (var dlg = new WarningDialog(Messages.PVS_SITE_CANNOT_BE_REMOVED))
                         dlg.ShowDialog(Parent);
-                    }
                     return false;
                 }
             }
@@ -163,10 +159,7 @@ namespace XenAdmin.Dialogs
                 ? string.Format(Messages.CONFIRM_DELETE_PVS_SITE_IN_USE, siteName)
                 : string.Format(Messages.CONFIRM_DELETE_PVS_SITE, siteName);
             DialogResult dialogResult;
-            using (var dlg = new ThreeButtonDialog(
-                    new ThreeButtonDialog.Details(SystemIcons.Warning, message, Messages.XENCENTER),
-                    ThreeButtonDialog.ButtonOK,
-                    ThreeButtonDialog.ButtonCancel))
+            using (var dlg = new WarningDialog(message, ThreeButtonDialog.ButtonOK, ThreeButtonDialog.ButtonCancel))
             {
                 dialogResult = dlg.ShowDialog(Parent);
             }
@@ -233,7 +226,7 @@ namespace XenAdmin.Dialogs
             Rectangle b = e.Bounds;
 
             // draw Delete icon
-            Image deleteIcon = Properties.Resources._000_Abort_h32bit_16;
+            Image deleteIcon = Images.StaticImages._000_Abort_h32bit_16;
             if (deleteIcon != null)
             {
                 page.DeleteIconBounds = new Rectangle(b.Right - deleteIcon.Width - ((32 - deleteIcon.Width) / 2),

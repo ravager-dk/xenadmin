@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -35,7 +34,6 @@ using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Controls.DataGridViewEx;
 using XenAdmin.Core;
-using XenAdmin.Properties;
 using XenAPI;
 
 namespace XenAdmin.Controls.GPU
@@ -86,7 +84,7 @@ namespace XenAdmin.Controls.GPU
                 var host = xenObject.Connection.Resolve(pgpu.host);
 
                 // add host label if needed
-                if (showingHostLabel && (hostRef == null || pgpu.host.opaque_ref != hostRef.opaque_ref))
+                if (showingHostLabel && host!= null && (hostRef == null || pgpu.host.opaque_ref != hostRef.opaque_ref))
                 {
                     AddHostLabel(new Label { Text = String.Format(Messages.GPU_ON_HOST_LABEL, host.Name())}, ref index);
                     hostRef = pgpu.host;
@@ -265,7 +263,7 @@ namespace XenAdmin.Controls.GPU
 
         public void UpdateDetails()
         {
-            ImageCell.Value = EnabledType ? Resources._000_Tick_h32bit_16 : Resources._000_Abort_h32bit_16;
+            ImageCell.Value = EnabledType ? Images.StaticImages._000_Tick_h32bit_16 : Images.StaticImages._000_Abort_h32bit_16;
             NameCell.Value = VGpuType.Name();
         }
     }

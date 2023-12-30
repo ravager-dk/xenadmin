@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -40,6 +39,8 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 {
     public class ApplyXenServerPatchPlanAction : HostPlanAction
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly XenServerPatch xenServerPatch;
         private readonly List<HostUpdateMapping> mappings;
 
@@ -52,16 +53,16 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 
         protected override void RunWithSession(ref Session session)
         {
-            var master = Helpers.GetMaster(Connection);
-            var mapping = (from HostUpdateMapping hum in mappings
+            var coordinator = Helpers.GetCoordinator(Connection);
+            HostUpdateMapping mapping = (from HostUpdateMapping hum in mappings
                 let xpm = hum as XenServerPatchMapping
-                where xpm != null && xpm.Matches(master, xenServerPatch)
+                where xpm != null && xpm.Matches(coordinator, xenServerPatch)
                 select xpm).FirstOrDefault();
 
             if (mapping == null || !mapping.IsValid)
             {
                 if (xenServerPatch != null)
-                    log.ErrorFormat("Mapping not found for patch {0} on master {1}", xenServerPatch.Uuid, master.uuid);
+                    log.ErrorFormat("Mapping not found for patch {0} on coordinator {1}", xenServerPatch.Uuid, coordinator.uuid);
 
                 throw new Exception("Pool_patch or Pool_update not found.");
             }
@@ -70,13 +71,16 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             try
             {
                 // evacuate the host, if needed, before applying the update
-                if (mapping.HostsThatNeedEvacuated.Contains(host.uuid))
+                if (mapping.HostsThatNeedEvacuation.Contains(host.uuid))
                     EvacuateHost(ref session);
 
                 AddProgressStep(string.Format(Messages.UPDATES_WIZARD_APPLYING_UPDATE, xenServerPatch.Name,
                     host.Name()));
 
-                PatchPrecheckOnHostPlanAction.RefreshUpdate(host, mapping, session);
+                if (mapping is PoolUpdateMapping pum)
+                    PatchPrecheckOnHostPlanAction.ReIntroducePoolUpdate(host, pum.Pool_update, session);
+
+                mapping = mapping.RefreshUpdate();
 
                 XenRef<Task> task = null;
 

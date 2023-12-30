@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.IO;
-using System.Text;
-using CookComputing.XmlRpc;
+using Newtonsoft.Json.Linq;
 using XenAdmin;
 using XenAdmin.Network;
-using Newtonsoft.Json.Linq;
 
 
 namespace XenAPI
@@ -46,33 +41,11 @@ namespace XenAPI
 
         public bool IsElevatedSession = false;
 
-        private Session(int timeout, IXenConnection connection, string url)
-            :this(timeout, url)
+        public Session(IXenConnection connection, string host, int port)
+            : this(GetUrl(host, port))
         {
             Connection = connection;
-            XmlRpcProxy.RequestEvent += LogRequest;
-#if DEBUG
-            XmlRpcProxy.ResponseEvent += LogResponse;
-#endif
-        }
-
-        public Session(Proxy proxy, IXenConnection connection)
-        {
-            Connection = connection;
-            XmlRpcProxy = proxy;
-        }
-
-        public Session(int timeout, IXenConnection connection, string host, int port)
-            : this(timeout, connection, GetUrl(host, port))
-        {
-        }
-
-        public Session(Session session, Proxy proxy, IXenConnection connection)
-            : this(proxy, connection)
-        {
-            opaque_ref = session.opaque_ref;
-            APIVersion = session.APIVersion;
-            CopyADFromSession(session);
+            JsonRpcClient.RequestEvent += LogJsonRequest;
         }
 
         /// <summary>
@@ -80,22 +53,11 @@ namespace XenAPI
         /// copied from the given instance, but a new connection will be created.  Use this if you want a duplicate connection to a host,
         /// for example when you need to cancel an operation that is blocking the primary connection.
         /// </summary>
-        public Session(Session session, IXenConnection connection, int timeout)
-            : this(session, timeout)
+        public Session(Session session, IXenConnection connection)
+            : this(session)
         {
             Connection = connection;
-
-            if (session.JsonRpcClient != null)
-            {
-                JsonRpcClient.RequestEvent += LogJsonRequest;
-            }
-            else if (session.XmlRpcProxy != null)
-            {
-                XmlRpcProxy.RequestEvent += LogRequest;
-#if DEBUG
-                XmlRpcProxy.ResponseEvent += LogResponse;
-#endif
-            }
+            JsonRpcClient.RequestEvent += LogJsonRequest;
         }
 
         /// <summary>
@@ -147,67 +109,6 @@ namespace XenAPI
 #endif
         }
 
-        private void LogRequest(object o, XmlRpcRequestEventArgs args)
-        {
-            string xml = DumpStream(args.RequestStream, String.Empty);
-
-            // Find the method name within the XML
-            string methodName = "";
-            int methodNameStart = xml.IndexOf("<methodName>");
-            if (methodNameStart >= 0)
-            {
-                methodNameStart += 12; // skip past "<methodName>"
-                int methodNameEnd = xml.IndexOf('<', methodNameStart);
-                if (methodNameEnd > methodNameStart)
-                    methodName = xml.Substring(methodNameStart, methodNameEnd - methodNameStart);
-            }
-
-            // do not log while downloading objects
-            // also exclude calls occurring frequently; we don't need to know about them;
-            // only log the full XML at Debug level because it may have sensitive data in: CA-80174
-
-            if (CanLogCall(methodName))
-            {
-#if DEBUG
-                log.DebugFormat("Invoking XML-RPC method {0}: {1}", methodName, xml);
-#else
-                log.DebugFormat("Invoking XML-RPC method {0}", methodName);
-#endif
-            }
-            else
-            {
-                log.InfoFormat("Invoking XML-RPC method {0}", methodName);
-            }
-        }
-
-#if DEBUG
-        private void LogResponse(object o, XmlRpcResponseEventArgs args)
-        {
-            if(log.IsDebugEnabled)
-                log.DebugFormat(DumpStream(args.ResponseStream, "XML-RPC response: "));
-        }
-#endif
-
-        private string DumpStream(Stream s, string header)
-        {
-            try
-            {
-                StringBuilder stringBuilder = new StringBuilder(header);
-                using (TextReader r = new StreamReader(s))
-                {
-                    string l;
-                    while ((l = r.ReadLine()) != null)
-                        stringBuilder.Append(l);
-                }
-                return stringBuilder.ToString();   
-            }
-            catch(OutOfMemoryException ex)
-            {
-                log.DebugFormat("Session ran out of memory while trying to log the XML response stream: {0}", ex.Message);
-                return String.Empty;
-            }
-        }
-
         /// <summary>
         /// The i18n'd string for the 'Logged in as:' username (AD or local root).
         /// </summary>
@@ -245,10 +146,10 @@ namespace XenAPI
         /// </summary>
         public string FriendlyRoleDescription()
         {
-            if (IsLocalSuperuser || XenAdmin.Core.Helpers.GetMaster(Connection).external_auth_type != Auth.AUTH_TYPE_AD)
+            if (IsLocalSuperuser || XenAdmin.Core.Helpers.GetCoordinator(Connection).external_auth_type != Auth.AUTH_TYPE_AD)
                 return Messages.AD_LOCAL_ROOT_ACCOUNT;
 
-            return Role.FriendlyCSVRoleList(Roles);
+            return Role.FriendlyCsvRoleList(Roles);
         }
 
         /// <summary>
@@ -257,13 +158,13 @@ namespace XenAPI
         /// </summary>
         public string FriendlySingleRoleDescription()
         {
-            if (IsLocalSuperuser || XenAdmin.Core.Helpers.GetMaster(Connection).external_auth_type != Auth.AUTH_TYPE_AD)
+            if (IsLocalSuperuser || XenAdmin.Core.Helpers.GetCoordinator(Connection).external_auth_type != Auth.AUTH_TYPE_AD)
                 return Messages.AD_LOCAL_ROOT_ACCOUNT;
 
             //Sort roles from highest to lowest
-            roles.Sort((r1, r2) => { return r2.CompareTo(r1); });
+            roles.Sort((r1, r2) => r2.CompareTo(r1));
             //Take the highest role
-            return roles[0].FriendlyName();
+            return roles.Count > 0 ? roles[0].FriendlyName() : Messages.UNKNOWN_AD_USER;
         }
     }
 }

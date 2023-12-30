@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -84,7 +83,7 @@ namespace XenAdmin.Wizards.NewPolicyWizard
 
         public string SubText { get; private set; }
 
-        public Image Image => Properties.Resources.notif_events_16;
+        public Image Image => Images.StaticImages.notif_events_16;
 
         #endregion
 
@@ -121,11 +120,11 @@ namespace XenAdmin.Wizards.NewPolicyWizard
 
         public void GetServerTime()
         {
-            var master = Helpers.GetMaster(Connection);
-            if (master == null)
+            var coordinator = Helpers.GetCoordinator(Connection);
+            if (coordinator == null)
                 return;
 
-            var action = new GetServerLocalTimeAction(master);
+            var action = new GetServerLocalTimeAction(coordinator);
             action.Completed += action_CompletedTimeServer;
             MainTableLayoutPanel.Visible = false;
             LoadingBox.Visible = true;
@@ -312,7 +311,16 @@ namespace XenAdmin.Wizards.NewPolicyWizard
 
         public void ShowLocalValidationMessages()
         {
-            HelpersGUI.ShowBalloonMessage(flowLayoutPanel1, Messages.VMSS_INVALID_SCHEDULE, InvalidParamToolTip);
+            HelpersGUI.ShowBalloonMessage(flowLayoutPanel1, InvalidParamToolTip, Messages.VMSS_INVALID_SCHEDULE);
+        }
+
+
+        public void HideLocalValidationMessages()
+        {
+            if (flowLayoutPanel1 != null)
+            {
+                InvalidParamToolTip.Hide(flowLayoutPanel1);
+            }
         }
 
         public void Cleanup()

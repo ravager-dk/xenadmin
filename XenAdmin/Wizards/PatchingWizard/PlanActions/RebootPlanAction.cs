@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -30,7 +29,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using XenAdmin.Network;
 using XenAPI;
@@ -39,8 +37,11 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 {
     public abstract class RebootPlanAction : HostPlanAction
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private bool _cancelled;
-        private bool lostConnection;
+        private bool _lostConnection;
+        private readonly object _lockObj = new object();
 
         protected RebootPlanAction(Host host)
             : base(host)
@@ -51,9 +52,9 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
         {
             _cancelled = true;
 
-            lock (this)
+            lock (_lockObj)
             {
-                Monitor.PulseAll(this);
+                Monitor.PulseAll(_lockObj);
             }
         }
 
@@ -85,8 +86,9 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             {
                 WaitForReboot(ref session, Host.BootTime, s => Host.async_reboot(s, HostXenRef.opaque_ref));
                 AddProgressStep(Messages.PLAN_ACTION_STATUS_RECONNECTING_STORAGE);
-                foreach (var host in Connection.Cache.Hosts)
-                    host.CheckAndPlugPBDs();  // Wait for PBDs to become plugged on all hosts
+                hostObj = GetResolvedHost();
+                //plug PBDs on the rebooted host (and not on all hosts; see CA-350406)
+                hostObj.CheckAndPlugPBDs();
             }
             finally
             {
@@ -96,13 +98,13 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 
         protected void WaitForReboot(ref Session session, Func<Session, string, double> metricDelegate, Action<Session> methodInvoker)
         {
-            bool master = GetResolvedHost().IsMaster();
+            bool isCoordinator = GetResolvedHost().IsCoordinator();
 
-            lostConnection = false;
+            _lostConnection = false;
             _cancelled = false;
             double metric = metricDelegate(session, HostXenRef.opaque_ref);
 
-            log.DebugFormat("{0}._WaitForReboot(master='{1}', metric='{2}')", GetType().Name, master, metric);
+            log.DebugFormat("{0}._WaitForReboot(coordinator='{1}', metric='{2}')", GetType().Name, isCoordinator, metric);
 
             PercentComplete = 10;
 
@@ -113,9 +115,9 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 
                 PercentComplete = 20;
 
-                log.DebugFormat("{0}._WaitForReboot executed delegate...", GetType().Name);
+                log.DebugFormat("{0}._WaitForReboot ran delegate...", GetType().Name);
 
-                session = WaitForHostToStart(master, session, metricDelegate, metric);
+                session = WaitForHostToStart(isCoordinator, session, metricDelegate, metric);
             }
             finally
             {
@@ -123,18 +125,18 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             }
         }
 
-        private Session WaitForHostToStart(bool master, Session session, Func<Session, string, double> metricDelegate, double metric)
+        private Session WaitForHostToStart(bool coordinator, Session session, Func<Session, string, double> metricDelegate, double metric)
         {
             Connection.ExpectDisruption = true;
 
             try
             {
-                if (master)
+                if (coordinator)
                 {
                     Connection.SuppressErrors = true;
-
+                    Connection.PreventResettingPasswordPrompt = true;
                     //
-                    // Wait for a dissconnection
+                    // Wait for a disconnection
                     //
 
                     WaitForDisconnection();
@@ -142,7 +144,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                     //
                     // Now, we need to wait for a reconnection
                     //
-                    session = WaitReconnectToMaster(session);
+                    session = WaitReconnectToCoordinator(session);
                 }
 
                 PercentComplete = 60;
@@ -150,13 +152,14 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                 // 
                 // Now wait for boot time to be greater than it was before
                 //
-                WaitForBootTimeToBeGreaterThanBefore(master, session, metricDelegate, metric);
+                WaitForBootTimeToBeGreaterThanBefore(coordinator, session, metricDelegate, metric);
 
                 log.DebugFormat("{0}._WaitForReboot done!", GetType().Name);
             }
             finally
             {
                 Connection.SuppressErrors = false;
+                Connection.PreventResettingPasswordPrompt = false;
             }
             return session;
         }
@@ -165,11 +168,11 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
         {
             log.DebugFormat("{0}._WaitForReboot waiting for connection to go away...", GetType().Name);
 
-            lock (this)
+            lock (_lockObj)
             {
-                while (!lostConnection && !_cancelled)
+                while (!_lostConnection && !_cancelled)
                 {
-                    Monitor.Wait(this);
+                    Monitor.Wait(_lockObj);
                 }
             }
 
@@ -183,7 +186,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             Thread.Sleep(1000);
         }
 
-        private void WaitForBootTimeToBeGreaterThanBefore(bool master, Session session, Func<Session, string, double> metricDelegate, double metric)
+        private void WaitForBootTimeToBeGreaterThanBefore(bool coordinator, Session session, Func<Session, string, double> metricDelegate, double metric)
         {
 
             DateTime waitForMetric = DateTime.Now;
@@ -219,7 +222,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             log.DebugFormat("{0}._WaitForReboot metric now up to date... (old metric='{1}', current metric='{2}')",
                             GetType().Name, metric, currentMetric);
 
-            if (master)
+            if (coordinator)
             {
                 //
                 // Force a reconnect to prime the cache for the next actions
@@ -231,7 +234,7 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
             }
         }
 
-        private Session WaitReconnectToMaster(Session session)
+        private Session WaitReconnectToCoordinator(Session session)
         {
 
             log.DebugFormat("{0}._WaitForReboot waiting for reconnect...", GetType().Name);
@@ -274,10 +277,10 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 
         private void connection_ConnectionLost(IXenConnection conn)
         {
-            lock (this)
+            lock (_lockObj)
             {
-                lostConnection = true;
-                Monitor.PulseAll(this);
+                _lostConnection = true;
+                Monitor.PulseAll(_lockObj);
             }
         }
     }

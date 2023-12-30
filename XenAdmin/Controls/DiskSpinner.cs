@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -109,6 +108,7 @@ namespace XenAdmin.Controls
 
             if (string.IsNullOrEmpty(DiskSizeNumericUpDown.Text.Trim())) //do not issue error here
             {
+                SelectedSize = 0;
                 SetError(null);
                 IsSizeValid = false;
                 return;
@@ -119,7 +119,8 @@ namespace XenAdmin.Controls
 
             if (!decimal.TryParse(DiskSizeNumericUpDown.Text.Trim(), out decimal result) || result < 0)
             {
-                SetError(Messages.INVALID_NUMBER);
+                SelectedSize = 0;
+                SetError(Messages.INVALID_DISK_SIZE);
                 IsSizeValid = false;
                 return;
             }
@@ -142,7 +143,7 @@ namespace XenAdmin.Controls
 
             if (SelectedSize > DEFAULT_MAXIMUM)
             {
-                SetError(Messages.INVALID_NUMBER);
+                SetError(Messages.INVALID_DISK_SIZE);
                 IsSizeValid = false;
                 return;
             }

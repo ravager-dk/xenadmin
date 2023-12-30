@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -49,7 +48,7 @@ namespace XenAdmin.Commands
         {
             Util.ThrowIfParameterNull(command, "command");
             Command = command;
-            Enabled = command != null && command.CanExecute();
+            Enabled = command != null && command.CanRun();
         }
 
         private void Update()
@@ -93,9 +92,9 @@ namespace XenAdmin.Commands
 
         protected override void OnClick(EventArgs e)
         {
-            if (_command != null && _command.CanExecute())
+            if (_command != null && _command.CanRun())
             {
-                _command.Execute();
+                _command.Run();
             }
 
             base.OnClick(e);

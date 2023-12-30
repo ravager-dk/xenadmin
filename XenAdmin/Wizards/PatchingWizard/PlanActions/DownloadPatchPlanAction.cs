@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -34,7 +33,6 @@ using System.Collections.Generic;
 using XenAdmin.Actions;
 using XenAdmin.Core;
 using XenAPI;
-using System.Linq;
 using System.IO;
 using XenAdmin.Network;
 
@@ -42,10 +40,11 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
 {
     class DownloadPatchPlanAction : PlanActionWithSession
     {
+        private static object _lock = new object();
+        private static readonly Dictionary<string, object> _patchLocks = new Dictionary<string, object>();
         private readonly XenServerPatch patch;
         private Dictionary<XenServerPatch, string> AllDownloadedPatches = new Dictionary<XenServerPatch, string>();
         private KeyValuePair<XenServerPatch, string> patchFromDisk;
-        private string tempFileName = null;
 
         public DownloadPatchPlanAction(IXenConnection connection, XenServerPatch patch, Dictionary<XenServerPatch, string> allDownloadedPatches, KeyValuePair<XenServerPatch, string> patchFromDisk)
             : base(connection)
@@ -59,16 +58,26 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
         {
             AddProgressStep(string.Format(Messages.PATCHINGWIZARD_DOWNLOADUPDATE_ACTION_TITLE_WAITING, patch.Name));
 
+            object patchLock;
+            lock (_lock)
+            {
+                if (!_patchLocks.TryGetValue(patch.Uuid, out patchLock))
+                {
+                    patchLock = new object();
+                    _patchLocks[patch.Uuid] = patchLock;
+                }
+            }
+
             //if we are updating multiple pools at the same time, we only need to download the patch for
             // the first pool, hence we lock it to prevent the plan action of the other pools to run
-            lock (patch)
+            lock (patchLock)
             {
                 if (Cancelling)
                     return;
 
                 //skip the download if the patch has been already downloaded or we are using a patch from disk
-                if ((AllDownloadedPatches.ContainsKey(patch) && File.Exists(AllDownloadedPatches[patch])) 
-                    || (patchFromDisk.Key == patch && File.Exists(patchFromDisk.Value)))
+                if (AllDownloadedPatches.ContainsKey(patch) && File.Exists(AllDownloadedPatches[patch]) 
+                    || patchFromDisk.Key == patch && File.Exists(patchFromDisk.Value))
                 {
                     ReplaceProgressStep(string.Format(Messages.PATCHINGWIZARD_DOWNLOADUPDATE_ACTION_TITLE_SKIPPING, patch.Name));
                 }
@@ -86,18 +95,17 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
                 return;
 
             Uri address = new Uri(patchUri);
-            tempFileName = Path.GetTempFileName();
 
-            var exts = Helpers.ElyOrGreater(Connection) ? InvisibleMessages.ISO_UPDATE : BrandManager.ExtensionUpdate;
-            var downloadAction = new DownloadAndUnzipXenServerPatchAction(patch.Name, address, tempFileName, true, exts);
+            var exts = Helpers.ElyOrGreater(Connection) ? "iso" : BrandManager.ExtensionUpdate;
+            var downloadAction = new DownloadAndUnzipUpdateAction(patch.Name, address, exts);
 
-            downloadAction.Changed += downloadAndUnzipXenServerPatchAction_Changed;
-            downloadAction.Completed += downloadAndUnzipXenServerPatchAction_Completed;
+            downloadAction.Changed += DownloadAction_Changed;
+            downloadAction.Completed += DownloadAction_Completed;
 
-            downloadAction.RunExternal(session);
+            downloadAction.RunSync(session);
         }
 
-        private void downloadAndUnzipXenServerPatchAction_Changed(ActionBase action)
+        private void DownloadAction_Changed(ActionBase action)
         {
             if (action == null)
                 return;
@@ -114,17 +122,16 @@ namespace XenAdmin.Wizards.PatchingWizard.PlanActions
         }
 
 
-        private void downloadAndUnzipXenServerPatchAction_Completed(ActionBase sender)
+        private void DownloadAction_Completed(ActionBase sender)
         {
-            var action = sender as DownloadAndUnzipXenServerPatchAction;
-            if (action == null)
+            if (!(sender is DownloadAndUnzipUpdateAction action))
                 return;
 
-            action.Changed -= downloadAndUnzipXenServerPatchAction_Changed;
-            action.Completed -= downloadAndUnzipXenServerPatchAction_Completed;
+            action.Changed -= DownloadAction_Changed;
+            action.Completed -= DownloadAction_Completed;
 
             if (action.Succeeded)
-                AllDownloadedPatches[patch] = action.PatchPath;
+                AllDownloadedPatches[patch] = action.UpdatePath;
         }
     }
 }

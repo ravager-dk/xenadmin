@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -32,44 +31,54 @@
 
 using System.Drawing;
 using System.Windows.Forms;
-using XenAdmin.Properties;
 
 
 namespace XenAdmin.Dialogs.OptionsPages
 {
     public partial class DisplayOptionsPage : UserControl, IOptionsPage
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         public DisplayOptionsPage()
         {
             InitializeComponent();
-            Build();
         }
 
-        private void Build()
+        public void Build()
         {
             GraphAreasRadioButton.Checked = Properties.Settings.Default.FillAreaUnderGraphs;
             GraphLinesRadioButton.Checked = !Properties.Settings.Default.FillAreaUnderGraphs;
             checkBoxStoreTab.Checked = Properties.Settings.Default.RememberLastSelectedTab;
-        }
-
-        public static void Log()
-        {
-            log.Info("=== FillAreaUnderGraphs: " + Properties.Settings.Default.FillAreaUnderGraphs);
-            log.Info("=== RememberLastSelectedTab: " + Properties.Settings.Default.RememberLastSelectedTab);
+            showTimestampsCheckBox.Checked = Properties.Settings.Default.ShowTimestampsInUpdatesLog;
         }
 
         #region IOptionsPage Members
+
+        public bool IsValidToSave(out Control control, out string invalidReason)
+        {
+            control = null;
+            invalidReason = null;
+            return true;
+        }
+
+        public void ShowValidationMessages(Control control, string message)
+        {
+            // no message
+        }
+
+        public void HideValidationMessages()
+        {
+            // no message
+        }
 
         public void Save()
         {
             if (GraphAreasRadioButton.Checked != Properties.Settings.Default.FillAreaUnderGraphs)
                 Properties.Settings.Default.FillAreaUnderGraphs = GraphAreasRadioButton.Checked;
- 
+
             if (checkBoxStoreTab.Checked != Properties.Settings.Default.RememberLastSelectedTab)
                 Properties.Settings.Default.RememberLastSelectedTab = checkBoxStoreTab.Checked;
- 
+
+            if (showTimestampsCheckBox.Checked != Properties.Settings.Default.ShowTimestampsInUpdatesLog)
+                Properties.Settings.Default.ShowTimestampsInUpdatesLog = showTimestampsCheckBox.Checked;
         }
 
         #endregion
@@ -80,7 +89,7 @@ namespace XenAdmin.Dialogs.OptionsPages
 
         public string SubText => Messages.DISPLAY_DETAILS;
 
-        public Image Image => Resources._001_PerformanceGraph_h32bit_16;
+        public Image Image => Images.StaticImages._001_PerformanceGraph_h32bit_16;
 
         #endregion
     }

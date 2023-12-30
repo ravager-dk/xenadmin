@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,16 +28,12 @@
  * SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using XenAdmin.Core;
-using XenAPI;
-using System.Windows.Forms;
-using XenAdmin.Dialogs;
-using XenAdmin.Properties;
 using System.Drawing;
-using System.Collections.ObjectModel;
+using System.Linq;
+using XenAdmin.Core;
+using XenAdmin.Dialogs;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -66,62 +61,42 @@ namespace XenAdmin.Commands
         {
         }
 
-        public RepairSRCommand(IMainWindow mainWindow, IEnumerable<SR> selection)
-            : base(mainWindow, ConvertToSelection<SR>(selection))
+        public RepairSRCommand(IMainWindow mainWindow, IEnumerable<SR> srs)
+            : base(mainWindow, srs.Select(s => new SelectedItem(s)).ToList())
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
-            List<SR> srList = selection.AsXenObjects<SR>(CanExecute);
+            List<SR> srList = selection.AsXenObjects<SR>(CanRun);
 
             if (srList.Find(s => !s.MultipathAOK()) != null)
             {
-                using (var dlg = new ThreeButtonDialog(
-                               new ThreeButtonDialog.Details(
-                                   SystemIcons.Warning,
-                                   Messages.MULTIPATH_FAILED,
-                                   Messages.MULTIPATHING)))
-                {
+                using (var dlg = new WarningDialog(string.Format(Messages.MULTIPATH_FAILED, BrandManager.ProductBrand))
+                    {WindowTitle = Messages.MULTIPATHING})
                     dlg.ShowDialog(Parent);
-                }
             }
 
-            new RepairSRDialog(srList).Show(Parent);
+            if (srList.Count != 0)
+            {
+                new RepairSRDialog(srList).Show(Parent);
+            }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.AllItemsAre<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanExecute);
+            return selection.AllItemsAre<SR>() && selection.AtLeastOneXenObjectCan<SR>(CanRun);
         }
 
-        private bool CanExecute(SR sr)
+        private bool CanRun(SR sr)
         {
             return sr != null && sr.HasPBDs() && (sr.IsBroken() || !sr.MultipathAOK()) && !HelpersGUI.GetActionInProgress(sr) && sr.CanRepairAfterUpgradeFromLegacySL();
         }
 
-        public override Image MenuImage
-        {
-            get
-            {
-                return Images.StaticImages._000_StorageBroken_h32bit_16;
-            }
-        }
+        public override Image MenuImage => Images.StaticImages._000_StorageBroken_h32bit_16;
 
-        public override string MenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REPAIR_SR;
-            }
-        }
+        public override string MenuText => Messages.MAINWINDOW_REPAIR_SR;
 
-        public override string ContextMenuText
-        {
-            get
-            {
-                return Messages.MAINWINDOW_REPAIR_SR_CONTEXT_MENU;
-            }
-        }
+        public override string ContextMenuText => Messages.MAINWINDOW_REPAIR_SR_CONTEXT_MENU;
     }
 }

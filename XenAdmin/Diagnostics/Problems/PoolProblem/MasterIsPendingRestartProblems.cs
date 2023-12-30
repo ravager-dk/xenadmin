@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,66 +28,41 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
-using XenAdmin.Diagnostics.Hotfixing;
-using XenAdmin.Properties;
 using XenAPI;
 
 namespace XenAdmin.Diagnostics.Problems.PoolProblem
 {
-    class MasterIsPendingRestartHostProblem : PoolProblem
+    class CoordinatorIsPendingRestartHostProblem : PoolProblem
     {
-        public MasterIsPendingRestartHostProblem(RestartHostOrToolstackPendingOnMasterCheck check, Pool pool)
+        public CoordinatorIsPendingRestartHostProblem(RestartHostOrToolstackPendingOnCoordinatorCheck check, Pool pool)
             : base(check, pool)
         { }
 
-        public override string Description
-        {
-            get 
-            {
-                return string.Format(
-                    ((RestartHostOrToolstackPendingOnMasterCheck)Check).UpdateUuid != null
-                    ? Messages.PROBLEM_MASTER_PENDING_RESTART_HOST_THIS_UPDATE
-                    : Messages.PROBLEM_MASTER_PENDING_RESTART_HOST,
-                    Helpers.GetName(Pool).Ellipsise(30));
-            }
-        }
+        public override string Description =>
+            string.Format(
+                ((RestartHostOrToolstackPendingOnCoordinatorCheck)Check).UpdateUuid != null
+                    ? Messages.PROBLEM_COORDINATOR_PENDING_RESTART_HOST_THIS_UPDATE
+                    : Messages.PROBLEM_COORDINATOR_PENDING_RESTART_HOST,
+                Helpers.GetName(Pool).Ellipsise(30));
 
-        public override string HelpMessage
-        {
-            get { return null; }
-        }
+        public override string HelpMessage => null;
     }
 
-    class MasterIsPendingRestartToolstackProblem : PoolProblem
+    class CoordinatorIsPendingRestartToolstackProblem : PoolProblem
     {
-        public MasterIsPendingRestartToolstackProblem(RestartHostOrToolstackPendingOnMasterCheck check, Pool pool)
+        public CoordinatorIsPendingRestartToolstackProblem(RestartHostOrToolstackPendingOnCoordinatorCheck check, Pool pool)
             : base(check, pool)
         { }
 
-        public override string Description
-        {
-            get
-            {
-                return string.Format(
-                    ((RestartHostOrToolstackPendingOnMasterCheck)Check).UpdateUuid != null
-                    ? Messages.PROBLEM_MASTER_PENDING_RESTART_TOOLSTACK_THIS_UPDATE
-                    : Messages.PROBLEM_MASTER_PENDING_RESTART_TOOLSTACK,
-                    Helpers.GetName(Pool).Ellipsise(30));
-            }
-        }
+        public override string Description =>
+            string.Format(
+                ((RestartHostOrToolstackPendingOnCoordinatorCheck)Check).UpdateUuid != null
+                    ? Messages.PROBLEM_COORDINATOR_PENDING_RESTART_TOOLSTACK_THIS_UPDATE
+                    : Messages.PROBLEM_COORDINATOR_PENDING_RESTART_TOOLSTACK,
+                Helpers.GetName(Pool).Ellipsise(30));
 
-        public override string HelpMessage
-        {
-            get { return null; }
-        }
+        public override string HelpMessage => null;
     }
 }

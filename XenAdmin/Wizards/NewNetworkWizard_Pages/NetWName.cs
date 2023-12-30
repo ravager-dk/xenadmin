@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -31,11 +30,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Text;
-using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.Network;
@@ -50,9 +44,9 @@ namespace XenAdmin.Wizards.NewNetworkWizard_Pages
             InitializeComponent();
         }
 
-        public override string Text { get { return Messages.NETW_NAME_TEXT; } }
+        public override string Text => Messages.NETW_NAME_TEXT;
 
-        public override string PageTitle { get { return Messages.NETW_NAME_TITLE; } }
+        public override string PageTitle => Messages.NETW_NAME_TITLE;
 
         public override bool EnableNext()
         {
@@ -61,7 +55,7 @@ namespace XenAdmin.Wizards.NewNetworkWizard_Pages
 
         protected override void PageLoadedCore(PageLoadedDirection direction)
         {
-            HelpersGUI.FocusFirstControl(Controls);
+            txtName.Focus();
         }
 
         protected override void PageLeaveCore(PageLoadedDirection direction, ref bool cancel)
@@ -77,21 +71,9 @@ namespace XenAdmin.Wizards.NewNetworkWizard_Pages
 
         public NetworkTypes SelectedNetworkType { private get; set; }
 
-        public string NetworkName
-        {
-            get
-            {
-                return this.txtName.Text;
-            }
-        }
+        public string NetworkName => txtName.Text;
 
-        public string NetworkDescription
-        {
-            get
-            {
-                return this.txtDescription.Text;
-            }
-        }
+        public string NetworkDescription => txtDescription.Text;
 
         private string GetNetworkName(NetworkTypes network_type)
         {

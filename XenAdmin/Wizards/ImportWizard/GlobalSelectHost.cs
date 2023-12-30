@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -107,7 +106,7 @@ namespace XenAdmin.Wizards.ImportWizard
 
 		private void m_buttonAddNewServer_Click(object sender, EventArgs e)
         {
-            new AddHostCommand(Program.MainWindow, this).Execute();
+            new AddHostCommand(Program.MainWindow, this).Run();
 		}
 
 		#endregion

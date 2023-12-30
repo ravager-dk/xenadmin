@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -49,10 +48,10 @@ namespace XenAdmin.Actions
 
             Description = string.Format(Messages.ACTION_TOOLSTACK_RESTARTING_ON, Host.Name().Ellipsise(30));
             RelatedTask = Host.async_restart_agent(session, Host.opaque_ref);
-            PollToCompletion(0, 100);
+            PollToCompletion();
 
             //call interrupt so we can reconnect afterwards
-            if (Helpers.HostIsMaster(Host))
+            if (Helpers.HostIsCoordinator(Host))
                 Host.Connection.Interrupt();
 
             Description = string.Format(Messages.ACTION_TOOLSTACK_RESTARTED_ON, Host.Name().Ellipsise(30));

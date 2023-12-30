@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -39,38 +38,25 @@ namespace XenAdmin.Actions
     /// <summary>
     /// Live migrate a VDI
     /// </summary>
-    public class MigrateVirtualDiskAction : PureAsyncAction
+    public class MigrateVirtualDiskAction : AsyncAction
     {
         private readonly VDI vdi;
 
         public MigrateVirtualDiskAction(IXenConnection connection, VDI vdi, SR sr)
-            : base(connection, string.Format(Messages.ACTION_MOVING_VDI_TITLE, Helpers.GetName(vdi), Helpers.GetName(sr)))
+            : base(connection, "")
         {
-            Description = Messages.ACTION_PREPARING;
             this.vdi = vdi;
             SR = sr;
+            Title = string.Format(Messages.ACTION_MOVING_VDI_TO_SR,
+                Helpers.GetName(vdi), Helpers.GetName(connection.Resolve(vdi.SR)), Helpers.GetName(sr));
+            ApiMethodsToRoleCheck.Add("VDI.async_pool_migrate");
         }
 
         protected override void Run()
         {
-            try
-            {
-                Title = Description = string.Format(Messages.ACTION_MOVING_VDI_STATUS, Helpers.GetName(vdi));
-                RelatedTask = VDI.async_pool_migrate(Session, vdi.opaque_ref, SR.opaque_ref, new Dictionary<string, string>());
-                PollToCompletion();
-            }
-            catch (CancelledException)
-            {
-                Description = string.Format(Messages.ACTION_VM_MIGRATE_CANCELLED, vdi.Name());
-                throw;
-            }
-            catch (Failure boo)
-            {
-                Description = boo.Message;
-                throw;
-            }
-
-            Description = Messages.ACTION_VM_MIGRATED;
+            RelatedTask = VDI.async_pool_migrate(Session, vdi.opaque_ref, SR.opaque_ref, new Dictionary<string, string>());
+            PollToCompletion();
+            Description = Messages.MOVED;
         }
     }
 }

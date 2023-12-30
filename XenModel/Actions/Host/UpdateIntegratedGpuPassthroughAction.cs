@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,14 +28,13 @@
  * SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
 using XenAdmin.Core;
 using XenAPI;
 
 
 namespace XenAdmin.Actions
 {
-    public class UpdateIntegratedGpuPassthroughAction : PureAsyncAction
+    public class UpdateIntegratedGpuPassthroughAction : AsyncAction
     {
         private bool enable;
 
@@ -45,11 +43,16 @@ namespace XenAdmin.Actions
         {
             Host = host;
             enable = enableOnNextReboot;
+
+            if (enable)
+                ApiMethodsToRoleCheck.AddRange("Host.async_enable_display", "PGPU.async_enable_dom0_access");
+            else
+                ApiMethodsToRoleCheck.AddRange("Host.async_disable_display", "PGPU.async_disable_dom0_access");
         }
 
         protected override void Run()
         {
-            this.Description = Messages.UPDATING_PROPERTIES;
+            Description = Messages.UPDATING_PROPERTIES;
 
             RelatedTask = enable 
                 ? Host.async_enable_display(Session, Host.opaque_ref) 
@@ -65,8 +68,8 @@ namespace XenAdmin.Actions
                     : PGPU.async_disable_dom0_access(Session, pGpu.opaque_ref);
                 PollToCompletion(50, 100);
             }
-            PercentComplete = 100;
-            Description = string.Format(Messages.UPDATED_PROPERTIES, Helpers.GetName(Host).Ellipsise(50));
+
+            Tick(100, string.Format(Messages.UPDATED_PROPERTIES, Helpers.GetName(Host).Ellipsise(50)));
         }
     }
 }

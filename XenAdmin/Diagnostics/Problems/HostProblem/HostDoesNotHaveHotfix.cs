@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,39 +28,23 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using XenAdmin.Core;
 using XenAdmin.Diagnostics.Checks;
 using XenAdmin.Diagnostics.Hotfixing;
-using XenAdmin.Properties;
 using XenAPI;
+
 
 namespace XenAdmin.Diagnostics.Problems.HostProblem
 {
     class HostDoesNotHaveHotfix : HostProblem
     {
-        private readonly HotfixFactory hotfixFactory = new HotfixFactory();
-
         public HostDoesNotHaveHotfix(HostHasHotfixCheck check, Host server)
             : base(check, server)
         {
         }
 
-        public override string Description
-        {
-            get { return string.Format(Messages.REQUIRED_HOTFIX_ISNOT_INSTALLED, ServerName); }
-        }
+        public override string Description => string.Format(Messages.REQUIRED_HOTFIX_NOT_INSTALLED, ServerName);
 
-        public override string HelpMessage
-        {
-            get { return Messages.APPLY_HOTFIX; }
-        }
+        public override string HelpMessage => Messages.APPLY_HOTFIX;
 
         protected override Actions.AsyncAction CreateAction(out bool cancelled)
         {
@@ -69,10 +52,25 @@ namespace XenAdmin.Diagnostics.Problems.HostProblem
             return new Actions.DelegatedAsyncAction(Server.Connection, string.Format(Messages.APPLYING_HOTFIX_TO_HOST, Server), "", "",
                 (ss) =>
                     {
-                        Hotfix hotfix = hotfixFactory.Hotfix(Server);
+                        Hotfix hotfix = HotfixFactory.Hotfix(Server);
                         if (hotfix != null)
                             hotfix.Apply(Server, ss);
                     }, true);
         }
+    }
+
+    class HostDoesNotHaveHotfixWarning : Warning
+    {
+        private readonly Host host;
+
+        public HostDoesNotHaveHotfixWarning(Check check, Host host)
+            : base(check)
+        {
+            this.host = host;
+        }
+
+        public override string Title => Check.Description;
+
+        public override string Description => string.Format(Messages.REQUIRED_HOTFIX_NOT_INSTALLED_WARNING, host);
     }
 }

@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -36,8 +35,9 @@ using System.Windows.Forms;
 using XenAPI;
 using XenAdmin.Controls;
 using XenCenterLib;
-using XenAdmin.Properties;
 using System.Collections;
+using System.Linq;
+using XenAdmin.Core;
 
 
 namespace XenAdmin.Wizards.NewVMWizard
@@ -45,6 +45,7 @@ namespace XenAdmin.Wizards.NewVMWizard
     public partial class Page_Template : XenTabPage
     {
         private bool templatesLoaded;
+        private VM m_selectedTemplate;
 
         public Page_Template()
         {
@@ -80,20 +81,11 @@ namespace XenAdmin.Wizards.NewVMWizard
             }
         }
 
-        public override string Text
-        {
-            get { return Messages.NEWVMWIZARD_TEMPLATEPAGE_NAME; }
-        }
+        public override string Text => Messages.NEWVMWIZARD_TEMPLATEPAGE_NAME;
 
-        public override string PageTitle
-        {
-            get { return Messages.NEWVMWIZARD_TEMPLATEPAGE_TITLE; }
-        }
+        public override string PageTitle => Messages.NEWVMWIZARD_TEMPLATEPAGE_TITLE;
 
-        public override string HelpID
-        {
-            get { return "Template"; }
-        }
+        public override string HelpID => "Template";
 
         public override List<KeyValuePair<string, string>> PageSummary
         {
@@ -112,9 +104,8 @@ namespace XenAdmin.Wizards.NewVMWizard
 
         #endregion
 
-        public bool CopyBiosStrings { get { return checkBoxCopyBiosStrings.Checked; } }
+        public bool CopyBiosStrings => checkBoxCopyBiosStrings.Checked;
 
-        private VM m_selectedTemplate;
         public VM SelectedTemplate
         {
             get
@@ -141,17 +132,21 @@ namespace XenAdmin.Wizards.NewVMWizard
 
         private void AddRows()
         {
-            List<TemplatesGridViewItem> SelectedRows = new List<TemplatesGridViewItem>();
+            List<TemplatesGridViewItem> selectedRows = new List<TemplatesGridViewItem>();
+
             foreach (TemplatesGridViewItem item in TemplatesGridView.SelectedRows)
-            {
-                SelectedRows.Add(item);
-            }
+                selectedRows.Add(item);
 
             TemplatesGridView.SuspendLayout();
             TemplatesGridView.Rows.Clear();
+
             foreach (VM vm in Connection.Cache.VMs)
             {
                 if (!vm.is_a_template || !vm.Show(Properties.Settings.Default.ShowHiddenVMs))
+                    continue;
+
+                if (vm.Connection.Cache.Hosts.Any(Host.RestrictVtpm) &&
+                    vm.platform.TryGetValue("vtpm", out var result) && result.ToLower() == "true")
                     continue;
 
                 TemplatesGridView.Rows.Add(new TemplatesGridViewItem(vm));
@@ -159,24 +154,21 @@ namespace XenAdmin.Wizards.NewVMWizard
 
             foreach (TemplatesGridViewItem temp in TemplatesGridView.Rows)
             {
-                if (SelectedRows.Contains(temp))
+                if (selectedRows.Contains(temp))
                     temp.Selected = true;
             }
 
             TemplatesGridView.ResumeLayout();
             RowsChanged();
 
-            TemplatesGridView.Sort(new Sorter());
+            TemplatesGridView.Sort(new TemplateSorter());
         }
 
         private void RefreshRows()
         {
-
             var rows = new List<DataGridViewRow>();
             foreach (DataGridViewRow row in TemplatesGridView.Rows)
-            {
                 rows.Add(row);
-            }
 
             TemplatesGridView.Rows.Clear();
 
@@ -240,26 +232,30 @@ namespace XenAdmin.Wizards.NewVMWizard
             }
         }
 
-        private class Sorter : IComparer
+        private class TemplateSorter : IComparer
         {
             public int Compare(object x, object y)
             {
-                TemplatesGridViewItem xItem = (TemplatesGridViewItem)x;
-                TemplatesGridViewItem yItem = (TemplatesGridViewItem)y;
+                var xItem = x as TemplatesGridViewItem;
+                var yItem = y as TemplatesGridViewItem;
 
-                int xScore = xItem.SortOrder;
-                int yScore = yItem.SortOrder;
+                if (xItem == null && yItem == null)
+                    return 0;
+                if (xItem == null)
+                    return -1;
+                if (yItem == null)
+                    return 1;
 
-                if (xScore != yScore)
-                    return (xScore - yScore);
-                else
-                {
-                    int result = StringUtility.NaturalCompare(xItem.Template.Name(), yItem.Template.Name());
-                    if (result != 0)
-                        return result;
-                    else
-                        return xItem.Template.opaque_ref.CompareTo(yItem.Template.opaque_ref);
-                }
+                int result = xItem.SortOrder - yItem.SortOrder;
+                if (result != 0)
+                    return result;
+
+                //reverse alphabetical order so most recent version appears first
+                result = -StringUtility.NaturalCompare(xItem.Template.Name(), yItem.Template.Name());
+                if (result != 0)
+                    return result;
+                
+                return xItem.Template.opaque_ref.CompareTo(yItem.Template.opaque_ref);
             }
         }
 
@@ -276,20 +272,16 @@ namespace XenAdmin.Wizards.NewVMWizard
                 if (template.IsHidden())
                     SortOrder += (int)VM.VmTemplateType.Count;
 
-                var ImageCell = new DataGridViewImageCell(false)
-                                    {
-                                        ValueType = typeof(Image),
-                                        Value = typ.ToBitmap()
-                                    };
-                var TypeCell = new DataGridViewTextBoxCell { Value = typ.ToDisplayString() };
-                var NameCell = new DataGridViewTextBoxCell { Value = template.Name() };
+                var imageCell = new DataGridViewImageCell(false) {ValueType = typeof(Image), Value = typ.ToBitmap()};
+                var typeCell = new DataGridViewTextBoxCell {Value = typ.ToDisplayString()};
+                var nameCell = new DataGridViewTextBoxCell {Value = template.Name()};
 
-                Cells.AddRange(ImageCell, NameCell, TypeCell);
+                Cells.AddRange(imageCell, nameCell, typeCell);
             }
 
             public bool Equals(TemplatesGridViewItem other)
             {
-                return Template.Equals(other.Template);
+                return Template.Equals(other?.Template);
             }
         }
     }
@@ -300,13 +292,20 @@ namespace XenAdmin.Wizards.NewVMWizard
         {
             switch (templateType)
             {
+                case VM.VmTemplateType.Custom:
+                    return Messages.NEWVMWIZARD_TEMPLATEPAGE_CUSTOM;
                 case VM.VmTemplateType.Windows:
+                case VM.VmTemplateType.WindowsServer:
                 case VM.VmTemplateType.LegacyWindows:
                     return Messages.NEWVMWIZARD_TEMPLATEPAGE_WINDOWS;
                 case VM.VmTemplateType.Centos:
                     return Messages.NEWVMWIZARD_TEMPLATEPAGE_CENTOS;
                 case VM.VmTemplateType.Debian:
                     return Messages.NEWVMWIZARD_TEMPLATEPAGE_DEBIAN;
+                case VM.VmTemplateType.Gooroom:
+                    return Messages.NEWVMWIZARD_TEMPLATEPAGE_GOOROOM;
+                case VM.VmTemplateType.Rocky:
+                    return Messages.NEWVMWIZARD_TEMPLATEPAGE_ROCKY;
                 case VM.VmTemplateType.Linx:
                     return Messages.NEWVMWIZARD_TEMPLATEPAGE_LINX; 
                 case VM.VmTemplateType.Oracle:
@@ -328,7 +327,7 @@ namespace XenAdmin.Wizards.NewVMWizard
                 case VM.VmTemplateType.Turbo:
                     return Messages.NEW_VM_WIZARD_TEMPLATEPAGE_TURBO;        
                 case VM.VmTemplateType.Citrix:
-                    return Messages.NEWVMWIZARD_TEMPLATEPAGE_CITRIX;
+                    return BrandManager.CompanyNameShort;
                 case VM.VmTemplateType.Solaris:
                 case VM.VmTemplateType.Misc:
                     return Messages.NEWVMWIZARD_TEMPLATEPAGE_MISC;
@@ -346,46 +345,51 @@ namespace XenAdmin.Wizards.NewVMWizard
             switch (templateType)
             {
                 case VM.VmTemplateType.Custom:
-                    return Resources._000_UserTemplate_h32bit_16;
+                    return Images.StaticImages._000_UserTemplate_h32bit_16;
                 case VM.VmTemplateType.Windows:
                 case VM.VmTemplateType.LegacyWindows:
-                    return Resources.windows_h32bit_16;
+                case VM.VmTemplateType.WindowsServer:
+                    return Images.StaticImages.windows_h32bit_16;
                 case VM.VmTemplateType.Centos:
-                    return Resources.centos_16x;
+                    return Images.StaticImages.centos_16x;
                 case VM.VmTemplateType.Debian:
-                    return Resources.debian_16x;
+                    return Images.StaticImages.debian_16x;
+                case VM.VmTemplateType.Gooroom:
+                    return Images.StaticImages.gooroom_16x;
+                case VM.VmTemplateType.Rocky:
+                    return Images.StaticImages.rocky_16x;
                 case VM.VmTemplateType.Linx:
-                    return Resources.linx_16x;     
+                    return Images.StaticImages.linx_16x;     
                 case VM.VmTemplateType.Oracle:
-                    return Resources.oracle_16x;
+                    return Images.StaticImages.oracle_16x;
                 case VM.VmTemplateType.RedHat:
-                    return Resources.redhat_16x;
+                    return Images.StaticImages.redhat_16x;
                 case VM.VmTemplateType.SciLinux:
-                    return Resources.scilinux_16x;
+                    return Images.StaticImages.scilinux_16x;
                 case VM.VmTemplateType.Suse:
-                    return Resources.suse_16x;
+                    return Images.StaticImages.suse_16x;
                 case VM.VmTemplateType.Ubuntu:
-                    return Resources.ubuntu_16x;
+                    return Images.StaticImages.ubuntu_16x;
                 case VM.VmTemplateType.YinheKylin:
-                    return Resources.yinhekylin_16x;
+                    return Images.StaticImages.yinhekylin_16x;
                 case VM.VmTemplateType.NeoKylin:
-                    return Resources.neokylin_16x;
+                    return Images.StaticImages.neokylin_16x;
                 case VM.VmTemplateType.Asianux:
-                    return Resources.asianux_16x;   
+                    return Images.StaticImages.asianux_16x;   
                 case VM.VmTemplateType.Turbo:
-                    return Resources.turbo_16x;                      
+                    return Images.StaticImages.turbo_16x;                      
                 case VM.VmTemplateType.Citrix:
-                    return Resources.Logo;
+                    return Images.StaticImages.Logo;
                 case VM.VmTemplateType.Solaris:
                 case VM.VmTemplateType.Misc:
-                    return Resources._000_VMTemplate_h32bit_16;
+                    return Images.StaticImages._000_VMTemplate_h32bit_16;
                 case VM.VmTemplateType.CoreOS:
-                    return Resources.coreos_globe_icon;
+                    return Images.StaticImages.coreos_globe_icon;
                 case VM.VmTemplateType.Snapshot:
                 case VM.VmTemplateType.SnapshotFromVmpp:
                 default:
-                    return Resources._000_VMSession_h32bit_16;
-                // Also modify PropertyNames.os_name in XenServer/Common.cs
+                    return Images.StaticImages._000_VMSession_h32bit_16;
+                // Also modify 'case PropertyNames.os_name' in method GetImagesFor(PropertyNames p) in XenModel/XenSearch/Common.cs
             }
         }
     }

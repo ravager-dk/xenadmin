@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,12 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.XenSearch;
-using System.Drawing;
 using XenAPI;
 using XenCenterLib;
 
@@ -45,9 +41,11 @@ namespace XenAdmin.Core
         private static readonly LimitedStack<HistoryItem> backwardHistory = new LimitedStack<HistoryItem>(15);
         private static readonly LimitedStack<HistoryItem> forwardHistory = new LimitedStack<HistoryItem>(15);
         private static HistoryItem currentHistoryItem;
-        private static bool InHistoryNavigation = false;
+        private static bool InHistoryNavigation;
 
-        // Use this when modifying a search
+        /// <summary>
+        /// Use this when modifying a search
+        /// </summary>
         public static void ReplaceHistoryItem(HistoryItem historyItem)
         {
             if (InHistoryNavigation)
@@ -135,7 +133,7 @@ namespace XenAdmin.Core
         }
 
         private static void PopulateMenuWith(ToolStripSplitButton button, LimitedStack<HistoryItem> history, 
-            HistoryNavigationDelegate historyNaviagtionDelegate)
+            HistoryNavigationDelegate historyNavigationDelegate)
         {
             button.DropDownItems.Clear();
 
@@ -143,28 +141,27 @@ namespace XenAdmin.Core
             foreach (HistoryItem item in history)
             {
                 int j = ++i;
-                ToolStripMenuItem menuItem = new ToolStripMenuItem();
-                menuItem.Text = item.Name.EscapeAmpersands();
-                menuItem.Image = item.Image;
-                menuItem.ImageScaling = ToolStripItemImageScaling.None;
-                menuItem.Click += delegate(Object sender, EventArgs e)
+                var menuItem = new ToolStripMenuItem
                 {
-                    historyNaviagtionDelegate(j);
+                    Text = item.Name.EscapeAmpersands(),
+                    Image = item.Image,
+                    ImageScaling = ToolStripItemImageScaling.None
                 };
+                menuItem.Click += (sender, e) => historyNavigationDelegate(j);
 
                 button.DropDownItems.Add(menuItem);
             }
         }
     }
 
-    public interface HistoryItem
+    internal abstract class HistoryItem
     {
-        bool Go();
-        String Name { get; }
-        Image Image { get; }
+        public abstract void Go();
+        public abstract string Name { get; }
+        public abstract Image Image { get; }
     }
 
-    public class XenModelObjectHistoryItem : HistoryItem
+    internal class XenModelObjectHistoryItem : HistoryItem
     {
         private readonly IXenObject o;
         private readonly TabPage tab;
@@ -175,15 +172,10 @@ namespace XenAdmin.Core
             this.tab = tab;
         }
 
-        public bool Go()
+        public override void Go()
         {
             if (Program.MainWindow.SelectObjectInTree(o))
-            {
                 Program.MainWindow.TheTabControl.SelectedTab = tab;
-                return true;
-            }
-
-            return false;
         }
 
         public override bool Equals(object obj)
@@ -209,25 +201,13 @@ namespace XenAdmin.Core
             return o.opaque_ref.GetHashCode();
         }
 
-        public String Name
-        {
-            get
-            {
-                return String.Format("{0}, ({1})", 
-                    o == null ? Messages.XENCENTER : Helpers.GetName(o), tab.Text);
-            }
-        }
+        public override string Name => string.Format("{0}, ({1})",
+            o == null ? BrandManager.BrandConsole : Helpers.GetName(o), tab.Text);
 
-        public Image Image
-        {
-            get
-            {
-                return o == null ? Images.GetImage16For(Icons.XenCenter) : Images.GetImage16For(o);
-            }
-        }
+        public override Image Image => o == null ? Images.GetImage16For(Icons.XenCenter) : Images.GetImage16For(o);
     }
 
-    public class SearchHistoryItem : HistoryItem
+    internal class SearchHistoryItem : HistoryItem
     {
         private readonly Search search;
 
@@ -236,10 +216,9 @@ namespace XenAdmin.Core
             this.search = search;
         }
 
-        public bool Go()
+        public override void Go()
         {
             Program.MainWindow.DoSearch(search);
-            return true;
         }
 
         public override bool Equals(object obj)
@@ -256,24 +235,12 @@ namespace XenAdmin.Core
             return search.GetHashCode();
         }
 
-        public String Name
-        {
-            get
-            {
-                return search.Name;
-            }
-        }
+        public override string Name => search.Name;
 
-        public Image Image
-        {
-            get
-            {
-                return Images.GetImage16For(search);
-            }
-        }
+        public override Image Image => Images.GetImage16For(search);
     }
 
-    public class ModifiedSearchHistoryItem : HistoryItem
+    internal class ModifiedSearchHistoryItem : HistoryItem
     {
         private readonly IXenObject o;
         private readonly Search search;
@@ -284,16 +251,13 @@ namespace XenAdmin.Core
             this.search = search;
         }
 
-        public bool Go()
+        public override void Go()
         {
             if (Program.MainWindow.SelectObjectInTree(o))
             {
                 Program.MainWindow.TheTabControl.SelectedTab = Program.MainWindow.TabPageSearch;
                 Program.MainWindow.SearchPage.Search = search;
-                return true;
             }
-
-            return false;
         }
 
         public override bool Equals(object obj)
@@ -319,21 +283,9 @@ namespace XenAdmin.Core
             return o.opaque_ref.GetHashCode();
         }
 
-        public String Name
-        {
-            get
-            {
-                return String.Format("{0}, ({1})",
-                    o == null ? Messages.XENCENTER : Helpers.GetName(o), Program.MainWindow.TabPageSearch.Text);
-            }
-        }
+        public override string Name => string.Format("{0}, ({1})",
+            o == null ? BrandManager.BrandConsole : Helpers.GetName(o), Program.MainWindow.TabPageSearch.Text);
 
-        public Image Image
-        {
-            get
-            {
-                return o == null ? Images.GetImage16For(Icons.XenCenter) : Images.GetImage16For(o);
-            }
-        }
+        public override Image Image => o == null ? Images.GetImage16For(Icons.XenCenter) : Images.GetImage16For(o);
     }
 }

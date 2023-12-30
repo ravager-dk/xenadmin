@@ -129,6 +129,7 @@
 			// pictureBoxWarning1
 			// 
 			resources.ApplyResources(this.pictureBoxWarning1, "pictureBoxWarning1");
+            this.pictureBoxWarning1.Image = global::XenAdmin.Properties.Resources._000_WarningAlert_h32bit_32;
 			this.pictureBoxWarning1.Name = "pictureBoxWarning1";
 			this.m_tableLpWarning.SetRowSpan(this.pictureBoxWarning1, 2);
 			this.pictureBoxWarning1.TabStop = false;
@@ -153,6 +154,7 @@
 			// pictureBoxInfo
 			// 
 			resources.ApplyResources(this.pictureBoxInfo, "pictureBoxInfo");
+            this.pictureBoxInfo.Image = global::XenAdmin.Properties.Resources._000_Info3_h32bit_16;
 			this.pictureBoxInfo.Name = "pictureBoxInfo";
 			this.pictureBoxInfo.TabStop = false;
 			// 
@@ -236,6 +238,7 @@
 			// pictureBoxWarning2
 			// 
 			resources.ApplyResources(this.pictureBoxWarning2, "pictureBoxWarning2");
+            this.pictureBoxWarning2.Image = global::XenAdmin.Properties.Resources._000_WarningAlert_h32bit_32;
 			this.pictureBoxWarning2.Name = "pictureBoxWarning2";
 			this.m_tableLpLimit.SetRowSpan(this.pictureBoxWarning2, 2);
 			this.pictureBoxWarning2.TabStop = false;

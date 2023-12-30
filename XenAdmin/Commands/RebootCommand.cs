@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -29,13 +28,9 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using XenAPI;
-using XenAdmin.Properties;
 using System.Drawing;
 using System.Collections.ObjectModel;
+using XenAPI;
 
 
 namespace XenAdmin.Commands
@@ -53,26 +48,26 @@ namespace XenAdmin.Commands
         {
         }
 
-        protected override void ExecuteCore(SelectedItemCollection selection)
+        protected override void RunCore(SelectedItemCollection selection)
         {
             Command cmd = new RebootHostCommand(MainWindowCommandInterface, selection);
 
-            if (cmd.CanExecute())
+            if (cmd.CanRun())
             {
-                cmd.Execute();
+                cmd.Run();
             }
             else
             {
                 cmd = new RebootVMCommand(MainWindowCommandInterface, selection);
 
-                if (cmd.CanExecute())
+                if (cmd.CanRun())
                 {
-                    cmd.Execute();
+                    cmd.Run();
                 }
             }
         }
 
-        protected override string EnabledToolTipText
+        public override string EnabledToolTipText
         {
             get
             {
@@ -86,17 +81,11 @@ namespace XenAdmin.Commands
             }
         }
 
-        protected override bool CanExecuteCore(SelectedItemCollection selection)
+        protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return new RebootVMCommand(MainWindowCommandInterface, selection).CanExecute() || new RebootHostCommand(MainWindowCommandInterface, selection).CanExecute();
+            return new RebootVMCommand(MainWindowCommandInterface, selection).CanRun() || new RebootHostCommand(MainWindowCommandInterface, selection).CanRun();
         }
 
-        public override Image ToolBarImage
-        {
-            get
-            {
-                return Images.StaticImages._001_Reboot_h32bit_24;
-            }
-        }
+        public override Image ToolBarImage => Images.StaticImages._001_Reboot_h32bit_24;
     }
 }

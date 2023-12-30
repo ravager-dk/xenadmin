@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -69,7 +68,7 @@ namespace XenAdmin
             }
         }
 
-        public static void InitEventHandlers()
+        public static void RegisterEventHandlers()
         {
             PoolCollectionChangedWithInvoke = InvokeHelper.InvokeHandler(CollectionChanged<Pool>);
             VMCollectionChangedWithInvoke = InvokeHelper.InvokeHandler(CollectionChanged<VM>);

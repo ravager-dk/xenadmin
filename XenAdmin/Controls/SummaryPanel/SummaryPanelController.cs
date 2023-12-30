@@ -1,5 +1,4 @@
-﻿/* Copyright (c) Citrix Systems, Inc. 
- * All rights reserved. 
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -43,7 +42,7 @@ namespace XenAdmin.Controls.SummaryPanel
         public SummaryPanelController(ISummaryPanelView view)
         {
             View = view;
-            View.DrawInformationIcon = XenAdmin.Properties.Resources._000_Info3_h32bit_16;
+            View.DrawInformationIcon = Images.StaticImages._000_Info3_h32bit_16;
             View.DrawInformationVisible = false;
         }
 
@@ -52,19 +51,37 @@ namespace XenAdmin.Controls.SummaryPanel
            set { View.DrawTitle = value; }
         }
 
-        public string HelperUrl
+        public string LicenseHelperUrlText
         {
-            set { View.DrawHelperUrl = value; }
+            set { View.DrawLicenseHelperUrlText = value; }
         }
 
-        public bool HelperUrlVisible
+        public string SupportHelperUrlText
         {
-            set { View.DrawHelperUrlVisible = value; }
+            set { View.DrawSupportHelperUrlText = value; }
         }
 
-        public string WarningMessage
+        public bool LicenseHelperUrlVisible
         {
-            set { View.DrawWarningMessage = value; }
+            set { View.DrawLicenseUrlVisible = value; }
+        }
+
+        public bool SupportHelperUrlVisible
+        {
+            set { View.DrawSupportUrlVisible = value; }
+        }
+
+        public string LicenseWarningMessage
+        {
+            set { View.DrawLicenseWarningMessage = value; }
+        }
+
+        public string SupportWarningMessage
+        {
+            set
+            {
+                View.DrawSupportWarningMessage = value;
+            }
         }
 
         public bool InformationVisible
@@ -77,9 +94,14 @@ namespace XenAdmin.Controls.SummaryPanel
             set { View.DrawInformationText = value; }
         }
 
-        public Bitmap WarningIcon
+        public Bitmap LicenseWarningIcon
         {
-            set { View.DrawWarningIcon = value; }
+            set { View.DrawLicenseWarningIcon = value; }
+        }
+
+        public Bitmap SupportWarningIcon
+        {
+            set { View.DrawSupportWarningIcon = value; }
         }
         
         public SummaryTextComponent TextSummary
@@ -92,20 +114,35 @@ namespace XenAdmin.Controls.SummaryPanel
             }
         }
 
-        public Action RunOnUrlClick { private get; set; }
+        public Action RunOnLicenseUrlClick { private get; set; }
 
-        public void UrlClicked()
+        public Action RunOnSupportUrlClick { private get; set; }
+
+        public void LicenseUrlClicked()
         {
-            if (RunOnUrlClick != null)
-                RunOnUrlClick.Invoke();
+            RunOnLicenseUrlClick?.Invoke();
         }
 
-        public bool DisplayWarning
+        public void SupportUrlClicked()
+        {
+            RunOnSupportUrlClick?.Invoke();
+        }
+
+        public bool DisplayLicenseWarning
         {
             set
             {
-                View.WarningIconVisiblity = value;
-                View.WarningTextVisiblity = value;
+                View.LicenseWarningIconVisibility = value;
+                View.LicenseWarningTextVisibility = value;
+            }
+        }
+
+        public bool DisplaySupportWarning
+        {
+            set
+            {
+                View.SupportWarningIconVisibility = value;
+                View.SupportWarningTextVisibility = value;
             }
         }
     }
