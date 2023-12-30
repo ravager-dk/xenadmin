@@ -6716,6 +6716,8 @@
       <DependentUpon>WorkloadReports.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Images\VMTemplate_h32bit_32.png" />
+    <None Include="Resources\splash.png" />
+    <None Include="Resources\splash.bmp" />
     <Content Include="TestResources\console.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

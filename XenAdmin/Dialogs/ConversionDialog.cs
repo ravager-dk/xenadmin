@@ -307,7 +307,7 @@ namespace XenAdmin.Dialogs
                         return;
                     }
 
-                    statusLabel.Image = Images.StaticImages.xcm;
+                    //statusLabel.Image = Images.StaticImages.xcm;
                     statusLabel.Text = Messages.CONVERSION_CONNECTING_VPX_SUCCESS;
                     statusLinkLabel.Reset();
 

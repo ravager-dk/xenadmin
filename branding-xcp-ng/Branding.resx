@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,70 +117,62 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="pictureBox1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
+  <data name="CIS" xml:space="preserve">
+    <value>Citrix Insight Services</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="pictureBox1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>0, 0, 0, 0</value>
+  <data name="COMPANY_NAME_LEGACY" xml:space="preserve">
+    <value>Citrix</value>
   </data>
-  <data name="pictureBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>830, 434</value>
+  <data name="COPYRIGHT" xml:space="preserve">
+    <value>Copyright &#xA9; 2007-2023 Cloud Software Group, Inc. All Rights Reserved.</value>
   </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="pictureBox1.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+  <data name="EXTENSION_BACKUP" xml:space="preserve">
+    <value>xbk</value>
   </data>
-  <data name="&gt;&gt;pictureBox1.Name" xml:space="preserve">
-    <value>pictureBox1</value>
+  <data name="EXTENSION_SEARCH" xml:space="preserve">
+    <value>xensearch</value>
   </data>
-  <data name="&gt;&gt;pictureBox1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="EXTENSION_UPDATE" xml:space="preserve">
+    <value>xsupdate</value>
   </data>
-  <data name="&gt;&gt;pictureBox1.Parent" xml:space="preserve">
-    <value>$this</value>
+  <data name="HELP_PATH" xml:space="preserve">
+    <value>xencenter/current-release/</value>
   </data>
-  <data name="&gt;&gt;pictureBox1.ZOrder" xml:space="preserve">
-    <value>0</value>
+  <data name="LEGACY_PRODUCT" xml:space="preserve">
+    <value>Citrix Hypervisor</value>
   </data>
-  <metadata name="timer1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>192, 192</value>
+  <data name="PERF_ALERT_MAIL_DEFAULT_LANGUAGE" xml:space="preserve">
+    <value>en-US</value>
   </data>
-  <data name="$this.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
+  <data name="PRODUCT_VERSION_7_0" xml:space="preserve">
+    <value>XenServer 7.0</value>
   </data>
-  <data name="$this.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
-    <value>GrowAndShrink</value>
+  <data name="PRODUCT_VERSION_7_0_SHORT" xml:space="preserve">
+    <value>7.0</value>
   </data>
-  <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>830, 434</value>
+  <data name="PRODUCT_VERSION_7_1_2" xml:space="preserve">
+    <value>XenServer 7.1 CU2</value>
   </data>
-  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>6, 6, 6, 6</value>
+  <data name="PRODUCT_VERSION_7_1_2_SHORT" xml:space="preserve">
+    <value>7.1.2</value>
   </data>
-  <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
-    <value>CenterScreen</value>
+  <data name="PRODUCT_VERSION_8_0" xml:space="preserve">
+    <value>Citrix Hypervisor 8.0</value>
   </data>
-  <data name="$this.Text" xml:space="preserve">
-    <value>SplashScreen</value>
+  <data name="PRODUCT_VERSION_8_1" xml:space="preserve">
+    <value>Citrix Hypervisor 8.1</value>
   </data>
-  <data name="&gt;&gt;timer1.Name" xml:space="preserve">
-    <value>timer1</value>
+  <data name="PRODUCT_VERSION_8_2" xml:space="preserve">
+    <value>Citrix Hypervisor 8.2</value>
   </data>
-  <data name="&gt;&gt;timer1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Timer, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PRODUCT_VERSION_8_2_1" xml:space="preserve">
+    <value>Citrix Hypervisor 8.2 CU1</value>
   </data>
-  <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>SplashScreen</value>
+  <data name="PRODUCT_VERSION_8_2_SHORT" xml:space="preserve">
+    <value>8.2</value>
   </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="TRADEMARKS" xml:space="preserve">
+    <value>XenServer, Xen, the Xen logo, Citrix, Citrix Hypervisor, Citrix Cloud, Citrix Virtual Apps and Desktops, Citrix Virtual Desktops, XenApp and XenDesktop, XenDesktop, are either registered trademarks or trademarks of Cloud Software Group, Inc., and/or its subsidiaries in the United States and/or other countries. XenServer High Availability is powered by everRun, a registered trademark of Stratus Technologies Bermuda Limited.</value>
   </data>
+
 </root>

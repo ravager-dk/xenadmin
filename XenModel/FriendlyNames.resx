@@ -2021,4 +2021,7 @@
   <data name="Label-SR.SRTypes-xfs" xml:space="preserve">
     <value>XFS</value>
   </data>
+  <data name="Label-host.edition-xcp-ng" xml:space="preserve">
+    <value>XCP-ng</value>
+  </data>
 </root>

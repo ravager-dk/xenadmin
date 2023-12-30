@@ -967,8 +967,6 @@ namespace XenAdmin
             public static Bitmap vnc_local_cursor = Properties.Resources.vnc_local_cursor;
             public static Bitmap windows_h32bit_16 = Properties.Resources.windows_h32bit_16;
             public static Bitmap wizard_background = Properties.Resources.wizard_background;
-            public static Bitmap xcm = Properties.Resources.xcm;
-            public static Bitmap xcm_32x32 = Properties.Resources.xcm_32x32;
             public static Bitmap queued = Properties.Resources.queued;
             public static Bitmap _000_User_h32bit_32 = Properties.Resources._000_User_h32bit_32;
             public static Bitmap asianux_16x = Properties.Resources.asianux_16x;

@@ -50,12 +50,6 @@ namespace XenAdmin.TabPages
 
             switch (Program.CurrentLanguage)
             {
-                case "ja":
-                    _html = Properties.Resources.HomePage_ja;
-                    break;
-                case "zh":
-                    _html = Properties.Resources.HomePage_zh_CN;
-                    break;
                 default:
                     _html = Properties.Resources.HomePage;
                     break;

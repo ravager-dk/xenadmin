@@ -1060,6 +1060,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die XCP-ng ähnelt.
+        /// </summary>
+        public static string Label_host_edition_xcp_ng {
+            get {
+                return ResourceManager.GetString("Label-host.edition-xcp-ng", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die {0} for Citrix Virtual Desktops ähnelt.
         /// </summary>
         public static string Label_host_edition_xendesktop {

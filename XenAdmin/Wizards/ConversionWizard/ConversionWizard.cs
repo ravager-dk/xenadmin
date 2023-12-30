@@ -56,7 +56,7 @@ namespace XenAdmin.Wizards.ConversionWizard
         public ConversionWizard(ConversionClient client)
             : base(client.Connection)
         {
-            pictureBoxWizard.Image = Images.StaticImages.xcm_32x32;
+            //pictureBoxWizard.Image = Images.StaticImages.xcm_32x32;
            
             _conversionClient = client;
 

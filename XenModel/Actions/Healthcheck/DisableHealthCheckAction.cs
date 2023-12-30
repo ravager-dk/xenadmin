@@ -1,4 +1,4 @@
-﻿/* Copyright (c) Cloud Software Group, Inc.
+﻿/* Copyright (c) Cloud Software Group, Inc. 
  * 
  * Redistribution and use in source and binary forms, 
  * with or without modification, are permitted provided 
@@ -28,44 +28,27 @@
  * SUCH DAMAGE.
  */
 
-using System;
-using System.Drawing;
-using System.Windows.Forms;
-using XenAdmin.Core;
+using System.Collections.Generic;
+using XenAPI;
 
-namespace XenAdmin
+
+namespace XenAdmin.Actions
 {
-    public partial class SplashScreen : Form
+    public class DisableHealthCheckAction : AsyncAction
     {
-        public event Action ShowMainWindowRequested;
-
-        public volatile bool AllowToClose;
-
-        public SplashScreen()
+        public DisableHealthCheckAction(Pool pool)
+            : base(pool.Connection, Messages.ACTION_DISABLE_HEALTH_CHECK_TITLE, "", false)
         {
-            InitializeComponent();
-            pictureBox1.Image = Images.StaticImages.splash;
-            //labelCopyright.Text = BrandManager.Copyright;
-            //labelCopyright.ForeColor = Color.FromArgb(39, 52, 64);
-
-            //setting the parent is needed so the transparency can show
-            //the picturebox content instead of the control behind it
-            //labelCopyright.Parent = pictureBox1;
+            Pool = pool;
+            ApiMethodsToRoleCheck.Add("pool.set_health_check_config");
+            Description = string.Format(Messages.ACTION_DISABLE_HEALTH_CHECK_DESCRIPTION, pool.Name());
         }
 
-        protected override void OnShown(EventArgs e)
+        protected override void Run()
         {
-            base.OnShown(e);
-            timer1.Start();
-        }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (!AllowToClose)
-                return;
-
-            timer1.Stop();
-            ShowMainWindowRequested?.Invoke();
+            Pool.set_health_check_config(Session, Pool.opaque_ref, new Dictionary<string, string>());
+            Connection.WaitFor(() => Pool.GetHealthCheckStatus() != Pool.HealthCheckStatus.Enabled, null);
         }
     }
 }
+
