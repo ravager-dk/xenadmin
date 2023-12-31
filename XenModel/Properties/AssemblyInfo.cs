@@ -39,9 +39,9 @@ using XenAdmin.Properties;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("XenModel")]
-[assembly: AssemblyDescription("[XenCenter] library")]
+[assembly: AssemblyDescription("XCP-ng Center library")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("[XenCenter]")]
+[assembly: AssemblyProduct("XCP-ng Center")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
@@ -54,20 +54,20 @@ using XenAdmin.Properties;
 [assembly: InternalsVisibleTo("XenAdminTests")]
 
 [assembly: CustomBranding(
-    "[XenCenter]",
-    "[Vendor]",
-    "[XenServerProduct]",
-    "[XenServer version]",
-    "[Xc updates url]",
-    "[Cfu url]",
-    "[Guest Tools]",
-    "[XenServer host]",
-    "[YumRepoBaseBin]",
-    "[YumRepoBaseSource]",
-    "[YumRepoEarlyAccessBin]",
-    "[YumRepoEarlyAccessSource]",
-    "[YumRepoNormalBin]",
-    "[YumRepoNormalSource]")]
+    "XCP-ng Center",
+    "XCP-ng",
+    "XCP-ng",
+    "",
+    "https://raw.githubusercontent.com/xcp-ng/xenadmin-updates/master/updates.xml",
+    "",
+    "XCP-ng VM Tools",
+    "XCP-ng",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "")]
 
 namespace XenAdmin.Properties
 {

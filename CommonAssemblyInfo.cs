@@ -30,12 +30,12 @@
 
 using System.Reflection;
 
-[assembly: AssemblyCompany("[XenServerProduct]")]
-[assembly: AssemblyCopyright("Copyright © [Vendor Legal]")]
+[assembly: AssemblyCompany("XCP-ng")]
+[assembly: AssemblyCopyright("Copyright © XCP-ng")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.0.0.0")]
-[assembly: AssemblyFileVersion("0000")]
+[assembly: AssemblyVersion("99.99.99.9999")]
+[assembly: AssemblyFileVersion("99.99.99.9999")]
 
 /*
  * .NET Framework 4.8 docs: All components of the version must be integers greater

@@ -45,6 +45,7 @@ namespace XenAdmin
         {
             InitializeComponent();
             pictureBox1.Image = Images.StaticImages.splash;
+            label1.Text = "Version " + Program.VersionText;
             //labelCopyright.Text = BrandManager.Copyright;
             //labelCopyright.ForeColor = Color.FromArgb(39, 52, 64);
 
