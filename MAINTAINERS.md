@@ -1,10 +1,7 @@
 List of maintainers
 ===================
 
-* Konstantina Chremmou <konstantina.chremmou@cloud.com>
-* Chris Lancaster <chris.lancaster@cloud.com>
-* Danilo Del Busso <danilo.delbusso@cloud.com>
-* Joey Jiang <joey.jiang@cloud.com>
+* Alexander Schulz (borzel) - code@schulzalex.de
 
 -----------------------------------------------------------------------------
 
