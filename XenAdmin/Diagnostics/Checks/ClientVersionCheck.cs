@@ -43,16 +43,10 @@ namespace XenAdmin.Diagnostics.Checks
         {
             _newServerVersion = newServerVersion;
         }
-        
+
         protected override Problem RunCheck()
         {
-            var requiredClientVersion = Updates.GetRequiredClientVersion(_newServerVersion);
-            if (requiredClientVersion == null) 
-                return null;
-            if (_newServerVersion != null) 
-                return new ClientVersionProblem(this, requiredClientVersion);
-            else
-                return new ClientVersionWarning(this, requiredClientVersion);
+            return null;
         }
 
         public override string Description => string.Format(Messages.XENCENTER_VERSION_CHECK_DESCRIPTION, BrandManager.BrandConsole);

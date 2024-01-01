@@ -81,14 +81,6 @@
             this.tableLayoutInfo.Controls.Add(this.labelMemoryInfo, 1, 1);
             this.tableLayoutInfo.Name = "tableLayoutInfo";
             // 
-            // linkLabelTellMeMore
-            // 
-            resources.ApplyResources(this.linkLabelTellMeMore, "linkLabelTellMeMore");
-            this.tableLayoutInfo.SetColumnSpan(this.linkLabelTellMeMore, 2);
-            this.linkLabelTellMeMore.Name = "linkLabelTellMeMore";
-            this.linkLabelTellMeMore.TabStop = true;
-            this.linkLabelTellMeMore.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelTellMeMore_LinkClicked);
-            // 
             // pictureBox1
             // 
             resources.ApplyResources(this.pictureBox1, "pictureBox1");

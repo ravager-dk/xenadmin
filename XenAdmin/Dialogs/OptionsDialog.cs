@@ -49,9 +49,6 @@ namespace XenAdmin.Dialogs
                 ContentPanel.BackColor = SystemColors.Control;
             // call save serverlist on OK
             saveAndRestoreOptionsPage1.SaveAllAfter = true;
-
-            if (Helpers.CommonCriteriaCertificationRelease)
-                verticalTabs.Items.Remove(updatesOptionsPage1);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -96,11 +93,6 @@ namespace XenAdmin.Dialogs
         public void SelectExternalToolsPage()
         {
             SelectPage(externalToolsOptionsPage1);
-        }
-
-        public void SelectUpdateOptionsPage()
-        {
-            SelectPage(updatesOptionsPage1);
         }
 
         private void OptionsDialog_Move(object sender, EventArgs e)

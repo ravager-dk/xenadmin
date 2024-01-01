@@ -281,13 +281,6 @@ namespace XenAdmin.Alerts
             }
         }
 
-        public override string HelpID
-        {
-            get
-            {
-                return string.Format("{0}UsageMessageAlert", AlarmType);
-            }
-        }
 
         public override string HelpLinkText
         {

@@ -16,8 +16,7 @@
             if (disposing)
             {
                 var mem = memoryControls as XenAdmin.Controls.Ballooning.VMMemoryControlsBasic;
-                if (mem != null)
-                    mem.InstallTools -= BallooningDialog_InstallTools;
+
                 
                 memoryControls.Dispose();
 

@@ -31,7 +31,6 @@
 using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Actions;
-using XenAdmin.Help;
 using XenAPI;
 
 namespace XenAdmin.SettingsPanels
@@ -76,9 +75,5 @@ namespace XenAdmin.SettingsPanels
 
         public bool HasChanged => checkBoxEnableReadCaching.Checked != sr.GetReadCachingEnabled();
 
-        private void linkLabelTellMeMore_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            HelpManager.Launch("StorageReadCaching");
-        }
     }
 }

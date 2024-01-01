@@ -63,7 +63,6 @@ namespace XenAdmin.Dialogs
             else
             {
                 memoryControls = new VMMemoryControlsBasic();
-                ((VMMemoryControlsBasic)memoryControls).InstallTools += BallooningDialog_InstallTools;
 
                 labelRubric.Text = vm.is_a_template
                     ? Messages.BALLOONING_RUBRIC_TEMPLATE

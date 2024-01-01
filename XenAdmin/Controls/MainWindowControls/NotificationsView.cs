@@ -48,9 +48,6 @@ namespace XenAdmin.Controls.MainWindowControls
         public NotificationsView()
         {
             Items.Add(new NotificationsSubModeItem(NotificationsSubMode.Alerts));
-            Items.Add(new NotificationsSubModeItem(NotificationsSubMode.UpdatesFromCdn));
-            if (!Helpers.CommonCriteriaCertificationRelease)
-                Items.Add(new NotificationsSubModeItem(NotificationsSubMode.Updates));
             Items.Add(new NotificationsSubModeItem(NotificationsSubMode.Events));
         }
 

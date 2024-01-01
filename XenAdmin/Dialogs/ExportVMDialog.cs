@@ -123,10 +123,6 @@ namespace XenAdmin.Dialogs
                     {
                         Verify = Win32.SendMessage(ComboHandle, Win32.BM_GETCHECK, IntPtr.Zero, IntPtr.Zero) == (IntPtr)Win32.BST_CHECKED;
                     }
-                    else if (nmhdr.code == Win32.CDN_HELP)
-                    {
-                        Help.HelpManager.Launch("ExportVMDialog");
-                    }
                     break;
             }
             return IntPtr.Zero;

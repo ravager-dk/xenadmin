@@ -33,7 +33,6 @@ using System.Diagnostics;
 using System.Linq;
 using XenAdmin.Core;
 using XenAdmin.Diagnostics.Problems;
-using XenAdmin.Wizards.PatchingWizard;
 using XenAPI;
 
 namespace XenAdmin.Diagnostics.Checks

@@ -680,11 +680,6 @@ namespace XenAdmin.Wizards.HAWizard_Pages
             return result;
         }
 
-        private void linkLabelTellMeMore_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Help.HelpManager.Launch("HaNtolZero");
-        }
-
         #region XentabPage overrides
 
         public override string Text

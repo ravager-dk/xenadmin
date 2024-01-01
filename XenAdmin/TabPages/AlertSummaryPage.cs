@@ -40,7 +40,6 @@ using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.Dialogs;
 using XenAdmin.Alerts;
-using XenAdmin.Help;
 using System.Threading;
 using XenAdmin.Actions;
 using System.IO;
@@ -429,29 +428,7 @@ namespace XenAdmin.TabPages
 
         #endregion
 
-        private void ToolStripMenuItemHelp_Click(object sender, EventArgs e)
-        {
-            // We should only be here if one item is selected, we dont do multi-help
-            if (GridViewAlerts.SelectedRows.Count != 1)
-                log.DebugFormat("Can only launch help for 1 alert at a time (Attempted to launch {0}). Launching for the clicked item.", GridViewAlerts.SelectedRows.Count);
-
-            DataGridViewRow clickedRow = FindAlertRow(sender as ToolStripMenuItem);
-            if (clickedRow == null)
-                return;
-
-            Alert alert = (Alert) clickedRow.Tag;
-            if (alert == null)
-                return;
-
-            if (alert.HelpID == null)
-            {
-                log.ErrorFormat("Attempted to launch help for alert {0} ({1}) but no helpID available. Not launching.", alert.Title, alert.uuid);
-                return;
-            }
-            HelpManager.Launch(alert.HelpID);
-
-        }
-
+       
         private void ToolStripMenuItemFix_Click(object sender, EventArgs e)
         {
             // We should only be here if one item is selected, we dont do multi-fix
@@ -685,12 +662,6 @@ namespace XenAdmin.TabPages
                 items.Add(dismiss);
             }
 
-            if (!string.IsNullOrEmpty(alert.HelpID))
-            {
-                var help = new ToolStripMenuItem(alert.HelpLinkText);
-                help.Click += ToolStripMenuItemHelp_Click;
-                items.Add(help);
-            }
 
             if (items.Count > 0)
                 items.Add(new ToolStripSeparator());

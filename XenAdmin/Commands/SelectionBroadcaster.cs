@@ -83,10 +83,7 @@ namespace XenAdmin.Commands
         {
             if (control.Command == null)
             {
-                if (control is ToolStripMenuItem)
-                {
-                    throw new Exception("Menu has no command: " + ((ToolStripMenuItem)control).Name);
-                }
+                return;
             }
 
             ((ICommand)control.Command).SetMainWindow(mainWindow);

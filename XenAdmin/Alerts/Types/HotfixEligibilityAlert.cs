@@ -158,8 +158,6 @@ namespace XenAdmin.Alerts.Types
         public override string FixLinkText => null;
 
         public override Action FixLinkAction => null;
-
-        public override string HelpID => "HotfixEligibilityAlert";
         
         public override bool Equals(Alert other)
         {

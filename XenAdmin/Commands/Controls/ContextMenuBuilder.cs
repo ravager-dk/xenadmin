@@ -189,15 +189,6 @@ namespace XenAdmin.Commands
             {
                 items.AddIfEnabled(new DisconnectHostsAndPoolsCommand(mainWindow, selection), true);
                 items.AddIfEnabled(new ReconnectHostCommand(mainWindow, selection), true);
-
-                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
-                if (updatesItem.Command.CanRun())
-                {
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
-                    items.Add(updatesItem);
-                }
-
                 items.AddIfEnabled(new EditTagsCommand(mainWindow, selection));
             }
 
@@ -233,15 +224,6 @@ namespace XenAdmin.Commands
             public override void Build(IMainWindow mainWindow, SelectedItemCollection selection, ContextMenuItemCollection items)
             {
                 items.AddIfEnabled(new DisconnectPoolCommand(mainWindow, selection), true);
-
-                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
-                if (updatesItem.Command.CanRun())
-                {
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
-                    items.Add(updatesItem);
-                }
-
                 items.AddIfEnabled(new EditTagsCommand(mainWindow, selection));
                 items.AddPluginItems(PluginContextMenu.pool, selection);
             }
@@ -561,14 +543,6 @@ namespace XenAdmin.Commands
                 }
 
                 items.AddIfEnabled(new HostMaintenanceModeCommand(mainWindow, selection));
-
-                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
-                if (updatesItem.Command.CanRun())
-                {
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
-                    items.Add(updatesItem);
-                }
                 items.AddSeparator();
 
                 items.AddIfEnabled(new RebootHostCommand(mainWindow, selection));
@@ -692,17 +666,6 @@ namespace XenAdmin.Commands
                 }
 
                 items.AddIfEnabled(new LaunchConversionManagerCommand(mainWindow, selection));
-
-                var updatesItem = new CommandToolStripMenuItem(new PoolUpdatesCommand(mainWindow, selection), true);
-                if (updatesItem.Command.CanRun())
-                {
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new ConfigUpdatesCommand(mainWindow, selection), true));
-                    updatesItem.DropDownItems.Add(new CommandToolStripMenuItem(new SynchronizeCommand(mainWindow, selection), true));
-                    items.Add(updatesItem);
-                }
-
-                if (selection.FirstAsXenObject is Pool pool && !pool.IsPoolFullyUpgraded())
-                    items.Add(new RollingUpgradeCommand(mainWindow));
 
                 items.AddSeparator();
                 items.Add(new AddHostToSelectedPoolToolStripMenuItem(mainWindow, selection, true));
@@ -853,7 +816,6 @@ namespace XenAdmin.Commands
                 items.AddSeparator();
 
                 items.AddIfEnabled(new VtpmCommand(mainWindow, selection));
-                items.AddIfEnabled(new InstallToolsCommand(mainWindow, selection));
                 items.AddSeparator();
 
                 items.AddIfEnabled(new DeleteVMCommand(mainWindow, selection));
@@ -1023,7 +985,6 @@ namespace XenAdmin.Commands
                 items.AddIfEnabled(new AssignGroupToolStripMenuItem<VM_appliance>(mainWindow, selection, true));
                 items.AddSeparator();
 
-                items.AddIfEnabled(new InstallToolsCommand(mainWindow, selection));
                 items.AddIfEnabled(new DeleteVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new EditTagsCommand(mainWindow, selection));
                 items.AddPluginItems(PluginContextMenu.vm, selection);
@@ -1067,7 +1028,6 @@ namespace XenAdmin.Commands
                 items.AddIfEnabled(new ForceVMRebootCommand(mainWindow, selection));
                 items.AddSeparator();
 
-                items.AddIfEnabled(new InstallToolsCommand(mainWindow, selection));
                 items.AddIfEnabled(new DeleteVMCommand(mainWindow, selection));
                 items.AddIfEnabled(new EditTagsCommand(mainWindow, selection));
                 items.AddPluginItems(PluginContextMenu.vm, selection);

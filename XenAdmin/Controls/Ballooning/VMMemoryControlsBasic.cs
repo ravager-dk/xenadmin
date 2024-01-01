@@ -40,7 +40,6 @@ namespace XenAdmin.Controls.Ballooning
 {
     public partial class VMMemoryControlsBasic : VMMemoryControlsEdit
     {
-        public event Action InstallTools;
 
         public VMMemoryControlsBasic()
         {
@@ -114,7 +113,6 @@ namespace XenAdmin.Controls.Ballooning
                     else
                         labelDMCUnavailable.Text = Messages.DMC_UNAVAILABLE_VMS;
 
-                    linkInstallTools.Visible = vms.All(InstallToolsCommand.CanRun);
                 }
                 else if (vm0.is_a_template)
                 {
@@ -135,8 +133,6 @@ namespace XenAdmin.Controls.Ballooning
                             labelDMCUnavailable.Text = string.Format(Messages.DMC_UNAVAILABLE_OLDTOOLS, BrandManager.VmTools);
                     else
                         labelDMCUnavailable.Text = Messages.DMC_UNAVAILABLE_VM;
-                    
-                    linkInstallTools.Visible = InstallToolsCommand.CanRun(vm0);
                 }
             }
 
@@ -235,22 +231,6 @@ namespace XenAdmin.Controls.Ballooning
             memorySpinnerDynMax.Initialize(vmShinyBar.Dynamic_max, RoundingBehaviour.None);
             memorySpinnerDynMin.Refresh();
             memorySpinnerDynMax.Refresh();
-        }
-
-        private void InstallTools_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left)
-                return;
-
-            if (vms.All(v => Helpers.StockholmOrGreater(v.Connection)))
-            {
-                Help.HelpManager.Launch("InstallToolsWarningDialog");
-                return;
-            }
-
-            var cmd = new InstallToolsCommand(Program.MainWindow, vms);
-            cmd.InstallTools += _ => InstallTools?.Invoke();
-            cmd.Run();
         }
     }
 }

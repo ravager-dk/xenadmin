@@ -101,8 +101,6 @@ namespace XenAdmin.Alerts
 
         public override string FixLinkText => Messages.ALERT_CSS_EXPIRED_LINK_TEXT;
 
-        public override string HelpID => "CssExpiryAlert";
-
         public override string HelpLinkText => Messages.ALERT_GENERIC_HELP;
     }
 }

@@ -472,9 +472,10 @@ namespace XenAdmin.Dialogs
                 case Failure.VM_MISSING_PV_DRIVERS:
                     vmRef = errorDescription[1];
                     VM vm = connection.Resolve(new XenRef<VM>(vmRef));
-                    solution = InstallToolsCommand.CanRun(vm) && !Helpers.StockholmOrGreater(connection)
-                        ? Solution.InstallPVDrivers
-                        : Solution.InstallPVDriversNoSolution;
+                    solution = Solution.InstallPVDriversNoSolution;
+                    //solution = InstallToolsCommand.CanRun(vm) && !Helpers.StockholmOrGreater(connection)
+                    //    ? Solution.InstallPVDrivers
+                    //    : Solution.InstallPVDriversNoSolution;
                     break;
 
                 case Failure.HA_NO_PLAN:
@@ -581,13 +582,6 @@ namespace XenAdmin.Dialogs
                     case Solution.Shutdown:
                         action = new VMHardShutdown(row.vm);
                         break;
-                    case Solution.InstallPVDrivers:
-                        var cmd = new InstallToolsCommand(Program.MainWindow, row.vm, dataGridViewVms);
-                        cmd.Run();
-                        // The install pv tools action is marked as complete after they have taken the user to the
-                        // console and loaded the disc. Rescanning when the action is 'complete' in this case
-                        // doesn't gain us anything then. Keep showing the "Click here to install PV drivers" text.
-                        return;
                 }
 
                 if (action != null)

@@ -55,19 +55,6 @@ namespace XenAdmin.Diagnostics.Checks
 
         protected override Problem RunCheck()
         {
-            var syncCount = ConnectionsManager.History.Count(a =>
-                !a.IsCompleted && a is SyncWithCdnAction syncA && !syncA.Cancelled && syncA.Connection == Pool.Connection);
-
-            if (syncCount > 0 || Pool.current_operations.Values.Contains(pool_allowed_operations.sync_updates))
-                return new SyncInProgressProblem(this, Pool);
-
-            if (Helpers.XapiEqualOrGreater_23_18_0(Pool.Connection))
-            {
-                var timeSpan = DateTime.UtcNow - Pool.Connection.ServerTimeOffset - Pool.last_update_sync;
-                if (timeSpan >= TimeSpan.FromDays(DAYS_SINCE_LAST_SYNC))
-                    return new CdnOutOfSyncProblem(this, Pool, timeSpan.Days);
-            }
-
             return null;
         }
 

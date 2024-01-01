@@ -32,12 +32,11 @@ using System;
 using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAdmin.Commands;
-using XenAdmin.Help;
 
 
 namespace XenAdmin.TabPages
 {
-    public partial class HomePage : DoubleBufferedPanel, IControlWithHelp
+    public partial class HomePage : DoubleBufferedPanel
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -85,11 +84,7 @@ namespace XenAdmin.TabPages
 
             if (url.StartsWith("XenCenter://", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (url.Contains("HelpContents"))
-                {
-                    HelpManager.Launch(null);
-                }
-                else if (url.Contains("AddServer"))
+                if (url.Contains("AddServer"))
                 {
                     new AddHostCommand(Program.MainWindow, this).Run();
                 }

@@ -34,7 +34,7 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright © XCP-ng")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("99.99.99.9999")]
+[assembly: AssemblyVersion("99.99.99")]
 [assembly: AssemblyFileVersion("99.99.99.9999")]
 
 /*

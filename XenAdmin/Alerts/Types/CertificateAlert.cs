@@ -237,8 +237,6 @@ namespace XenAdmin.Alerts
             }
         }
 
-        public override string HelpID => "CertificateAlert";
-
         public override string HelpLinkText => Messages.ALERT_GENERIC_HELP;
     }
 }

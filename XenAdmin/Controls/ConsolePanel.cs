@@ -35,12 +35,11 @@ using System.Windows.Forms;
 using XenAdmin.ConsoleView;
 using XenAPI;
 using System.Drawing;
-using XenAdmin.Help;
 
 
 namespace XenAdmin.Controls
 {
-    public partial class ConsolePanel : UserControl, IControlWithHelp
+    public partial class ConsolePanel : UserControl
     {
         private const int MAX_ACTIVE_VM_CONSOLES = 10;
 

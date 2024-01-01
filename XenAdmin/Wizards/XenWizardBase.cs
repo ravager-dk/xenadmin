@@ -35,12 +35,11 @@ using System.Windows.Forms;
 
 using XenAdmin.Controls;
 using XenAdmin.Core;
-using XenAdmin.Help;
 using XenAdmin.Network;
 
 namespace XenAdmin.Wizards
 {
-    public partial class XenWizardBase : Form, IFormWithHelp
+    public partial class XenWizardBase : Form
     {
         private IXenConnection connection; // connection to use
 
@@ -292,20 +291,6 @@ namespace XenAdmin.Wizards
             return string.Format("{0}_{1}Pane", GetType().Name, id);
         }
 
-        public bool HasHelp()
-        {
-            return HelpManager.TryGetTopicId(WizardPaneHelpID(), out _);
-        }
-
-        private void HelpButton_Click(object sender, EventArgs e)
-        {
-            Help.HelpManager.Launch(WizardPaneHelpID());
-        }
-
-        private void XenWizardBase_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            Help.HelpManager.Launch(WizardPaneHelpID());
-        }
 
         private void XenWizardBase_Load(object sender, EventArgs e)
         {

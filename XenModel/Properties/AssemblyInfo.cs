@@ -58,16 +58,10 @@ using XenAdmin.Properties;
     "XCP-ng",
     "XCP-ng",
     "",
-    "https://raw.githubusercontent.com/xcp-ng/xenadmin-updates/master/updates.xml",
+    "https://github.com/xcp-ng/xenadmin/releases",
     "",
     "XCP-ng VM Tools",
-    "XCP-ng",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "")]
+    "XCP-ng")]
 
 namespace XenAdmin.Properties
 {
@@ -82,13 +76,7 @@ namespace XenAdmin.Properties
             string xcUpdatesUrl,
             string cfuUrl,
             string vmTools,
-            string xenHost,
-            string yumRepoBaseBin,
-            string yumRepoBaseSource,
-            string yumRepoEarlyAccessBin,
-            string yumRepoEarlyAccessSource,
-            string yumRepoNormalBin,
-            string yumRepoNormalSource
+            string xenHost
         )
         {
             BrandConsole = brandConsole;
@@ -99,12 +87,6 @@ namespace XenAdmin.Properties
             CfuUrl = cfuUrl;
             VmTools = vmTools;
             XenHost = xenHost;
-            YumRepoBaseBin = yumRepoBaseBin;
-            YumRepoBaseSource = yumRepoBaseSource;
-            YumRepoEarlyAccessBin = yumRepoEarlyAccessBin;
-            YumRepoEarlyAccessSource = yumRepoEarlyAccessSource;
-            YumRepoNormalBin = yumRepoNormalBin;
-            YumRepoNormalSource = yumRepoNormalSource;
         }
 
         public string BrandConsole { get; }
@@ -115,11 +97,5 @@ namespace XenAdmin.Properties
         public string XcUpdatesUrl { get; }
         public string CfuUrl { get; }
         public string XenHost { get; }
-        public string YumRepoBaseBin { get; }
-        public string YumRepoBaseSource { get; }
-        public string YumRepoEarlyAccessBin { get; }
-        public string YumRepoEarlyAccessSource { get; }
-        public string YumRepoNormalBin { get; }
-        public string YumRepoNormalSource { get; }
     }
 }

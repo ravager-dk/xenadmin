@@ -35,12 +35,11 @@ using System.Linq;
 using System.Windows.Forms;
 using XenAdmin.Network;
 using XenAdmin.Core;
-using XenAdmin.Help;
 using XenAPI;
 
 namespace XenAdmin.Dialogs
 {
-    public partial class XenDialogBase : Form, IFormWithHelp
+    public partial class XenDialogBase : Form
     {
         private static readonly Dictionary<IXenConnection, List<XenDialogBase>> instances = new Dictionary<IXenConnection, List<XenDialogBase>>();
         private static readonly Dictionary<IXenObject, XenDialogBase> instancePerXenObject = new Dictionary<IXenObject, XenDialogBase>();
@@ -169,24 +168,8 @@ namespace XenAdmin.Dialogs
                 Owner.Activate();
         }
 
-        public bool HasHelp()
-        {
-            return HelpManager.TryGetTopicId(HelpName, out _);
-        }
-
         #region Event handlers
 
-        private void XenDialogBase_HelpButtonClicked(object sender, CancelEventArgs e)
-        {
-            HelpManager.Launch(HelpName);
-            e.Cancel = true;
-        }
-
-        private void XenDialogBase_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            HelpManager.Launch(HelpName);
-            hlpevent.Handled = true;
-        }
 
         private void XenDialogBase_Shown(object sender, EventArgs e)
         {

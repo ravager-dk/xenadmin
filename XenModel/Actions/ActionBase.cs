@@ -315,7 +315,7 @@ namespace XenAdmin.Actions
             {
                 _description = description;
 
-                System.Diagnostics.Debug.Assert(0 <= percent && percent <= 100, $"Percent is {percent}");
+                //System.Diagnostics.Debug.Assert(0 <= percent && percent <= 100, $"Percent is {percent}");
 
                 if (percent < 0)
                     percent = 0;

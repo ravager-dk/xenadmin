@@ -54,12 +54,6 @@ namespace XenAdmin.Core
             CfuUrl = customBranding.CfuUrl;
             VmTools = customBranding.VmTools;
             XenHost = customBranding.XenHost;
-            YumRepoBaseBin = customBranding.YumRepoBaseBin;
-            YumRepoBaseSource = customBranding.YumRepoBaseSource;
-            YumRepoEarlyAccessBin = customBranding.YumRepoEarlyAccessBin;
-            YumRepoEarlyAccessSource = customBranding.YumRepoEarlyAccessSource;
-            YumRepoNormalBin = customBranding.YumRepoNormalBin;
-            YumRepoNormalSource = customBranding.YumRepoNormalSource;
         }
 
 
@@ -114,18 +108,6 @@ namespace XenAdmin.Core
         public static readonly string VmTools;
 
         public static readonly string XenHost;
-
-        public static readonly string YumRepoBaseBin;
-
-        public static readonly string YumRepoBaseSource;
-
-        public static readonly string YumRepoEarlyAccessBin;
-
-        public static readonly string YumRepoEarlyAccessSource;
-
-        public static readonly string YumRepoNormalBin;
-
-        public static readonly string YumRepoNormalSource;
 
 
         /// <summary>

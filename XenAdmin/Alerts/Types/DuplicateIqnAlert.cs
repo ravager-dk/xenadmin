@@ -61,14 +61,6 @@ namespace XenAdmin.Alerts
             }
         }
 
-        public override string HelpID
-        {
-            get
-            {
-                return "DuplicateIqnAlert";
-            }
-        }
-
         public override bool Equals(Alert other)
         {
             if (other is DuplicateIqnAlert)

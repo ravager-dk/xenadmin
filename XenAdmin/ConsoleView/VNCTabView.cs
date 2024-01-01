@@ -1369,7 +1369,6 @@ namespace XenAdmin.ConsoleView
                 contextMenuItems.AddIfEnabled(new ShutDownVMCommand(Program.MainWindow, source, this));
                 contextMenuItems.AddIfEnabled(new RebootVMCommand(Program.MainWindow, source, this));
                 contextMenuItems.AddIfEnabled(new SuspendVMCommand(Program.MainWindow, source, this));
-                contextMenuItems.AddIfEnabled(new InstallToolsCommand(Program.MainWindow, source, this));
                 contextMenuItems.AddIfEnabled(new ForceVMShutDownCommand(Program.MainWindow, source, this));
                 contextMenuItems.AddIfEnabled(new ForceVMRebootCommand(Program.MainWindow, source, this));
             }

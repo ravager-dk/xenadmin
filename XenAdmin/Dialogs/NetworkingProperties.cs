@@ -37,7 +37,6 @@ using XenAdmin.Controls;
 using XenAPI;
 using XenAdmin.Core;
 using XenAdmin.Actions;
-using XenAdmin.Help;
 using PifTuple = System.Tuple<XenAPI.PIF, bool>;
 
 
@@ -694,11 +693,6 @@ namespace XenAdmin.Dialogs
                 prop_page_DeleteButtonClicked(page, new EventArgs());
                 HideTooltip();
             }
-        }
-
-        private void linkLabelTellMeMore_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            HelpManager.Launch("NetworkingProperties");
         }
 
         private void ShowTooltip(Point location)

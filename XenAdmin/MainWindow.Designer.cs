@@ -68,8 +68,6 @@ namespace XenAdmin
             this.TabPageDockerDetails = new System.Windows.Forms.TabPage();
             this.TabPageUSB = new System.Windows.Forms.TabPage();
             this.alertPage = new XenAdmin.TabPages.AlertSummaryPage();
-            this.updatesPage = new XenAdmin.TabPages.ManageUpdatesPage();
-            this.cdnUpdatesPage = new XenAdmin.TabPages.ManageCdnUpdatesPage();
             this.eventsPage = new XenAdmin.TabPages.HistoryPage();
             this.TitleBackPanel = new XenAdmin.Controls.GradientPanel.VerticalGradientPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -253,9 +251,6 @@ namespace XenAdmin
             this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pluginItemsPlaceHolderToolStripMenuItem9 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpTopicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem15 = new System.Windows.Forms.ToolStripSeparator();
             this.viewApplicationLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem17 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemCfu = new System.Windows.Forms.ToolStripMenuItem();
@@ -265,10 +260,6 @@ namespace XenAdmin
             this.pluginItemsPlaceHolderToolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainMenuBar = new XenAdmin.Controls.MenuStripEx();
-            this.updateClientToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.downloadInstallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.relNotesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.downloadSourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.securityGroupsToolStripMenuItem = new XenAdmin.Commands.CommandToolStripMenuItem();
             this.MenuPanel = new System.Windows.Forms.Panel();
             this.StatusStrip = new XenAdmin.Controls.StatusStripEx();
@@ -311,8 +302,6 @@ namespace XenAdmin
             this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.Control;
             this.splitContainer1.Panel2.Controls.Add(this.TheTabControl);
             this.splitContainer1.Panel2.Controls.Add(this.alertPage);
-            this.splitContainer1.Panel2.Controls.Add(this.updatesPage);
-            this.splitContainer1.Panel2.Controls.Add(this.cdnUpdatesPage);
             this.splitContainer1.Panel2.Controls.Add(this.eventsPage);
             this.splitContainer1.Panel2.Controls.Add(this.TitleBackPanel);
             resources.ApplyResources(this.splitContainer1.Panel2, "splitContainer1.Panel2");
@@ -484,19 +473,6 @@ namespace XenAdmin
             resources.ApplyResources(this.alertPage, "alertPage");
             this.alertPage.BackColor = System.Drawing.SystemColors.Window;
             this.alertPage.Name = "alertPage";
-            // 
-            // updatesPage
-            // 
-            resources.ApplyResources(this.updatesPage, "updatesPage");
-            this.updatesPage.BackColor = System.Drawing.SystemColors.Window;
-            this.updatesPage.Name = "updatesPage";
-            this.updatesPage.Load += new System.EventHandler(this.updatesPage_Load);
-            // 
-            // cdnUpdatesPage
-            // 
-            resources.ApplyResources(this.cdnUpdatesPage, "cdnUpdatesPage");
-            this.cdnUpdatesPage.BackColor = System.Drawing.SystemColors.Window;
-            this.cdnUpdatesPage.Name = "cdnUpdatesPage";
             // 
             // eventsPage
             // 
@@ -1478,7 +1454,6 @@ namespace XenAdmin
             // 
             // installToolsToolStripMenuItem
             // 
-            this.installToolsToolStripMenuItem.Command = new XenAdmin.Commands.InstallToolsCommand();
             this.installToolsToolStripMenuItem.Name = "installToolsToolStripMenuItem";
             resources.ApplyResources(this.installToolsToolStripMenuItem, "installToolsToolStripMenuItem");
             // 
@@ -1763,9 +1738,6 @@ namespace XenAdmin
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.helpTopicsToolStripMenuItem,
-            this.helpContextMenuItem,
-            this.toolStripMenuItem15,
             this.viewApplicationLogToolStripMenuItem,
             this.toolStripMenuItem17,
             this.toolStripMenuItemCfu,
@@ -1776,24 +1748,6 @@ namespace XenAdmin
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             resources.ApplyResources(this.helpToolStripMenuItem, "helpToolStripMenuItem");
-            // 
-            // helpTopicsToolStripMenuItem
-            // 
-            this.helpTopicsToolStripMenuItem.Name = "helpTopicsToolStripMenuItem";
-            resources.ApplyResources(this.helpTopicsToolStripMenuItem, "helpTopicsToolStripMenuItem");
-            this.helpTopicsToolStripMenuItem.Click += new System.EventHandler(this.helpTopicsToolStripMenuItem_Click);
-            // 
-            // helpContextMenuItem
-            // 
-            this.helpContextMenuItem.Image = global::XenAdmin.Properties.Resources._000_HelpIM_h32bit_16;
-            this.helpContextMenuItem.Name = "helpContextMenuItem";
-            resources.ApplyResources(this.helpContextMenuItem, "helpContextMenuItem");
-            this.helpContextMenuItem.Click += new System.EventHandler(this.helpContextMenuItem_Click);
-            // 
-            // toolStripMenuItem15
-            // 
-            this.toolStripMenuItem15.Name = "toolStripMenuItem15";
-            resources.ApplyResources(this.toolStripMenuItem15, "toolStripMenuItem15");
             // 
             // viewApplicationLogToolStripMenuItem
             // 
@@ -1854,41 +1808,10 @@ namespace XenAdmin
             this.templatesToolStripMenuItem,
             this.toolsToolStripMenuItem,
             this.windowToolStripMenuItem,
-            this.helpToolStripMenuItem,
-            this.updateClientToolStripMenuItem});
+            this.helpToolStripMenuItem});
             this.MainMenuBar.Name = "MainMenuBar";
             this.MainMenuBar.MenuActivate += new System.EventHandler(this.MainMenuBar_MenuActivate);
             this.MainMenuBar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MainMenuBar_MouseClick);
-            // 
-            // updateClientToolStripMenuItem
-            // 
-            this.updateClientToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.updateClientToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
-            this.updateClientToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.downloadInstallToolStripMenuItem,
-            this.relNotesToolStripMenuItem,
-            this.downloadSourceToolStripMenuItem});
-            this.updateClientToolStripMenuItem.Image = global::XenAdmin.Properties.Resources._015_Download_h32bit_16;
-            this.updateClientToolStripMenuItem.Margin = new System.Windows.Forms.Padding(0, 0, 5, 0);
-            this.updateClientToolStripMenuItem.Name = "updateClientToolStripMenuItem";
-            resources.ApplyResources(this.updateClientToolStripMenuItem, "updateClientToolStripMenuItem");
-            // 
-            // downloadInstallToolStripMenuItem
-            // 
-            this.downloadInstallToolStripMenuItem.Name = "downloadInstallToolStripMenuItem";
-            resources.ApplyResources(this.downloadInstallToolStripMenuItem, "downloadInstallToolStripMenuItem");
-            this.downloadInstallToolStripMenuItem.Click += new System.EventHandler(this.downloadInstallToolStripMenuItem_Click);
-            // 
-            // relNotesToolStripMenuItem
-            // 
-            this.relNotesToolStripMenuItem.Name = "relNotesToolStripMenuItem";
-            resources.ApplyResources(this.relNotesToolStripMenuItem, "relNotesToolStripMenuItem");
-            this.relNotesToolStripMenuItem.Click += new System.EventHandler(this.relNotesToolStripMenuItem_Click);
-            // 
-            // downloadSourceToolStripMenuItem
-            // 
-            this.downloadSourceToolStripMenuItem.Name = "downloadSourceToolStripMenuItem";
-            resources.ApplyResources(this.downloadSourceToolStripMenuItem, "downloadSourceToolStripMenuItem");
             // 
             // securityGroupsToolStripMenuItem
             // 
@@ -1992,7 +1915,6 @@ namespace XenAdmin
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.Shown += new System.EventHandler(this.MainWindow_Shown);
             this.ResizeEnd += new System.EventHandler(this.MainWindow_ResizeEnd);
-            this.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.MainWindow_HelpRequested);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainWindow_KeyDown);
             this.Resize += new System.EventHandler(this.MainWindow_Resize);
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -2108,9 +2030,6 @@ namespace XenAdmin
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem windowToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem helpTopicsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem helpContextMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem15;
         private System.Windows.Forms.ToolStripMenuItem viewApplicationLogToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem17;
         private System.Windows.Forms.ToolStripMenuItem xenSourceOnTheWebToolStripMenuItem;
@@ -2208,7 +2127,6 @@ namespace XenAdmin
         private XenAdmin.Commands.CommandToolStripMenuItem restartToolstackToolStripMenuItem;
         private XenAdmin.Controls.MainWindowControls.NavigationPane navigationPane;
         private XenAdmin.TabPages.AlertSummaryPage alertPage;
-        private XenAdmin.TabPages.ManageUpdatesPage updatesPage;
         private XenAdmin.TabPages.HistoryPage eventsPage;
         private System.Windows.Forms.ToolStripMenuItem customTemplatesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem templatesToolStripMenuItem1;
@@ -2241,15 +2159,10 @@ namespace XenAdmin
         private XenAdmin.Commands.CommandToolStripMenuItem toolStripMenuItemWlb;
         private XenAdmin.Commands.CommandToolStripMenuItem toolStripMenuItemCertificate;
         private XenAdmin.Commands.CommandToolStripMenuItem toolStripMenuItemResetCertificate;
-        private System.Windows.Forms.ToolStripMenuItem updateClientToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem relNotesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem downloadInstallToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCfu;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator32;
         private XenAdmin.Commands.CommandToolStripMenuItem toolStripMenuItemVtpm;
-        private System.Windows.Forms.ToolStripMenuItem downloadSourceToolStripMenuItem;
         private System.Windows.Forms.Label labelFiltersOnOff;
-        private TabPages.ManageCdnUpdatesPage cdnUpdatesPage;
         private System.Windows.Forms.ToolStripSplitButton statusButtonErrors;
         private System.Windows.Forms.ToolStripSplitButton statusButtonCdnUpdates;
         private System.Windows.Forms.ToolStripSplitButton statusButtonUpdates;

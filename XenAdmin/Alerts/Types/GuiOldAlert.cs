@@ -54,8 +54,6 @@ namespace XenAdmin.Alerts
 
         public override string FixLinkText => Messages.ALERT_NEW_VERSION_DOWNLOAD;
 
-        public override string HelpID => "GuiOldAlert";
-
         public override string Title => string.Format(Messages.XENCENTER_NEWER_AVAILABLE, BrandManager.BrandConsole);
     }
 }

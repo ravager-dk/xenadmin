@@ -475,7 +475,7 @@ namespace XenAdmin
                 log.Error("Could not save settings. Exiting application.", ex);
 
                 using (var dlg = new ErrorDialog(string.Format(Messages.MESSAGEBOX_SAVE_CORRUPTED, GetUserConfigPath()))
-                    {WindowTitle = Messages.MESSAGEBOX_SAVE_CORRUPTED_TITLE})
+                { WindowTitle = Messages.MESSAGEBOX_SAVE_CORRUPTED_TITLE })
                 {
                     dlg.ShowDialog(Program.MainWindow);
                 }
@@ -530,7 +530,7 @@ namespace XenAdmin
                 // Ugly, but we need to warn the user...
                 if (!Program.RunInAutomatedTestMode)
                     using (var dlg = new WarningDialog(Messages.MESSAGEBOX_SESSION_SAVE_UNABLE)
-                        {WindowTitle = Messages.MESSAGEBOX_SESSION_SAVE_UNABLE_TITLE})
+                    { WindowTitle = Messages.MESSAGEBOX_SESSION_SAVE_UNABLE_TITLE })
                     {
                         dlg.ShowDialog();
                     }
@@ -644,7 +644,7 @@ namespace XenAdmin
                 var knownServers = Properties.Settings.Default.KnownServers;
                 if (knownServers == null)
                     return known;
-                
+
                 foreach (string knownHost in knownServers)
                 {
                     string[] hostCert = knownHost.Split(' ');
@@ -712,13 +712,10 @@ namespace XenAdmin
             log.Info($"=== WarnChangedCertificate: {Properties.Settings.Default.WarnChangedCertificate}");
             log.Info($"=== RemindChangePassword: {Properties.Settings.Default.RemindChangePassword}");
 
-            if (!Helpers.CommonCriteriaCertificationRelease)
-            {
-                //do not log Fileservice settings
-                log.Info($"=== AllowXenCenterUpdates: {Properties.Settings.Default.AllowXenCenterUpdates}");
-                log.Info($"=== AllowPatchesUpdates: {Properties.Settings.Default.AllowPatchesUpdates}");
-                log.Info($"=== AllowXenServerUpdates: {Properties.Settings.Default.AllowXenServerUpdates}");
-            }
+            //do not log Fileservice settings
+            log.Info($"=== AllowXenCenterUpdates: {Properties.Settings.Default.AllowXenCenterUpdates}");
+            log.Info($"=== AllowPatchesUpdates: {Properties.Settings.Default.AllowPatchesUpdates}");
+            log.Info($"=== AllowXenServerUpdates: {Properties.Settings.Default.AllowXenServerUpdates}");
 
             log.Info($"=== FillAreaUnderGraphs: {Properties.Settings.Default.FillAreaUnderGraphs}");
             log.Info($"=== RememberLastSelectedTab: {Properties.Settings.Default.RememberLastSelectedTab}");
@@ -732,8 +729,8 @@ namespace XenAdmin
             log.InfoFormat($"=== DisabledPlugins: {disabledPlugins}");
 
             log.Info($"=== DoNotConfirmDismissAlerts: {Properties.Settings.Default.DoNotConfirmDismissAlerts}");
-            log.Info($"=== DoNotConfirmDismissUpdates: {Properties.Settings.Default.DoNotConfirmDismissUpdates}" );
-            log.Info($"=== DoNotConfirmDismissEvents: {Properties.Settings.Default.DoNotConfirmDismissEvents}" );
+            log.Info($"=== DoNotConfirmDismissUpdates: {Properties.Settings.Default.DoNotConfirmDismissUpdates}");
+            log.Info($"=== DoNotConfirmDismissEvents: {Properties.Settings.Default.DoNotConfirmDismissEvents}");
             log.Info($"=== IgnoreOvfValidationWarnings: {Properties.Settings.Default.IgnoreOvfValidationWarnings}");
         }
 

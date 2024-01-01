@@ -213,9 +213,6 @@ namespace XenAdmin.Plugins
                 _tabPage.Text = ToString();
                 _tabPage.ToolTipText = Tooltip ?? "";
 
-                if (Program.MainWindow != null) // for unit tests
-                    _tabPage.HelpRequested += Program.MainWindow.MainWindow_HelpRequested;
-
                 CreateStatusBar();
                 CreateBrowser();
                 _tabPage.Controls.Add(statusStrip);
@@ -461,10 +458,6 @@ namespace XenAdmin.Plugins
 
         private void Browser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
-            if (e.KeyCode == Keys.F1 && Browser.Focused)
-            {
-                Program.MainWindow.MainWindow_HelpRequested(null, null);
-            }
         }
 
         private void Browser_AuthenticationPrompt(WebBrowser2 sender, WebBrowser2.AuthenticationPromptEventArgs e)

@@ -112,7 +112,7 @@ namespace XenAdmin.XenSearch
                     return false;
 
                 string warningMessage;
-                int colSpan;                
+                int colSpan;
 
                 if (property == PropertyNames.memoryValue && !status.HasFlag(VM.VirtualizationStatus.ManagementInstalled))
                 {
@@ -127,37 +127,15 @@ namespace XenAdmin.XenSearch
                         colSpan = 3;
                     }
 
-                    if (InstallToolsCommand.CanRun(vm))
-                    {
-                        item = new GridStringItem(warningMessage,
-                            HorizontalAlignment.Center,
-                            VerticalAlignment.Middle,
-                            false,
-                            false,
-                            QueryPanel.LinkBrush,
-                            Program.DefaultFontUnderline,
-                            QueryPanel.LinkBrush,
-                            Program.DefaultFontUnderline,
-                            colSpan,
-                            (sender, args) =>
-                            {
-                                if (Helpers.StockholmOrGreater(vm.Connection))
-                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
-                                else
-                                    new InstallToolsCommand(Program.MainWindow, vm).Run();
-                            }, null);
-                    }
-                    else
-                    {
-                        item = new GridStringItem(warningMessage,
-                                                  HorizontalAlignment.Center,
-                                                  VerticalAlignment.Middle,
-                                                  false,
-                                                  false,
-                                                  QueryPanel.TextBrush,
-                                                  Program.DefaultFont,
-                                                  colSpan);
-                    }
+                    item = new GridStringItem(warningMessage,
+                                                   HorizontalAlignment.Center,
+                                                   VerticalAlignment.Middle,
+                                                   false,
+                                                   false,
+                                                   QueryPanel.TextBrush,
+                                                   Program.DefaultFont,
+                                                   colSpan);
+
                 }
 
                 if (property == PropertyNames.diskText && vm.HasNewVirtualizationStates() && !status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
@@ -165,56 +143,17 @@ namespace XenAdmin.XenSearch
                     warningMessage = Messages.VIRTUALIZATION_STATE_VM_IO_NOT_OPTIMIZED;
                     colSpan = 2;
 
-                    if (InstallToolsCommand.CanRun(vm))
-                    {
-                        item = new GridStringItem(warningMessage,
-                            HorizontalAlignment.Center,
-                            VerticalAlignment.Middle,
-                            false,
-                            false,
-                            QueryPanel.LinkBrush,
-                            Program.DefaultFontUnderline,
-                            QueryPanel.LinkBrush,
-                            Program.DefaultFontUnderline,
-                            colSpan,
-                            (sender, args) =>
-                            {
-                                if (Helpers.StockholmOrGreater(vm.Connection))
-                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
-                                else
-                                    new InstallToolsCommand(Program.MainWindow, vm).Run();
-                            }, null);
-                    }
-                    else
-                    {
-                        item = new GridStringItem(warningMessage,
-                                                  HorizontalAlignment.Center,
-                                                  VerticalAlignment.Middle,
-                                                  false,
-                                                  false,
-                                                  QueryPanel.TextBrush,
-                                                  Program.DefaultFont,
-                                                  colSpan);
-                    }
+
+                    item = new GridStringItem(warningMessage,
+                                              HorizontalAlignment.Center,
+                                              VerticalAlignment.Middle,
+                                              false,
+                                              false,
+                                              QueryPanel.TextBrush,
+                                              Program.DefaultFont,
+                                              colSpan);
+
                 }
-                return true;
-            }
-
-            if (o is Pool pool && !pool.IsPoolFullyUpgraded())
-            {
-                if (property == PropertyNames.memoryValue)
-                {
-                    var coordinator = pool.Connection.Resolve(pool.master);
-                    var versionString = $"{coordinator.ProductBrand()} {coordinator.ProductVersionText()}";
-
-                    item = new GridStringItem(string.Format(Messages.POOL_VERSIONS_LINK_TEXT, versionString),
-                                  HorizontalAlignment.Center, VerticalAlignment.Middle, false, false,
-                                  QueryPanel.LinkBrush, Program.DefaultFontUnderline, QueryPanel.LinkBrush,
-                                  Program.DefaultFontUnderline, 3,
-                                  (sender, args) => new RollingUpgradeCommand(Program.MainWindow).Run(),
-                                  null);
-                }
-
                 return true;
             }
 
@@ -239,16 +178,16 @@ namespace XenAdmin.XenSearch
 
             return new GridVerticalArrayItem(
                 new GridItemBase[] {
-                                       new GridStringItem(new PropertyWrapper(PropertyNames.label, o), HorizontalAlignment.Left, 
+                                       new GridStringItem(new PropertyWrapper(PropertyNames.label, o), HorizontalAlignment.Left,
                                                           VerticalAlignment.Middle, o != null, true, QueryPanel.TextBrush, Program.DefaultFont,
                                                           QueryPanel.TextBrush, Program.DefaultFontUnderline,
                                                           // Next argument used to be "if (ObjectInTreeView(o)) ? delegate() {...} : null".
                                                           // I moved the ObjectInTreeView inside the delegate because it's O(#nodes in tree)
                                                           // and so that we only have to check it at click time, not for each item put into
                                                           // the search results. (We no longer need to know at mouse-over time). See CA-29607.
-                                                          delegate{ClickHandler(o); }, 
+                                                          delegate{ClickHandler(o); },
                                                           delegate(object gridItem, EventArgs e) {ContextMenuHandler((GridItemBase)gridItem, o);}),
-                                       new GridStringItem(new PropertyWrapper(PropertyNames.description, o), HorizontalAlignment.Left, 
+                                       new GridStringItem(new PropertyWrapper(PropertyNames.description, o), HorizontalAlignment.Left,
                                                           VerticalAlignment.Middle, false, false, QueryPanel.DarkGreyBrush, Program.DefaultFont)
                                    }, false);
         }
@@ -343,7 +282,7 @@ namespace XenAdmin.XenSearch
 
             return NewBarItem(
                 new PropertyWrapper(textProperty, o),
-                new ImageDelegate(delegate()
+                new ImageDelegate(delegate ()
                 {
                     int? i = (int?)PropertyAccessors.Get(rankProperty)(o);
                     if (i == null)

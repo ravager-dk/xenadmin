@@ -54,9 +54,9 @@ namespace XenAdmin.Controls
 
         public void Build(bool showLackAsError = false)
         {
-            labelInfo.Text = Updates.CheckCanDownloadUpdates()
-                ? Messages.FILESERVICE_CLIENTID_FOUND
-                : Messages.FILESERVICE_CLIENTID_NOT_FOUND;
+            //labelInfo.Text = Updates.CheckCanDownloadUpdates()
+            //    ? Messages.FILESERVICE_CLIENTID_FOUND
+            //    : Messages.FILESERVICE_CLIENTID_NOT_FOUND;
 
             if (showLackAsError)
             {

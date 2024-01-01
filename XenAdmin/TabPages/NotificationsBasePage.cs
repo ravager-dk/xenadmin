@@ -32,11 +32,10 @@
 using System;
 using System.Windows.Forms;
 using XenAdmin.Controls.MainWindowControls;
-using XenAdmin.Help;
 
 namespace XenAdmin.TabPages
 {
-    public class NotificationsBasePage : UserControl, IControlWithHelp
+    public class NotificationsBasePage : UserControl
     {
         public event Action FiltersChanged;
 

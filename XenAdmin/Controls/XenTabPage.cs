@@ -33,14 +33,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
-using XenAdmin.Help;
 using XenAdmin.Network;
 
 
 namespace XenAdmin.Controls
 {
     [Designer(typeof(ParentControlDesigner))]
-    public partial class XenTabPage : UserControl, IControlWithHelp
+    public partial class XenTabPage : UserControl
     {
         public IXenConnection Connection;
 

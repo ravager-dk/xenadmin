@@ -99,13 +99,6 @@ namespace XenAdmin.Dialogs
             this.AddButton.UseVisualStyleBackColor = false;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
-            // linkLabelTellMeMore
-            // 
-            resources.ApplyResources(this.linkLabelTellMeMore, "linkLabelTellMeMore");
-            this.linkLabelTellMeMore.Name = "linkLabelTellMeMore";
-            this.linkLabelTellMeMore.TabStop = true;
-            this.linkLabelTellMeMore.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelTellMeMore_LinkClicked);
-            // 
             // NetworkingProperties
             // 
             resources.ApplyResources(this, "$this");

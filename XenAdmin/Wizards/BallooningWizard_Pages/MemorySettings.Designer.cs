@@ -38,7 +38,6 @@ namespace XenAdmin.Wizards.BallooningWizard_Pages
             // 
             resources.ApplyResources(this.memoryControlsBasic, "memoryControlsBasic");
             this.memoryControlsBasic.Name = "memoryControlsBasic";
-            this.memoryControlsBasic.InstallTools += new System.Action(this.memoryControlsBasic_InstallTools);
             // 
             // memoryControlsAdvanced
             // 

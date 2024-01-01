@@ -44,9 +44,7 @@ namespace XenAdmin.Dialogs
             this.Name = "XenDialogBase";
             this.ShowInTaskbar = false;
             this.Load += new System.EventHandler(this.XenDialogBase_Load);
-            this.HelpButtonClicked += new System.ComponentModel.CancelEventHandler(this.XenDialogBase_HelpButtonClicked);
             this.Shown += new System.EventHandler(this.XenDialogBase_Shown);
-            this.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.XenDialogBase_HelpRequested);
             this.ResumeLayout(false);
 
         }

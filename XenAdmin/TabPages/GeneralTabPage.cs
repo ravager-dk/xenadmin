@@ -41,7 +41,6 @@ using XenAdmin.Controls;
 using XenAdmin.Core;
 using XenAdmin.CustomFields;
 using XenAdmin.Dialogs;
-using XenAdmin.Dialogs.ServerUpdates;
 using XenAdmin.Model;
 using XenAdmin.Network;
 using XenAdmin.SettingsPanels;
@@ -363,12 +362,10 @@ namespace XenAdmin.TabPages
                 GenerateMemoryBox();
                 GenerateVersionBox();
                 GenerateCPUBox();
-                GenerateHostUpdatesBox();
                 GenerateBootBox();
                 GenerateHABox();
                 GenerateStatusBox();
                 GenerateMultipathBox();
-                GeneratePoolUpdatesBox();
                 GenerateMultipathBootBox();
                 GenerateVCPUsBox();
                 GenerateDockerInfoBox();
@@ -486,234 +483,6 @@ namespace XenAdmin.TabPages
 
                 var cfWrapper = new CustomFieldWrapper(xenObject, customField.Definition);
                 s.AddEntry(customField.Definition.Name, cfWrapper.ToString(), editValue);
-            }
-        }
-
-        private void GeneratePoolUpdatesBox()
-        {
-            if (!(xenObject is Pool pool))
-                return;
-
-            var messages = CheckPoolUpdate(pool);
-            if (messages.Count > 0)
-            {
-                foreach (var kvp in messages)
-                    pdSectionUpdates.AddEntry(kvp.Key, kvp.Value);
-            }
-
-            var fullyApplied = new List<string>();
-            var partAppliedError = new List<string>();
-            var partApplied = new List<string>();
-
-            var cache = xenObject.Connection.Cache;
-            var allHostCount = xenObject.Connection.Cache.HostCount;
-
-            if (Helpers.CloudOrGreater(pool.Connection))
-                GenerateCdnUpdatesBox(pool);
-
-            if (Helpers.ElyOrGreater(xenObject.Connection))
-            {
-                foreach (var u in cache.Pool_updates)
-                {
-                    var entry = Helpers.UpdatesFriendlyNameAndVersion(u);
-                    var appliedHostCount = u.AppliedOnHosts().Count;
-
-                    if (appliedHostCount == allHostCount)
-                    {
-                        fullyApplied.Add(entry);
-                    }
-                    else if (appliedHostCount > 0)
-                    {
-                        if (u.EnforceHomogeneity())
-                            partAppliedError.Add(entry);
-                        else
-                            partApplied.Add(entry);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var p in cache.Pool_patches)
-                {
-                    var entry = p.name_label;
-                    var appliedHostCount = p.host_patches.Count;
-
-                    if (appliedHostCount == allHostCount)
-                        fullyApplied.Add(entry);
-                    else if (appliedHostCount > 0)
-                        partAppliedError.Add(entry);
-                }
-            }
-
-            if (fullyApplied.Count > 0)
-            {
-                fullyApplied.Sort(StringUtility.NaturalCompare);
-                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.fully_applied"), string.Join(Environment.NewLine, fullyApplied));
-            }
-
-            if (partApplied.Count > 0)
-            {
-                var menuItems = new ToolStripMenuItem[] { new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true) };
-                partApplied.Sort(StringUtility.NaturalCompare);
-                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.partially_applied"), string.Join(Environment.NewLine, partApplied), menuItems);
-            }
-
-            if (partAppliedError.Count > 0)
-            {
-                var menuItems = new ToolStripMenuItem[] { new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true) };
-                partAppliedError.Sort(StringUtility.NaturalCompare);
-                pdSectionUpdates.AddEntry(string.Format(Messages.STRING_SPACE_STRING,
-                        FriendlyName("Pool_patch.partially_applied"), Messages.UPDATES_GENERAL_TAB_ENFORCE_HOMOGENEITY),
-                    string.Join(Environment.NewLine, partAppliedError), Color.Red, menuItems);
-            }
-        }
-
-        private void GenerateCdnUpdatesBox(Pool pool)
-        {
-            var repoNames = (from repoRef in pool.repositories
-                             let repo = pool.Connection.Resolve(repoRef)
-                             where repo != null
-                             let found = RepoDescriptor.AllRepos.FirstOrDefault(rd => rd.MatchesRepository(repo))
-                             where found != null
-                             select found.FriendlyName).ToList();
-
-            pdSectionUpdates.AddEntryWithNoteLink(Messages.UPDATES_GENERAL_TAB_REPO,
-                repoNames.Count == 0 ? Messages.NOT_CONFIGURED : string.Join("\n", repoNames),
-                Messages.UPDATES_GENERAL_TAB_CONFIG,
-                () =>
-                {
-                    using (var dialog = new ConfigUpdatesDialog())
-                        dialog.ShowDialog(this);
-                }, true);
-
-            string lastSyncTime = Messages.INDETERMINABLE;
-
-            if (Helpers.XapiEqualOrGreater_23_18_0(pool.Connection))
-            {
-                lastSyncTime = Messages.NEVER;
-
-                if (pool.last_update_sync > Util.GetUnixMinDateTime())
-                {
-                    lastSyncTime = HelpersGUI.DateTimeToString(pool.last_update_sync.ToLocalTime(), Messages.DATEFORMAT_DMY_HMS, true);
-                }
-            }
-
-            if (pool.repositories.Count > 0)
-            {
-                var enabled = pool.allowed_operations.Contains(pool_allowed_operations.sync_updates) &&
-                              !ConnectionsManager.History.Any(a =>
-                                  !a.IsCompleted && a is SyncWithCdnAction syncA && !syncA.Cancelled && syncA.Connection == pool.Connection);
-
-                pdSectionUpdates.AddEntryWithNoteLink(Messages.UPDATES_GENERAL_TAB_LAST_SYNCED,
-                    lastSyncTime, Messages.UPDATES_GENERAL_TAB_SYNC_NOW,
-                    () =>
-                    {
-                        var syncAction = new SyncWithCdnAction(pool);
-                        BuildList();
-                        syncAction.Completed += a => Updates.CheckForCdnUpdates(a.Connection);
-                        syncAction.RunAsync();
-                    }, enabled);
-            }
-            else
-            {
-                pdSectionUpdates.AddEntry(Messages.UPDATES_GENERAL_TAB_LAST_SYNCED, lastSyncTime);
-            }
-
-            foreach (var host in pool.Connection.Cache.Hosts)
-            {
-                if (host.pending_guidances.Count > 0)
-                {
-                    pdSectionUpdates.AddEntry(string.Format(Messages.CDN_PENDING_GUIDANCES_KEY, host.Name().Ellipsise(30)),
-                        string.Format(Messages.CDN_PENDING_GUIDANCES_VALUE, string.Join(Environment.NewLine, host.pending_guidances.Select(GetPendingGuidance))));
-                }
-            }
-        }
-
-        private void GenerateHostUpdatesBox()
-        {
-            if (!(xenObject is Host host))
-                return;
-
-            bool elyOrGreater = Helpers.ElyOrGreater(host);
-
-            // As of Ely we use host.updates_requiring_reboot to generate the list of reboot required messages
-            // For older versions no change to how messages are generated
-
-            var messages = elyOrGreater ? CheckHostUpdatesRequiringReboot(host) : CheckServerUpdates(host);
-
-            foreach (var kvp in messages)
-                pdSectionUpdates.AddEntry(kvp.Key, kvp.Value);
-
-            var appliedPatches = string.Join(Environment.NewLine, Helpers.HostAppliedPatchesList(host));
-
-            if (!string.IsNullOrEmpty(appliedPatches))
-                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.applied"), appliedPatches);
-
-            var recommendedPatches = RecommendedPatchesForHost(host);
-
-            if (!string.IsNullOrEmpty(recommendedPatches))
-                pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.required-updates"), recommendedPatches);
-
-            if (!elyOrGreater)
-            {
-                var suppPacks = hostInstalledSuppPacks(host);
-
-                if (!string.IsNullOrEmpty(suppPacks))
-                    pdSectionUpdates.AddEntry(FriendlyName("Supplemental_packs.installed"), suppPacks);
-            }
-
-            if (Helpers.CloudOrGreater(host))
-            {
-                var pool = Helpers.GetPool(host.Connection);
-                if (pool == null) //standalone host
-                {
-                    pool = Helpers.GetPoolOfOne(host.Connection);
-                    GenerateCdnUpdatesBox(pool);
-                }
-
-                if (host.pending_guidances.Count > 0)
-                {
-                    pdSectionUpdates.AddEntry(string.Format(Messages.CDN_PENDING_GUIDANCES_KEY, host.Name().Ellipsise(30)),
-                        string.Format(Messages.CDN_PENDING_GUIDANCES_VALUE, string.Join(Environment.NewLine, host.pending_guidances.Select(GetPendingGuidance))));
-                }
-
-                if (Helpers.XapiEqualOrGreater_22_20_0(host))
-                {
-                    var unixMinDateTime = Util.GetUnixMinDateTime();
-                    var softwareVersionDate = unixMinDateTime;
-
-                    if (host.software_version.ContainsKey("date"))
-                    {
-                        if (!Util.TryParseIso8601DateTime(host.software_version["date"], out softwareVersionDate))
-                            Util.TryParseNonIso8601DateTime(host.software_version["date"], out softwareVersionDate);
-                    }
-
-                    string lastUpdateTime = Messages.NEVER;
-
-                    if (host.last_software_update > softwareVersionDate && host.last_software_update > unixMinDateTime)
-                    {
-                        lastUpdateTime = HelpersGUI.DateTimeToString(host.last_software_update.ToLocalTime(), Messages.DATEFORMAT_DMY_HMS, true);
-                    }
-
-                    pdSectionUpdates.AddEntry(Messages.SOFTWARE_VERSION_LAST_UPDATED, lastUpdateTime);
-                }
-            }
-        }
-
-        private static string GetPendingGuidance(update_guidances guidance)
-        {
-            switch (guidance)
-            {
-                case update_guidances.reboot_host:
-                    return Messages.CDN_GUIDANCE_REBOOT_HOST;
-                case update_guidances.reboot_host_on_livepatch_failure:
-                    return Messages.CDN_GUIDANCE_REBOOT_HOST_LIVEPATCH_FAILURE;
-                case update_guidances.restart_toolstack:
-                    return Messages.CDN_GUIDANCE_RESTART_TOOLSTACK;
-                case update_guidances.restart_device_model:
-                    return Messages.CDN_GUIDANCE_RESTART_DEVICE_MODEL;
-                default:
-                    return Messages.UNKNOWN;
             }
         }
 
@@ -1381,29 +1150,7 @@ namespace XenAdmin.TabPages
                 if (coordinator != null)
                 {
                     var versionString = $"{coordinator.ProductBrand()} {coordinator.ProductVersionText()}";
-
-                    if (p.IsPoolFullyUpgraded())
-                    {
-                        //var hotfixEligibilityString = AdditionalVersionString(coordinator);
-
-                        //if (string.IsNullOrEmpty(hotfixEligibilityString))
-                        s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
-                        //else
-                        //    s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
-                        //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
-                        //        Color.Red);
-                    }
-                    else
-                    {
-                        var cmd = new RollingUpgradeCommand(Program.MainWindow);
-                        var runRpuWizard = new ToolStripMenuItem(Messages.ROLLING_POOL_UPGRADE_ELLIPSIS,
-                            null,
-                            (sender, args) => cmd.Run());
-
-                        s.AddEntryLink(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
-                            string.Format(Messages.POOL_VERSIONS_LINK_TEXT, versionString),
-                            cmd, runRpuWizard);
-                    }
+                    s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
                 }
             }
 
@@ -1461,43 +1208,22 @@ namespace XenAdmin.TabPages
                     // displaying Row1 - Row3
                     s.AddEntry(FriendlyName("VM.VirtualizationState"), sb.ToString());
 
-                    if (vm.power_state == vm_power_state.Running)
-                    {
-                        //Row 4: Install Tools
-                        string installMessage = string.Empty;
-                        var canInstall = InstallToolsCommand.CanRun(vm);
+                    //if (vm.power_state == vm_power_state.Running)
+                    //{
+                    //    //Row 4: Install Tools
+                    //    string installMessage = string.Empty;
+                    //    var canInstall = InstallToolsCommand.CanRun(vm);
 
-                        if (canInstall && !status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
-                        {
-                            installMessage = Messages.VIRTUALIZATION_STATE_VM_INSTALL_IO_DRIVERS_AND_MANAGEMENT_AGENT;
-                        }
-                        else if (canInstall && status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled) &&
-                                 !status.HasFlag(VM.VirtualizationStatus.ManagementInstalled))
-                        {
-                            installMessage = Messages.VIRTUALIZATION_STATE_VM_INSTALL_MANAGEMENT_AGENT;
-                        }
-
-                        if (!string.IsNullOrEmpty(installMessage))
-                        {
-                            if (Helpers.StockholmOrGreater(vm.Connection))
-                            {
-                                void GoToHelp()
-                                {
-                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
-                                }
-
-                                var toolsItem = new ToolStripMenuItem(string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), null,
-                                    (sender, args) => GoToHelp());
-                                s.AddEntryLink(string.Empty, string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), GoToHelp, toolsItem);
-                            }
-                            else
-                            {
-                                var cmd = new InstallToolsCommand(Program.MainWindow, vm);
-                                var toolsItem = new ToolStripMenuItem(installMessage, null, (sender, args) => cmd.Run());
-                                s.AddEntryLink(string.Empty, installMessage, cmd, toolsItem);
-                            }
-                        }
-                    }
+                    //    if (canInstall && !status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled))
+                    //    {
+                    //        installMessage = Messages.VIRTUALIZATION_STATE_VM_INSTALL_IO_DRIVERS_AND_MANAGEMENT_AGENT;
+                    //    }
+                    //    else if (canInstall && status.HasFlag(VM.VirtualizationStatus.IoDriversInstalled) &&
+                    //             !status.HasFlag(VM.VirtualizationStatus.ManagementInstalled))
+                    //    {
+                    //        installMessage = Messages.VIRTUALIZATION_STATE_VM_INSTALL_MANAGEMENT_AGENT;
+                    //    }
+                    //}
                 }
 
                 //for everything else (All VMs on pre-Dundee hosts & All non-Windows VMs on any host)
@@ -1507,34 +1233,7 @@ namespace XenAdmin.TabPages
 
                     if (status == VM.VirtualizationStatus.NotInstalled || status.HasFlag(VM.VirtualizationStatus.PvDriversOutOfDate))
                     {
-                        if (InstallToolsCommand.CanRun(vm))
-                        {
-                            if (Helpers.StockholmOrGreater(vm.Connection))
-                            {
-                                void GoToHelp()
-                                {
-                                    Help.HelpManager.Launch("InstallToolsWarningDialog");
-                                }
-
-                                var toolsItem = new ToolStripMenuItem(string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), null, (sender, args) => GoToHelp());
-
-                                s.AddEntry(FriendlyName("VM.VirtualizationState"), statusString);
-                                s.AddEntryLink("", string.Format(Messages.INSTALLTOOLS_READ_MORE, BrandManager.VmTools), GoToHelp, toolsItem);
-                            }
-                            else
-                            {
-                                var cmd = new InstallToolsCommand(Program.MainWindow, vm);
-                                var toolsItem = new ToolStripMenuItem(string.Format(Messages.INSTALL_XENSERVER_TOOLS, BrandManager.VmTools), null,
-                                    (sender, args) => cmd.Run());
-
-                                s.AddEntryLink(FriendlyName("VM.VirtualizationState"), statusString,
-                                    cmd, toolsItem);
-                            }
-                        }
-                        else
-                        {
-                            s.AddEntry(FriendlyName("VM.VirtualizationState"), statusString, Color.Red);
-                        }
+                        s.AddEntry(FriendlyName("VM.VirtualizationState"), statusString, Color.Red);
                     }
                     else
                     {
@@ -1729,27 +1428,6 @@ namespace XenAdmin.TabPages
                     return false;
             }
             return true;
-        }
-
-        private string RecommendedPatchesForHost(Host host)
-        {
-            var result = new List<string>();
-            var recommendedPatches = Updates.RecommendedPatchesForHost(host);
-
-            if (recommendedPatches == null)
-                return String.Empty;
-
-            foreach (var patch in recommendedPatches)
-                result.Add(patch.Name);
-
-            return string.Join(Environment.NewLine, result.ToArray());
-        }
-
-        private string hostInstalledSuppPacks(Host host)
-        {
-            var result = host.SuppPacks().Select(suppPack => suppPack.LongDescription).ToList();
-            result.Sort(StringUtility.NaturalCompare);
-            return string.Join("\n", result.ToArray());
         }
 
         private void SetupDeprecationBanner()

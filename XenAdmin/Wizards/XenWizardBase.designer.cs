@@ -87,13 +87,6 @@ namespace XenAdmin.Wizards
             this.labelWizard.ForeColor = System.Drawing.Color.Black;
             this.labelWizard.Name = "labelWizard";
             // 
-            // XSHelpButton
-            // 
-            resources.ApplyResources(this.XSHelpButton, "XSHelpButton");
-            this.XSHelpButton.Name = "XSHelpButton";
-            this.XSHelpButton.TabStop = false;
-            this.XSHelpButton.Click += new System.EventHandler(this.HelpButton_Click);
-            // 
             // wizardProgress
             // 
             resources.ApplyResources(this.wizardProgress, "wizardProgress");
@@ -189,7 +182,6 @@ namespace XenAdmin.Wizards
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.XenWizardBase_FormClosing);
             this.Load += new System.EventHandler(this.XenWizardBase_Load);
-            this.HelpRequested += new System.Windows.Forms.HelpEventHandler(this.XenWizardBase_HelpRequested);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.XenWizardBase_KeyPress);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panelTop.ResumeLayout(false);

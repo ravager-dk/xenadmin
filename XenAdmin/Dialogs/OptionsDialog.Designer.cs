@@ -34,7 +34,6 @@ namespace XenAdmin.Dialogs
             this.connectionOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.ConnectionOptionsPage();
             this.consolesOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.ConsolesOptionsPage();
             this.graphsOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.DisplayOptionsPage();
-            this.updatesOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.UpdatesOptionsPage();
             this.securityOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.SecurityOptionsPage();
             this.saveAndRestoreOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.SaveAndRestoreOptionsPage();
             this.pluginOptionsPage1 = new XenAdmin.Dialogs.OptionsPages.PluginOptionsPage();
@@ -56,7 +55,6 @@ namespace XenAdmin.Dialogs
             this.ContentPanel.Controls.Add(this.pluginOptionsPage1);
             this.ContentPanel.Controls.Add(this.saveAndRestoreOptionsPage1);
             this.ContentPanel.Controls.Add(this.securityOptionsPage1);
-            this.ContentPanel.Controls.Add(this.updatesOptionsPage1);
             this.ContentPanel.Controls.Add(this.graphsOptionsPage1);
             this.ContentPanel.Controls.Add(this.consolesOptionsPage1);
             this.ContentPanel.Controls.Add(this.connectionOptionsPage1);
@@ -68,7 +66,6 @@ namespace XenAdmin.Dialogs
             this.pluginOptionsPage1,
             this.saveAndRestoreOptionsPage1,
             this.securityOptionsPage1,
-            this.updatesOptionsPage1,
             this.graphsOptionsPage1,
             this.consolesOptionsPage1,
             this.connectionOptionsPage1,
@@ -108,11 +105,6 @@ namespace XenAdmin.Dialogs
             // 
             resources.ApplyResources(this.graphsOptionsPage1, "graphsOptionsPage1");
             this.graphsOptionsPage1.Name = "graphsOptionsPage1";
-            // 
-            // updatesOptionsPage1
-            // 
-            resources.ApplyResources(this.updatesOptionsPage1, "updatesOptionsPage1");
-            this.updatesOptionsPage1.Name = "updatesOptionsPage1";
             // 
             // securityOptionsPage1
             // 
@@ -159,7 +151,6 @@ namespace XenAdmin.Dialogs
 
         private XenAdmin.Dialogs.OptionsPages.ConnectionOptionsPage connectionOptionsPage1;
         private XenAdmin.Dialogs.OptionsPages.ConsolesOptionsPage consolesOptionsPage1;
-        private XenAdmin.Dialogs.OptionsPages.UpdatesOptionsPage updatesOptionsPage1;
         private XenAdmin.Dialogs.OptionsPages.DisplayOptionsPage graphsOptionsPage1;
         private XenAdmin.Dialogs.OptionsPages.SecurityOptionsPage securityOptionsPage1;
         private XenAdmin.Dialogs.OptionsPages.SaveAndRestoreOptionsPage saveAndRestoreOptionsPage1;

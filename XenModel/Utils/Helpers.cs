@@ -200,12 +200,6 @@ namespace XenAdmin.Core
             return false;
         }
 
-        // CP-3435: Disable Check for Updates in Common Criteria Certification project
-        public static bool CommonCriteriaCertificationRelease
-        {
-            get { return false; }
-        }
-
         public static bool WlbEnabled(IXenConnection connection)
         {
             Pool pool = GetPoolOfOne(connection);

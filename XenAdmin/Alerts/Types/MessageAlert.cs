@@ -33,7 +33,6 @@ using System.Collections.Generic;
 using System.Linq;
 using XenAPI;
 using XenAdmin.Core;
-using XenAdmin.Help;
 using System.Text.RegularExpressions;
 using XenAdmin.Commands;
 using XenAdmin.Network;
@@ -386,17 +385,6 @@ namespace XenAdmin.Alerts
 				return Message.FriendlyAction(Message.MessageTypeString()) ?? Messages.DETAILS;
 			}
         }
-
-        public override string HelpID
-        {
-            get
-            {
-                string pageRef = "MessageAlert_" + Message.Type;
-                return HelpManager.TryGetTopicId(pageRef, out _) ? pageRef : null;
-            }
-        }
-
-        public override string HelpLinkText => Message.FriendlyHelp(Message.MessageTypeString());
 
         public override string Title
         {

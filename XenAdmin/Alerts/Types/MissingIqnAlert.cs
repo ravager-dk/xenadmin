@@ -57,14 +57,6 @@ namespace XenAdmin.Alerts
             }
         }
 
-        public override string HelpID
-        {
-            get
-            {
-                return "MissingIqnAlert";
-            }
-        }
-
         public override bool Equals(Alert other)
         {
             if (other is MissingIqnAlert)

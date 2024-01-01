@@ -148,10 +148,6 @@ namespace XenAdmin.ConsoleView
                     undockedForm.Location = oldUndockedLocation;
                 }
 
-                undockedForm.HelpButton = true;
-                undockedForm.HelpButtonClicked += undockedForm_HelpButtonClicked;
-                undockedForm.HelpRequested += undockedForm_HelpRequested;
-
                 undockedForm.Show();
 
                 if(Properties.Settings.Default.PreserveScaleWhenUndocked)
@@ -202,18 +198,6 @@ namespace XenAdmin.ConsoleView
                 return string.Format(Messages.CONSOLE_SR_DRIVER_DOMAIN, sr.Name());
 
             return vm.Name();
-        }
-
-        private void undockedForm_HelpButtonClicked(object sender, CancelEventArgs e)
-        {
-            Help.HelpManager.Launch("TabPageConsole");
-            e.Cancel = true;
-        }
-
-        private void undockedForm_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            Help.HelpManager.Launch("TabPageConsole");
-            hlpevent.Handled = true;
         }
 
         void Server_PropertyChanged(object sender, PropertyChangedEventArgs e)

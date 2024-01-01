@@ -262,7 +262,6 @@ namespace XenAdmin.Alerts
         /// <summary>
         /// The helpid opened when the 'click here for help...' link is clicked.
         /// </summary>
-        public abstract string HelpID { get; }
 
         public IXenConnection Connection { get; protected set; }
 

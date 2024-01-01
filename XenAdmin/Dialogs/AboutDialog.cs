@@ -48,9 +48,6 @@ namespace XenAdmin.Dialogs
             VersionLabel.Text = string.Format(Messages.VERSION_NUMBER, BrandManager.BrandConsole,
                 Program.VersionText, Program.Version.Revision, IntPtr.Size * 8);
 
-            if (Helpers.CommonCriteriaCertificationRelease)
-                VersionLabel.Text += string.Format(Messages.COMMON_CRITERIA_TEXT, BrandManager.ProductBrand);
-
             label2.Text = BrandManager.Copyright;
         }
 

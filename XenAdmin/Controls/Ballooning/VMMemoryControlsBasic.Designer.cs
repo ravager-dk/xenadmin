@@ -149,14 +149,6 @@ namespace XenAdmin.Controls.Ballooning
             resources.ApplyResources(this.labelDMCUnavailable, "labelDMCUnavailable");
             this.labelDMCUnavailable.Name = "labelDMCUnavailable";
             // 
-            // linkInstallTools
-            // 
-            resources.ApplyResources(this.linkInstallTools, "linkInstallTools");
-            this.linkInstallTools.Name = "linkInstallTools";
-            this.linkInstallTools.TabStop = true;
-            this.linkInstallTools.VisitedLinkColor = System.Drawing.Color.Blue;
-            this.linkInstallTools.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.InstallTools_LinkClicked);
-            // 
             // memorySpinnerFixed
             // 
             resources.ApplyResources(this.memorySpinnerFixed, "memorySpinnerFixed");

@@ -126,14 +126,6 @@ namespace XenAdmin.Wizards.HAWizard_Pages
             resources.ApplyResources(this.labelStartDelayUnits, "labelStartDelayUnits");
             this.labelStartDelayUnits.Name = "labelStartDelayUnits";
             // 
-            // linkLabelTellMeMore
-            // 
-            resources.ApplyResources(this.linkLabelTellMeMore, "linkLabelTellMeMore");
-            this.tableLayoutPanel1.SetColumnSpan(this.linkLabelTellMeMore, 5);
-            this.linkLabelTellMeMore.Name = "linkLabelTellMeMore";
-            this.linkLabelTellMeMore.TabStop = true;
-            this.linkLabelTellMeMore.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelTellMeMore_LinkClicked);
-            // 
             // haNtolIndicator
             // 
             resources.ApplyResources(this.haNtolIndicator, "haNtolIndicator");

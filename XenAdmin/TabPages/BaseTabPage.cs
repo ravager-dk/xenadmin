@@ -34,12 +34,11 @@ using System.Drawing;
 using System.Windows.Forms;
 using XenAdmin.Controls;
 using XenAdmin.Controls.GradientPanel;
-using XenAdmin.Help;
 
 namespace XenAdmin.TabPages
 {
     [Designer("System.Windows.Forms.Design.ParentControlDesigner, System.Design", typeof(IDesigner))]
-    public partial class BaseTabPage : UserControl, IControlWithHelp
+    public partial class BaseTabPage : UserControl
     {
         // Colours etc. that are used by more than one tab page
         internal const int ITEM_SPACING = 4;
