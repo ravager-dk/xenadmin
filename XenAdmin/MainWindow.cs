@@ -117,8 +117,6 @@ namespace XenAdmin
 
         private string[] _commandLineArgs;
 
-        private static readonly System.Windows.Forms.Timer CheckForUpdatesTimer = new System.Windows.Forms.Timer();
-
         public readonly PluginManager PluginManager;
         private readonly ContextMenuBuilder contextMenuBuilder;
 
@@ -595,47 +593,7 @@ namespace XenAdmin
 
             CloseSplashScreen();
 
-            if (!Program.RunInAutomatedTestMode)
-            {
-                if (!Properties.Settings.Default.SeenAllowUpdatesDialog)
-                    using (var dlg = new NoIconDialog(string.Format(Messages.ALLOWED_UPDATES_DIALOG_MESSAGE, BrandManager.BrandConsole, BrandManager.ProductBrand),
-                        ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
-                    {
-                        HelpButton = true,
-                        HelpNameSetter = "AllowUpdatesDialog",
-                        ShowCheckbox = true,
-                        CheckboxCaption = Messages.ALLOWED_UPDATES_DIALOG_CHECKBOX
-                    })
-                    {
-                        var result = dlg.ShowDialog(this) == DialogResult.Yes;
-
-                        Properties.Settings.Default.AllowXenCenterUpdates = result;
-                        Properties.Settings.Default.SeenAllowUpdatesDialog = true;
-
-                        if (result && dlg.IsCheckBoxChecked)
-                        {
-                            using (var dialog = new OptionsDialog(PluginManager))
-                            {
-                                dialog.SelectConnectionOptionsPage();
-                                dialog.ShowDialog(this);
-                            }
-                        }
-
-                        Settings.TrySaveSettings();
-                    }
-
-                // start checkforupdates thread
-                CheckForUpdatesTimer.Interval = 1000 * 60 * 60 * 24; // 24 hours
-                CheckForUpdatesTimer.Tick += CheckForUpdatesTimer_Tick;
-                CheckForUpdatesTimer.Start();
-            }
-
             ProcessCommand(_commandLineArgs);
-        }
-
-        private void CheckForUpdatesTimer_Tick(object sender, EventArgs e)
-        {
-            //Updates.CheckForClientUpdates();
         }
 
         private void LoadTasksAsMeddlingActions(IXenConnection connection)
