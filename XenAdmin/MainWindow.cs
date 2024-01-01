@@ -88,20 +88,16 @@ namespace XenAdmin
         internal readonly ConsolePanel ConsolePanel = new ConsolePanel();
         internal readonly CvmConsolePanel CvmConsolePanel = new CvmConsolePanel();
         internal readonly HAPage HAPage = new HAPage();
-        internal readonly HAUpsellPage HAUpsellPage = new HAUpsellPage();
         internal readonly HomePage HomePage = new HomePage();
         internal readonly SearchPage SearchPage = new SearchPage();
         internal readonly NetworkPage NetworkPage = new NetworkPage();
         internal readonly NICPage NICPage = new NICPage();
         internal readonly WlbPage WlbPage = new WlbPage();
-        internal readonly WLBUpsellPage WLBUpsellPage = new WLBUpsellPage();
         internal readonly SrStoragePage SrStoragePage = new SrStoragePage();
         internal readonly PhysicalStoragePage PhysicalStoragePage = new PhysicalStoragePage();
         internal readonly VMStoragePage VMStoragePage = new VMStoragePage();
         internal readonly AdPage AdPage = new AdPage();
-        internal readonly ADUpsellPage AdUpsellPage = new ADUpsellPage();
         internal readonly GpuPage GpuPage = new GpuPage();
-        internal readonly PvsPage PvsPage = new PvsPage();
         internal readonly DockerProcessPage DockerProcessPage = new DockerProcessPage();
         internal readonly DockerDetailsPage DockerDetailsPage = new DockerDetailsPage();
         internal readonly UsbPage UsbPage = new UsbPage();
@@ -129,9 +125,6 @@ namespace XenAdmin
         public readonly PluginManager PluginManager;
         private readonly ContextMenuBuilder contextMenuBuilder;
 
-        private readonly LicenseManagerLauncher licenseManagerLauncher;
-        private readonly LicenseTimer licenseTimer;
-
         private Dictionary<ToolStripMenuItem, int> pluginMenuItemStartIndexes = new Dictionary<ToolStripMenuItem, int>();
 
         private bool expandTreeNodesOnStartup;
@@ -155,7 +148,7 @@ namespace XenAdmin
         public MainWindow(string[] args)
         {
             _commandLineArgs = args;
-            licenseManagerLauncher = new LicenseManagerLauncher(Program.MainWindow);
+            //licenseManagerLauncher = new LicenseManagerLauncher(Program.MainWindow);
             InvokeHelper.Initialize(this);
 
             ConnectionsManager.XenConnections.Clear();
@@ -185,7 +178,6 @@ namespace XenAdmin
             components.Add(WlbPage);
             components.Add(AdPage);
             components.Add(GpuPage);
-            components.Add(PvsPage);
             components.Add(SearchPage);
             components.Add(DockerProcessPage);
             components.Add(DockerDetailsPage);
@@ -202,15 +194,11 @@ namespace XenAdmin
             AddTabContents(CvmConsolePanel, TabPageCvmConsole);
             AddTabContents(NetworkPage, TabPageNetwork);
             AddTabContents(HAPage, TabPageHA);
-            AddTabContents(HAUpsellPage, TabPageHAUpsell);
             AddTabContents(HomePage, TabPageHome);
             AddTabContents(WlbPage, TabPageWLB);
-            AddTabContents(WLBUpsellPage, TabPageWLBUpsell);
             AddTabContents(PhysicalStoragePage, TabPagePhysicalStorage);
             AddTabContents(AdPage, TabPageAD);
-            AddTabContents(AdUpsellPage, TabPageADUpsell);
             AddTabContents(GpuPage, TabPageGPU);
-            AddTabContents(PvsPage, TabPagePvs);
             AddTabContents(SearchPage, TabPageSearch);
             AddTabContents(DockerProcessPage, TabPageDockerProcess);
             AddTabContents(DockerDetailsPage, TabPageDockerDetails);
@@ -251,26 +239,26 @@ namespace XenAdmin
             SelectionManager.BindTo(MainMenuBar.Items, this);
             SelectionManager.BindTo(ToolStrip.Items, this);
 
-            licenseTimer = new LicenseTimer(licenseManagerLauncher);
-            GeneralPage.LicenseLauncher = licenseManagerLauncher;
-
             updateClientToolStripMenuItem.Visible = false;
 
             xenSourceOnTheWebToolStripMenuItem.Text = string.Format(xenSourceOnTheWebToolStripMenuItem.Text,
                 BrandManager.ProductBrand);
             viewApplicationLogToolStripMenuItem.Text = string.Format(viewApplicationLogToolStripMenuItem.Text, BrandManager.BrandConsole);
             xenCenterPluginsOnlineToolStripMenuItem.Text = string.Format(xenCenterPluginsOnlineToolStripMenuItem.Text, BrandManager.BrandConsole);
-            aboutXenSourceAdminToolStripMenuItem.Text = string.Format(aboutXenSourceAdminToolStripMenuItem.Text, BrandManager.BrandConsole);
+            aboutToolStripMenuItem.Text = string.Format(aboutToolStripMenuItem.Text, BrandManager.BrandConsole);
             templatesToolStripMenuItem1.Text = string.Format(templatesToolStripMenuItem1.Text, BrandManager.ProductBrand);
             updateClientToolStripMenuItem.Text = string.Format(updateClientToolStripMenuItem.Text, BrandManager.BrandConsole);
             toolStripMenuItemCfu.Text = string.Format(toolStripMenuItemCfu.Text, BrandManager.BrandConsole);
 
-            toolStripSeparator7.Visible = xenSourceOnTheWebToolStripMenuItem.Visible = xenCenterPluginsOnlineToolStripMenuItem.Visible = !HiddenFeatures.ToolStripMenuItemHidden;
+            helpTopicsToolStripMenuItem.Visible = false;
+            helpContextMenuItem.Visible = false;
+            toolStripMenuItem15.Visible = false; // Separator
+
+            xenCenterPluginsOnlineToolStripMenuItem.Visible = false;
 
             statusButtonAlerts.Visible = statusButtonUpdates.Visible = statusButtonCdnUpdates.Visible = statusButtonProgress.Visible = statusButtonErrors.Visible = false;
             statusButtonUpdates.ToolTipText = string.Format(statusButtonUpdates.ToolTipText, BrandManager.ProductVersion821);
             statusButtonCdnUpdates.ToolTipText = string.Format(statusButtonCdnUpdates.ToolTipText, BrandManager.ProductBrand, BrandManager.ProductVersionPost82);
-            downloadLatestSourceToolStripMenuItem.Text = Messages.DOWNLOAD_LATEST_SOURCE;
         }
 
         private void RegisterEvents()
@@ -686,34 +674,11 @@ namespace XenAdmin
             c.CachePopulated -= connection_CachePopulatedOnStartup;
             if (expandTreeNodesOnStartup)
                 TrySelectNewNode(c, false, true, false);
-
-            Program.Invoke(this, ShowAboutDialogOnStartup);
         }
 
         private void Connection_ConnectionStateChangedOnStartup(IXenConnection c)
         {
             c.ConnectionStateChanged -= Connection_ConnectionStateChangedOnStartup;
-
-            Program.Invoke(Program.MainWindow, delegate
-            {
-                connectionsInProgressOnStartup--;
-                // show the About dialog if this was the last connection in progress and the connection failed
-                if (!c.IsConnected)
-                    ShowAboutDialogOnStartup();
-            });
-        }
-
-        /// <summary>
-        /// Show the About dialog after all conncections kicked-off on startup have finished the connection phase (cache populated)
-        /// Must be called on the event thread.
-        /// </summary>
-        private void ShowAboutDialogOnStartup()
-        {
-            Program.AssertOnEventThread();
-            if (connectionsInProgressOnStartup > 0)
-                return;
-            if (Properties.Settings.Default.ShowAboutDialog && HiddenFeatures.LicenseNagVisible)
-                ShowForm(typeof(AboutDialog));
         }
 
         #region Commnad line args processing
@@ -727,10 +692,6 @@ namespace XenAdmin
                     case "import":
                         log.DebugFormat("CLI: Importing VM export from {0}", args[1]);
                         OpenGlobalImportWizard(args[1]);
-                        break;
-                    case "license":
-                        log.DebugFormat("CLI: Installing license from {0}", args[1]);
-                        LaunchLicensePicker(args[1]);
                         break;
                     case "restore":
                         log.DebugFormat("CLI: Restoring host backup from {0}", args[1]);
@@ -977,7 +938,7 @@ namespace XenAdmin
                         using (var dlog = new ErrorDialog(msg)
                         {
                             WindowTitle = title,
-                            ShowLinkLabel = !HiddenFeatures.LinkLabelHidden,
+                            ShowLinkLabel = true,
                             LinkText = url,
                             LinkData = url
                         })
@@ -1005,7 +966,7 @@ namespace XenAdmin
                         using (var dlog = new ErrorDialog(msg)
                         {
                             WindowTitle = title,
-                            ShowLinkLabel = !HiddenFeatures.LinkLabelHidden,
+                            ShowLinkLabel = true,
                             LinkText = url,
                             LinkData = url
                         })
@@ -1028,27 +989,6 @@ namespace XenAdmin
 
             if (HelpersGUI.iSCSIisUsed())
                 HelpersGUI.PerformIQNCheck();
-
-            if (licenseTimer != null)
-                licenseTimer.CheckActiveServerLicense(connection, false);
-
-            if (BrandManager.BrandConsole == "[XenCenter]" || BrandManager.BrandConsole == "XenCenter")
-            {
-                Pool pool = Helpers.GetPoolOfOne(connection);
-                if (pool != null && pool.GetHealthCheckStatus() == Pool.HealthCheckStatus.Enabled)
-                {
-                    Program.BeginInvoke(Program.MainWindow, () =>
-                    {
-                        using (var dlg = new InformationDialog(
-                                   string.Format(Messages.PROBLEM_HEALTH_CHECK_ON_CONNECTION, pool.Name(), BrandManager.BrandConsole),
-                                   ThreeButtonDialog.ButtonOK))
-                        {
-                            if (dlg.ShowDialog() == DialogResult.OK)
-                                new DisableHealthCheckAction(pool).RunAsync();
-                        }
-                    });
-                }
-            }
 
             if (!Program.RunInAutomatedTestMode && !Helpers.CommonCriteriaCertificationRelease &&
                 !Helpers.CloudOrGreater(coordinator))
@@ -1488,10 +1428,6 @@ namespace XenAdmin
             // 'Home' tab is only visible if the 'Overview' tree node is selected, or if the tree is
             // empty (i.e. at startup).
             bool show_home = SelectionManager.Selection.Count == 1 && SelectionManager.Selection[0].Value == null;
-            // The upsell pages use the first selected XenObject: but they're only shown if there is only one selected object (see calls to ShowTab() below).
-            bool ha_upsell = Helpers.FeatureForbidden(SelectionManager.Selection.FirstAsXenObject, Host.RestrictHA) && selectionPool != null && !selectionPool.ha_enabled;
-            bool wlb_upsell = Helpers.FeatureForbidden(SelectionManager.Selection.FirstAsXenObject, Host.RestrictWLB);
-            bool ad_upsell = Helpers.FeatureForbidden(SelectionManager.Selection.FirstAsXenObject, Host.RestrictAD);
             bool is_connected = selectionConnection != null && selectionConnection.IsConnected;
 
             bool multi = SelectionManager.Selection.Count > 1;
@@ -1572,21 +1508,8 @@ namespace XenAdmin
             if (!multi && !SearchMode && (isRealVMSelected || (isHostSelected && isHostLive)))
                 newTabs.Add(TabPagePeformance);
 
-            if (!multi && !SearchMode && isPoolSelected)
-                newTabs.Add(ha_upsell ? TabPageHAUpsell : TabPageHA);
-
             if (!multi && !SearchMode && isRealVMSelected)
                 newTabs.Add(TabPageSnapshots);
-
-            if (!multi && !SearchMode && isPoolSelected)
-                newTabs.Add(wlb_upsell ? TabPageWLBUpsell : TabPageWLB);
-
-            if (!multi && !SearchMode && (isPoolSelected || isPoolOrLiveStandaloneHost))
-                newTabs.Add(ad_upsell ? TabPageADUpsell : TabPageAD);
-
-            if (!multi && !SearchMode && isPoolOrLiveStandaloneHost && !Helpers.FeatureForbidden(SelectionManager.Selection.FirstAsXenObject, Host.RestrictPvsCache)
-                && Helpers.PvsCacheCapability(selectionConnection))
-                newTabs.Add(TabPagePvs);
 
             foreach (var f in otherFeatures)
                 newTabs.Add(f.TabPage);
@@ -1832,86 +1755,6 @@ namespace XenAdmin
             ShowForm(typeof(AboutDialog));
         }
 
-        /// <summary>
-        /// Apply license, if HostAncestorOfSelectedNode is null, show host picker, if filepath == "" show filepicker
-        /// </summary>
-        public void LaunchLicensePicker(string filepath)
-        {
-            HelpersGUI.BringFormToFront(this);
-            OpenFileDialog dialog = null;
-            DialogResult result = DialogResult.Cancel;
-            if (filepath == "")
-            {
-                if (!Program.RunInAutomatedTestMode)
-                {
-                    dialog = new OpenFileDialog();
-                    dialog.Multiselect = false;
-                    dialog.Title = Messages.SELECT_LICENSE_KEY;
-                    dialog.CheckFileExists = true;
-                    dialog.CheckPathExists = true;
-                    dialog.Filter = string.Format("{0} (*.xslic)|*.xslic|{1} (*.*)|*.*",
-                        string.Format(Messages.XS_LICENSE_FILES, BrandManager.ProductBrand), Messages.ALL_FILES);
-                    dialog.ShowHelp = true;
-                    dialog.HelpRequest += dialog_HelpRequest;
-                    result = dialog.ShowDialog(this);
-                }
-            }
-            else
-            {
-                result = DialogResult.OK;
-            }
-
-            if (result == DialogResult.OK || Program.RunInAutomatedTestMode)
-            {
-                if (Program.RunInAutomatedTestMode)
-                {
-                    filepath = string.Empty;
-                }
-                else if (filepath == string.Empty && dialog != null)
-                {
-                    filepath = dialog.FileName;
-                }
-
-                Host hostAncestor = SelectionManager.Selection.Count == 1 ? SelectionManager.Selection[0].HostAncestor : null;
-
-                if (SelectionManager.Selection.Count == 1 && hostAncestor == null)
-                {
-                    SelectHostDialog hostdialog = new SelectHostDialog();
-                    hostdialog.TheHost = null;
-                    hostdialog.Owner = this;
-                    hostdialog.ShowDialog(this);
-                    if (string.IsNullOrEmpty(filepath) || hostdialog.DialogResult != DialogResult.OK)
-                    {
-                        return;
-                    }
-                    hostAncestor = hostdialog.TheHost;
-                }
-
-                DoLicenseAction(hostAncestor, filepath);
-
-            }
-        }
-
-        private void DoLicenseAction(Host host, string filePath)
-        {
-            //null can happen if the application is started from, say,
-            //double clicking on a license file without any connections on the tree
-            if (host == null)
-                return;
-
-            var action = new ApplyLicenseAction(host, filePath);
-            using (var actionProgress = new ActionProgressDialog(action, ProgressBarStyle.Marquee))
-            {
-                actionProgress.Text = Messages.INSTALL_LICENSE_KEY;
-                actionProgress.ShowDialog(this);
-            }
-        }
-
-        private void dialog_HelpRequest(object sender, EventArgs e)
-        {
-            Help.HelpManager.Launch("LicenseKeyDialog");
-        }
-
         private void TheTabControl_Deselected(object sender, TabControlEventArgs e)
         {
             TabPage t = e.TabPage;
@@ -2126,10 +1969,6 @@ namespace XenAdmin
                 else if (t == TabPageDockerDetails)
                 {
                     DockerDetailsPage.DockerContainer = SelectionManager.Selection.First as DockerContainer;
-                }
-                else if (t == TabPagePvs)
-                {
-                    PvsPage.Connection = SelectionManager.Selection.GetConnectionOfFirstItem();
                 }
             }
 
@@ -2725,9 +2564,6 @@ namespace XenAdmin
                 downloadSourceToolStripMenuItem.Text = string.Format(Messages.DOWNLOAD_SOURCE, BrandManager.BrandConsole, updateAlert.NewVersion.Version);
             }
             var clientVersion = Updates.ClientVersions.FirstOrDefault();
-            downloadLatestSourceToolStripMenuItem.Text = clientVersion != null
-                ? string.Format(Messages.DOWNLOAD_SOURCE, BrandManager.BrandConsole, clientVersion.Version)
-                : string.Format(Messages.DOWNLOAD_LATEST_SOURCE, BrandManager.BrandConsole);
             updateClientToolStripMenuItem.Visible = updateAlert != null;
         }
 
@@ -2868,9 +2704,6 @@ namespace XenAdmin
             if (navigationPane.currentMode == NavigationPane.NavigationMode.Notifications)
                 return;
 
-            var licenseColor = VerticalGradientPanel.TextColor;
-            var licenseText = string.Empty;
-
             if (SearchMode && SearchPage.Search != null)
             {
                 TitleLabel.Text = HelpersGUI.GetLocalizedSearchName(SearchPage.Search);
@@ -2881,8 +2714,6 @@ namespace XenAdmin
                 IXenObject xenObject = SelectionManager.Selection[0].XenObject;
                 TitleLabel.Text = xenObject.NameWithLocation();
                 TitleIcon.Image = Images.GetImage16For(xenObject);
-
-                licenseText = GetLicenseStatusText(xenObject, out licenseColor);
 
                 // When in folder view only show the logged in label if it is clear to which connection the object belongs (most likely pools and hosts)
 
@@ -2898,31 +2729,12 @@ namespace XenAdmin
                 loggedInLabel1.Connection = null;
             }
 
-            LicenseStatusTitleLabel.Text = licenseText;
-            LicenseStatusTitleLabel.ForeColor = licenseColor;
             SetTitleLabelMaxWidth();
-        }
-
-        private string GetLicenseStatusText(IXenObject xenObject, out Color foreColor)
-        {
-            foreColor = VerticalGradientPanel.TextColor;
-
-            if (xenObject is Pool pool && pool.Connection != null && pool.Connection.IsConnected && pool.Connection.CacheIsPopulated)
-            { 
-                return string.Format(Messages.MAINWINDOW_HEADER_LICENSED_WITH, Helpers.GetFriendlyLicenseName(pool));
-            }
-
-            if (xenObject is Host host && host.Connection != null && host.Connection.IsConnected && host.Connection.CacheIsPopulated)
-            {
-                return string.Format(Messages.MAINWINDOW_HEADER_LICENSED_WITH, Helpers.GetFriendlyLicenseName(host));
-            }
-
-            return string.Empty;
         }
 
         private void SetTitleLabelMaxWidth()
         {
-            TitleLabel.MaximumSize = new Size(tableLayoutPanel1.Width - loggedInLabel1.Width - LicenseStatusTitleLabel.Width - 6, TitleLabel.Height);
+            TitleLabel.MaximumSize = new Size(tableLayoutPanel1.Width - loggedInLabel1.Width - 6, TitleLabel.Height);
         }
 
         private void UpdateViewMenu(NavigationPane.NavigationMode mode)
@@ -3007,7 +2819,6 @@ namespace XenAdmin
         {
             if (mode == NavigationPane.NavigationMode.Notifications)
             {
-                LicenseStatusTitleLabel.Text = string.Empty;
                 TheTabControl.Visible = false;
             }
             else
@@ -3109,11 +2920,6 @@ namespace XenAdmin
                 return;
 
             History.PopulateForwardDropDown(button);
-        }
-
-        private void LicenseManagerMenuItem_Click(object sender, EventArgs e)
-        {
-            licenseManagerLauncher.LaunchIfRequired(false, ConnectionsManager.XenConnections, SelectionManager.Selection);
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -3392,14 +3198,9 @@ namespace XenAdmin
                 dialog.ShowDialog(this);
         }
 
-        private void downloadSourceToolStripMenuItem_Click(object sender, EventArgs e)
+        private void updatesPage_Load(object sender, EventArgs e)
         {
-            ClientUpdateAlert.DownloadSource(this);
-        }
 
-        private void downloadLatestSourceToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ClientUpdateAlert.DownloadSource(this);
         }
     }
 }

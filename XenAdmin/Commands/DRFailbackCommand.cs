@@ -77,15 +77,8 @@ namespace XenAdmin.Commands
             var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
             if (pool != null)
             {
-                if (Helpers.FeatureForbidden(pool.Connection, Host.RestrictDR))
-                {
-                    UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_DR, Parent);
-                }
-                else
-                {
-                    _wizard = new DRFailoverWizard(pool, DRWizardType.Failback);
-                    this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, _wizard);
-                }
+                _wizard = new DRFailoverWizard(pool, DRWizardType.Failback);
+                this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, _wizard);
             }
         }
 

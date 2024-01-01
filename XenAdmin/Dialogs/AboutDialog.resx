@@ -129,7 +129,7 @@
     <value>NoControl</value>
   </data>
   <data name="OkButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>333, 288</value>
+    <value>333, 164</value>
   </data>
   <data name="OkButton.Size" type="System.Drawing.Size, System.Drawing">
     <value>75, 23</value>
@@ -151,7 +151,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;OkButton.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>3</value>
   </data>
   <data name="tableLayoutPanel1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -161,36 +161,6 @@
   </data>
   <data name="tableLayoutPanel1.ColumnCount" type="System.Int32, mscorlib">
     <value>3</value>
-  </data>
-  <data name="LicenseDetailsTextBox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Segoe UI, 9pt</value>
-  </data>
-  <data name="LicenseDetailsTextBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 194</value>
-  </data>
-  <data name="LicenseDetailsTextBox.Multiline" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="LicenseDetailsTextBox.ScrollBars" type="System.Windows.Forms.ScrollBars, System.Windows.Forms">
-    <value>Both</value>
-  </data>
-  <data name="LicenseDetailsTextBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>396, 54</value>
-  </data>
-  <data name="LicenseDetailsTextBox.TabIndex" type="System.Int32, mscorlib">
-    <value>20</value>
-  </data>
-  <data name="&gt;&gt;LicenseDetailsTextBox.Name" xml:space="preserve">
-    <value>LicenseDetailsTextBox</value>
-  </data>
-  <data name="&gt;&gt;LicenseDetailsTextBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;LicenseDetailsTextBox.Parent" xml:space="preserve">
-    <value>tableLayoutPanel1</value>
-  </data>
-  <data name="&gt;&gt;LicenseDetailsTextBox.ZOrder" xml:space="preserve">
-    <value>0</value>
   </data>
   <data name="linkLabel1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -229,7 +199,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;linkLabel1.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>0</value>
   </data>
   <data name="label2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -265,43 +235,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;label2.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="licenseDetailsLabel.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="licenseDetailsLabel.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Segoe UI, 9pt</value>
-  </data>
-  <data name="licenseDetailsLabel.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="licenseDetailsLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 176</value>
-  </data>
-  <data name="licenseDetailsLabel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 15, 3, 0</value>
-  </data>
-  <data name="licenseDetailsLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>175, 15</value>
-  </data>
-  <data name="licenseDetailsLabel.TabIndex" type="System.Int32, mscorlib">
-    <value>19</value>
-  </data>
-  <data name="licenseDetailsLabel.Text" xml:space="preserve">
-    <value>{0} licensed to:</value>
-  </data>
-  <data name="&gt;&gt;licenseDetailsLabel.Name" xml:space="preserve">
-    <value>licenseDetailsLabel</value>
-  </data>
-  <data name="&gt;&gt;licenseDetailsLabel.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;licenseDetailsLabel.Parent" xml:space="preserve">
-    <value>tableLayoutPanel1</value>
-  </data>
-  <data name="&gt;&gt;licenseDetailsLabel.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>1</value>
   </data>
   <data name="VersionLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -319,7 +253,7 @@
     <value>3, 12, 3, 0</value>
   </data>
   <data name="VersionLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>203, 15</value>
+    <value>45, 15</value>
   </data>
   <data name="VersionLabel.TabIndex" type="System.Int32, mscorlib">
     <value>15</value>
@@ -337,46 +271,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;VersionLabel.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="showAgainCheckBox.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="showAgainCheckBox.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Segoe UI, 9pt</value>
-  </data>
-  <data name="showAgainCheckBox.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="showAgainCheckBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 263</value>
-  </data>
-  <data name="showAgainCheckBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 12, 3, 3</value>
-  </data>
-  <data name="showAgainCheckBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>258, 19</value>
-  </data>
-  <data name="showAgainCheckBox.TabIndex" type="System.Int32, mscorlib">
-    <value>21</value>
-  </data>
-  <data name="showAgainCheckBox.Text" xml:space="preserve">
-    <value>&amp;Show this dialog when opening {0}</value>
-  </data>
-  <data name="showAgainCheckBox.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="&gt;&gt;showAgainCheckBox.Name" xml:space="preserve">
-    <value>showAgainCheckBox</value>
-  </data>
-  <data name="&gt;&gt;showAgainCheckBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;showAgainCheckBox.Parent" xml:space="preserve">
-    <value>tableLayoutPanel1</value>
-  </data>
-  <data name="&gt;&gt;showAgainCheckBox.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>2</value>
   </data>
   <data name="pictureBox1.Font" type="System.Drawing.Font, System.Drawing">
     <value>Segoe UI, 9pt</value>
@@ -412,7 +307,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;pictureBox1.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>4</value>
   </data>
   <data name="tableLayoutPanel1.Font" type="System.Drawing.Font, System.Drawing">
     <value>Segoe UI, 9pt</value>
@@ -427,7 +322,7 @@
     <value>9</value>
   </data>
   <data name="tableLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>420, 323</value>
+    <value>420, 199</value>
   </data>
   <data name="tableLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
     <value>19</value>
@@ -445,7 +340,7 @@
     <value>0</value>
   </data>
   <data name="tableLayoutPanel1.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="LicenseDetailsTextBox" Row="5" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="linkLabel1" Row="3" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="label2" Row="2" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="licenseDetailsLabel" Row="4" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="VersionLabel" Row="1" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="showAgainCheckBox" Row="6" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="OkButton" Row="7" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="pictureBox1" Row="0" RowSpan="1" Column="0" ColumnSpan="3" /&gt;&lt;/Controls&gt;&lt;Columns Styles="Absolute,9,AutoSize,0,Absolute,9" /&gt;&lt;Rows Styles="AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,Absolute,9" /&gt;&lt;/TableLayoutSettings&gt;</value>
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="linkLabel1" Row="3" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="label2" Row="2" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="VersionLabel" Row="1" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="OkButton" Row="7" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="pictureBox1" Row="0" RowSpan="1" Column="0" ColumnSpan="3" /&gt;&lt;/Controls&gt;&lt;Columns Styles="Absolute,9,AutoSize,0,Absolute,9" /&gt;&lt;Rows Styles="AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,AutoSize,0,Absolute,9" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -475,6 +370,6 @@
     <value>AboutDialog</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>XenAdmin.Dialogs.XenDialogBase, XenCenterMain, Version=7.4.0.2, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Dialogs.XenDialogBase, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

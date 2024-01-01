@@ -81,6 +81,14 @@ namespace XenAdmin.Commands
         /// </summary>
         public void BindTo(ICommandControl control, IMainWindow mainWindow)
         {
+            if (control.Command == null)
+            {
+                if (control is ToolStripMenuItem)
+                {
+                    throw new Exception("Menu has no command: " + ((ToolStripMenuItem)control).Name);
+                }
+            }
+
             ((ICommand)control.Command).SetMainWindow(mainWindow);
             control.SelectionBroadcaster = this;
         }
@@ -97,7 +105,7 @@ namespace XenAdmin.Commands
         /// Gets the current selection which will be used by listening <see cref="CommandToolStripMenuItem"/>s and 
         /// <see cref="CommandToolStripButton"/>s.
         /// </summary>
-        public abstract SelectedItemCollection Selection { get;}
+        public abstract SelectedItemCollection Selection { get; }
 
         public abstract void RefreshSelection();
 

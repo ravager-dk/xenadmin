@@ -73,32 +73,25 @@ namespace XenAdmin.Commands
 
         protected override void RunCore(SelectedItemCollection selection)
         {
-            
+
             var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
             if (pool != null)
             {
-                if (Helpers.FeatureForbidden(pool.Connection, Host.RestrictDR)) 
-                {
-                    UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_DR, Parent);
-                }
-                else
-                {
-                    _wizard = new DRFailoverWizard(pool, DRWizardType.Failover);
-                    this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, _wizard);
-                }
+                _wizard = new DRFailoverWizard(pool, DRWizardType.Failover);
+                this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, _wizard);
             }
         }
 
         protected override bool CanRunCore(SelectedItemCollection selection)
         {
-            return selection.Count==1 && selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null; 
+            return selection.Count == 1 && selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null;
         }
 
         public override string ContextMenuText
         {
             get
             {
-                return Messages.DR_FAILOVER_AMP; 
+                return Messages.DR_FAILOVER_AMP;
             }
         }
     }

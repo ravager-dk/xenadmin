@@ -252,7 +252,7 @@ namespace XenAdmin.TabPages
 
         private void UnregisterHandlers()
         {
-            if (m_VM == null) 
+            if (m_VM == null)
                 return;
             m_VM.Connection.Cache.DeregisterBatchCollectionChanged<VM>(VM_BatchCollectionChanged);
             m_VM.PropertyChanged -= snapshot_PropertyChanged;
@@ -681,7 +681,7 @@ namespace XenAdmin.TabPages
                     if (customFields.Count >= 2)
                     {
                         tableLayoutPanelSimpleSelection.RowStyles[6].Height = 30;
-                        customFieldTitle2.Text = String.Format("{0}:",customFields[1].Definition.Name.ToString());
+                        customFieldTitle2.Text = String.Format("{0}:", customFields[1].Definition.Name.ToString());
                         customFieldContent2.Text = customFields[1].Value.ToString();
                     }
 
@@ -703,7 +703,7 @@ namespace XenAdmin.TabPages
 
                 var descr = snapshot.Description();
                 descriptionLabel.Text = string.IsNullOrEmpty(descr) ? Messages.NONE : descr;
-                toolTipDescriptionLabel.SetToolTip(descriptionLabel, 
+                toolTipDescriptionLabel.SetToolTip(descriptionLabel,
                                             descriptionLabel.Height == descriptionLabel.MaximumSize.Height ? descriptionLabel.Text : "");
 
                 BackgroundWorker backgroundWorker = new BackgroundWorker();
@@ -718,7 +718,7 @@ namespace XenAdmin.TabPages
                     folderLabel.Text = folder.name_label;
                 else
                     folderLabel.Text = Messages.NONE;
-                toolTipFolderLabel.SetToolTip(folderLabel, 
+                toolTipFolderLabel.SetToolTip(folderLabel,
                                             folderLabel.Height == folderLabel.MaximumSize.Height ? folderLabel.Text : "");
                 propertiesGroupBox.Tag = snapshot;
                 propertiesButton.Enabled = true;
@@ -1087,10 +1087,10 @@ namespace XenAdmin.TabPages
                         VM snap = (VM)item.Tag;
                         if (snap != null && snap.is_a_snapshot)
                         {
-                            if(!(snap.is_snapshot_from_vmpp || snap.is_vmss_snapshot) || toolStripMenuItemScheduledSnapshots.Checked)
+                            if (!(snap.is_snapshot_from_vmpp || snap.is_vmss_snapshot) || toolStripMenuItemScheduledSnapshots.Checked)
                                 snapshots.Add(snap);
                         }
-                            
+
                     }
                     return snapshots;
                 }
@@ -1503,15 +1503,8 @@ namespace XenAdmin.TabPages
 
         private void linkLabelVMPPInfo_Click(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (Helpers.FeatureForbidden(VM.Connection, Host.RestrictVMSnapshotSchedule))
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_VMSS, this);
-            }
-            else
-            {
-                var command = new VMGroupCommand<VMSS>(Program.MainWindow, VM);
-                command.Run();
-            }
+            var command = new VMGroupCommand<VMSS>(Program.MainWindow, VM);
+            command.Run();
         }
 
         private void snapshotTreeView_Leave(object sender, EventArgs e)

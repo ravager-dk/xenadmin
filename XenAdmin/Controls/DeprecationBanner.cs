@@ -50,12 +50,10 @@ namespace XenAdmin.Controls
         public string WarningMessage { private get; set; }
         public string LinkText { set => helperLink.Text = value; }
         public Uri LinkUri { set; private get; }
-        public bool HelperLinkVisible { set => helperLink.Visible = value; }
-
+        
         public DeprecationBanner()
         {
             InitializeComponent();
-            HelperLinkVisible = !Core.HiddenFeatures.LinkLabelHidden;
             //LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
             Visible = false;
         }

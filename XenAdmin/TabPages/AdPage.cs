@@ -1044,12 +1044,6 @@ namespace XenAdmin.TabPages
 
         private void ButtonChangeRoles_Click(object sender, EventArgs e)
         {
-            if (Helpers.FeatureForbidden(_connection, Host.RestrictRBAC))
-            {
-                UpsellDialog.ShowUpsellDialog(string.Format(Messages.UPSELL_BLURB_RBAC, BrandManager.ProductBrand), this);
-                return;
-            }
-
             // Double check, this method is called from a context menu as well and the state could have changed under it
             if (!ButtonChangeRoles.Enabled)
                 return;

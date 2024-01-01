@@ -60,11 +60,7 @@ namespace XenAdmin.Commands
         {
             var con = selection.GetConnectionOfFirstItem();
 
-            if (Helpers.FeatureForbidden(con, Host.RestrictConversion))
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_CONVERSION, Parent);
-            }
-            else if (!con.Session.IsLocalSuperuser && !Registry.DontSudo && con.Session.Roles.All(r => r.name_label != Role.MR_ROLE_POOL_ADMIN))
+            if (!con.Session.IsLocalSuperuser && !Registry.DontSudo && con.Session.Roles.All(r => r.name_label != Role.MR_ROLE_POOL_ADMIN))
             {
                 var currentRoles = con.Session.Roles;
                 currentRoles.Sort();

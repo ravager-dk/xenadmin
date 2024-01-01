@@ -61,8 +61,6 @@ namespace XenAdmin.Dialogs
         private VDISizeLocationPage vdiSizeLocation;
         private VMHAEditPage VMHAEditPage;
         private GeneralEditPage GeneralEditPage;
-        private UpsellPage PerfmonAlertUpsellEditPage;
-        private UpsellPage PerfmonAlertOptionsUpsellEditPage;
         private PerfmonAlertOptionsPage PerfmonAlertOptionsEditPage;
         private HostPowerONEditPage HostPowerONEditPage;
         private NewPolicySnapshotFrequencyPage newPolicySnapshotFrequencyPage1;
@@ -70,7 +68,6 @@ namespace XenAdmin.Dialogs
         private NewVMGroupVMsPage<VMSS> newVMSSVMsPage1;
         private NewVMGroupVMsPage<VM_appliance> newVMApplianceVMsPage1;
         private NewVMApplianceVMOrderAndDelaysPage newVmApplianceVmOrderAndDelaysPage1;
-        private UpsellPage GpuUpsellEditPage;
         private GpuEditPage GpuEditPage;
         private PoolGpuEditPage PoolGpuEditPage;
         private VMEnlightenmentEditPage VMEnlightenmentEditPage;
@@ -136,7 +133,7 @@ namespace XenAdmin.Dialogs
                 ShowTab(GeneralEditPage = new GeneralEditPage());
 
                 if (!isVmAppliance && !isVmss)
-                    ShowTab(CustomFieldsEditPage = new CustomFieldsDisplayPage {AutoScroll = true});
+                    ShowTab(CustomFieldsEditPage = new CustomFieldsDisplayPage { AutoScroll = true });
 
                 if (isVm)
                 {
@@ -149,39 +146,12 @@ namespace XenAdmin.Dialogs
 
                 if (isVm || isHost || isSr)
                 {
-                    if (Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictAlerts))
-                    {
-                        PerfmonAlertUpsellEditPage = new UpsellPage
-                        {
-                            Image = Images.StaticImages._000_Alert2_h32bit_16,
-                            Text = Messages.ALERTS,
-                            BlurbText = Messages.UPSELL_BLURB_ALERTS
-                        };
-
-                        ShowTab(PerfmonAlertUpsellEditPage);
-                    }
-                    else
-                    {
-                        ShowTab(PerfmonAlertEditPage = new PerfmonAlertEditPage {AutoScroll = true});
-                    }
+                    ShowTab(PerfmonAlertEditPage = new PerfmonAlertEditPage { AutoScroll = true });
                 }
 
                 if (isPoolOrStandalone)
                 {
-                    if (Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictAlerts))
-                    {
-                        PerfmonAlertOptionsUpsellEditPage = new UpsellPage
-                        {
-                            Image = Images.StaticImages._000_Email_h32bit_16,
-                            Text = Messages.EMAIL_OPTIONS,
-                            BlurbText = Messages.UPSELL_BLURB_ALERTS
-                        };
-                        ShowTab(PerfmonAlertOptionsUpsellEditPage);
-                    }
-                    else
-                    {
-                        ShowTab(PerfmonAlertOptionsEditPage = new PerfmonAlertOptionsPage());
-                    }
+                    ShowTab(PerfmonAlertOptionsEditPage = new PerfmonAlertOptionsPage());
                 }
 
                 if (isHost)
@@ -226,21 +196,8 @@ namespace XenAdmin.Dialogs
 
                     if (theVm.CanHaveGpu())
                     {
-                        if (Helpers.FeatureForbidden(_xenObjectCopy, Host.RestrictGpu))
-                        {
-                            GpuUpsellEditPage = new UpsellPage
-                            {
-                                Image = Images.StaticImages._000_GetMemoryInfo_h32bit_16,
-                                Text = Messages.GPU,
-                                BlurbText = Messages.UPSELL_BLURB_GPU
-                            };
-                            ShowTab(GpuUpsellEditPage);
-                        }
-                        else
-                        {
-                            if(Helpers.GpusAvailable(connection))
-                                ShowTab(GpuEditPage = new GpuEditPage());
-                        }
+                        if (Helpers.GpusAvailable(connection))
+                            ShowTab(GpuEditPage = new GpuEditPage());
                     }
 
                     if (theVm.IsHVM())
@@ -268,9 +225,9 @@ namespace XenAdmin.Dialogs
 
                 if (isVmss)
                 {
-                    ShowTab(newVMSSVMsPage1 = new NewVMGroupVMsPage<VMSS> {Pool = pool});
+                    ShowTab(newVMSSVMsPage1 = new NewVMGroupVMsPage<VMSS> { Pool = pool });
                     ShowTab(newPolicyVMSSTypePage1 = new NewPolicySnapshotTypePage());
-                    newPolicySnapshotFrequencyPage1 = new NewPolicySnapshotFrequencyPage {Connection = pool.Connection};
+                    newPolicySnapshotFrequencyPage1 = new NewPolicySnapshotFrequencyPage { Connection = pool.Connection };
                     newPolicySnapshotFrequencyPage1.Populated += EditPage_Populated;
                     ShowTab(newPolicySnapshotFrequencyPage1);
                 }
@@ -307,7 +264,7 @@ namespace XenAdmin.Dialogs
                     using (var dialog = new ActionProgressDialog(
                                new DelegatedAsyncAction(vdi.Connection, Messages.DEVICE_POSITION_SCANNING,
                                    Messages.DEVICE_POSITION_SCANNING, Messages.DEVICE_POSITION_SCANNED,
-                                   delegate(Session session)
+                                   delegate (Session session)
                                    {
                                        foreach (VBDEditPage page in vbdEditPages)
                                            page.UpdateDevicePositions(session);
@@ -397,7 +354,7 @@ namespace XenAdmin.Dialogs
                 actions);
 
             _action.SetObject(_xenObjectCopy);
-            
+
             _action.Completed += action_Completed;
             Close();
 
@@ -506,7 +463,7 @@ namespace XenAdmin.Dialogs
                 GpuEditPage.ShowHideWarnings();
                 return;
             }
-            
+
             if (verticalTabs.SelectedItem == usbEditPage && VMHAEditPage != null)
             {
                 usbEditPage.SelectedPriority = VMHAEditPage.SelectedPriority;

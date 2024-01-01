@@ -61,17 +61,6 @@ namespace XenAdmin.Commands
                    new ViewWorkloadReportsCommand(MainWindowCommandInterface, selection).CanRun();
         }
 
-        protected bool IsLicensedFeature(SelectedItemCollection selection)
-        {
-            if (Helpers.FeatureForbidden(selection[0].XenObject, Host.RestrictWLB))
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_WLB, Parent);
-                return false;
-            }
-
-            return true;
-        }
-
         public override string MenuText => Messages.WLB_COMMAND_MENU_ITEM;
     }
 
@@ -89,9 +78,6 @@ namespace XenAdmin.Commands
 
         protected override void RunCore(SelectedItemCollection selection)
         {
-            if (!IsLicensedFeature(selection))
-                return;
-
             using (var dialog = new WarningDialog(Messages.WLB_DISCONNECT_SERVER,
                 ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo))
                 if (dialog.ShowDialog(Program.MainWindow) == DialogResult.Yes)
@@ -136,9 +122,6 @@ namespace XenAdmin.Commands
 
         protected override void RunCore(SelectedItemCollection selection)
         {
-            if (!IsLicensedFeature(selection))
-                return;
-
             var wlbReports = new WorkloadReports(_reportFile, _run)
             {
                 Pool = selection[0].PoolAncestor,

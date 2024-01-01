@@ -75,7 +75,7 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
                 deprecationBanner.BannerType = DeprecationBanner.Type.Deprecation;
                 deprecationBanner.FeatureName = Messages.SOFTWARE_FCOE_STORAGE_REPOSITORIES;
                 deprecationBanner.LinkUri = new Uri(InvisibleMessages.DEPRECATION_URL);
-                deprecationBanner.Visible = !HiddenFeatures.LinkLabelHidden;
+                deprecationBanner.Visible = true;
             }
             else
             {
@@ -238,24 +238,12 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
 
                 SetupDeprecationBanner(frontend);
 
-                if (frontend.IsEnhancedSR && Helpers.FeatureForbidden(Connection, Host.RestrictStorageChoices))
-                {
-                    selectedStoreTypeLabel.Visible = false;
-                    selectedStoreTypeLabel.Text = string.Empty;
-                    SRBlurb.Visible = false;
-                    upsellPage1.Visible = true;
-                    upsellPage1.BlurbText = Messages.UPSELL_BLURB_ENHANCEDSR;
-                    m_allowNext = false;
-                }
-                else
-                {
-                    upsellPage1.Visible = false;
-                    selectedStoreTypeLabel.Visible = true;
-                    selectedStoreTypeLabel.Text = frontend.FrontendTypeName;
-                    SRBlurb.Visible = true;
-                    SRBlurb.Text = frontend.FrontendBlurb;
-                    m_allowNext = true;
-                }
+                selectedStoreTypeLabel.Visible = true;
+                selectedStoreTypeLabel.Text = frontend.FrontendTypeName;
+                SRBlurb.Visible = true;
+                SRBlurb.Text = frontend.FrontendBlurb;
+                m_allowNext = true;
+                
                 OnPageUpdated();
             }
         }

@@ -51,7 +51,7 @@ namespace XenAdmin.Commands
             : base(mainWindow, selection)
         { }
 
-        public CrossPoolMigrateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, Host preSelectedHost, bool resumeAfter=false)
+        public CrossPoolMigrateCommand(IMainWindow mainWindow, IEnumerable<SelectedItem> selection, Host preSelectedHost, bool resumeAfter = false)
             : base(mainWindow, selection)
         {
             this.preSelectedHost = preSelectedHost;
@@ -82,15 +82,8 @@ namespace XenAdmin.Commands
         {
             var con = selection.GetConnectionOfFirstItem();
 
-            if (Helpers.FeatureForbidden(con, Host.RestrictCrossPoolMigrate))
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_CPM, Parent);
-            }
-            else
-            {
-                var wizard = new CrossPoolMigrateWizard(con, selection, preSelectedHost, WizardMode.Migrate, _resumeAfter);
-                MainWindowCommandInterface.ShowPerConnectionWizard(con, wizard); 
-            }
+            var wizard = new CrossPoolMigrateWizard(con, selection, preSelectedHost, WizardMode.Migrate, _resumeAfter);
+            MainWindowCommandInterface.ShowPerConnectionWizard(con, wizard);
         }
 
         protected override Host GetHost(VM vm)
@@ -121,7 +114,7 @@ namespace XenAdmin.Commands
 
             if (preselectedHost != null)
             {
-                var vms = new List<VM> {vm};
+                var vms = new List<VM> { vm };
 
                 if (new ResidentHostIsSameAsSelectionFilter(preselectedHost, vms).FailureFound(out failureReason))
                     return false;

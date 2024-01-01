@@ -131,17 +131,7 @@ namespace XenAdmin.Commands
                 }
             }
 
-            // Are there any hosts which are forbidden from masking their CPUs for licensing reasons?
-            // If so, we need to show upsell.
             Host coordinator = Helpers.GetCoordinator(_pool);
-            if (null != _hosts.Find(host =>
-                !PoolJoinRules.CompatibleCPUs(host, coordinator) &&
-                Helpers.FeatureForbidden(host, Host.RestrictCpuMasking) &&
-                !PoolJoinRules.FreeHostPaidCoordinator(host, coordinator, false)))  // in this case we can upgrade the license and then mask the CPU
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_CPUMASKING, Parent);
-                return;
-            }
 
             // Get permission for any fix-ups:
             // 1) Licensing free hosts

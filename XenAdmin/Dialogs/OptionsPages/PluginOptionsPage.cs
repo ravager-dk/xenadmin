@@ -49,7 +49,6 @@ namespace XenAdmin.Dialogs.OptionsPages
             labelNoPlugins.Visible = false;
             labelIntro.Text = string.Format(labelIntro.Text, BrandManager.BrandConsole);
             linkLabel1.Text = string.Format(linkLabel1.Text, BrandManager.BrandConsole);
-            linkLabel1.Visible = !HiddenFeatures.LinkLabelHidden;
         }
 
         public void Build()

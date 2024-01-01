@@ -65,66 +65,62 @@ namespace XenAdmin.Commands
         {
         }
 
-		public DRConfigureCommand(IMainWindow mainWindow, IXenObject selection)
+        public DRConfigureCommand(IMainWindow mainWindow, IXenObject selection)
             : base(mainWindow, selection)
         {
         }
 
 
-		protected override void RunCore(SelectedItemCollection selection)
-		{
-			var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
+        protected override void RunCore(SelectedItemCollection selection)
+        {
+            var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
 
-			if (pool != null)
-			{
-				if (Helpers.FeatureForbidden(pool.Connection, Host.RestrictDR))
-				{
-					UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_DR, Parent);
-				}
-				else
-				{
-					using (DRConfigureDialog dlog = new DRConfigureDialog(pool))
-					{
-                        if (dlog.ShowDialog() == DialogResult.OK && (dlog.SRtoEnable.Count > 0 || dlog.SRtoDisable.Count > 0))
-						{
-							var actions = new List<AsyncAction>();
+            if (pool != null)
+            {
+                using (DRConfigureDialog dlog = new DRConfigureDialog(pool))
+                {
+                    if (dlog.ShowDialog() == DialogResult.OK && (dlog.SRtoEnable.Count > 0 || dlog.SRtoDisable.Count > 0))
+                    {
+                        var actions = new List<AsyncAction>();
 
-							foreach (SR sr in dlog.SRtoDisable.Values)
-							{
-								SR curSr = sr;
-								var action = new DelegatedAsyncAction(pool.Connection,
-									String.Format(Messages.ACTION_DR_DISABLING_ON, sr.Name()), Messages.ACTION_DR_DISABLING, Messages.ACTION_DR_DISABLED, 
-									s => SR.disable_database_replication(s, curSr.opaque_ref)) {Pool = pool};
-								actions.Add(action);
-							}
-							
-							foreach (SR sr in dlog.SRtoEnable.Values)
-							{
-								SR curSr = sr;
-								var action = new DelegatedAsyncAction(pool.Connection, 
-									String.Format(Messages.ACTION_DR_ENABLING_ON, sr.Name()), Messages.ACTION_DR_ENABLING, Messages.ACTION_DR_ENABLED, 
-									s => SR.enable_database_replication(s, curSr.opaque_ref)) { Pool = pool };
-								actions.Add(action);
-							}
+                        foreach (SR sr in dlog.SRtoDisable.Values)
+                        {
+                            SR curSr = sr;
+                            var action = new DelegatedAsyncAction(pool.Connection,
+                                String.Format(Messages.ACTION_DR_DISABLING_ON, sr.Name()), Messages.ACTION_DR_DISABLING, Messages.ACTION_DR_DISABLED,
+                                s => SR.disable_database_replication(s, curSr.opaque_ref))
+                            { Pool = pool };
+                            actions.Add(action);
+                        }
 
-							RunMultipleActions(actions, Messages.ACTION_DR_CONFIGURING, string.Empty, string.Empty, true);
-						}
-					}
-				}
-			}
-		}
+                        foreach (SR sr in dlog.SRtoEnable.Values)
+                        {
+                            SR curSr = sr;
+                            var action = new DelegatedAsyncAction(pool.Connection,
+                                String.Format(Messages.ACTION_DR_ENABLING_ON, sr.Name()), Messages.ACTION_DR_ENABLING, Messages.ACTION_DR_ENABLED,
+                                s => SR.enable_database_replication(s, curSr.opaque_ref))
+                            { Pool = pool };
+                            actions.Add(action);
+                        }
+
+                        RunMultipleActions(actions, Messages.ACTION_DR_CONFIGURING, string.Empty, string.Empty, true);
+                    }
+                }
+
+            }
+        }
 
         protected override bool CanRunCore(SelectedItemCollection selection)
         {
             return selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null && selection.FirstAsXenObject.Connection.IsConnected
-				&& (selection.PoolAncestor != null || selection.HostAncestor != null); //CA-61207: this check ensures there's no cross-pool selection
+                && (selection.PoolAncestor != null || selection.HostAncestor != null); //CA-61207: this check ensures there's no cross-pool selection
         }
 
         public override string ContextMenuText
         {
             get
             {
-                return Messages.DR_CONFIGURE_AMP; 
+                return Messages.DR_CONFIGURE_AMP;
             }
         }
     }

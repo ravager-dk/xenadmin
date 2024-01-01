@@ -60,15 +60,7 @@ namespace XenAdmin.Commands
         {
             List<VDI> vdis = selection.AsXenObjects<VDI>();
 
-            bool featureForbidden = vdis.TrueForAll(vdi => Helpers.FeatureForbidden(vdi.Connection, Host.RestrictCrossPoolMigrate));
-            if (featureForbidden)
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_MIGRATE_VDI, Parent);
-            }
-            else
-            {
-                new MigrateVirtualDiskDialog(selection.FirstAsXenObject.Connection, vdis).Show(Program.MainWindow);
-            }
+            new MigrateVirtualDiskDialog(selection.FirstAsXenObject.Connection, vdis).Show(Program.MainWindow);
         }
 
         protected override bool CanRunCore(SelectedItemCollection selection)

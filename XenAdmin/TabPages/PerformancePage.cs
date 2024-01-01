@@ -340,11 +340,6 @@ namespace XenAdmin.TabPages
             DataPlotNav.RefreshXRange(false);
         }
 
-        private void ShowUpsell()
-        {
-            UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_PERFORMANCE, this);
-        }
-
         private void MoveGraphUp()
         {
             if (XenObject == null)
@@ -437,26 +432,17 @@ namespace XenAdmin.TabPages
 
         private void LastYearZoom()
         {
-            if (FeatureForbidden)
-                ShowUpsell();
-            else
-                DataPlotNav.ZoomToRange(TimeSpan.Zero, TimeSpan.FromDays(366) - TimeSpan.FromSeconds(1));
+            DataPlotNav.ZoomToRange(TimeSpan.Zero, TimeSpan.FromDays(366) - TimeSpan.FromSeconds(1));
         }
 
         private void LastMonthZoom()
         {
-            if (FeatureForbidden)
-                ShowUpsell();
-            else
-                DataPlotNav.ZoomToRange(TimeSpan.Zero, TimeSpan.FromDays(30) - TimeSpan.FromSeconds(1));
+            DataPlotNav.ZoomToRange(TimeSpan.Zero, TimeSpan.FromDays(30) - TimeSpan.FromSeconds(1));
         }
 
         private void LastWeekZoom()
         {
-            if (FeatureForbidden)
-                ShowUpsell();
-            else
-                DataPlotNav.ZoomToRange(TimeSpan.Zero, TimeSpan.FromDays(7) - TimeSpan.FromSeconds(1));
+            DataPlotNav.ZoomToRange(TimeSpan.Zero, TimeSpan.FromDays(7) - TimeSpan.FromSeconds(1));
         }
 
         private void LastDayZoom()

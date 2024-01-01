@@ -117,14 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CIS" xml:space="preserve">
-    <value>Citrix Insight Services</value>
-  </data>
   <data name="COMPANY_NAME_LEGACY" xml:space="preserve">
-    <value>Citrix</value>
+    <value>XCP-ng</value>
   </data>
   <data name="COPYRIGHT" xml:space="preserve">
-    <value>Copyright (c) 2023 XCP-ng Project\nCopyright © 2007-2023 Cloud Software Group, Inc. All Rights Reserved.</value>
+    <value>Copyright (c) 2023 XCP-ng Project</value>
   </data>
   <data name="EXTENSION_BACKUP" xml:space="preserve">
     <value>xbk</value>
@@ -139,7 +136,7 @@
     <value>xencenter/current-release/</value>
   </data>
   <data name="LEGACY_PRODUCT" xml:space="preserve">
-    <value>Citrix Hypervisor</value>
+    <value>[Citrix Hypervisor]</value>
   </data>
   <data name="PERF_ALERT_MAIL_DEFAULT_LANGUAGE" xml:space="preserve">
     <value>en-US</value>

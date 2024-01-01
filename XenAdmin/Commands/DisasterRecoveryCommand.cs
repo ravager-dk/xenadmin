@@ -74,22 +74,15 @@ namespace XenAdmin.Commands
             var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
             if (pool != null)
             {
-                if (Helpers.FeatureForbidden(pool.Connection, Host.RestrictDR))
-                {
-                    UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_DR, Parent);
-                }
-                else
-                {
-                    _wizard = new DRFailoverWizard(pool);
-                    this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, _wizard);
-                }
+                _wizard = new DRFailoverWizard(pool);
+                this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, _wizard);
             }
         }
 
         protected override bool CanRunCore(SelectedItemCollection selection)
         {
-			return selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null &&  selection.FirstAsXenObject.Connection.IsConnected
-				&& (selection.PoolAncestor != null || selection.HostAncestor != null); //CA-61207: this check ensures there's no cross-pool selection
+            return selection.FirstAsXenObject != null && selection.FirstAsXenObject.Connection != null && selection.FirstAsXenObject.Connection.IsConnected
+                && (selection.PoolAncestor != null || selection.HostAncestor != null); //CA-61207: this check ensures there's no cross-pool selection
         }
 
         public override string ContextMenuText

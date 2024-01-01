@@ -145,7 +145,7 @@
     <value>navigationPane</value>
   </data>
   <data name="&gt;&gt;navigationPane.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.MainWindowControls.NavigationPane, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Controls.MainWindowControls.NavigationPane, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;navigationPane.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -528,33 +528,6 @@
   <data name="&gt;&gt;TabPageHA.ZOrder" xml:space="preserve">
     <value>11</value>
   </data>
-  <data name="TabPageHAUpsell.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
-  </data>
-  <data name="TabPageHAUpsell.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="TabPageHAUpsell.Size" type="System.Drawing.Size, System.Drawing">
-    <value>753, 591</value>
-  </data>
-  <data name="TabPageHAUpsell.TabIndex" type="System.Int32, mscorlib">
-    <value>15</value>
-  </data>
-  <data name="TabPageHAUpsell.Text" xml:space="preserve">
-    <value>HA</value>
-  </data>
-  <data name="&gt;&gt;TabPageHAUpsell.Name" xml:space="preserve">
-    <value>TabPageHAUpsell</value>
-  </data>
-  <data name="&gt;&gt;TabPageHAUpsell.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;TabPageHAUpsell.Parent" xml:space="preserve">
-    <value>TheTabControl</value>
-  </data>
-  <data name="&gt;&gt;TabPageHAUpsell.ZOrder" xml:space="preserve">
-    <value>12</value>
-  </data>
   <data name="TabPageSnapshots.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
   </data>
@@ -580,7 +553,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageSnapshots.ZOrder" xml:space="preserve">
-    <value>13</value>
+    <value>12</value>
   </data>
   <data name="TabPageWLB.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -604,31 +577,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageWLB.ZOrder" xml:space="preserve">
-    <value>14</value>
-  </data>
-  <data name="TabPageWLBUpsell.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
-  </data>
-  <data name="TabPageWLBUpsell.Size" type="System.Drawing.Size, System.Drawing">
-    <value>753, 591</value>
-  </data>
-  <data name="TabPageWLBUpsell.TabIndex" type="System.Int32, mscorlib">
-    <value>16</value>
-  </data>
-  <data name="TabPageWLBUpsell.Text" xml:space="preserve">
-    <value>WLB</value>
-  </data>
-  <data name="&gt;&gt;TabPageWLBUpsell.Name" xml:space="preserve">
-    <value>TabPageWLBUpsell</value>
-  </data>
-  <data name="&gt;&gt;TabPageWLBUpsell.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;TabPageWLBUpsell.Parent" xml:space="preserve">
-    <value>TheTabControl</value>
-  </data>
-  <data name="&gt;&gt;TabPageWLBUpsell.ZOrder" xml:space="preserve">
-    <value>15</value>
+    <value>13</value>
   </data>
   <data name="TabPageAD.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -652,34 +601,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageAD.ZOrder" xml:space="preserve">
-    <value>16</value>
-  </data>
-  <data name="TabPageADUpsell.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
-  </data>
-  <data name="TabPageADUpsell.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="TabPageADUpsell.Size" type="System.Drawing.Size, System.Drawing">
-    <value>753, 591</value>
-  </data>
-  <data name="TabPageADUpsell.TabIndex" type="System.Int32, mscorlib">
-    <value>21</value>
-  </data>
-  <data name="TabPageADUpsell.Text" xml:space="preserve">
-    <value>Users</value>
-  </data>
-  <data name="&gt;&gt;TabPageADUpsell.Name" xml:space="preserve">
-    <value>TabPageADUpsell</value>
-  </data>
-  <data name="&gt;&gt;TabPageADUpsell.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;TabPageADUpsell.Parent" xml:space="preserve">
-    <value>TheTabControl</value>
-  </data>
-  <data name="&gt;&gt;TabPageADUpsell.ZOrder" xml:space="preserve">
-    <value>17</value>
+    <value>14</value>
   </data>
   <data name="TabPageGPU.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -703,34 +625,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageGPU.ZOrder" xml:space="preserve">
-    <value>18</value>
-  </data>
-  <data name="TabPagePvs.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 22</value>
-  </data>
-  <data name="TabPagePvs.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 3</value>
-  </data>
-  <data name="TabPagePvs.Size" type="System.Drawing.Size, System.Drawing">
-    <value>753, 591</value>
-  </data>
-  <data name="TabPagePvs.TabIndex" type="System.Int32, mscorlib">
-    <value>23</value>
-  </data>
-  <data name="TabPagePvs.Text" xml:space="preserve">
-    <value>PVS</value>
-  </data>
-  <data name="&gt;&gt;TabPagePvs.Name" xml:space="preserve">
-    <value>TabPagePvs</value>
-  </data>
-  <data name="&gt;&gt;TabPagePvs.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TabPage, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;TabPagePvs.Parent" xml:space="preserve">
-    <value>TheTabControl</value>
-  </data>
-  <data name="&gt;&gt;TabPagePvs.ZOrder" xml:space="preserve">
-    <value>19</value>
+    <value>15</value>
   </data>
   <data name="TabPageSearch.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
@@ -760,7 +655,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageSearch.ZOrder" xml:space="preserve">
-    <value>20</value>
+    <value>16</value>
   </data>
   <data name="TabPageDockerProcess.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -790,7 +685,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageDockerProcess.ZOrder" xml:space="preserve">
-    <value>21</value>
+    <value>17</value>
   </data>
   <data name="TabPageDockerDetails.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
@@ -820,7 +715,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageDockerDetails.ZOrder" xml:space="preserve">
-    <value>22</value>
+    <value>18</value>
   </data>
   <data name="TabPageUSB.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -847,7 +742,7 @@
     <value>TheTabControl</value>
   </data>
   <data name="&gt;&gt;TabPageUSB.ZOrder" xml:space="preserve">
-    <value>23</value>
+    <value>19</value>
   </data>
   <data name="TheTabControl.Font" type="System.Drawing.Font, System.Drawing">
     <value>Verdana, 8.25pt</value>
@@ -898,7 +793,7 @@
     <value>alertPage</value>
   </data>
   <data name="&gt;&gt;alertPage.Type" xml:space="preserve">
-    <value>XenAdmin.TabPages.AlertSummaryPage, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.TabPages.AlertSummaryPage, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;alertPage.Parent" xml:space="preserve">
     <value>splitContainer1.Panel2</value>
@@ -928,7 +823,7 @@
     <value>updatesPage</value>
   </data>
   <data name="&gt;&gt;updatesPage.Type" xml:space="preserve">
-    <value>XenAdmin.TabPages.ManageUpdatesPage, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.TabPages.ManageUpdatesPage, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;updatesPage.Parent" xml:space="preserve">
     <value>splitContainer1.Panel2</value>
@@ -958,7 +853,7 @@
     <value>cdnUpdatesPage</value>
   </data>
   <data name="&gt;&gt;cdnUpdatesPage.Type" xml:space="preserve">
-    <value>XenAdmin.TabPages.ManageCdnUpdatesPage, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.TabPages.ManageCdnUpdatesPage, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;cdnUpdatesPage.Parent" xml:space="preserve">
     <value>splitContainer1.Panel2</value>
@@ -988,7 +883,7 @@
     <value>eventsPage</value>
   </data>
   <data name="&gt;&gt;eventsPage.Type" xml:space="preserve">
-    <value>XenAdmin.TabPages.HistoryPage, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.TabPages.HistoryPage, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;eventsPage.Parent" xml:space="preserve">
     <value>splitContainer1.Panel2</value>
@@ -1062,42 +957,6 @@
   <data name="&gt;&gt;TitleLabel.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <data name="LicenseStatusTitleLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Left</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Verdana, 9.75pt, style=Bold</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>82, 4</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>58, 16</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.TabIndex" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="LicenseStatusTitleLabel.Text" xml:space="preserve">
-    <value>licence</value>
-  </data>
-  <data name="&gt;&gt;LicenseStatusTitleLabel.Name" xml:space="preserve">
-    <value>LicenseStatusTitleLabel</value>
-  </data>
-  <data name="&gt;&gt;LicenseStatusTitleLabel.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;LicenseStatusTitleLabel.Parent" xml:space="preserve">
-    <value>tableLayoutPanel1</value>
-  </data>
-  <data name="&gt;&gt;LicenseStatusTitleLabel.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
   <data name="loggedInLabel1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -1123,13 +982,13 @@
     <value>loggedInLabel1</value>
   </data>
   <data name="&gt;&gt;loggedInLabel1.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.LoggedInLabel, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Controls.LoggedInLabel, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;loggedInLabel1.Parent" xml:space="preserve">
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;loggedInLabel1.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>2</value>
   </data>
   <data name="labelFiltersOnOff.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Left</value>
@@ -1159,7 +1018,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;labelFiltersOnOff.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>3</value>
   </data>
   <data name="tableLayoutPanel1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
@@ -1189,7 +1048,7 @@
     <value>0</value>
   </data>
   <data name="tableLayoutPanel1.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="TitleIcon" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="TitleLabel" Row="0" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="LicenseStatusTitleLabel" Row="0" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;Control Name="loggedInLabel1" Row="0" RowSpan="1" Column="4" ColumnSpan="1" /&gt;&lt;Control Name="labelFiltersOnOff" Row="0" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,AutoSize,0,Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;Rows Styles="Percent,100" /&gt;&lt;/TableLayoutSettings&gt;</value>
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="TitleIcon" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="TitleLabel" Row="0" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="loggedInLabel1" Row="0" RowSpan="1" Column="4" ColumnSpan="1" /&gt;&lt;Control Name="labelFiltersOnOff" Row="0" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,AutoSize,0,Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;Rows Styles="Percent,100" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
   <data name="TitleBackPanel.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
@@ -1204,7 +1063,7 @@
     <value>TitleBackPanel</value>
   </data>
   <data name="&gt;&gt;TitleBackPanel.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.GradientPanel.VerticalGradientPanel, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Controls.GradientPanel.VerticalGradientPanel, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;TitleBackPanel.Parent" xml:space="preserve">
     <value>splitContainer1.Panel2</value>
@@ -1635,6 +1494,48 @@
   <data name="SuspendToolbarButton.ToolTipText" xml:space="preserve">
     <value>Suspend VM (Ctrl+Y)</value>
   </data>
+  <data name="PauseVmToolbarButton.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Tahoma, 8.25pt</value>
+  </data>
+  <data name="PauseVmToolbarButton.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="PauseVmToolbarButton.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
+    <value>Magenta</value>
+  </data>
+  <data name="PauseVmToolbarButton.Size" type="System.Drawing.Size, System.Drawing">
+    <value>64, 28</value>
+  </data>
+  <data name="PauseVmToolbarButton.Text" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="PauseVmToolbarButton.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="PauseVmToolbarButton.ToolTipText" xml:space="preserve">
+    <value>Pause VM to RAM</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Tahoma, 8.25pt</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
+    <value>Magenta</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.Size" type="System.Drawing.Size, System.Drawing">
+    <value>77, 28</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.Text" xml:space="preserve">
+    <value>Unpause</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleLeft</value>
+  </data>
+  <data name="UnpauseVmToolbarButton.ToolTipText" xml:space="preserve">
+    <value>Unpause VM</value>
+  </data>
   <data name="ForceShutdownToolbarButton.Font" type="System.Drawing.Font, System.Drawing">
     <value>Tahoma, 8.25pt</value>
   </data>
@@ -1788,60 +1689,6 @@
   <data name="pauseContainerToolStripButton.ToolTipText" xml:space="preserve">
     <value>Pause Docker Container</value>
   </data>
-  <data name="UnpauseVmToolbarButton.ToolTipText" xml:space="preserve">
-    <value>Unpause VM</value>
-  </data>
-  <data name="&gt;&gt;UnpauseVmToolbarButton.Name" xml:space="preserve">
-    <value>UnpauseVmToolbarButton</value>
-  </data>
-  <data name="&gt;&gt;UnpauseVmToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, XenCenterMain, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="UnpauseVmToolbarButton.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 8.25pt</value>
-  </data>
-  <data name="UnpauseVmToolbarButton.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
-  </data>
-  <data name="UnpauseVmToolbarButton.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Magenta</value>
-  </data>
-  <data name="UnpauseVmToolbarButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>73, 28</value>
-  </data>
-  <data name="UnpauseVmToolbarButton.Text" xml:space="preserve">
-    <value>Unpause</value>
-  </data>
-  <data name="UnpauseVmToolbarButton.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
-  </data>
-  <data name="&gt;&gt;PauseVmToolbarButton.Name" xml:space="preserve">
-    <value>PauseVmToolbarButton</value>
-  </data>
-  <data name="&gt;&gt;PauseVmToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, XenCenterMain, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="PauseVmToolbarButton.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 8.25pt</value>
-  </data>
-  <data name="PauseVmToolbarButton.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
-  </data>
-  <data name="PauseVmToolbarButton.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Magenta</value>
-  </data>
-  <data name="PauseVmToolbarButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>64, 28</value>
-  </data>
-  <data name="PauseVmToolbarButton.Text" xml:space="preserve">
-    <value>Pause</value>
-  </data>
-  <data name="PauseVmToolbarButton.ToolTipText" xml:space="preserve">
-    <value>Pause VM to RAM</value>
-  </data>
-  <data name="PauseVmToolbarButton.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
-  </data> 
   <data name="ToolStrip.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 24</value>
   </data>
@@ -1858,7 +1705,7 @@
     <value>ToolStrip</value>
   </data>
   <data name="&gt;&gt;ToolStrip.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.ToolStripEx, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Controls.ToolStripEx, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ToolStrip.Parent" xml:space="preserve">
     <value>$this</value>
@@ -2331,12 +2178,6 @@
   <data name="controlDomainMemoryToolStripMenuItem.Text" xml:space="preserve">
     <value>Control &amp;Domain Memory...</value>
   </data>
-  <data name="RemoveCrashdumpsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>216, 22</value>
-  </data>
-  <data name="RemoveCrashdumpsToolStripMenuItem.Text" xml:space="preserve">
-    <value>Remove Crash Dump &amp;Files</value>
-  </data>
   <data name="ChangeRootPasswordToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>161, 22</value>
   </data>
@@ -2392,7 +2233,7 @@
     <value>&amp;Server</value>
   </data>
   <data name="NewVmToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Control+N</value>
+    <value>Strg+N</value>
   </data>
   <data name="NewVmToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>264, 22</value>
@@ -2703,53 +2544,14 @@
   <data name="templatesToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Templates</value>
   </data>
-  <data name="bugToolToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
-  </data>
-  <data name="bugToolToolStripMenuItem.Text" xml:space="preserve">
-    <value>Server &amp;Status Report...</value>
-  </data>
-  <data name="toolStripSeparator14.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 6</value>
-  </data>
-  <data name="LicenseManagerMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
-  </data>
-  <data name="LicenseManagerMenuItem.Text" xml:space="preserve">
-    <value>&amp;License Manager...</value>
-  </data>
-  <data name="toolStripSeparator13.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 6</value>
-  </data>
-  <data name="configureUpdatesToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
-  </data>
-  <data name="configureUpdatesToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Configure Updates...</value>
-  </data>
-  <data name="installNewUpdateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
-  </data>
-  <data name="installNewUpdateToolStripMenuItem.Text" xml:space="preserve">
-    <value>Install &amp;Updates...</value>
-  </data>
-  <data name="rollingUpgradeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
-  </data>
-  <data name="rollingUpgradeToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Rolling Pool Upgrade...</value>
-  </data>
-  <data name="toolStripSeparator6.Size" type="System.Drawing.Size, System.Drawing">
-    <value>192, 6</value>
-  </data>
   <data name="pluginItemsPlaceHolderToolStripMenuItem7.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
+    <value>186, 22</value>
   </data>
   <data name="pluginItemsPlaceHolderToolStripMenuItem7.Text" xml:space="preserve">
     <value>PluginItemsPlaceHolder</value>
   </data>
   <data name="preferencesToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>195, 22</value>
+    <value>186, 22</value>
   </data>
   <data name="preferencesToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Options...</value>
@@ -2829,14 +2631,11 @@
   <data name="pluginItemsPlaceHolderToolStripMenuItem8.Text" xml:space="preserve">
     <value>PluginItemsPlaceHolder</value>
   </data>
-  <data name="downloadLatestSourceToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="aboutToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>186, 22</value>
   </data>
-  <data name="aboutXenSourceAdminToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>186, 22</value>
-  </data>
-  <data name="aboutXenSourceAdminToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;About {0}</value>
+  <data name="aboutToolStripMenuItem.Text" xml:space="preserve">
+    <value>About</value>
   </data>
   <data name="helpToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>41, 20</value>
@@ -2857,22 +2656,19 @@
     <value>Microsoft Sans Serif, 8.25pt</value>
   </data>
   <data name="downloadInstallToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>173, 22</value>
   </data>
   <data name="downloadInstallToolStripMenuItem.Text" xml:space="preserve">
     <value>Download and &amp;Install</value>
   </data>
   <data name="relNotesToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>173, 22</value>
   </data>
   <data name="relNotesToolStripMenuItem.Text" xml:space="preserve">
     <value>v{0} &amp;Release Notes</value>
   </data>
   <data name="downloadSourceToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
-  </data>
-  <data name="downloadSourceToolStripMenuItem.Text" xml:space="preserve">
-    <value>Download v{0} source</value>
+    <value>173, 22</value>
   </data>
   <data name="updateClientToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>87, 20</value>
@@ -2896,7 +2692,7 @@
     <value>MainMenuBar</value>
   </data>
   <data name="&gt;&gt;MainMenuBar.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.MenuStripEx, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Controls.MenuStripEx, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;MainMenuBar.Parent" xml:space="preserve">
     <value>MenuPanel</value>
@@ -3034,7 +2830,7 @@
     <value>StatusStrip</value>
   </data>
   <data name="&gt;&gt;StatusStrip.Type" xml:space="preserve">
-    <value>XenAdmin.Controls.StatusStripEx, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Controls.StatusStripEx, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;StatusStrip.Parent" xml:space="preserve">
     <value>$this</value>
@@ -3046,7 +2842,7 @@
     <value>True</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>32</value>
+    <value>63</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>96, 96</value>
@@ -3085,7 +2881,7 @@
     <value>AddServerToolbarButton</value>
   </data>
   <data name="&gt;&gt;AddServerToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator11.Name" xml:space="preserve">
     <value>toolStripSeparator11</value>
@@ -3097,19 +2893,19 @@
     <value>AddPoolToolbarButton</value>
   </data>
   <data name="&gt;&gt;AddPoolToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;newStorageToolbarButton.Name" xml:space="preserve">
     <value>newStorageToolbarButton</value>
   </data>
   <data name="&gt;&gt;newStorageToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;NewVmToolbarButton.Name" xml:space="preserve">
     <value>NewVmToolbarButton</value>
   </data>
   <data name="&gt;&gt;NewVmToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator12.Name" xml:space="preserve">
     <value>toolStripSeparator12</value>
@@ -3121,79 +2917,91 @@
     <value>shutDownToolStripButton</value>
   </data>
   <data name="&gt;&gt;shutDownToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;powerOnHostToolStripButton.Name" xml:space="preserve">
     <value>powerOnHostToolStripButton</value>
   </data>
   <data name="&gt;&gt;powerOnHostToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;startVMToolStripButton.Name" xml:space="preserve">
     <value>startVMToolStripButton</value>
   </data>
   <data name="&gt;&gt;startVMToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;RebootToolbarButton.Name" xml:space="preserve">
     <value>RebootToolbarButton</value>
   </data>
   <data name="&gt;&gt;RebootToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;resumeToolStripButton.Name" xml:space="preserve">
     <value>resumeToolStripButton</value>
   </data>
   <data name="&gt;&gt;resumeToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;SuspendToolbarButton.Name" xml:space="preserve">
     <value>SuspendToolbarButton</value>
   </data>
   <data name="&gt;&gt;SuspendToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;PauseVmToolbarButton.Name" xml:space="preserve">
+    <value>PauseVmToolbarButton</value>
+  </data>
+  <data name="&gt;&gt;PauseVmToolbarButton.Type" xml:space="preserve">
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;UnpauseVmToolbarButton.Name" xml:space="preserve">
+    <value>UnpauseVmToolbarButton</value>
+  </data>
+  <data name="&gt;&gt;UnpauseVmToolbarButton.Type" xml:space="preserve">
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ForceShutdownToolbarButton.Name" xml:space="preserve">
     <value>ForceShutdownToolbarButton</value>
   </data>
   <data name="&gt;&gt;ForceShutdownToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ForceRebootToolbarButton.Name" xml:space="preserve">
     <value>ForceRebootToolbarButton</value>
   </data>
   <data name="&gt;&gt;ForceRebootToolbarButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;stopContainerToolStripButton.Name" xml:space="preserve">
     <value>stopContainerToolStripButton</value>
   </data>
   <data name="&gt;&gt;stopContainerToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;startContainerToolStripButton.Name" xml:space="preserve">
     <value>startContainerToolStripButton</value>
   </data>
   <data name="&gt;&gt;startContainerToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;restartContainerToolStripButton.Name" xml:space="preserve">
     <value>restartContainerToolStripButton</value>
   </data>
   <data name="&gt;&gt;restartContainerToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;resumeContainerToolStripButton.Name" xml:space="preserve">
     <value>resumeContainerToolStripButton</value>
   </data>
   <data name="&gt;&gt;resumeContainerToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;pauseContainerToolStripButton.Name" xml:space="preserve">
     <value>pauseContainerToolStripButton</value>
   </data>
   <data name="&gt;&gt;pauseContainerToolStripButton.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripButton, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripButton, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;statusToolTip.Name" xml:space="preserve">
     <value>statusToolTip</value>
@@ -3217,13 +3025,13 @@
     <value>FileImportVMToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;FileImportVMToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;importSearchToolStripMenuItem.Name" xml:space="preserve">
     <value>importSearchToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;importSearchToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator21.Name" xml:space="preserve">
     <value>toolStripSeparator21</value>
@@ -3319,7 +3127,7 @@
     <value>AddPoolToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;AddPoolToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator8.Name" xml:space="preserve">
     <value>toolStripSeparator8</value>
@@ -3331,25 +3139,25 @@
     <value>addServerToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;addServerToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.AddHostToSelectedPoolToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.AddHostToSelectedPoolToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;removeServerToolStripMenuItem.Name" xml:space="preserve">
     <value>removeServerToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;removeServerToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.PoolRemoveServerToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.PoolRemoveServerToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;poolReconnectAsToolStripMenuItem.Name" xml:space="preserve">
     <value>poolReconnectAsToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;poolReconnectAsToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;disconnectPoolToolStripMenuItem.Name" xml:space="preserve">
     <value>disconnectPoolToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;disconnectPoolToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator27.Name" xml:space="preserve">
     <value>toolStripSeparator27</value>
@@ -3361,7 +3169,7 @@
     <value>virtualAppliancesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;virtualAppliancesToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator30.Name" xml:space="preserve">
     <value>toolStripSeparator30</value>
@@ -3373,73 +3181,73 @@
     <value>highAvailabilityToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;highAvailabilityToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemHaConfigure.Name" xml:space="preserve">
     <value>toolStripMenuItemHaConfigure</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemHaConfigure.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemHaDisable.Name" xml:space="preserve">
     <value>toolStripMenuItemHaDisable</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemHaDisable.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;disasterRecoveryToolStripMenuItem.Name" xml:space="preserve">
     <value>disasterRecoveryToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;disasterRecoveryToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;drConfigureToolStripMenuItem.Name" xml:space="preserve">
     <value>drConfigureToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;drConfigureToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;DrWizardToolStripMenuItem.Name" xml:space="preserve">
     <value>DrWizardToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;DrWizardToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;VMSnapshotScheduleToolStripMenuItem.Name" xml:space="preserve">
     <value>VMSnapshotScheduleToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;VMSnapshotScheduleToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;exportResourceReportPoolToolStripMenuItem.Name" xml:space="preserve">
     <value>exportResourceReportPoolToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;exportResourceReportPoolToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemWlb.Name" xml:space="preserve">
     <value>toolStripMenuItemWlb</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemWlb.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;wlbReportsToolStripMenuItem.Name" xml:space="preserve">
     <value>wlbReportsToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;wlbReportsToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;wlbDisconnectToolStripMenuItem.Name" xml:space="preserve">
     <value>wlbDisconnectToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;wlbDisconnectToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;conversionToolStripMenuItem.Name" xml:space="preserve">
     <value>conversionToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;conversionToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator9.Name" xml:space="preserve">
     <value>toolStripSeparator9</value>
@@ -3451,19 +3259,19 @@
     <value>changePoolPasswordToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;changePoolPasswordToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemRotateSecret.Name" xml:space="preserve">
     <value>toolStripMenuItemRotateSecret</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemRotateSecret.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemEnableTls.Name" xml:space="preserve">
     <value>toolStripMenuItemEnableTls</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemEnableTls.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItem1.Name" xml:space="preserve">
     <value>toolStripMenuItem1</value>
@@ -3475,7 +3283,7 @@
     <value>deleteToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;deleteToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator26.Name" xml:space="preserve">
     <value>toolStripSeparator26</value>
@@ -3493,7 +3301,7 @@
     <value>PoolPropertiesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;PoolPropertiesToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;HostMenuItem.Name" xml:space="preserve">
     <value>HostMenuItem</value>
@@ -3505,7 +3313,7 @@
     <value>AddHostToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;AddHostToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItem11.Name" xml:space="preserve">
     <value>toolStripMenuItem11</value>
@@ -3517,25 +3325,25 @@
     <value>RebootHostToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;RebootHostToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;powerOnToolStripMenuItem.Name" xml:space="preserve">
     <value>powerOnToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;powerOnToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ShutdownHostToolStripMenuItem.Name" xml:space="preserve">
     <value>ShutdownHostToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;ShutdownHostToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;restartToolstackToolStripMenuItem.Name" xml:space="preserve">
     <value>restartToolstackToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;restartToolstackToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator1.Name" xml:space="preserve">
     <value>toolStripSeparator1</value>
@@ -3553,19 +3361,19 @@
     <value>ReconnectToolStripMenuItem1</value>
   </data>
   <data name="&gt;&gt;ReconnectToolStripMenuItem1.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;DisconnectToolStripMenuItem.Name" xml:space="preserve">
     <value>DisconnectToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;DisconnectToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;reconnectAsToolStripMenuItem.Name" xml:space="preserve">
     <value>reconnectAsToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;reconnectAsToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator4.Name" xml:space="preserve">
     <value>toolStripSeparator4</value>
@@ -3577,25 +3385,25 @@
     <value>connectAllToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;connectAllToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;disconnectAllToolStripMenuItem.Name" xml:space="preserve">
     <value>disconnectAllToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;disconnectAllToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;addServerToPoolMenuItem.Name" xml:space="preserve">
     <value>addServerToPoolMenuItem</value>
   </data>
   <data name="&gt;&gt;addServerToPoolMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.AddSelectedHostToPoolToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.AddSelectedHostToPoolToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;menuItemRemoveFromPool.Name" xml:space="preserve">
     <value>menuItemRemoveFromPool</value>
   </data>
   <data name="&gt;&gt;menuItemRemoveFromPool.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator3.Name" xml:space="preserve">
     <value>toolStripSeparator3</value>
@@ -3607,13 +3415,13 @@
     <value>backupToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;backupToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;restoreFromBackupToolStripMenuItem.Name" xml:space="preserve">
     <value>restoreFromBackupToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;restoreFromBackupToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator23.Name" xml:space="preserve">
     <value>toolStripSeparator23</value>
@@ -3625,55 +3433,49 @@
     <value>toolStripMenuItemCertificate</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemCertificate.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemInstallCertificate.Name" xml:space="preserve">
     <value>toolStripMenuItemInstallCertificate</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemInstallCertificate.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemResetCertificate.Name" xml:space="preserve">
     <value>toolStripMenuItemResetCertificate</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemResetCertificate.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;maintenanceModeToolStripMenuItem1.Name" xml:space="preserve">
     <value>maintenanceModeToolStripMenuItem1</value>
   </data>
   <data name="&gt;&gt;maintenanceModeToolStripMenuItem1.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;controlDomainMemoryToolStripMenuItem.Name" xml:space="preserve">
     <value>controlDomainMemoryToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;controlDomainMemoryToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;RemoveCrashdumpsToolStripMenuItem.Name" xml:space="preserve">
-    <value>RemoveCrashdumpsToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;RemoveCrashdumpsToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;HostPasswordToolStripMenuItem.Name" xml:space="preserve">
     <value>HostPasswordToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;HostPasswordToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ChangeRootPasswordToolStripMenuItem.Name" xml:space="preserve">
     <value>ChangeRootPasswordToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;ChangeRootPasswordToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;forgetSavedPasswordToolStripMenuItem.Name" xml:space="preserve">
     <value>forgetSavedPasswordToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;forgetSavedPasswordToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator25.Name" xml:space="preserve">
     <value>toolStripSeparator25</value>
@@ -3685,13 +3487,13 @@
     <value>destroyServerToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;destroyServerToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;removeHostToolStripMenuItem.Name" xml:space="preserve">
     <value>removeHostToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;removeHostToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator15.Name" xml:space="preserve">
     <value>toolStripSeparator15</value>
@@ -3709,7 +3511,7 @@
     <value>ServerPropertiesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;ServerPropertiesToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;VMToolStripMenuItem.Name" xml:space="preserve">
     <value>VMToolStripMenuItem</value>
@@ -3721,31 +3523,31 @@
     <value>NewVmToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;NewVmToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;startShutdownToolStripMenuItem.Name" xml:space="preserve">
     <value>startShutdownToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;startShutdownToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.VMLifeCycleToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.VMLifeCycleToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;resumeOnToolStripMenuItem.Name" xml:space="preserve">
     <value>resumeOnToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;resumeOnToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.ResumeVMOnHostToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.ResumeVMOnHostToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;relocateToolStripMenuItem.Name" xml:space="preserve">
     <value>relocateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;relocateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.MigrateVMToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.MigrateVMToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;startOnHostToolStripMenuItem.Name" xml:space="preserve">
     <value>startOnHostToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;startOnHostToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.StartVMOnHostToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.StartVMOnHostToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator20.Name" xml:space="preserve">
     <value>toolStripSeparator20</value>
@@ -3757,13 +3559,13 @@
     <value>assignSnapshotScheduleToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;assignSnapshotScheduleToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.AssignGroupToolStripMenuItemVMSS, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.AssignGroupToolStripMenuItemVMSS, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;assignToVirtualApplianceToolStripMenuItem.Name" xml:space="preserve">
     <value>assignToVirtualApplianceToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;assignToVirtualApplianceToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.AssignGroupToolStripMenuItemVM_appliance, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.AssignGroupToolStripMenuItemVM_appliance, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItem9.Name" xml:space="preserve">
     <value>toolStripMenuItem9</value>
@@ -3775,31 +3577,31 @@
     <value>copyVMtoSharedStorageMenuItem</value>
   </data>
   <data name="&gt;&gt;copyVMtoSharedStorageMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;MoveVMToolStripMenuItem.Name" xml:space="preserve">
     <value>MoveVMToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;MoveVMToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;snapshotToolStripMenuItem.Name" xml:space="preserve">
     <value>snapshotToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;snapshotToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;convertToTemplateToolStripMenuItem.Name" xml:space="preserve">
     <value>convertToTemplateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;convertToTemplateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;exportToolStripMenuItem.Name" xml:space="preserve">
     <value>exportToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;exportToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator32.Name" xml:space="preserve">
     <value>toolStripSeparator32</value>
@@ -3811,25 +3613,25 @@
     <value>toolStripMenuItemVtpm</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItemVtpm.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;disableCbtToolStripMenuItem.Name" xml:space="preserve">
     <value>disableCbtToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;disableCbtToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;enablePVSReadcachingToolStripMenuItem.Name" xml:space="preserve">
     <value>enablePVSReadcachingToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;enablePVSReadcachingToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;disablePVSReadcachingToolStripMenuItem.Name" xml:space="preserve">
     <value>disablePVSReadcachingToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;disablePVSReadcachingToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItem12.Name" xml:space="preserve">
     <value>toolStripMenuItem12</value>
@@ -3841,7 +3643,7 @@
     <value>installToolsToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;installToolsToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;sendCtrlAltDelToolStripMenuItem.Name" xml:space="preserve">
     <value>sendCtrlAltDelToolStripMenuItem</value>
@@ -3859,7 +3661,7 @@
     <value>uninstallToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;uninstallToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator10.Name" xml:space="preserve">
     <value>toolStripSeparator10</value>
@@ -3877,7 +3679,7 @@
     <value>VMPropertiesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;VMPropertiesToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItem8.Name" xml:space="preserve">
     <value>toolStripMenuItem8</value>
@@ -3895,7 +3697,7 @@
     <value>AddStorageToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;AddStorageToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator22.Name" xml:space="preserve">
     <value>toolStripSeparator22</value>
@@ -3907,13 +3709,13 @@
     <value>RepairStorageToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;RepairStorageToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;DefaultSRToolStripMenuItem.Name" xml:space="preserve">
     <value>DefaultSRToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;DefaultSRToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator2.Name" xml:space="preserve">
     <value>toolStripSeparator2</value>
@@ -3925,25 +3727,25 @@
     <value>virtualDisksToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;virtualDisksToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;addVirtualDiskToolStripMenuItem.Name" xml:space="preserve">
     <value>addVirtualDiskToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;addVirtualDiskToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;attachVirtualDiskToolStripMenuItem.Name" xml:space="preserve">
     <value>attachVirtualDiskToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;attachVirtualDiskToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;reclaimFreedSpacetripMenuItem.Name" xml:space="preserve">
     <value>reclaimFreedSpacetripMenuItem</value>
   </data>
   <data name="&gt;&gt;reclaimFreedSpacetripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator19.Name" xml:space="preserve">
     <value>toolStripSeparator19</value>
@@ -3955,25 +3757,25 @@
     <value>DetachStorageToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;DetachStorageToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ReattachStorageRepositoryToolStripMenuItem.Name" xml:space="preserve">
     <value>ReattachStorageRepositoryToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;ReattachStorageRepositoryToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;ForgetStorageRepositoryToolStripMenuItem.Name" xml:space="preserve">
     <value>ForgetStorageRepositoryToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;ForgetStorageRepositoryToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;DestroyStorageRepositoryToolStripMenuItem.Name" xml:space="preserve">
     <value>DestroyStorageRepositoryToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;DestroyStorageRepositoryToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator18.Name" xml:space="preserve">
     <value>toolStripSeparator18</value>
@@ -3991,7 +3793,7 @@
     <value>SRPropertiesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;SRPropertiesToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;templatesToolStripMenuItem.Name" xml:space="preserve">
     <value>templatesToolStripMenuItem</value>
@@ -4003,19 +3805,19 @@
     <value>CreateVmFromTemplateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;CreateVmFromTemplateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;newVMFromTemplateToolStripMenuItem.Name" xml:space="preserve">
     <value>newVMFromTemplateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;newVMFromTemplateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;InstantVmToolStripMenuItem.Name" xml:space="preserve">
     <value>InstantVmToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;InstantVmToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator29.Name" xml:space="preserve">
     <value>toolStripSeparator29</value>
@@ -4027,13 +3829,13 @@
     <value>exportTemplateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;exportTemplateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;duplicateTemplateToolStripMenuItem.Name" xml:space="preserve">
     <value>duplicateTemplateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;duplicateTemplateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator16.Name" xml:space="preserve">
     <value>toolStripSeparator16</value>
@@ -4045,7 +3847,7 @@
     <value>uninstallTemplateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;uninstallTemplateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator28.Name" xml:space="preserve">
     <value>toolStripSeparator28</value>
@@ -4063,61 +3865,13 @@
     <value>templatePropertiesToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;templatePropertiesToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;toolsToolStripMenuItem.Name" xml:space="preserve">
     <value>toolsToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;toolsToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;bugToolToolStripMenuItem.Name" xml:space="preserve">
-    <value>bugToolToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;bugToolToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator14.Name" xml:space="preserve">
-    <value>toolStripSeparator14</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator14.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;LicenseManagerMenuItem.Name" xml:space="preserve">
-    <value>LicenseManagerMenuItem</value>
-  </data>
-  <data name="&gt;&gt;LicenseManagerMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator13.Name" xml:space="preserve">
-    <value>toolStripSeparator13</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator13.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;configureUpdatesToolStripMenuItem.Name" xml:space="preserve">
-    <value>configureUpdatesToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;configureUpdatesToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;installNewUpdateToolStripMenuItem.Name" xml:space="preserve">
-    <value>installNewUpdateToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;installNewUpdateToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;rollingUpgradeToolStripMenuItem.Name" xml:space="preserve">
-    <value>rollingUpgradeToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;rollingUpgradeToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator6.Name" xml:space="preserve">
-    <value>toolStripSeparator6</value>
-  </data>
-  <data name="&gt;&gt;toolStripSeparator6.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;pluginItemsPlaceHolderToolStripMenuItem7.Name" xml:space="preserve">
     <value>pluginItemsPlaceHolderToolStripMenuItem7</value>
@@ -4209,16 +3963,10 @@
   <data name="&gt;&gt;pluginItemsPlaceHolderToolStripMenuItem8.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;downloadLatestSourceToolStripMenuItem.Name" xml:space="preserve">
-    <value>downloadLatestSourceToolStripMenuItem</value>
+  <data name="&gt;&gt;aboutToolStripMenuItem.Name" xml:space="preserve">
+    <value>aboutToolStripMenuItem</value>
   </data>
-  <data name="&gt;&gt;downloadLatestSourceToolStripMenuItem.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;aboutXenSourceAdminToolStripMenuItem.Name" xml:space="preserve">
-    <value>aboutXenSourceAdminToolStripMenuItem</value>
-  </data>
-  <data name="&gt;&gt;aboutXenSourceAdminToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;aboutToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;updateClientToolStripMenuItem.Name" xml:space="preserve">
@@ -4249,7 +3997,7 @@
     <value>securityGroupsToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;securityGroupsToolStripMenuItem.Type" xml:space="preserve">
-    <value>XenAdmin.Commands.CommandToolStripMenuItem, [XenCenter], Version=0.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+    <value>XenAdmin.Commands.CommandToolStripMenuItem, XCP-ng Center, Version=99.99.99.9999, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;statusProgressBar.Name" xml:space="preserve">
     <value>statusProgressBar</value>

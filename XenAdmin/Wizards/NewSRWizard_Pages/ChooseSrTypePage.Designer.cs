@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChooseSrTypePage));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.upsellPage1 = new XenAdmin.Controls.UpsellPage();
             this.SRBlurb = new XenAdmin.Controls.Common.AutoHeightLabel();
             this.deprecationBanner = new XenAdmin.Controls.DeprecationBanner();
             this.selectedStoreTypeLabel = new System.Windows.Forms.Label();
@@ -62,16 +61,10 @@
             // tableLayoutPanel2
             // 
             resources.ApplyResources(this.tableLayoutPanel2, "tableLayoutPanel2");
-            this.tableLayoutPanel2.Controls.Add(this.upsellPage1, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.SRBlurb, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.deprecationBanner, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.selectedStoreTypeLabel, 0, 2);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            // 
-            // upsellPage1
-            // 
-            resources.ApplyResources(this.upsellPage1, "upsellPage1");
-            this.upsellPage1.Name = "upsellPage1";
             // 
             // SRBlurb
             // 
@@ -218,7 +211,6 @@
         private System.Windows.Forms.RadioButton radioButtonNfsIso;
         private System.Windows.Forms.RadioButton radioButtonCifsIso;
         private System.Windows.Forms.RadioButton radioButtonFibreChannel;
-        private XenAdmin.Controls.UpsellPage upsellPage1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private XenAdmin.Controls.Common.AutoHeightLabel SRBlurb;

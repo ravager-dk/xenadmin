@@ -69,11 +69,7 @@ namespace XenAdmin.TabPages
 
         private readonly CollectionChangeEventHandler VM_guest_metrics_CollectionChangedWithInvoke;
 
-        private LicenseStatus licenseStatus;
-
         #endregion
-
-        public LicenseManagerLauncher LicenseLauncher { private get; set; }
 
         public GeneralTabPage()
         {
@@ -100,29 +96,6 @@ namespace XenAdmin.TabPages
         }
 
         public override string HelpID => "TabPageSettings";
-
-        private void licenseStatus_ItemUpdated()
-        {
-            if (pdSectionLicense == null || licenseStatus == null)
-                return;
-
-            var ss = new GeneralTabLicenseStatusStringifier(licenseStatus);
-            Program.Invoke(Program.MainWindow, () => 
-            {
-                pdSectionLicense.UpdateEntryValueWithKey(FriendlyName("host.license_params-expiry"),
-                    ss.ExpiryDate, ss.ShowExpiryDate);
-
-                pdSectionLicense.UpdateEntryValueWithKey(Messages.LICENSE_STATUS, ss.ExpiryStatus, true);
-
-                if (xenObject is Pool p)
-                {
-                    var additionalString = PoolAdditionalLicenseString(p);
-                    pdSectionGeneral.UpdateEntryValueWithKey(
-                        Messages.POOL_LICENSE, Helpers.GetFriendlyLicenseName(p),
-                        true);
-                }
-                });
-        }
 
         private void ScrollToSelectionIfNeeded(PDSection s)
         {
@@ -161,26 +134,11 @@ namespace XenAdmin.TabPages
                     return;
                 }
 
-                if (licenseStatus != null)
-                {
-                    licenseStatus.ItemUpdated -= licenseStatus_ItemUpdated;
-                    licenseStatus.Dispose();
-                    //set this to null to prevent updates if the object is not a host or pool
-                    licenseStatus = null;
-                }
+                UnregisterHandlers();
 
-                if (value.Connection != null && value.Connection.IsConnected && (value is Host || value is Pool))
-                {
-                    licenseStatus = new LicenseStatus(value);
-                    licenseStatus.ItemUpdated += licenseStatus_ItemUpdated;
-                    licenseStatus.BeginUpdate();
-                }
-
-                    UnregisterHandlers();
-
-                    xenObject = value;
-                    RegisterHandlers();
-                    BuildList();
+                xenObject = value;
+                RegisterHandlers();
+                BuildList();
 
                 List<PDSection> expandedSections = null;
 
@@ -317,14 +275,14 @@ namespace XenAdmin.TabPages
                         pbd.PropertyChanged += PropertyChanged;
                     }
                 }
-                else
-                {
-                    // At the moment we are rebuilding on almost any property changed event. 
-                    // As long as we are just clearing and re-adding the rows in the PDSections this seems to be super quick. 
-                    // If it gets slower we should update specific boxes for specific property changes.
-                    if (licenseStatus != null && licenseStatus.Updated)
-                        licenseStatus.BeginUpdate();
-                }
+                //else
+                //{
+                //    // At the moment we are rebuilding on almost any property changed event. 
+                //    // As long as we are just clearing and re-adding the rows in the PDSections this seems to be super quick. 
+                //    // If it gets slower we should update specific boxes for specific property changes.
+                //    if (licenseStatus != null && licenseStatus.Updated)
+                //        licenseStatus.BeginUpdate();
+                //}
 
                 BuildList();
             });
@@ -404,7 +362,6 @@ namespace XenAdmin.TabPages
                 GenerateInterfaceBox();
                 GenerateMemoryBox();
                 GenerateVersionBox();
-                GenerateLicenseBox();
                 GenerateCPUBox();
                 GenerateHostUpdatesBox();
                 GenerateBootBox();
@@ -596,14 +553,14 @@ namespace XenAdmin.TabPages
 
             if (partApplied.Count > 0)
             {
-                var menuItems = new ToolStripMenuItem[] {new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true)};
+                var menuItems = new ToolStripMenuItem[] { new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true) };
                 partApplied.Sort(StringUtility.NaturalCompare);
                 pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.partially_applied"), string.Join(Environment.NewLine, partApplied), menuItems);
             }
 
             if (partAppliedError.Count > 0)
             {
-                var menuItems = new ToolStripMenuItem[] {new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true)};
+                var menuItems = new ToolStripMenuItem[] { new CommandToolStripMenuItem(new InstallNewUpdateCommand(Program.MainWindow), true) };
                 partAppliedError.Sort(StringUtility.NaturalCompare);
                 pdSectionUpdates.AddEntry(string.Format(Messages.STRING_SPACE_STRING,
                         FriendlyName("Pool_patch.partially_applied"), Messages.UPDATES_GENERAL_TAB_ENFORCE_HOMOGENEITY),
@@ -614,11 +571,11 @@ namespace XenAdmin.TabPages
         private void GenerateCdnUpdatesBox(Pool pool)
         {
             var repoNames = (from repoRef in pool.repositories
-                let repo = pool.Connection.Resolve(repoRef)
-                where repo != null
-                let found = RepoDescriptor.AllRepos.FirstOrDefault(rd => rd.MatchesRepository(repo))
-                where found != null
-                select found.FriendlyName).ToList();
+                             let repo = pool.Connection.Resolve(repoRef)
+                             where repo != null
+                             let found = RepoDescriptor.AllRepos.FirstOrDefault(rd => rd.MatchesRepository(repo))
+                             where found != null
+                             select found.FriendlyName).ToList();
 
             pdSectionUpdates.AddEntryWithNoteLink(Messages.UPDATES_GENERAL_TAB_REPO,
                 repoNames.Count == 0 ? Messages.NOT_CONFIGURED : string.Join("\n", repoNames),
@@ -681,19 +638,19 @@ namespace XenAdmin.TabPages
 
             // As of Ely we use host.updates_requiring_reboot to generate the list of reboot required messages
             // For older versions no change to how messages are generated
-            
+
             var messages = elyOrGreater ? CheckHostUpdatesRequiringReboot(host) : CheckServerUpdates(host);
 
             foreach (var kvp in messages)
                 pdSectionUpdates.AddEntry(kvp.Key, kvp.Value);
 
             var appliedPatches = string.Join(Environment.NewLine, Helpers.HostAppliedPatchesList(host));
-            
+
             if (!string.IsNullOrEmpty(appliedPatches))
                 pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.applied"), appliedPatches);
 
             var recommendedPatches = RecommendedPatchesForHost(host);
-            
+
             if (!string.IsNullOrEmpty(recommendedPatches))
                 pdSectionUpdates.AddEntry(FriendlyName("Pool_patch.required-updates"), recommendedPatches);
 
@@ -787,7 +744,7 @@ namespace XenAdmin.TabPages
             bool broken = false;
             bool repairable = sr.HasPBDs();
             var statusString = Messages.GENERAL_STATE_OK;
-            
+
             if (sr.IsDetached())
             {
                 broken = true;
@@ -1050,115 +1007,6 @@ namespace XenAdmin.TabPages
             }
         }
 
-        private void GenerateLicenseBox()
-        {
-            if (!(xenObject is Host host))
-                return;
-
-            PDSection s = pdSectionLicense;
-
-            if (host.CanShowTrialEditionUpsell())
-            {
-                pdSectionLicense.AddEntryWithNoteLink(Messages.WARNING, Messages.TRIAL_EDITION_UPSELLING_MESSAGE,
-                    Messages.LICENSE_MANAGER_BUY_LICENSE_LINK_TEXT, () => Program.OpenURL(InvisibleMessages.LICENSE_BUY_URL), Color.Red);
-            }
-            
-            if (host.CssLicenseHasExpired() && !host.IsInPreviewRelease())
-            {
-                pdSectionLicense.AddEntryWithNoteLink(Messages.WARNING, Messages.EXPIRED_CSS_UPSELLING_MESSAGE_HOST,
-                    Messages.LICENSE_MANAGER_PURCHASE_SUPPORT_LINK_TEXT, () => Program.OpenURL(InvisibleMessages.CSS_URL), Color.Red);
-            }
-
-            if (host.license_params == null)
-                return;
-
-            Dictionary<string, string> info = new Dictionary<string, string>(host.license_params);
-
-            // This field is now suppressed as it has no meaning under the current license scheme, and was never
-            // enforced anyway.
-            info.Remove("sockets");
-
-            // Remove "expiry" field for "basic" license
-            if (!string.IsNullOrEmpty(host.edition) && host.edition == "basic")
-                info.Remove("expiry");
-
-            if (info.ContainsKey("expiry"))
-            {
-                ToolStripMenuItem editItem = new ToolStripMenuItem(Messages.LAUNCH_LICENSE_MANAGER);
-                editItem.Click += delegate
-                    {
-                        if (LicenseLauncher != null)
-                        {
-                            LicenseLauncher.Parent = Program.MainWindow;
-                            LicenseLauncher.LaunchIfRequired(false, ConnectionsManager.XenConnections);
-                        }
-                    };
-
-                if (licenseStatus != null)
-                {
-                    var ss = new GeneralTabLicenseStatusStringifier(licenseStatus);
-                    s.AddEntry(Messages.LICENSE_STATUS,
-                        licenseStatus.Updated ? ss.ExpiryStatus : Messages.GENERAL_LICENSE_QUERYING, editItem);
-
-                    if (ss.ShowExpiryDate)
-                        s.AddEntry(FriendlyName("host.license_params-expiry"),
-                            licenseStatus.Updated ? ss.ExpiryDate : Messages.GENERAL_LICENSE_QUERYING,
-                            editItem);
-                }
-
-                info.Remove("expiry");
-            }
-
-            if (!string.IsNullOrEmpty(host.edition))
-            {
-                s.AddEntry(FriendlyName("host.edition"), Helpers.GetFriendlyLicenseName(host));
-            }
-
-            s.AddEntry(Messages.NUMBER_OF_SOCKETS, host.CpuSockets().ToString());
-
-            if (host.license_server.ContainsKey("address"))
-            {
-                var licenseServerAddress = host.license_server["address"].Trim();
-                if (licenseServerAddress == "" || licenseServerAddress.ToLower() == "localhost")
-                    s.AddEntry(FriendlyName("host.license_server-address"), host.license_server["address"]);
-                else
-                {
-                    void OpenWebConsole()
-                    {
-                        Program.OpenURL(string.Format(Messages.LICENSE_SERVER_WEB_CONSOLE_FORMAT, licenseServerAddress, Host.LicenseServerWebConsolePort));
-                    }
-
-                    var openUrl = new ToolStripMenuItem(Messages.LICENSE_SERVER_WEB_CONSOLE_GOTO, null,
-                        (sender, e) => OpenWebConsole());
-
-                    s.AddEntryLink(FriendlyName("host.license_server-address"), host.license_server["address"],
-                        OpenWebConsole, openUrl);
-                }
-            }
-            if (host.license_server.ContainsKey("port"))
-            {
-                s.AddEntry(FriendlyName("host.license_server-port"), host.license_server["port"]);
-            }
-
-            foreach (string key in new string[] { "productcode", "serialnumber" })
-            {
-                if (info.ContainsKey(key))
-                {
-                    string row_name = string.Format("host.license_params-{0}", key);
-                    string k = key;
-                    if (host.license_params[k] != string.Empty)
-                        s.AddEntry(FriendlyName(row_name), host.license_params[k]);
-                    info.Remove(key);
-                }
-            }
-
-            string restrictions = Helpers.GetHostRestrictions(host);
-            if (restrictions != "")
-            {
-                s.AddEntry(Messages.RESTRICTIONS, restrictions);
-            }
-        }
-
         private void GenerateVersionBox()
         {
             if (!(xenObject is Host host) || host.software_version == null)
@@ -1185,9 +1033,9 @@ namespace XenAdmin.TabPages
             {
                 //var hotfixEligibilityString = AdditionalVersionString(host);
                 var versionString = $"{host.ProductBrand()} {host.ProductVersionText()}";
-                
+
                 //if (string.IsNullOrEmpty(hotfixEligibilityString))
-                    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
+                pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
                 //else
                 //    pdSectionVersion.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
                 //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
@@ -1496,11 +1344,6 @@ namespace XenAdmin.TabPages
 
             if (xenObject is Pool p)
             {
-                var additionalString = PoolAdditionalLicenseString(p);
-                s.AddEntry(Messages.POOL_LICENSE,
-                    additionalString != string.Empty
-                        ? string.Format(Messages.MAINWINDOW_CONTEXT_REASON, Helpers.GetFriendlyLicenseName(p), additionalString)
-                        : Helpers.GetFriendlyLicenseName(p));
                 s.AddEntry(Messages.NUMBER_OF_SOCKETS, p.CpuSockets().ToString());
 
                 if (Helpers.CloudOrGreater(p.Connection) && Helpers.XapiEqualOrGreater_1_290_0(p.Connection))
@@ -1544,7 +1387,7 @@ namespace XenAdmin.TabPages
                         //var hotfixEligibilityString = AdditionalVersionString(coordinator);
 
                         //if (string.IsNullOrEmpty(hotfixEligibilityString))
-                            s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
+                        s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION, versionString);
                         //else
                         //    s.AddEntry(Messages.SOFTWARE_VERSION_PRODUCT_VERSION,
                         //        string.Format(Messages.MAINWINDOW_CONTEXT_REASON, versionString, hotfixEligibilityString),
@@ -1581,63 +1424,6 @@ namespace XenAdmin.TabPages
             s.AddEntry(FriendlyName("host.uuid"), xenObject.Get("uuid") as string);
         }
 
-        private string PoolAdditionalLicenseString(IXenObject pool)
-        {
-            if (licenseStatus == null)
-                return string.Empty;
-
-            switch (licenseStatus.CurrentState)
-            {
-                case LicenseStatus.HostState.Expired:
-                    return Messages.LICENSE_EXPIRED;
-                case LicenseStatus.HostState.Free:
-                    // We don't show "Unlicensed" when the pool is in Trial edition
-                    return Helpers.NileOrGreater(pool?.Connection) ? string.Empty : Messages.LICENSE_UNLICENSED;
-                default:
-                    return string.Empty;
-            }
-        }
-
-        //private string AdditionalVersionString(Host host)
-        //{
-        //    var hotfixEligibility = Updates.HotfixEligibility(host, out var xenServerVersion);
-        //    var unlicensed = host.IsFreeLicenseOrExpired();
-
-        //    switch (hotfixEligibility)
-        //    {
-        //        // premium
-        //        case hotfix_eligibility.premium when unlicensed && xenServerVersion.HotfixEligibilityPremiumDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_FREE, HelpersGUI.DateTimeToString(xenServerVersion.HotfixEligibilityPremiumDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.premium when unlicensed:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_FREE_NO_DATE;
-
-        //        // cu
-        //        case hotfix_eligibility.cu when unlicensed && xenServerVersion.HotfixEligibilityPremiumDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_FREE, HelpersGUI.DateTimeToString(xenServerVersion.HotfixEligibilityPremiumDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.cu when unlicensed:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_FREE_NO_DATE;
-
-        //        case hotfix_eligibility.cu when xenServerVersion.HotfixEligibilityNoneDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_CU, HelpersGUI.DateTimeToString(xenServerVersion.HotfixEligibilityNoneDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.cu:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_CU_NO_DATE;
-
-        //        // none
-        //        case hotfix_eligibility.none when unlicensed && xenServerVersion.EolDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.none when xenServerVersion.EolDate != DateTime.MinValue:
-        //            return string.Format(Messages.HOTFIX_ELIGIBILITY_WARNING_EOL, HelpersGUI.DateTimeToString(xenServerVersion.EolDate.ToLocalTime(), Messages.DATEFORMAT_DMY, true));
-        //        case hotfix_eligibility.none when unlicensed:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_FREE_NO_DATE;
-        //        case hotfix_eligibility.none:
-        //            return Messages.HOTFIX_ELIGIBILITY_WARNING_EOL_NO_DATE;
-
-        //        // default
-        //        default:
-        //            return string.Empty;
-        //    }
-        //}
-
         private static void GenerateVirtualisationStatusForGeneralBox(PDSection s, VM vm)
         {
             if (vm != null && vm.Connection != null)
@@ -1670,8 +1456,7 @@ namespace XenAdmin.TabPages
                     }
 
                     //Row 3 : vendor device - Windows Update
-                    if (!HiddenFeatures.WindowsUpdateHidden)
-                        sb.Append(vm.has_vendor_device ? Messages.VIRTUALIZATION_STATE_VM_RECEIVING_UPDATES : Messages.VIRTUALIZATION_STATE_VM_NOT_RECEIVING_UPDATES);
+                    sb.Append(vm.has_vendor_device ? Messages.VIRTUALIZATION_STATE_VM_RECEIVING_UPDATES : Messages.VIRTUALIZATION_STATE_VM_NOT_RECEIVING_UPDATES);
 
                     // displaying Row1 - Row3
                     s.AddEntry(FriendlyName("VM.VirtualizationState"), sb.ToString());
@@ -2073,7 +1858,7 @@ namespace XenAdmin.TabPages
             {
                 var update = host.Connection.Resolve(updateRef);
                 if (update != null)
-                warnings.Add(CreateWarningRow(host, update));
+                    warnings.Add(CreateWarningRow(host, update));
             }
 
             // For Toolstack restart, legacy code has to be used to determine this - pool_patches are still populated for backward compatibility

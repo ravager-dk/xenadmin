@@ -239,13 +239,6 @@
     <Compile Include="Controls\Tags\TagsEditor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\UpsellPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\UpsellPage.designer.cs">
-      <DependentUpon>UpsellPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Core\HiddenFeatures.cs" />
     <Compile Include="Core\Metadata.cs" />
     <Compile Include="Core\RepoDescriptor.cs" />
     <Compile Include="Diagnostics\Checks\AssertCanEvacuateCheck.cs" />
@@ -390,24 +383,6 @@
     <Compile Include="Dialogs\OvfValidationDialog.Designer.cs">
       <DependentUpon>OvfValidationDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\PvsCacheConfigurationDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\PvsCacheConfigurationDialog.Designer.cs">
-      <DependentUpon>PvsCacheConfigurationDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\PvsPages\PvsCacheConfigurationPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Dialogs\PvsPages\PvsCacheConfigurationPage.designer.cs">
-      <DependentUpon>PvsCacheConfigurationPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\PvsSiteDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\PvsSiteDialog.Designer.cs">
-      <DependentUpon>PvsSiteDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\ControlDomainMemoryDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -445,12 +420,6 @@
     </Compile>
     <Compile Include="Dialogs\ScreenShotDialog.Designer.cs">
       <DependentUpon>ScreenShotDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\UpsellDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\UpsellDialog.designer.cs">
-      <DependentUpon>UpsellDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\BallooningDialog.cs">
       <SubType>Form</SubType>
@@ -594,23 +563,11 @@
     <Compile Include="TabPages\NotificationsBasePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TabPages\PvsPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TabPages\PvsPage.Designer.cs">
-      <DependentUpon>PvsPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="TabPages\SnapshotsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="TabPages\SnapshotsPage.designer.cs">
       <DependentUpon>SnapshotsPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="TabPages\UpsellTabPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TabPages\UpsellTabPage.designer.cs">
-      <DependentUpon>UpsellTabPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\Clip.cs" />
     <Compile Include="Controls\BootOrderListBox.cs">
@@ -857,18 +814,6 @@
     </Compile>
     <Compile Include="Dialogs\InstallCertificateDialog.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\StatusReportRows\ClientSideStatusReportRow.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\StatusReportRows\SingleHostStatusReportRow.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\StatusReportRows\ZipStatusReportRow.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\StatusReportRows\StatusReportRow.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Wizards\ConversionWizard\ConversionWizard.cs">
       <SubType>Form</SubType>
@@ -1452,9 +1397,6 @@
     <Compile Include="Dialogs\XenDialogBase.designer.cs">
       <DependentUpon>XenDialogBase.cs</DependentUpon>
     </Compile>
-    <Compile Include="LicenseTimer.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="SettingsPanels\BootDevice.cs" />
     <Compile Include="SettingsPanels\CpuMemoryEditPage.cs">
       <SubType>UserControl</SubType>
@@ -1488,24 +1430,6 @@
       <DependentUpon>VMAdvancedEditPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Wizards\WizardProgressEventArgs.cs" />
-    <Compile Include="Wizards\BugToolWizard\BugToolPageDestination.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolPageDestination.Designer.cs">
-      <DependentUpon>BugToolPageDestination.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolPageRetrieveData.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolPageRetrieveData.Designer.cs">
-      <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.Designer.cs">
-      <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
-    </Compile>
     <Compile Include="Wizards\HAWizard.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1528,18 +1452,6 @@
     <Compile Include="Diagnostics\Problems\HostProblem\NotEnoughMem.cs" />
     <Compile Include="Diagnostics\Problems\HostProblem\PrecheckFailed.cs" />
     <Compile Include="Diagnostics\Problems\Problem.cs" />
-    <Compile Include="Wizards\BugToolWizard\GenericSelectHostsPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\GenericSelectHostsPage.Designer.cs">
-      <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolWizard.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Wizards\BugToolWizard\BugToolWizard.Designer.cs">
-      <DependentUpon>BugToolWizard.cs</DependentUpon>
-    </Compile>
     <Compile Include="ConsoleView\VNCGraphicsClient.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -1871,10 +1783,6 @@
       <DependentUpon>ShadowPanel.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\UpsellPage.resx">
-      <DependentUpon>UpsellPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Controls\Wlb\WlbOptModeScheduler.resx">
       <SubType>Designer</SubType>
       <DependentUpon>WlbOptModeScheduler.cs</DependentUpon>
@@ -1977,36 +1885,6 @@
     <EmbeddedResource Include="Dialogs\OvfValidationDialog.zh-CN.resx">
       <DependentUpon>OvfValidationDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsCacheConfigurationDialog.ja.resx">
-      <DependentUpon>PvsCacheConfigurationDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsCacheConfigurationDialog.resx">
-      <DependentUpon>PvsCacheConfigurationDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsCacheConfigurationDialog.zh-CN.resx">
-      <DependentUpon>PvsCacheConfigurationDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsPages\PvsCacheConfigurationPage.ja.resx">
-      <DependentUpon>PvsCacheConfigurationPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsPages\PvsCacheConfigurationPage.resx">
-      <DependentUpon>PvsCacheConfigurationPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsPages\PvsCacheConfigurationPage.zh-CN.resx">
-      <DependentUpon>PvsCacheConfigurationPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsSiteDialog.ja.resx">
-      <DependentUpon>PvsSiteDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsSiteDialog.resx">
-      <DependentUpon>PvsSiteDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\PvsSiteDialog.zh-CN.resx">
-      <DependentUpon>PvsSiteDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionsPages\SaveAndRestoreOptionsPage.ja.resx">
       <DependentUpon>SaveAndRestoreOptionsPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -2071,10 +1949,6 @@
     <EmbeddedResource Include="Dialogs\ScreenShotDialog.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ScreenShotDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UpsellDialog.resx">
-      <DependentUpon>UpsellDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\VerticallyTabbedDialog.resx">
       <DependentUpon>VerticallyTabbedDialog.cs</DependentUpon>
@@ -2322,17 +2196,6 @@
     <EmbeddedResource Include="TabPages\ManageCdnUpdatesPage.zh-CN.resx">
       <DependentUpon>ManageCdnUpdatesPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\PvsPage.ja.resx">
-      <DependentUpon>PvsPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\PvsPage.resx">
-      <DependentUpon>PvsPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\PvsPage.zh-CN.resx">
-      <DependentUpon>PvsPage.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="TabPages\UsbPage.ja.resx">
       <DependentUpon>UsbPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -2348,10 +2211,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\SnapshotsPage.resx">
       <DependentUpon>SnapshotsPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\UpsellTabPage.resx">
-      <DependentUpon>UpsellTabPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="TabPages\PhysicalStoragePage.resx">
@@ -2803,28 +2662,8 @@
       <DependentUpon>PerfmonAlertEditPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageDestination.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>BugToolPageDestination.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageRetrieveData.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.resx">
-      <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Wizards\HAWizard.resx">
       <DependentUpon>HAWizard.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\GenericSelectHostsPage.resx">
-      <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolWizard.resx">
-      <DependentUpon>BugToolWizard.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\HAWizard_Pages\AssignPriorities.resx">
@@ -2946,12 +2785,10 @@
     </Content>
     <Compile Include="Actions\GUIActions\MeddlingActionManager.cs" />
     <Compile Include="Alerts\AlertExtensions.cs" />
-    <Compile Include="Alerts\Types\LicenseAlert.cs" />
     <Compile Include="Alerts\Types\IqnAlert.cs" />
     <Compile Include="Commands\Controls\AssignVMGroupToolStripMenuItem.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Commands\BugToolCommand.cs" />
     <Compile Include="Commands\RestartToolstackCommand.cs" />
     <Compile Include="Commands\CrossPoolMigrateCommand.cs" />
     <Compile Include="Commands\DestroyHostCommand.cs" />
@@ -3130,10 +2967,6 @@
     <Compile Include="Controls\SrPickerItem.cs" />
     <Compile Include="Controls\SummaryPanel\ISummaryPanelView.cs" />
     <Compile Include="Diagnostics\Problems\PoolProblem\MissingMultipleFCSRsProblem.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseCheckableDataGridView\ILicenseCheckableDataGridViewView.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseCheckableDataGridView\LicenseCheckableDataGridView.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\SummaryPanel\SummaryPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -3257,28 +3090,6 @@
     <Compile Include="Dialogs\IscsiDeviceConfigDialog.Designer.cs">
       <DependentUpon>IscsiDeviceConfigDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\LicenseManager\ILicenseManagerView.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseCheckableDataGridView\LicenseCheckableDataGridViewController.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseDataGridViewRow.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseManager.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\LicenseManager\LicenseManager.Designer.cs">
-      <DependentUpon>LicenseManager.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\LicenseManager\LicenseManagerController.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseManagerLauncher.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseRowComparers\ExpiryComparer.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseRowComparers\NameColumnComparer.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseRowComparers\ProductColumnComparer.cs" />
-    <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\CanUseLicenseServerVerifier.cs" />
-    <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\HaOnVerifier.cs" />
-    <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\LicenseSelectionVerifier.cs" />
-    <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\NotLiveVerifier.cs" />
-    <Compile Include="Dialogs\LicenseManager\SelectionVerifiers\SelectionVerifierFactory.cs" />
-    <Compile Include="Dialogs\LicenseManager\SummaryPanelDecorators\LicenseManagerSummaryComponent.cs" />
-    <Compile Include="Dialogs\LicenseManager\LicenseStatus.cs" />
-    <Compile Include="Dialogs\LicenseManager\SummaryPanelDecorators\LicenseManagerSummaryDecorators.cs" />
     <Compile Include="SettingsPanels\PoolGpuEditPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -3340,7 +3151,6 @@
       <DependentUpon>GpuEditPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Core\ActionBaseExtensions.cs" />
-    <Compile Include="TabPages\GeneralTabLicenseStatusStringifier.cs" />
     <Compile Include="WinformsXenAdminConfigProvider.cs" />
     <Compile Include="Actions\GUIActions\Wlb\ExportReportAction.cs" />
     <Compile Include="Actions\GUIActions\Wlb\WlbOptimizePoolAction.cs" />
@@ -3526,8 +3336,6 @@
     </Compile>
     <Compile Include="Commands\RemoveFromFolderCommand.cs" />
     <Compile Include="Commands\RemoveHostCommand.cs">
-    </Compile>
-    <Compile Include="Commands\RemoveHostCrashDumpsCommand.cs">
     </Compile>
     <Compile Include="Commands\RemoveHostFromPoolCommand.cs">
     </Compile>
@@ -5117,12 +4925,6 @@
     <EmbeddedResource Include="Controls\TreeViews\FlickerFreeTreeView.ja.resx">
       <DependentUpon>FlickerFreeTreeView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\UpsellPage.ja.resx">
-      <DependentUpon>UpsellPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\UpsellPage.zh-CN.resx">
-      <DependentUpon>UpsellPage.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Controls\Wlb\WeekView.ja.resx">
       <DependentUpon>WeekView.cs</DependentUpon>
     </EmbeddedResource>
@@ -5333,15 +5135,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\LegalNoticesDialog.zh-CN.resx">
       <DependentUpon>LegalNoticesDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\LicenseManager\LicenseManager.ja.resx">
-      <DependentUpon>LicenseManager.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\LicenseManager\LicenseManager.resx">
-      <DependentUpon>LicenseManager.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\LicenseManager\LicenseManager.zh-CN.resx">
-      <DependentUpon>LicenseManager.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\RestoreSession\LoadSessionDialog.ja.resx">
       <DependentUpon>LoadSessionDialog.cs</DependentUpon>
@@ -5554,14 +5347,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\ThreeButtonDialog.zh-CN.resx">
       <DependentUpon>ThreeButtonDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UpsellDialog.ja.resx">
-      <DependentUpon>UpsellDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\UpsellDialog.zh-CN.resx">
-      <DependentUpon>UpsellDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\VerticallyTabbedDialog.ja.resx">
       <DependentUpon>VerticallyTabbedDialog.cs</DependentUpon>
@@ -5964,14 +5749,6 @@
     <EmbeddedResource Include="TabPages\SrStoragePage.zh-CN.resx">
       <DependentUpon>SrStoragePage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\UpsellTabPage.ja.resx">
-      <DependentUpon>UpsellTabPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TabPages\UpsellTabPage.zh-CN.resx">
-      <DependentUpon>UpsellTabPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="TabPages\VMStoragePage.ja.resx">
       <DependentUpon>VMStoragePage.cs</DependentUpon>
     </EmbeddedResource>
@@ -6001,30 +5778,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\BallooningWizard_Pages\MemorySettings.zh-CN.resx">
       <DependentUpon>MemorySettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageDestination.ja.resx">
-      <DependentUpon>BugToolPageDestination.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageDestination.zh-CN.resx">
-      <DependentUpon>BugToolPageDestination.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageRetrieveData.ja.resx">
-      <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageRetrieveData.zh-CN.resx">
-      <DependentUpon>BugToolPageRetrieveData.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.ja.resx">
-      <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolPageSelectCapabilities.zh-CN.resx">
-      <DependentUpon>BugToolPageSelectCapabilities.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolWizard.ja.resx">
-      <DependentUpon>BugToolWizard.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\BugToolWizard.zh-CN.resx">
-      <DependentUpon>BugToolWizard.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\CrossPoolMigrateWizard\CrossPoolMigrateFinishPage.ja.resx">
       <DependentUpon>CrossPoolMigrateFinishPage.cs</DependentUpon>
@@ -6134,12 +5887,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\ExportWizard\ExportSelectVMsPage.zh-CN.resx">
       <DependentUpon>ExportSelectVMsPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\GenericSelectHostsPage.ja.resx">
-      <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Wizards\BugToolWizard\GenericSelectHostsPage.zh-CN.resx">
-      <DependentUpon>GenericSelectHostsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Wizards\GenericPages\LunPerVdiMappingPage.ja.resx">
       <DependentUpon>LunPerVdiMappingPage.cs</DependentUpon>

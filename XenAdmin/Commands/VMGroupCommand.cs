@@ -70,10 +70,7 @@ namespace XenAdmin.Commands
             var pool = Helpers.GetPoolOfOne(selection.FirstAsXenObject.Connection);
             if (pool != null)
             {
-                if (Helpers.FeatureForbidden(pool.Connection, VMGroup<T>.FeatureRestricted))
-                    UpsellDialog.ShowUpsellDialog(VMGroup<T>.UpsellBlurb, Parent);
-                else
-                    this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, VMGroup<T>.ManageGroupsDialog(pool));
+                this.MainWindowCommandInterface.ShowPerConnectionWizard(pool.Connection, VMGroup<T>.ManageGroupsDialog(pool));
             }
         }
 

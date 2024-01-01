@@ -87,11 +87,7 @@ namespace XenAdmin.Commands
             if (pool == null)
                 return;
 
-            if (Helpers.FeatureForbidden(pool, Host.RestrictHA))
-            {
-                UpsellDialog.ShowUpsellDialog(Messages.UPSELL_BLURB_HA, Parent);
-            }
-            else if (pool.ha_enabled)
+            if (pool.ha_enabled)
             {
                 if (pool.ha_statefiles.All(sf => pool.Connection.Resolve(new XenRef<VDI>(sf)) == null))//empty gives true, which is correct
                 {
@@ -200,7 +196,7 @@ namespace XenAdmin.Commands
             }
 
             // Confirm the user wants to disable HA
-            using (var dlg = new NoIconDialog(string.Format(Messages.HA_DISABLE_QUERY, 
+            using (var dlg = new NoIconDialog(string.Format(Messages.HA_DISABLE_QUERY,
                     Helpers.GetName(pool).Ellipsise(30)),
                 ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
             {
@@ -268,7 +264,7 @@ namespace XenAdmin.Commands
 
             if (!pool.IsVisible())
                 return Messages.HA_STANDALONE_SERVER;
- 
+
             Host coordinator = Helpers.GetCoordinator(pool.Connection);
             if (coordinator == null)
                 return string.Format(Messages.POOL_COORDINATOR_GONE, BrandManager.BrandConsole);

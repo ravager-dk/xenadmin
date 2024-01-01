@@ -53,9 +53,11 @@ namespace XenAdmin.Dialogs
 
             foreach (string warning in _warnings)
             {
-                var row = new LicenseDataGridViewRow();
-                row.Cells.Add(new DataGridViewTextBoxCell {Value = warning});
-                rows.Add(row);
+                throw new Exception("Warum wird hier Lizenz benutzt im Quellcode?");
+
+                //var row = new LicenseDataGridViewRow();
+                //row.Cells.Add(new DataGridViewTextBoxCell {Value = warning});
+                //rows.Add(row);
             }
 
             dataGridViewEx1.Rows.AddRange(rows.ToArray());

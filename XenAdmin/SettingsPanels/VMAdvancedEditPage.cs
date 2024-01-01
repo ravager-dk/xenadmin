@@ -51,7 +51,6 @@ namespace XenAdmin.SettingsPanels
         {
             InitializeComponent();
 
-            CPSOptimizationRadioButton.Text = string.Format(CPSOptimizationRadioButton.Text, BrandManager.CompanyNameLegacy);
             Text = Messages.ADVANCED_OPTIONS;
 
             m_invalidParamToolTip = new ToolTip
@@ -60,7 +59,8 @@ namespace XenAdmin.SettingsPanels
                     ToolTipIcon = ToolTipIcon.Warning,
                     ToolTipTitle = Messages.INVALID_PARAMETER
                 };
-            this.CPSOptimizationRadioButton.Visible = showCpsOptimisation = !HiddenFeatures.CPSOptimizationHidden;
+
+            this.CPSOptimizationRadioButton.Visible = showCpsOptimisation = true;
         }
 
         public String SubText

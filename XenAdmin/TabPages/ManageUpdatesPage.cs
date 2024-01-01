@@ -527,7 +527,7 @@ namespace XenAdmin.TabPages
             else
             {
                 informationLabel.Text = reason;
-                tableLayoutPanel1.Visible = !HiddenFeatures.LinkLabelHidden;
+                tableLayoutPanel1.Visible = true;
             }
         }
 

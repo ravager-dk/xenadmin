@@ -384,7 +384,6 @@ namespace XenAdmin.XenSearch
             properties[PropertyNames.ha_enabled] = o => o is Pool pool ? (IComparable)pool.ha_enabled : null;
             properties[PropertyNames.isNotFullyUpgraded] = o => o is Pool pool ? (IComparable)!pool.IsPoolFullyUpgraded() : null;
             properties[PropertyNames.ip_address] = IPAddressProperty;
-            properties[PropertyNames.license] = LicenseProperty;
             properties[PropertyNames.memoryText] = MemoryTextProperty;
             properties[PropertyNames.memoryValue] = MemoryValueProperty;
             properties[PropertyNames.memoryRank] = MemoryRankProperty;
@@ -583,18 +582,6 @@ namespace XenAdmin.XenSearch
             if (xc != null && xc.IsConnected)
                 return xc.Hostname;
             return null;
-        }
-
-        private static IComparable LicenseProperty(IXenObject o)
-        {
-            Pool pool = Helpers.GetPool(o.Connection);
-            if (pool == null)
-                return null;
-            Host coordinator = Helpers.GetCoordinator(pool.Connection);
-            if (coordinator == null)
-                return null;
-
-            return Helpers.GetFriendlyLicenseName(coordinator);
         }
 
         private static IComparable SharedProperty(IXenObject o)

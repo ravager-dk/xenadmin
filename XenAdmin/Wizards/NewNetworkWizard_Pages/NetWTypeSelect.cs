@@ -66,7 +66,7 @@ namespace XenAdmin.Wizards.NewNetworkWizard_Pages
             if (pool == null)
                 return;
 
-            if (HiddenFeatures.CrossServerPrivateNetworkHidden || Helpers.StockholmOrGreater(Connection))
+            if (Helpers.StockholmOrGreater(Connection))
             {
                 rbtnCHIN.Visible = labelCHIN.Visible = false;
                 warningTableChin.Visible = false;

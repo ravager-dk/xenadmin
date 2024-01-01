@@ -65,8 +65,6 @@ namespace XenAdmin.Core
 
         public static readonly string BrandConsole;
 
-        public static readonly string Cis = Get("CIS");
-
         public static readonly string CompanyNameLegacy = Get("COMPANY_NAME_LEGACY");
 
         public static readonly string CompanyNameShort;

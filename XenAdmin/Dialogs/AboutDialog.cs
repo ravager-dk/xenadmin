@@ -52,16 +52,6 @@ namespace XenAdmin.Dialogs
                 VersionLabel.Text += string.Format(Messages.COMMON_CRITERIA_TEXT, BrandManager.ProductBrand);
 
             label2.Text = BrandManager.Copyright;
-            label2.Visible = !HiddenFeatures.CopyrightHidden;
-
-            licenseDetailsLabel.Text = string.Format(licenseDetailsLabel.Text, BrandManager.ProductBrand);
-            showAgainCheckBox.Text = string.Format(showAgainCheckBox.Text, BrandManager.BrandConsole);
-
-            showAgainCheckBox.Checked = Properties.Settings.Default.ShowAboutDialog;
-            var showLicenseNag = HiddenFeatures.LicenseNagVisible;
-            LicenseDetailsTextBox.Text = showLicenseNag ? GetLicenseDetails() : "";
-            licenseDetailsLabel.Visible = LicenseDetailsTextBox.Visible = showLicenseNag;
-            showAgainCheckBox.Visible = showLicenseNag;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -103,15 +93,6 @@ namespace XenAdmin.Dialogs
                 }
             }
             return string.Join("\r\n", companies);
-        }
-
-        private void showAgainCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (Properties.Settings.Default.ShowAboutDialog != showAgainCheckBox.Checked)
-            {
-                Properties.Settings.Default.ShowAboutDialog = showAgainCheckBox.Checked;
-                Settings.TrySaveSettings();
-            }
         }
 
         private void AboutDialog_FormClosed(object sender, FormClosedEventArgs e)
