@@ -147,6 +147,16 @@ namespace XenAPI
             }
         }
 
+        public bool GetVmAutostartEnabled()
+        {
+            Pool p = Helpers.GetPoolOfOne(Connection);
+
+            if (p != null)
+                return p.GetVmAutostartEnabled();
+            else
+                return false;
+        }
+
         public string GetIscsiIqn()
         {
             if (Helpers.KolkataOrGreater(this))
@@ -181,7 +191,7 @@ namespace XenAPI
                     software_version.ContainsKey("product_brand")
                         ? software_version["product_brand"]
                         : BrandManager.ProductBrand);
-            
+
             return name_description ?? "";
         }
 
@@ -204,8 +214,8 @@ namespace XenAPI
         /// </summary>
         public virtual DateTime? LicenseCssExpiry()
         {
-            if(license_params != null &&
-                license_params.TryGetValue("css_expiry", out var cssExpiryValue) && 
+            if (license_params != null &&
+                license_params.TryGetValue("css_expiry", out var cssExpiryValue) &&
                 !string.IsNullOrEmpty(cssExpiryValue) &&
                 Util.TryParseNonIso8601DateTime(cssExpiryValue, out var result))
             {
@@ -268,9 +278,9 @@ namespace XenAPI
 
         public static bool RestrictVSwitchController(Host h)
         {
-            return BoolKeyPreferTrue(h.license_params, "restrict_vswitch_controller"); 
+            return BoolKeyPreferTrue(h.license_params, "restrict_vswitch_controller");
         }
-   
+
         public static bool RestrictSriovNetwork(Host h)
         {
             return BoolKeyPreferTrue(h.license_params, "restrict_network_sriov");
@@ -425,12 +435,12 @@ namespace XenAPI
 
         public static bool RestrictExportResourceData(Host h)
         {
-                return BoolKeyPreferTrue(h.license_params, "restrict_export_resource_data");
-            }
+            return BoolKeyPreferTrue(h.license_params, "restrict_export_resource_data");
+        }
 
         public static bool RestrictIntraPoolMigrate(Host h)
         {
-            return BoolKey(h.license_params, "restrict_xen_motion"); 
+            return BoolKey(h.license_params, "restrict_xen_motion");
         }
 
         /// <summary>
@@ -448,7 +458,7 @@ namespace XenAPI
 
         public static bool RestrictHealthCheck(Host h)
         {
-            return BoolKeyPreferTrue(h.license_params, "restrict_health_check"); 
+            return BoolKeyPreferTrue(h.license_params, "restrict_health_check");
         }
 
         /// <summary>
@@ -456,7 +466,7 @@ namespace XenAPI
         /// </summary>
         public static bool RestrictVss(Host h)
         {
-            return BoolKey(h.license_params, "restrict_vss"); 
+            return BoolKey(h.license_params, "restrict_vss");
         }
 
         public static bool RestrictPoolSize(Host h)
@@ -601,7 +611,7 @@ namespace XenAPI
 
         public String MultipathHandle()
         {
-           return Get(other_config, MULTIPATH_HANDLE);
+            return Get(other_config, MULTIPATH_HANDLE);
         }
 
         public override int CompareTo(Host other)
@@ -1436,7 +1446,7 @@ namespace XenAPI
             var sockets = CpuSockets();
             var cpuCount = CpuCount();
             if (sockets > 0 && cpuCount > 0)
-                return (cpuCount/sockets);
+                return (cpuCount / sockets);
 
             return 0;
         }
@@ -1549,7 +1559,7 @@ namespace XenAPI
                 description = value.Substring(0, x);
                 string val = value.Substring(x + 10);
 
-                string[] delims = new string[] {", "};
+                string[] delims = new string[] { ", " };
                 string[] splitValue = val.Split(delims, StringSplitOptions.None);
                 if (splitValue.Length == 0 || splitValue.Length > 3)
                     return;
@@ -1618,7 +1628,7 @@ namespace XenAPI
             out string platformVersion, out string productVersion)
         {
             platformVersion = productVersion = null;
-            
+
             try
             {
                 var result = call_plugin(host.Connection.Session, host.opaque_ref,

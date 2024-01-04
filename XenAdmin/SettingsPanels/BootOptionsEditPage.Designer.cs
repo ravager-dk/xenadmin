@@ -91,7 +91,7 @@ namespace XenAdmin.SettingsPanels
             this.m_tlpAutoBoot.Controls.Add(this.m_picInfoAutoBoot, 0, 0);
             this.m_tlpAutoBoot.Controls.Add(this.m_autoHeightLabelAutoBoot, 1, 0);
             this.m_tlpAutoBoot.Controls.Add(this.m_autoHeightLabelAutoBootHAWarning, 1, 0);
-            this.m_tlpAutoBoot.Controls.Add(this.m_checkBoxAutoBoot, 0, 1);
+            this.m_tlpAutoBoot.Controls.Add(this.m_checkBoxAutoBoot, 0, 2);
             this.m_tlpAutoBoot.Name = "m_tlpAutoBoot";
             // 
             // m_picInfoAutoBoot

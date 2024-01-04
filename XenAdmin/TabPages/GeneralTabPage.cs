@@ -742,6 +742,9 @@ namespace XenAdmin.TabPages
 
             PDSection s = pdSectionBootOptions;
 
+            s.AddEntry(FriendlyName("VM.auto_boot"), Helpers.BoolToString(vm.GetAutoPowerOn()),
+               new PropertiesToolStripMenuItem(new VmEditStartupOptionsCommand(Program.MainWindow, vm)));
+
             if (vm.IsHVM())
             {
                 s.AddEntry(FriendlyName("VM.BootOrder"), HVMBootOrder(vm),
@@ -974,6 +977,8 @@ namespace XenAdmin.TabPages
                     s.AddEntry(FriendlyName("host.enabled"), Messages.YES, item);
                 }
 
+                s.AddEntry("Autoboot of VMs enabled", Helpers.BoolToString(host.GetVmAutostartEnabled()));
+
                 if (Helpers.CloudOrGreater(host) && Helpers.XapiEqualOrGreater_1_290_0(host))
                 {
                     var pool = Helpers.GetPoolOfOne(xenObject.Connection);
@@ -1114,6 +1119,8 @@ namespace XenAdmin.TabPages
             if (xenObject is Pool p)
             {
                 s.AddEntry(Messages.NUMBER_OF_SOCKETS, p.CpuSockets().ToString());
+
+                s.AddEntry("Autoboot of VMs enabled", Helpers.BoolToString(p.GetVmAutostartEnabled()));
 
                 if (Helpers.CloudOrGreater(p.Connection) && Helpers.XapiEqualOrGreater_1_290_0(p.Connection))
                 {

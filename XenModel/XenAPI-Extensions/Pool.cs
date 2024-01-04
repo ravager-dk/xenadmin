@@ -287,6 +287,17 @@ namespace XenAPI
             return base.Equals(other);
         }
 
+        public bool GetVmAutostartEnabled()
+        {
+            string auto_poweron = Get(other_config, "auto_poweron");
+            if (auto_poweron == null)
+            { 
+                return false; 
+            }
+
+            return auto_poweron == "true" ? true : false;
+        }
+
         #endregion
     }
 }

@@ -659,6 +659,14 @@ namespace XenAPI
         public void SetAutoPowerOn(bool value)
         {
             other_config = SetDictionaryKey(other_config, "auto_poweron", value.ToString().ToLower());
+
+            //// set auto_poweron on pool
+            //Pool p = Helpers.GetPoolOfOne(Connection);
+            //if (p != null)
+            //{
+            //    p.other_config = Pool.SetDictionaryKey(p.other_config, "auto_poweron", "true");
+            //    p.SaveChanges(Connection.Session); // need to lock pool first, but how?!?
+            //}
         }
 
         public string IsOnSharedStorage()

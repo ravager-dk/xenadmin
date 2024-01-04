@@ -92,10 +92,12 @@ namespace XenAdmin.SettingsPanels
 
             vm.SetAutoPowerOn(m_checkBoxAutoBoot.Checked);
 
+            vm.PV_args = m_textBoxOsParams.Text;
+
             return new DelegatedAsyncAction(vm.Connection, "Change VBDs bootable", "Change VBDs bootable", null,
 			                                delegate(Session session)
 			                                	{
-			                                		if (bootFromCD)
+                                                    if (bootFromCD)
 			                                		{
 			                                			foreach (var vbd in vm.Connection.ResolveAll(vm.VBDs))
 			                                				VBD.set_bootable(session, vbd.opaque_ref, vbd.IsCDROM());
@@ -187,7 +189,8 @@ namespace XenAdmin.SettingsPanels
             m_picInfoAutoBoot.Visible = false;
             m_autoHeightLabelAutoBoot.Visible = false;
             m_autoHeightLabelAutoBootHAWarning.Visible = false;
-            m_checkBoxAutoBoot.Visible = false;
+
+            m_checkBoxAutoBoot.Checked = vm.GetAutoPowerOn();
 
             BootDeviceAndOrderEnabled(vm.IsHVM());
 
@@ -351,8 +354,8 @@ namespace XenAdmin.SettingsPanels
             Convert(false);
         }
 
-        #endregion
 
+        #endregion
 
     }
 }
