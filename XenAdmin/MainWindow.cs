@@ -926,39 +926,6 @@ namespace XenAdmin
             if (HelpersGUI.iSCSIisUsed())
                 HelpersGUI.PerformIQNCheck();
 
-            if (!Program.RunInAutomatedTestMode && !Helpers.CloudOrGreater(coordinator))
-            {
-                Program.BeginInvoke(Program.MainWindow, () =>
-                {
-                    if (Properties.Settings.Default.SeenAllowCfuUpdatesDialog)
-                        return;
-
-                    Properties.Settings.Default.SeenAllowCfuUpdatesDialog = true;
-                    Settings.TrySaveSettings();
-
-                    bool launch;
-                    using (var dlg = new NoIconDialog(string.Format(Messages.ALLOWED_UPDATES_DIALOG_MESSAGE_CFU, BrandManager.BrandConsole, BrandManager.ProductVersion821),
-                               ThreeButtonDialog.ButtonYes, ThreeButtonDialog.ButtonNo)
-                    {
-                        HelpButton = true,
-                        HelpNameSetter = "AllowUpdatesDialog",
-                        ShowCheckbox = false
-                    })
-                    {
-                        launch = dlg.ShowDialog(this) == DialogResult.Yes;
-                    }
-
-                    //if (launch)
-                    //{
-                    //    using (var dialog = new ConfigUpdatesDialog())
-                    //    {
-                    //        dialog.SelectLcmTab();
-                    //        dialog.ShowDialog(this);
-                    //    }
-                    //}
-                });
-            }
-
             RequestRefreshTreeView();
             CheckTlsVerification(connection);
         }
