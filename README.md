@@ -1,3 +1,14 @@
+## EOL-Notice
+
+XCP-ng Center Release 2023.12 (to be released in 2024) will be the last Release of XCP-ng Center.
+
+Alternatives:
+
+- [XO Lite](https://xcp-ng.org/forum/category/24/xo-lite) (still in delevopment)
+- [Xen Orchestra](https://xen-orchestra.com)
+
+see also: https://xcp-ng.org/forum/topic/8202/eol-xcp-ng-center-has-come-to-an-end
+
 ## Disclaimer
 The official graphical client for XCP-ng is [Xen Orchestra](https://xen-orchestra.com), which gets support from a team of several developers.
 XCP-ng Center is maintained by community members on their free time and hosted by the XCP-ng project.
