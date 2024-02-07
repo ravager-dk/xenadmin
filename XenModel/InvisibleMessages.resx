@@ -159,4 +159,25 @@
   <data name="HELP_URL" xml:space="preserve">
     <value />
   </data>
+  <data name="CLIENT_ID_URL" xml:space="preserve">
+    <value />
+  </data>
+  <data name="CSS_URL" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DEPRECATION_URL" xml:space="preserve">
+    <value />
+  </data>
+  <data name="PV_GUESTS_CHECK_URL" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TOKEN_API_URL" xml:space="preserve">
+    <value />
+  </data>
+  <data name="UPDATE_URL_PREFIX" xml:space="preserve">
+    <value />
+  </data>
+  <data name="WEBSITE_DOWNLOADS" xml:space="preserve">
+    <value />
+  </data>
 </root>

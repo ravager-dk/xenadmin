@@ -61,16 +61,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://cis.citrix.com.
-        /// </summary>
-        public static string CIS_URL {
-            get {
-                return ResourceManager.GetString("CIS_URL", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to https://support.citrix.com/xencenterclientiddownload.
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string CLIENT_ID_URL {
             get {
@@ -79,7 +70,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.citrix.com/support/programs/.
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string CSS_URL {
             get {
@@ -88,7 +79,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://docs.xenserver.com/en-us/xenserver/8/whats-new/removed-features.html.
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string DEPRECATION_URL {
             get {
@@ -106,20 +97,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ?utm_campaign={0}&amp;utm_medium=ui_link&amp;utm_source={1}.
+        ///   Looks up a localized string similar to .
         /// </summary>
-        public static string HELP_URL_QUERY {
+        public static string HELP_URL {
             get {
-                return ResourceManager.GetString("HELP_URL_QUERY", resourceCulture);
+                return ResourceManager.GetString("HELP_URL", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.xenserver.com/.
+        ///   Looks up a localized string similar to https://xcp-ng.org.
         /// </summary>
         public static string HOMEPAGE {
             get {
                 return ResourceManager.GetString("HOMEPAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string HTTP_LICENSES {
+            get {
+                return ResourceManager.GetString("HTTP_LICENSES", resourceCulture);
             }
         }
         
@@ -133,11 +133,29 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string LICENSE_EXPIRY_WEBPAGE {
+            get {
+                return ResourceManager.GetString("LICENSE_EXPIRY_WEBPAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to https://docs.citrix.com/en-us/licensing/current-release/license-server-getting-started.html.
         /// </summary>
         public static string LICENSE_SERVER_DOCS_LINK {
             get {
                 return ResourceManager.GetString("LICENSE_SERVER_DOCS_LINK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string LICENSE_SERVER_DOWNLOAD_LINK {
+            get {
+                return ResourceManager.GetString("LICENSE_SERVER_DOWNLOAD_LINK", resourceCulture);
             }
         }
         
@@ -151,7 +169,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://github.com/xenserver/xencenter-samples.
+        ///   Looks up a localized string similar to https://xcp-ng.org.
         /// </summary>
         public static string PLUGINS_URL {
             get {
@@ -160,7 +178,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://docs.xenserver.com/en-us/xenserver/8/system-requirements/guest-os-support.html.
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string PV_GUESTS_CHECK_URL {
             get {
@@ -178,7 +196,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://fileservice.citrix.com/api/session/token.
+        ///   Looks up a localized string similar to https://xcp-ng.com.
+        /// </summary>
+        public static string SUPPORT_URL {
+            get {
+                return ResourceManager.GetString("SUPPORT_URL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string TOKEN_API_URL {
             get {
@@ -187,7 +214,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://fileservice.citrix.com/direct/v2/download/.
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string UPDATE_URL_PREFIX {
             get {
@@ -196,7 +223,7 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.xenserver.com/.
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string UPSELL_LEARNMOREURL_TRIAL {
             get {
@@ -205,7 +232,16 @@ namespace XenAdmin {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://www.xenserver.com/downloads.
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string UPSELL_SA {
+            get {
+                return ResourceManager.GetString("UPSELL_SA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
         /// </summary>
         public static string WEBSITE_DOWNLOADS {
             get {

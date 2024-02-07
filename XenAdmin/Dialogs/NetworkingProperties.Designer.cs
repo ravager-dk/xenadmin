@@ -32,6 +32,7 @@ namespace XenAdmin.Dialogs
             this.BlurbLabel = new System.Windows.Forms.Label();
             this.AddButton = new System.Windows.Forms.Button();
             this.linkLabelTellMeMore = new System.Windows.Forms.LinkLabel();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
             this.splitContainer.SuspendLayout();
@@ -46,8 +47,8 @@ namespace XenAdmin.Dialogs
             // 
             this.verticalTabs.BorderStyle = System.Windows.Forms.BorderStyle.None;
             resources.ApplyResources(this.verticalTabs, "verticalTabs");
-            this.verticalTabs.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.verticalTabs_DrawItem);
             this.verticalTabs.MouseClick += new System.Windows.Forms.MouseEventHandler(this.verticalTabs_MouseClick);
+            this.verticalTabs.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.verticalTabs_DrawItem);
             this.verticalTabs.MouseMove += new System.Windows.Forms.MouseEventHandler(this.verticalTabs_MouseMove);
             // 
             // cancelButton
@@ -69,12 +70,7 @@ namespace XenAdmin.Dialogs
             // 
             this.splitContainer.Panel1.BackColor = System.Drawing.SystemColors.Window;
             this.splitContainer.Panel1.Controls.Add(this.AddButton);
-            resources.ApplyResources(this.splitContainer.Panel1, "splitContainer.Panel1");
             this.splitContainer.Panel1.Resize += new System.EventHandler(this.splitContainer_Panel1_Resize);
-            // 
-            // splitContainer.Panel2
-            // 
-            resources.ApplyResources(this.splitContainer.Panel2, "splitContainer.Panel2");
             // 
             // blueBorder
             // 
@@ -99,6 +95,11 @@ namespace XenAdmin.Dialogs
             this.AddButton.UseVisualStyleBackColor = false;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
+            // linkLabelTellMeMore
+            // 
+            resources.ApplyResources(this.linkLabelTellMeMore, "linkLabelTellMeMore");
+            this.linkLabelTellMeMore.Name = "linkLabelTellMeMore";
+            // 
             // NetworkingProperties
             // 
             resources.ApplyResources(this, "$this");
@@ -113,10 +114,10 @@ namespace XenAdmin.Dialogs
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel1.PerformLayout();
             this.splitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
             this.splitContainer.ResumeLayout(false);
             this.blueBorder.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 

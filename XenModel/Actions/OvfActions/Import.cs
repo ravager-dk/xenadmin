@@ -333,7 +333,7 @@ namespace XenAdmin.Actions.OvfActions
                     dataStream = File.OpenRead(sourcefile);
                     dataLength = virtualSize = dataStream.Length;
                 }
-                else if (VirtualDisk.SupportedDiskFormats.Any(f => ext.ToLower().EndsWith(f.ToLower())))
+                else if (VirtualDiskManager.SupportedDiskFormats.Any(f => ext.ToLower().EndsWith(f.ToLower())))
                 {
                     vhdDisk = VirtualDisk.OpenDisk(sourcefile, FileAccess.Read);
                     dataStream = vhdDisk.Content;

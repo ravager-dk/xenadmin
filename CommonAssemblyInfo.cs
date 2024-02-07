@@ -34,8 +34,8 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright © XCP-ng")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("99.99.99.30")]
-[assembly: AssemblyFileVersion("99.99.99.30")]
+[assembly: AssemblyVersion("99.99.99.99")]
+[assembly: AssemblyFileVersion("99.99.99.99")]
 
 /*
  * .NET Framework 4.8 docs: All components of the version must be integers greater

@@ -328,11 +328,11 @@ namespace XenAdmin
             History.EnableHistoryButtons();
             History.NewHistoryItem(new XenModelObjectHistoryItem(null, TabPageHome));
             Text = BrandManager.BrandConsole;
-            if (Program.Version.Major == 99 &&
-                Program.Version.Minor == 99 &&
-                Program.Version.Build == 99)
+            if (Program.Version.Major == 0 &&
+                Program.Version.Minor == 0 &&
+                Program.Version.Build == 0)
             {
-                Text += " NIGHTLY BUILD Nr. " + Program.Version.Revision.ToString();
+                Text += " NIGHTLY BUILD Nr. " + Program.Version.Revision.ToString() + " (rev: " + ThisAssembly.Git.SourceRevisionId + ")";
             }
 
             /*
