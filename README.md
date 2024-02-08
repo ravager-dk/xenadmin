@@ -1,8 +1,10 @@
 ## Notice
 
-XCP-ng Center is no longer EOL! We have a new maintainer (Michael Manley) to work on the current codebase and will mantain it for the foreseeable future.
+XCP-ng Center is no longer EOL! We have a new maintainer (Michael Manley) to work on the current codebase and will maintain it for the foreseeable future.
 
 Please submit any bug reports to the issue tracker, and expect for GitHub Actions to be enabled soon for CI/CD for commmited builds.
+
+See here for discussion: https://xcp-ng.org/forum/topic/8202/eol-xcp-ng-center-has-come-to-an-end
 
 ## Disclaimer
 The official graphical client for XCP-ng is [Xen Orchestra](https://xen-orchestra.com), which gets support from a team of several developers.
