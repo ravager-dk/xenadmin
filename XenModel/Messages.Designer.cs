@@ -40016,6 +40016,15 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rev: {0} BuildLab: {1}-{2}-{3}.
+        /// </summary>
+        public static string VERSION_ADDITIONAL {
+            get {
+                return ResourceManager.GetString("VERSION_ADDITIONAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} version {1} (build {2}) {3}-bit..
         /// </summary>
         public static string VERSION_NUMBER {

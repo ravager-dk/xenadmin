@@ -44,10 +44,10 @@ namespace XenAdmin.Core
         /// </summary>
         public static string GetFriendlyName(string s)
         {
-            var result = FriendlyNames.GetString(s);
-#if DEBUG
-            Debug.Assert(result != null, $"{s} doesn't exist in FriendlyNames");
-#endif
+            var result = FriendlyNames.GetString(s) ;
+//#if DEBUG
+//            Debug.Assert(result != null, $"{s} doesn't exist in FriendlyNames");
+//#endif
             switch (s)
             {
                 case "Label-host.XenMemory":

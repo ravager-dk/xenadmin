@@ -1,0 +1,36 @@
+name: Test Builds
+
+on:
+  workflow_dispatch:
+    push:
+      branches: [ development ]
+    pull_request:
+      branches: [ development ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.5
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Restore Packages
+        run: nuget restore MySolution.sln
+      - name: Build Release solution
+        run: msbuild XenAdmin.sln -property:Configuration=Debug
+      - name: Build Debug solution
+        run: msbuild XenAdmin.sln -property:Configuration=Release
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drop-release
+          path: XenAdmin/bin/Release/net481
+      - name: Upload Debug Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drop-debug
+          path: XenAdmin/bin/Debug/net481

@@ -46,7 +46,7 @@ namespace XenAdmin
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.navigationPane = new XenAdmin.Controls.MainWindowControls.NavigationPane();
-            this.TheTabControl = new System.Windows.Forms.TabControl();
+            this.TheTabControl = new XenAdmin.Controls.TabControl.CustomTabControl();
             this.TabPageHome = new System.Windows.Forms.TabPage();
             this.TabPageGeneral = new System.Windows.Forms.TabPage();
             this.TabPageBallooning = new System.Windows.Forms.TabPage();
@@ -343,6 +343,24 @@ namespace XenAdmin
             this.TheTabControl.Controls.Add(this.TabPageDockerProcess);
             this.TheTabControl.Controls.Add(this.TabPageDockerDetails);
             this.TheTabControl.Controls.Add(this.TabPageUSB);
+            this.TheTabControl.DisplayStyle = XenAdmin.Controls.TabControl.TabStyle.Angled;
+            // 
+            // 
+            // 
+            this.TheTabControl.DisplayStyleProvider.BorderColor = System.Drawing.SystemColors.ControlDark;
+            this.TheTabControl.DisplayStyleProvider.BorderColorHot = System.Drawing.SystemColors.ControlDark;
+            this.TheTabControl.DisplayStyleProvider.BorderColorSelected = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(157)))), ((int)(((byte)(185)))));
+            this.TheTabControl.DisplayStyleProvider.FocusTrack = false;
+            this.TheTabControl.DisplayStyleProvider.HotTrack = true;
+            this.TheTabControl.DisplayStyleProvider.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.TheTabControl.DisplayStyleProvider.Opacity = 1F;
+            this.TheTabControl.DisplayStyleProvider.Overlap = 7;
+            this.TheTabControl.DisplayStyleProvider.Padding = new System.Drawing.Point(10, 3);
+            this.TheTabControl.DisplayStyleProvider.Radius = 10;
+            this.TheTabControl.DisplayStyleProvider.TextColor = System.Drawing.SystemColors.ControlText;
+            this.TheTabControl.DisplayStyleProvider.TextColorDisabled = System.Drawing.SystemColors.ControlDark;
+            this.TheTabControl.DisplayStyleProvider.TextColorSelected = System.Drawing.SystemColors.ControlText;
+            this.TheTabControl.HotTrack = true;
             this.TheTabControl.Name = "TheTabControl";
             this.TheTabControl.SelectedIndex = 4;
             this.TheTabControl.SelectedIndexChanged += new System.EventHandler(this.TheTabControl_SelectedIndexChanged);
@@ -2041,7 +2059,7 @@ namespace XenAdmin
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator24;
         private System.Windows.Forms.ToolStripMenuItem toolbarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ShowHiddenObjectsToolStripMenuItem;
-        internal System.Windows.Forms.TabControl TheTabControl;
+        internal XenAdmin.Controls.TabControl.CustomTabControl TheTabControl;
         private System.Windows.Forms.TabPage TabPageHome;
         internal System.Windows.Forms.TabPage TabPageSearch;
         internal System.Windows.Forms.TabPage TabPageGeneral;

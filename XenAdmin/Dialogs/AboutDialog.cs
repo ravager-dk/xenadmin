@@ -48,6 +48,10 @@ namespace XenAdmin.Dialogs
             VersionLabel.Text = string.Format(Messages.VERSION_NUMBER, BrandManager.BrandConsole,
                 Program.VersionText, Program.Version.Revision, IntPtr.Size * 8);
 
+            AdditionalVersionData.Text = string.Format(Messages.VERSION_ADDITIONAL, ThisAssembly.Git.SourceRevisionId, 
+                ThisAssembly.InformationalData.LabId, ThisAssembly.InformationalData.BuildDateTime, 
+                ThisAssembly.InformationalData.BuildStage);
+
             label2.Text = BrandManager.Copyright;
         }
 

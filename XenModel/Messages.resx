@@ -168,7 +168,7 @@
   <data name="ACTION_CHANGE_LOG_DESTINATION" xml:space="preserve">
     <value>Change log destination</value>
   </data>
-   <data name="INSTALL_SERVER_CERTIFICATE_ACTION_LINK" xml:space="preserve">
+  <data name="INSTALL_SERVER_CERTIFICATE_ACTION_LINK" xml:space="preserve">
     <value>Install certificate...</value>
   </data>
   <data name="INSTALL_SERVER_CERTIFICATE_DESCRIPTION" xml:space="preserve">
@@ -1079,7 +1079,7 @@ This could be because the data source is not generating any data. Ensure the pre
   <data name="ACTION_VGPU_CONFIGURATION_SAVING" xml:space="preserve">
     <value>Saving virtual GPU configuration</value>
   </data>
-    <data name="NEWVMWIZARD_VGPUPAGE_MULTIPLE_VGPU_INFO" xml:space="preserve">
+  <data name="NEWVMWIZARD_VGPUPAGE_MULTIPLE_VGPU_INFO" xml:space="preserve">
     <value>The selected virtual GPU type supports multiple instances.</value>
   </data>
   <data name="NEWVMWIZARD_VGPUPAGE_SINGLE_VGPU_INFO" xml:space="preserve">
@@ -7695,21 +7695,6 @@ This might result in failure to migrate VMs to this server during the RPU or to 
   <data name="INSTALL_PENDING_UPDATES" xml:space="preserve">
     <value>Install pending &amp;updates...</value>
   </data>
-  <data name="INSTALL_SERVER_CERTIFICATE_ACTION_LINK" xml:space="preserve">
-    <value>Install certificate...</value>
-  </data>
-  <data name="INSTALL_SERVER_CERTIFICATE_DESCRIPTION" xml:space="preserve">
-    <value>Installing server certificate...</value>
-  </data>
-  <data name="INSTALL_SERVER_CERTIFICATE_HA" xml:space="preserve">
-    <value>You cannot install a server certificate when HA is on.</value>
-  </data>
-  <data name="INSTALL_SERVER_CERTIFICATE_MENU" xml:space="preserve">
-    <value>&amp;Install certificate...</value>
-  </data>
-  <data name="INSTALL_SERVER_CERTIFICATE_TITLE" xml:space="preserve">
-    <value>Installing certificate on server {0}...</value>
-  </data>
   <data name="INSTALL_XENSERVER_TOOLS" xml:space="preserve">
     <value>Install {0}</value>
   </data>
@@ -8961,7 +8946,7 @@ To ensure system stability, it is strongly recommended that you use multipathing
     <value>You must select a network</value>
   </data>
   <data name="MY_CITRIX_CREDENTIALS_URL" xml:space="preserve">
-    <value></value>
+    <value />
   </data>
   <data name="NAME" xml:space="preserve">
     <value>Name</value>
@@ -9880,15 +9865,6 @@ When you configure an NFS storage repository, you simply provide the host name o
   </data>
   <data name="NEWVMWIZARD_TEMPLATEPAGE_WINDOWS" xml:space="preserve">
     <value>Windows</value>
-  </data>
-  <data name="NEWVMWIZARD_VGPUPAGE_MULTIPLE_VGPU_INFO" xml:space="preserve">
-    <value>The selected virtual GPU type supports multiple instances.</value>
-  </data>
-  <data name="NEWVMWIZARD_VGPUPAGE_SINGLE_VGPU_INFO" xml:space="preserve">
-    <value>The selected virtual GPU type does not support multiple instances.</value>
-  </data>
-  <data name="NEWVMWIZARD_VGPUPAGE_TITLE" xml:space="preserve">
-    <value>Assign a virtual GPU</value>
   </data>
   <data name="NEWVMWIZARD_XENAPP_XENDESKTOP_INFO_MESSAGE_POOL" xml:space="preserve">
     <value>This pool is only licensed for {0} Virtual Apps and Desktops workloads</value>
@@ -15259,5 +15235,8 @@ Do you want to synchronize immediately?</value>
   </data>
   <data name="YUM_REPO_SYNC_YES_VISIBLE_BUTTON" xml:space="preserve">
     <value>Only synchronize &amp;visible</value>
+  </data>
+  <data name="VERSION_ADDITIONAL" xml:space="preserve">
+    <value>Rev: {0} BuildLab: {1}-{2}-{3}</value>
   </data>
 </root>

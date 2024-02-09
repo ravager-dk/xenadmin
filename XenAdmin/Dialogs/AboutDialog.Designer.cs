@@ -35,6 +35,7 @@ namespace XenAdmin.Dialogs
             this.label2 = new System.Windows.Forms.Label();
             this.VersionLabel = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.AdditionalVersionData = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -52,11 +53,12 @@ namespace XenAdmin.Dialogs
             // 
             resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
             this.tableLayoutPanel1.BackColor = System.Drawing.Color.White;
-            this.tableLayoutPanel1.Controls.Add(this.linkLabel1, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.label2, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.AdditionalVersionData, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.VersionLabel, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.OkButton, 1, 7);
             this.tableLayoutPanel1.Controls.Add(this.pictureBox1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.label2, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.linkLabel1, 1, 6);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // linkLabel1
@@ -86,6 +88,12 @@ namespace XenAdmin.Dialogs
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.TabStop = false;
             // 
+            // AdditionalVersionData
+            // 
+            resources.ApplyResources(this.AdditionalVersionData, "AdditionalVersionData");
+            this.AdditionalVersionData.BackColor = System.Drawing.Color.Transparent;
+            this.AdditionalVersionData.Name = "AdditionalVersionData";
+            // 
             // AboutDialog
             // 
             this.AcceptButton = this.OkButton;
@@ -113,5 +121,6 @@ namespace XenAdmin.Dialogs
         private System.Windows.Forms.Button OkButton;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Label AdditionalVersionData;
     }
 }
