@@ -18,7 +18,7 @@ jobs:
       - name: setup-msbuild
         uses: microsoft/setup-msbuild@v1.1
       - name: Restore Packages
-        run: nuget restore MySolution.sln
+        run: nuget restore XenAdmin.sln
       - name: Build Release solution
         run: msbuild XenAdmin.sln -property:Configuration=Debug
       - name: Build Debug solution
