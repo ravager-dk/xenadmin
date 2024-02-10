@@ -8,10 +8,13 @@
 		<ApplicationIcon>AppIcon.ico</ApplicationIcon>
 		<Title>XCP-ng Center</Title>
 		<Description>XCP-ng Center</Description>
+		<RestoreSources>$(RestoreSources);../Packages</RestoreSources>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\XenModel\XenModel.csproj" />
+		<PackageReference Include="MSTSCLib" Version="1.0.0" />
+		<PackageReference Include="Microsoft.ReportViewer" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -31,21 +34,10 @@
 		<EmbeddedResource Update="VNC\KeyMap.resx">
 			<LogicalName>DotNetVnc.KeyMap.resources</LogicalName>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Reference Include="Microsoft.ReportViewer.WinForms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>ReportViewer\Microsoft.ReportViewer.WinForms.dll</HintPath>
-			<SpecificVersion>False</SpecificVersion>
-			<Private>True</Private>
-		</Reference>
-		<Reference Include="MSTSCLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<Private>True</Private>
-		</Reference>
-		<Reference Include="MSTSCLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<SpecificVersion>False</SpecificVersion>
-			<HintPath>RDP\MSTSCLib.dll</HintPath>
-		</Reference>
+		<EmbeddedResource Update="Wizards\NewSRWizard_Pages\ChooseSrProvisioningPage.resx">
+		  <Generator>ResXFileCodeGenerator</Generator>
+		  <LastGenOutput>ChooseSrProvisioningPage.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -58,6 +50,11 @@
 	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
 	    <AutoGen>True</AutoGen>
 	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
+	  <Compile Update="Wizards\NewSRWizard_Pages\ChooseSrProvisioningPage.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>ChooseSrProvisioningPage.resx</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 

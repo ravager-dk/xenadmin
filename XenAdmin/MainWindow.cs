@@ -332,7 +332,7 @@ namespace XenAdmin
                 Program.Version.Minor == 0 &&
                 Program.Version.Build == 0)
             {
-                Text += " NIGHTLY BUILD Nr. " + Program.Version.Revision.ToString() + " (rev: " + ThisAssembly.Git.SourceRevisionId + ")";
+                Text += " vNext Build " + Program.Version.Revision.ToString() + " (rev: " + ThisAssembly.Git.SourceRevisionId + ")";
             }
 
             /*

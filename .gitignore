@@ -25,8 +25,6 @@ Thumbs.db
 *.idc
 *.bak
 
-packages/*
-!packages/DOTNET_BUILD_LOCATION
 Branding/Hotfixes/*
 
 _ReSharper.*/

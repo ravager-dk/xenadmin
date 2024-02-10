@@ -120,7 +120,10 @@ namespace XenAdmin
             var assembly = Assembly.GetExecutingAssembly();
             AssemblyDir = Path.GetDirectoryName(assembly.Location);
             Version = assembly.GetName().Version;
-            VersionText = $"{Version.Major}.{Version.Minor}.{Version.Build}";
+
+            VersionText = Version.Major == 0 && Version.Minor == 0 && Version.Build == 0
+                ? "vNext"
+                : $"{Version.Major}.{Version.Minor}.{Version.Build}";
 
             var logFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
