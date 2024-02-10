@@ -41,3 +41,6 @@ ServiceFabricBackup/
 .vscode
 
 vim.exe.stackdump
+
+installer-xcp-ng/drop.zip
+installer-xcp-ng/Setup.exe
