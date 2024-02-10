@@ -92,6 +92,6 @@ internal partial class ThisAssembly
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<RestoreSources>$(RestoreSources);./Packages;https://api.nuget.org/v3/index.json</RestoreSources>
+		<RestoreSources>$(RestoreSources);../Packages;https://api.nuget.org/v3/index.json</RestoreSources>
 	</PropertyGroup>
 </Project>
