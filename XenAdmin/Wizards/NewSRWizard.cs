@@ -62,6 +62,7 @@ namespace XenAdmin.Wizards
         private readonly ChooseSrTypePage xenTabPageChooseSrType;
         private readonly ChooseSrProvisioningPage xenTabPageChooseSrProv;
         private readonly RBACWarningPage xenTabPageRbacWarning;
+        private readonly LocalStorageFrontend xenTabPageLocalStorage;
         #endregion
 
         /// <summary>
@@ -109,6 +110,7 @@ namespace XenAdmin.Wizards
             xenTabPageRbacWarning = new RBACWarningPage((srToReattach == null && !disasterRecoveryTask)
                              ? Messages.RBAC_WARNING_PAGE_DESCRIPTION_SR_CREATE
                              : Messages.RBAC_WARNING_PAGE_DESCRIPTION_SR_ATTACH);
+            xenTabPageLocalStorage = new LocalStorageFrontend();
 
             //do not use virtual members in constructor
             var format = (srToReattach == null && !disasterRecoveryTask)
@@ -291,6 +293,8 @@ namespace XenAdmin.Wizards
                     AddPage(xenTabPageCifs);
                 else if (m_srWizardType is SrWizardType_NfsIso)
                     AddPage(xenTabPageNfsIso);
+                else if (m_srWizardType is SrWizardType_LocalStorage)
+                    AddPage(xenTabPageLocalStorage);
 
                 xenTabPageSrName.SrWizardType = m_srWizardType;
                 xenTabPageSrName.MatchingFrontends = xenTabPageChooseSrType.MatchingFrontends;
@@ -319,6 +323,8 @@ namespace XenAdmin.Wizards
                     xenTabPageCifs.SrWizardType = m_srWizardType;
                 else if (m_srWizardType is SrWizardType_Fcoe)
                     xenTabPageLvmoFcoe.SrWizardType = m_srWizardType;
+                else if (m_srWizardType is SrWizardType_LocalStorage)
+                    xenTabPageLocalStorage.SrWizardType = m_srWizardType;
                 #endregion
             }
             else if (senderPagetype == typeof(ChooseSrProvisioningPage))
@@ -357,6 +363,12 @@ namespace XenAdmin.Wizards
                 m_srWizardType.UUID = xenTabPageVhdoNFS.UUID;
                 m_srWizardType.DeviceConfig = xenTabPageVhdoNFS.DeviceConfig;
                 SetCustomDescription(m_srWizardType, xenTabPageVhdoNFS.SrDescription);
+            }
+            else if (senderPagetype == typeof(LocalStorageFrontend))
+            {
+                m_srWizardType.UUID = xenTabPageLocalStorage.UUID;
+                m_srWizardType.DeviceConfig = xenTabPageLocalStorage.DeviceConfig;
+                SetCustomDescription(m_srWizardType, xenTabPageLocalStorage.SrDescription);
             }
         }
 

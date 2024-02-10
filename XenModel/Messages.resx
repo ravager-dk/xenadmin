@@ -15239,4 +15239,19 @@ Do you want to synchronize immediately?</value>
   <data name="VERSION_ADDITIONAL" xml:space="preserve">
     <value>Rev: {0} BuildLab: {1}-{2}-{3}</value>
   </data>
+  <data name="NEWSR_LOCALSTORAGE_BLURB" xml:space="preserve">
+    <value>TODO: Local Storage Blurb</value>
+  </data>
+  <data name="NEWSR_LOCALSTORAGE_TYPE_NAME" xml:space="preserve">
+    <value>Local Storage</value>
+  </data>
+  <data name="SRWIZARD_LOCALSTORAGE" xml:space="preserve">
+    <value>Local virtual disk storage</value>
+  </data>
+  <data name="NEWSR_LOCALSTORE_ACTION" xml:space="preserve">
+    <value>Local Store Device: {0}</value>
+  </data>
+  <data name="NEWSR_LOCALSTORAGE_DEVINFO" xml:space="preserve">
+    <value>Enter your Local Storage Device information</value>
+  </data>
 </root>

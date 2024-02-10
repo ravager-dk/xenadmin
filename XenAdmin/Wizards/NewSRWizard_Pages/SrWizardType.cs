@@ -333,6 +333,47 @@ namespace XenAdmin.Wizards.NewSRWizard_Pages
         }
     }
 
+    public class SrWizardType_LocalStorage : SrWizardType
+    {
+        public override IEnumerable<string> Errors
+        {
+            get { return new[] { Failure.SR_BACKEND_FAILURE_72, Failure.SR_BACKEND_FAILURE_73, Failure.SR_BACKEND_FAILURE_140 }; }
+        }
+
+        public override bool IsEnhancedSR { get { return false; } }
+        public override string FrontendBlurb { get { return Messages.NEWSR_LOCALSTORAGE_BLURB; } }
+        public override string FrontendTypeName { get { return Messages.NEWSR_LOCALSTORAGE_TYPE_NAME; } }
+
+        public override SR.SRTypes Type
+        {
+            get
+            {
+                switch (SrType)
+                {
+                    case "ext":
+                        return SR.SRTypes.ext;
+                    case "xfs":
+                        return SR.SRTypes.xfs;
+                    case "lvm":
+                        return SR.SRTypes.lvm;
+                    default:
+                        return SR.SRTypes.dummy; // this should never happen
+                }
+            }
+        }
+
+        public override string ContentType { get { return ""; } }
+        public override bool ShowIntroducePrompt { get { return true; } }
+        public override bool ShowReattachWarning { get { return true; } }
+        public override bool AllowToCreateNewSr { get; set; }
+        public string SrType { get; internal set; } = "ext";
+
+        public override void ResetSrName(IXenConnection connection)
+        {
+            SrName = SrWizardHelpers.DefaultSRName(Messages.SRWIZARD_LOCALSTORAGE, connection);
+        }
+    }
+
     public class SrWizardType_NfsIso : SrWizardType
     {
         public override IEnumerable<string> Errors

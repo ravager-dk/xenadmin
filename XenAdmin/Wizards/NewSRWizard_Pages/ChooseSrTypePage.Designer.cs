@@ -46,6 +46,7 @@
             this.labelVirtualDiskStorage = new System.Windows.Forms.Label();
             this.labelFileBasedStorage = new System.Windows.Forms.Label();
             this.labelBlockBasedStorage = new System.Windows.Forms.Label();
+            this.radioButtonLS = new System.Windows.Forms.RadioButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -87,17 +88,18 @@
             // tableLayoutPanel3
             // 
             resources.ApplyResources(this.tableLayoutPanel3, "tableLayoutPanel3");
-            this.tableLayoutPanel3.Controls.Add(this.labelISOlibrary, 0, 8);
-            this.tableLayoutPanel3.Controls.Add(this.radioButtonCifsIso, 1, 9);
-            this.tableLayoutPanel3.Controls.Add(this.radioButtonNfsIso, 1, 10);
+            this.tableLayoutPanel3.Controls.Add(this.labelISOlibrary, 0, 9);
+            this.tableLayoutPanel3.Controls.Add(this.radioButtonCifsIso, 1, 10);
+            this.tableLayoutPanel3.Controls.Add(this.radioButtonNfsIso, 1, 11);
             this.tableLayoutPanel3.Controls.Add(this.radioButtonIscsi, 1, 2);
             this.tableLayoutPanel3.Controls.Add(this.radioButtonFibreChannel, 1, 3);
             this.tableLayoutPanel3.Controls.Add(this.radioButtonFcoe, 1, 4);
             this.tableLayoutPanel3.Controls.Add(this.radioButtonNfs, 1, 6);
-            this.tableLayoutPanel3.Controls.Add(this.radioButtonCifs, 1, 7);
             this.tableLayoutPanel3.Controls.Add(this.labelVirtualDiskStorage, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.labelFileBasedStorage, 1, 5);
             this.tableLayoutPanel3.Controls.Add(this.labelBlockBasedStorage, 1, 1);
+            this.tableLayoutPanel3.Controls.Add(this.radioButtonLS, 1, 8);
+            this.tableLayoutPanel3.Controls.Add(this.radioButtonCifs, 1, 7);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             // 
             // labelISOlibrary
@@ -189,6 +191,14 @@
             this.labelBlockBasedStorage.ForeColor = System.Drawing.SystemColors.WindowText;
             this.labelBlockBasedStorage.Name = "labelBlockBasedStorage";
             // 
+            // radioButtonLS
+            // 
+            resources.ApplyResources(this.radioButtonLS, "radioButtonLS");
+            this.radioButtonLS.Name = "radioButtonLS";
+            this.radioButtonLS.TabStop = true;
+            this.radioButtonLS.UseVisualStyleBackColor = true;
+            this.radioButtonLS.CheckedChanged += new System.EventHandler(this.RadioButton_CheckedChanged);
+            // 
             // ChooseSrTypePage
             // 
             resources.ApplyResources(this, "$this");
@@ -223,5 +233,6 @@
         private System.Windows.Forms.Label labelFileBasedStorage;
         private System.Windows.Forms.Label labelISOlibrary;
         private System.Windows.Forms.Label labelVirtualDiskStorage;
+        private System.Windows.Forms.RadioButton radioButtonLS;
     }
 }

@@ -27094,6 +27094,42 @@ namespace XenAdmin {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to TODO: Local Storage Blurb.
+        /// </summary>
+        public static string NEWSR_LOCALSTORAGE_BLURB {
+            get {
+                return ResourceManager.GetString("NEWSR_LOCALSTORAGE_BLURB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter your Local Storage Device information.
+        /// </summary>
+        public static string NEWSR_LOCALSTORAGE_DEVINFO {
+            get {
+                return ResourceManager.GetString("NEWSR_LOCALSTORAGE_DEVINFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local Storage.
+        /// </summary>
+        public static string NEWSR_LOCALSTORAGE_TYPE_NAME {
+            get {
+                return ResourceManager.GetString("NEWSR_LOCALSTORAGE_TYPE_NAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local Store Device: {0}.
+        /// </summary>
+        public static string NEWSR_LOCALSTORE_ACTION {
+            get {
+                return ResourceManager.GetString("NEWSR_LOCALSTORE_ACTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Location.
         /// </summary>
         public static string NEWSR_LOCATION {
@@ -36212,6 +36248,15 @@ namespace XenAdmin {
         public static string SRWIZARD_ISCSI_STORAGE {
             get {
                 return ResourceManager.GetString("SRWIZARD_ISCSI_STORAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Local virtual disk storage.
+        /// </summary>
+        public static string SRWIZARD_LOCALSTORAGE {
+            get {
+                return ResourceManager.GetString("SRWIZARD_LOCALSTORAGE", resourceCulture);
             }
         }
         
