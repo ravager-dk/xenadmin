@@ -8,11 +8,13 @@
 		<ApplicationIcon>AppIcon.ico</ApplicationIcon>
 		<Title>XCP-ng Center</Title>
 		<Description>XCP-ng Center</Description>
-		<RestoreSources>$(RestoreSources);../Packages</RestoreSources>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\XenModel\XenModel.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="MSTSCLib" Version="1.0.0" />
 		<PackageReference Include="Microsoft.ReportViewer" Version="9.0.0" />
 	</ItemGroup>
