@@ -92,7 +92,9 @@ namespace XenAPI
         API_2_16 = 27,
         /// <summary>XCP-ng 8.3</summary>
         API_2_20 = 28,
-        LATEST = 28,
+        /// <summary>XCP-ng 8.3</summary>
+        API_2_21 = 29,
+        LATEST = 29,
         UNKNOWN = 99
     }
 
@@ -158,6 +160,8 @@ namespace XenAPI
                     return "2.16";
                 case API_Version.API_2_20:
                     return "2.20";
+                case API_Version.API_2_21:
+                    return "2.21";
                 default:
                     return "Unknown";
             }
